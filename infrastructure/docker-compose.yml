@@ -125,7 +125,8 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
       - grafana_data:/var/lib/grafana
     networks:
       - iot_network
@@ -134,7 +135,7 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     networks:
       - iot_network
