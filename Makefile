@@ -1,8 +1,7 @@
 COMPOSE_FILE= ./infrastructure/docker-compose.yml
 DC=docker compose -f $(COMPOSE_FILE)
 
-.PHONY: up down restart logs
-
+.PHONY: up down downv restart logs help
 
 help: ## Показать список доступных команд
 	@echo "Usage: make <command>\n"

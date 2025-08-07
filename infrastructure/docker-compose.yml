@@ -173,10 +173,10 @@ services:
     environment:
       - KAFKA_URI=kafka:9092
       - KAFKA_GROUP_FILTER=.*
-    networks:
-      - iot_network
     depends_on:
       - kafka
+    networks:
+      - iot_network
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:latest
     container_name: postgres-exporter
