@@ -7,6 +7,8 @@ services:
       - ALLOW_ANONYMOUS_LOGIN=yes
     ports:
       - "2181:2181"
+    volumes:
+      - zookeeper_data:/bitnami/zookeeper
     networks:
       - iot_network
   kafka:
@@ -15,13 +17,14 @@ services:
     restart: unless-stopped
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
     depends_on:
       - zookeeper
     ports:
-      - "7071:7071"
+      - "9092:9092"
     volumes:
       - kafka_data:/bitnami/kafka
     networks:
@@ -43,7 +46,7 @@ services:
         condition: service_healthy
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
     networks:
       - iot_network
   minio:
@@ -148,8 +151,13 @@ services:
     environment:
       CASSANDRA_CLUSTER_NAME: "TestCluster"
       CASSANDRA_NUM_TOKENS: 256
-      CASSANDRA_DC: "dc1"
+      CASSANDRA_DC: "datacenter1"
       CASSANDRA_RACK: "rack1"
+    healthcheck:
+      test: [ "CMD", "cqlsh", "-e", "describe keyspaces" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - cassandra_data:/var/lib/cassandra
   grafana:
@@ -182,7 +190,7 @@ services:
     ports:
       - "9308:9308"
     environment:
-      - KAFKA_URI=kafka:9092
+      - KAFKA_URI=kafka:29092
       - KAFKA_GROUP_FILTER=.*
     depends_on:
       kafka:
@@ -203,6 +211,7 @@ services:
     networks:
       - iot_network
 volumes:
+  zookeeper_data:
   postgres_data:
   redis_data:
   cassandra_data:

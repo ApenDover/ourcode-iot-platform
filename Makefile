@@ -1,3 +1,8 @@
+ifneq (,$(wildcard infrastructure/.env))
+	include infrastructure/.env
+	export
+endif
+
 COMPOSE_FILE= ./infrastructure/docker-compose.yml
 DC=docker compose -f $(COMPOSE_FILE)
 
@@ -13,6 +18,13 @@ help: ## Показать список доступных команд
 
 up: ## Запустить контейнеры в фоне
 	$(DC) up -d
+#	@bash -c '\
+#	until docker exec cassandra cqlsh -e "describe keyspaces" > /dev/null 2>&1; do \
+#		echo "Cassandra is not ready yet. Waiting 3 seconds..."; \
+#		sleep 3; \
+#	done'
+#	@docker exec cassandra cqlsh -e "CREATE KEYSPACE IF NOT EXISTS $(KEYSPACE_NAME) WITH replication = {'class':'SimpleStrategy','replication_factor':1};"
+#	@echo "Keyspace $(KEYSPACE_NAME) ready."
 
 down: ## Остановить и удалить контейнеры
 	$(DC) down

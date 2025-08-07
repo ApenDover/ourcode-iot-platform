@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.4'
     id 'io.spring.dependency-management' version '1.1.7'
+    id "com.github.davidmc24.gradle.plugin.avro" version "1.9.1"
 }
 
 group = 'ts.andrey'
@@ -13,6 +14,11 @@ java {
     }
 }
 
+avro {
+    createSetters = false
+    fieldVisibility = "PRIVATE"
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -21,21 +27,38 @@ configurations {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
+
+    implementation 'org.liquibase:liquibase-core'
+    implementation 'org.liquibase.ext:liquibase-cassandra:4.26.0'
+
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.apache.commons:commons-lang3:3.18.0'
-    implementation 'io.confluent:kafka-avro-serializer:8.0.0'
+    implementation 'io.confluent:kafka-avro-serializer:7.4.0'
+    implementation 'io.confluent:kafka-schema-registry-client:7.4.0'
+
+    implementation 'org.mapstruct:mapstruct:1.6.3'
 
     compileOnly 'org.projectlombok:lombok'
+
     annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation "org.testcontainers:cassandra:1.20.3"
     testImplementation 'org.springframework.kafka:spring-kafka-test'
-    testImplementation 'org.testcontainers:cassandra'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:kafka'
+
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    testCompileOnly 'org.projectlombok:lombok'
+
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 }
 
 tasks.named('test') {

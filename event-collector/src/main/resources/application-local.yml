@@ -4,7 +4,7 @@ spring:
   application:
     name: event-collector
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: localhost:9092
     template:
       default-topic: events
       dlt-default-topic: events.DLT
@@ -12,7 +12,7 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
       properties:
-        schema.registry.url: http://schema-registry:8081
+        schema.registry.url: http://localhost:8081
         auto.register.schemas: true
     consumer:
       group-id: device-group
@@ -20,7 +20,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
       properties:
-        schema.registry.url: http://schema-registry:8081
+        schema.registry.url: http://localhost:8081
         specific.avro.reader: true
         use.latest.version: true
     listener:
@@ -28,7 +28,7 @@ spring:
       concurrency: 3
 
   cassandra:
-    contact-points: cassandra
+    contact-points: localhost
     port: 9042
     local-datacenter: datacenter1
     keyspace-name: iot_service
