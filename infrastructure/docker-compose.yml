@@ -2,6 +2,7 @@ services:
   zookeeper:
     image: bitnami/zookeeper:latest
     container_name: zookeeper
+    restart: unless-stopped
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
     ports:
@@ -11,6 +12,7 @@ services:
   kafka:
     image: bitnami/kafka:3.4
     container_name: kafka
+    restart: unless-stopped
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
@@ -20,6 +22,8 @@ services:
       - zookeeper
     ports:
       - "7071:7071"
+    volumes:
+      - kafka_data:/bitnami/kafka
     networks:
       - iot_network
     healthcheck:
@@ -29,10 +33,11 @@ services:
   schema-registry:
     container_name: schema-registry
     image: confluentinc/cp-schema-registry:7.5.0
-    depends_on:
-      - kafka
+    restart: unless-stopped
     ports:
       - "8081:8081"
+    depends_on:
+      - kafka
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
@@ -44,6 +49,7 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+    restart: unless-stopped
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -57,6 +63,7 @@ services:
     container_name: camunda
     depends_on:
       - postgres
+    restart: unless-stopped
     ports:
       - "8088:8080"
     environment:
@@ -64,9 +71,11 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       DB_USERNAME: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - iot_network
   postgres:
     container_name: postgres
-    image: postgres:14-alpine
+    image: postgres:latest
     restart: unless-stopped
     ports:
       - "5432:5432"
@@ -82,9 +91,12 @@ services:
       test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}" ]
       interval: 10s
       retries: 5
+    networks:
+      - iot_network
   keycloak:
     image: quay.io/keycloak/keycloak:21.0.1
     container_name: keycloak
+    restart: unless-stopped
     depends_on:
       - postgres
     ports:
@@ -99,12 +111,15 @@ services:
       KC_DB_URL_DATABASE: ${POSTGRES_DB}
       KC_HOSTNAME: "localhost"
     command: start-dev
+    networks:
+      - iot_network
   redis:
     image: redis:7-alpine
     container_name: redis
     ports:
       - "6379:6379"
     command: redis-server --requirepass ${REDIS_PASSWORD}
+    restart: unless-stopped
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     healthcheck:
@@ -118,6 +133,7 @@ services:
     ports:
       - "9042:9042"
     container_name: cassandra
+    restart: unless-stopped
     environment:
       CASSANDRA_CLUSTER_NAME: "TestCluster"
       CASSANDRA_NUM_TOKENS: 256
@@ -130,6 +146,7 @@ services:
     ports:
       - 3000:3000
     container_name: grafana
+    restart: unless-stopped
     volumes:
       - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
       - ./grafana/datasources:/etc/grafana/provisioning/datasources
@@ -141,6 +158,7 @@ services:
     ports:
       - 9090:9090
     container_name: prometheus
+    restart: unless-stopped
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -148,21 +166,35 @@ services:
       - iot_network
   kafka-exporter:
     image: danielqsj/kafka-exporter:latest
+    container_name: kafka-exporter
+    restart: unless-stopped
     ports:
       - "9308:9308"
-    container_name: kafka-exporter
     environment:
       - KAFKA_URI=kafka:9092
+      - KAFKA_GROUP_FILTER=.*
     networks:
       - iot_network
     depends_on:
       - kafka
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter
+    restart: unless-stopped
+    ports:
+      - "9187:9187"
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+    depends_on:
+      - postgres
+    networks:
+      - iot_network
 volumes:
   postgres_data:
   redis_data:
   cassandra_data:
   grafana_data:
   prometheus_data:
+  kafka_data:
 networks:
   iot_network:
-
