@@ -26,4 +26,5 @@ Rel(engineer, ext_auth, "Вход в систему", "Keycloak (OIDC)")
 Rel(engineer, ext_bpm, "Мониторинг процессов", "HTTP (Camunda Cockpit)")
 Rel(api, ext_bpm, "Запуск бизнес-процесса при событии", "REST API")
 Rel(api, minio, "Загрузка/выгрузка файлов (например, прошивки)", "S3 API")
+
 @enduml

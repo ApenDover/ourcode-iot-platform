@@ -1,30 +1,16 @@
-@startuml Containers
-!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+@startuml Context
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
-Person(engineer, "Инженер")
-Container_Boundary(platform, "IoT Platform") {
-    Container(api, "Device Service", "Spring Boot", "Управление IoT-устройствами")
-    Container(processing, "Analytics Service", "Python", "Обработка телеметрии")
-    ContainerDb(pg, "PostgreSQL", "Database", "Реляционная БД для конфигураций")
-    ContainerDb(cassandra, "Cassandra", "NoSQL Database", "Хранилище телеметрии")
-    Container(queue, "Kafka", "Message Broker", "Очередь сообщений для событий")
-    Container(cache, "Redis", "In-Memory Cache", "Кэш и Pub/Sub")
-    Container(ext_auth, "Keycloak", "Identity Server", "SSO/OAuth2 сервер")
-    Container(ext_bpm, "Camunda", "BPM Engine", "Движок workflow процессов")
-    Container(minio, "MinIO", "Object Storage", "Хранение файлов (S3 API)")
-}
+Person(engineer, "Инженер", "DevOps-инженер, настраивающий платформу")
+System(System_IoT, "IoT Microservice Platform", "Микросервисная IoT-платформа")
+System_Ext(device, "IoT-устройство", "Внешний датчик или контроллер, отправляет данные")
+System_Ext(keycloak, "Keycloak", "Сервер аутентификации (SSO)")
+System_Ext(grafana, "Grafana", "Мониторинг и дашборды")
 
-System_Ext(device, "IoT-устройство")
-Rel(device, queue, "Отправка данных (producer)", "Kafka protocol")
-Rel(api, queue, "Чтение данных от устройств (consumer)", "Kafka")
-Rel(api, pg, "Конфигурация устройств", "JDBC")
-Rel(processing, cassandra, "Сохранение телеметрии", "CQL")
-Rel(processing, pg, "Параметры аналитики", "SQL")
-Rel(api, cache, "Кэш активных устройств", "Redis")
-Rel(api, ext_auth, "OAuth2 запрос токена", "HTTP/JSON")
-Rel(engineer, ext_auth, "Вход в систему", "Keycloak (OIDC)")
-Rel(engineer, ext_bpm, "Мониторинг процессов", "HTTP (Camunda Cockpit)")
-Rel(api, ext_bpm, "Запуск бизнес-процесса при событии", "REST API")
-Rel(api, minio, "Загрузка/выгрузка файлов (например, прошивки)", "S3 API")
+Rel(engineer, System_IoT, "Управление и мониторинг платформы", "HTTP/REST, UI")
+Rel(device, System_IoT, "Телеметрия и команды", "MQTT/HTTP")
+Rel(engineer, grafana, "Просмотр метрик и логов", "HTTP (dashboards)")
+Rel(System_IoT, keycloak, "Запрос токена / проверка JWT", "OIDC")
+Rel(System_IoT, grafana, "Экспорт метрик и логов", "Prometheus, Loki")
 
 @enduml

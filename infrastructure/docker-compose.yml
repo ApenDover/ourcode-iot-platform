@@ -27,9 +27,11 @@ services:
     networks:
       - iot_network
     healthcheck:
+      test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list" ]
       interval: 10s
+      timeout: 5s
       retries: 5
-      test: [ "CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list" ]
+      start_period: 10s
   schema-registry:
     container_name: schema-registry
     image: confluentinc/cp-schema-registry:7.5.0
@@ -37,7 +39,8 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
@@ -62,7 +65,8 @@ services:
     image: camunda/camunda-bpm-platform:latest
     container_name: camunda
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     ports:
       - "8088:8080"
@@ -71,6 +75,11 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       DB_USERNAME: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/engine-rest/engine" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - iot_network
   postgres:
@@ -98,7 +107,8 @@ services:
     container_name: keycloak
     restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
@@ -110,7 +120,8 @@ services:
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
       KC_DB_URL_DATABASE: ${POSTGRES_DB}
       KC_HOSTNAME: "localhost"
-    command: start-dev
+    command:
+      - start-dev
     networks:
       - iot_network
   redis:
@@ -173,10 +184,11 @@ services:
     environment:
       - KAFKA_URI=kafka:9092
       - KAFKA_GROUP_FILTER=.*
+    depends_on:
+      kafka:
+        condition: service_healthy
     networks:
       - iot_network
-    depends_on:
-      - kafka
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:latest
     container_name: postgres-exporter
@@ -186,7 +198,8 @@ services:
     environment:
       DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - iot_network
 volumes:
