@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+    <Match>
+        <Class name="com.nashkod.avro.DeviceEvent"/>
+        <Or>
+            <Bug pattern="EI_EXPOSE_REP"/>
+            <Bug pattern="MS_EXPOSE_REP"/>
+        </Or>
+    </Match>
+    <Match>
+        <Class name="~com\.nashkod\.avro\..*"/>
+        <Bug pattern="RI_REDUNDANT_INTERFACES"/>
+    </Match>
+    <Match>
+        <Class name="ts.andrey.eventcollector.service.DeviceEventProducer"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="~.*Test.*"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE"/>
+    </Match>
+</FindBugsFilter>

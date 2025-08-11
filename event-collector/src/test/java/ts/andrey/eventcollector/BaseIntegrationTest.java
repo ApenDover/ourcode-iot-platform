@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.CassandraContainer;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
@@ -31,8 +30,9 @@ public abstract class BaseIntegrationTest {
     private static final String LOCALHOST = "localhost:";
     private static final String LOCALHOST_HTTP = "http://localhost:";
 
+    @SuppressWarnings("resource")
     @Container
-    protected static GenericContainer<?> zookeeper = new GenericContainer<>(
+    protected static final GenericContainer<?> zookeeper = new GenericContainer<>(
             DockerImageName.parse("bitnami/zookeeper:latest"))
             .withCreateContainerCmdModifier(cmd -> cmd.withName("zookeeper"))
             .withNetwork(Network.SHARED)
@@ -40,8 +40,9 @@ public abstract class BaseIntegrationTest {
             .withExposedPorts(2181)
             .withEnv("ALLOW_ANONYMOUS_LOGIN", "yes");
 
+
     @Container
-    protected static KafkaContainer kafka = new KafkaContainer(
+    protected static final KafkaContainer kafka = new KafkaContainer(
             DockerImageName.parse("apache/kafka-native:3.8.0"))
             .withCreateContainerCmdModifier(cmd -> cmd.withName("kafka"))
             .withNetwork(Network.SHARED)
@@ -53,8 +54,9 @@ public abstract class BaseIntegrationTest {
             .withEnv("KAFKA_CFG_ADVERTISED_LISTENERS", "PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:9093")
             .dependsOn(zookeeper);
 
+    @SuppressWarnings("resource")
     @Container
-    protected static GenericContainer<?> schemaRegistry = new GenericContainer<>(
+    protected static final GenericContainer<?> schemaRegistry = new GenericContainer<>(
             DockerImageName.parse("confluentinc/cp-schema-registry:7.5.0"))
             .withCreateContainerCmdModifier(cmd -> cmd.withName("schema-registry"))
             .withNetwork(Network.SHARED)
@@ -64,8 +66,9 @@ public abstract class BaseIntegrationTest {
             .withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://kafka:9093")
             .dependsOn(kafka);
 
+    @SuppressWarnings("resource")
     @Container
-    protected static GenericContainer<?> cassandra = new CassandraContainer<>(
+    protected static final GenericContainer<?> cassandra = new GenericContainer<>(
             DockerImageName.parse("cassandra:5.0"))
             .withCreateContainerCmdModifier(cmd -> cmd.withName("cassandra"))
             .withNetwork(Network.SHARED)
