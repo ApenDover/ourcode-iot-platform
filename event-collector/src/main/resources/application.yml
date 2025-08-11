@@ -6,8 +6,10 @@ spring:
   kafka:
     bootstrap-servers: kafka:9092
     template:
-      default-topic: events
-      dlt-default-topic: events.DLT
+      events-topic: events
+      dlt-events-topic: events.DLT
+      device-topic: device-id
+      dlt-device-topic: device-id.DLT
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer

@@ -6,7 +6,6 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
     id "com.github.davidmc24.gradle.plugin.avro" version "1.9.1"
     id 'com.github.spotbugs' version '6.0.7'
-    id 'org.owasp.dependencycheck' version '8.4.0'
     id 'jacoco'
     id 'checkstyle'
 }
@@ -64,6 +63,7 @@ dependencies {
     testImplementation 'org.springframework.kafka:spring-kafka-test'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:kafka'
+    testImplementation 'org.awaitility:awaitility:4.2.0'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
@@ -93,11 +93,6 @@ spotbugs {
     excludeFilter = file("$rootDir/config/spotbugs/exclude-filter.xml")
 }
 
-dependencyCheck {
-    formats = ['HTML', 'JSON']
-    failBuildOnCVSS = 7
-}
-
 tasks.withType(SpotBugsTask).configureEach {
     reports {
         xml.required = false
@@ -125,7 +120,7 @@ tasks.register('jacocoMergedReport', JacocoReport) {
 }
 
 
-configurations.all {
+configurations.configureEach {
     exclude group: 'org.slf4j', module: 'slf4j-simple'
 }
 

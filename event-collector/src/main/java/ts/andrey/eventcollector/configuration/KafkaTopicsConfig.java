@@ -13,15 +13,22 @@ public class KafkaTopicsConfig {
     private static final Integer DLT_DEFAULT_NUM_PARTITIONS = 1;
     private static final Integer DEFAULT_REPLICAS = 1;
 
-    @Value("${spring.kafka.template.default-topic}")
-    private String defaultTopic;
+    @Value("${spring.kafka.template.events-topic}")
+    private String eventsTopic;
 
-    @Value("${spring.kafka.template.dlt-default-topic}")
-    private String dltDefaultTopic;
+    @Value("${spring.kafka.template.dlt-events-topic}")
+    private String dltEventsTopic;
+
+    @Value("${spring.kafka.template.device-topic}")
+    private String deviceIdTopic;
+
+    @Value("${spring.kafka.template.dlt-device-topic}")
+    private String dltDeviceIdTopic;
+
 
     @Bean
     public NewTopic deviceEventsTopic() {
-        return TopicBuilder.name(defaultTopic)
+        return TopicBuilder.name(eventsTopic)
                 .partitions(DEFAULT_NUM_PARTITIONS)
                 .replicas(DEFAULT_REPLICAS)
                 .compact()
@@ -30,7 +37,23 @@ public class KafkaTopicsConfig {
 
     @Bean
     public NewTopic deviceEventsDlt() {
-        return TopicBuilder.name(dltDefaultTopic)
+        return TopicBuilder.name(dltEventsTopic)
+                .partitions(DLT_DEFAULT_NUM_PARTITIONS)
+                .build();
+    }
+
+    @Bean
+    public NewTopic deviceIdTopic() {
+        return TopicBuilder.name(deviceIdTopic)
+                .partitions(DEFAULT_NUM_PARTITIONS)
+                .replicas(DEFAULT_REPLICAS)
+                .compact()
+                .build();
+    }
+
+    @Bean
+    public NewTopic deviceIdDlt() {
+        return TopicBuilder.name(dltDeviceIdTopic)
                 .partitions(DLT_DEFAULT_NUM_PARTITIONS)
                 .build();
     }

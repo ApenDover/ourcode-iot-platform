@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.TDF;
+package ts.andrey.eventcollector.tdf;
 
 import lombok.experimental.UtilityClass;
 

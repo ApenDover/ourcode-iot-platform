@@ -10,20 +10,17 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
-import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeviceEventConsumer {
 
-    private final DeviceEventService deviceEventService;
-
-    private final DeviceEventMapper deviceEventMapper;
+    private final CollectorServiceImpl collectorService;
 
     @RetryableTopic(attempts = "3", backoff = @Backoff(delay = 1000, multiplier = 2.0))
     @KafkaListener(
-            topics = "${spring.kafka.template.default-topic}",
+            topics = "${spring.kafka.template.events-topic}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void handleEvent(
@@ -32,8 +29,7 @@ public class DeviceEventConsumer {
     ) {
         log.info("Processing event:eventId={}, deviceId={}, message={}, partition={}",
                 event.getEventId(), event.getDeviceId(), event.getPayload(), partition);
-        final var deviceEvent = deviceEventMapper.toEntity(event);
-        deviceEventService.save(deviceEvent);
+        collectorService.process(event);
     }
 
     @DltHandler

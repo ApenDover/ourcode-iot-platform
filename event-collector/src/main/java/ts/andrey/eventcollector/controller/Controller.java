@@ -18,7 +18,7 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class Controller {
 
-    private final DeviceEventProducer deviceEventProducer;
+    private final DeviceEventProducer deviceEventProducerImpl;
 
     @PostMapping("/api/kafka/send")
     public ResponseEntity<String> sendKafkaMessage(@RequestBody String message) {
@@ -28,7 +28,7 @@ public class Controller {
                 Timestamp.from(Instant.now()).getTime(),
                 EventType.TEMPERATURE,
                 message);
-        deviceEventProducer.sendEvent(event);
+        deviceEventProducerImpl.sendEvent(event);
         return ResponseEntity.ok("Ok");
     }
 

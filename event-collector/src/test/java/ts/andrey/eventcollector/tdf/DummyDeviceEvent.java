@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.TDF;
+package ts.andrey.eventcollector.tdf;
 
 import com.nashkod.avro.DeviceEvent;
 import com.nashkod.avro.EventType;

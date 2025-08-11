@@ -9,4 +9,6 @@ public interface DeviceEventRepository extends CassandraRepository<DeviceEventEn
 
     Optional<DeviceEventEntity> findDeviceEventEntityByEventId(String eventId);
 
+    Boolean existsByDeviceId(String deviceId);
+
 }

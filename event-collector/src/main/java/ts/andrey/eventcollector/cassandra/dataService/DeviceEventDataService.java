@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.service;
+package ts.andrey.eventcollector.cassandra.dataService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,7 @@ import ts.andrey.eventcollector.exception.IotException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DeviceEventService {
+public class DeviceEventDataService {
 
     private static final String EVENT_ID = "eventId";
 
@@ -32,6 +32,10 @@ public class DeviceEventService {
             );
         }
         return deviceEvent.get();
+    }
+
+    public boolean isExistDeviceId(String deviceId) {
+        return repository.existsByDeviceId(deviceId);
     }
 
 }

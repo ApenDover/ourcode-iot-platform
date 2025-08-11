@@ -15,9 +15,9 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
+import ts.andrey.eventcollector.cassandra.dataService.DeviceEventDataService;
 import ts.andrey.eventcollector.service.DeviceEventConsumer;
-import ts.andrey.eventcollector.service.DeviceEventProducer;
-import ts.andrey.eventcollector.service.DeviceEventService;
+import ts.andrey.eventcollector.service.impl.DeviceEventProducerImpl;
 
 import java.net.InetSocketAddress;
 
@@ -76,13 +76,13 @@ public abstract class BaseIntegrationTest {
             .withExposedPorts(9042);
 
     @Autowired
-    public DeviceEventProducer producer;
+    public DeviceEventProducerImpl producer;
 
     @Autowired
     public DeviceEventConsumer consumer;
 
     @Autowired
-    public DeviceEventService deviceEventService;
+    public DeviceEventDataService deviceEventDataService;
 
     @SneakyThrows
     @BeforeAll

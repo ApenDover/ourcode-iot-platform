@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "DeviceId",
+  "namespace": "com.nashkod.avro",
+  "fields": [
+    {
+      "name": "deviceId",
+      "type": "string"
+    }
+  ]
+}
