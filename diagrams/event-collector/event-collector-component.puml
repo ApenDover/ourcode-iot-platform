@@ -1,0 +1,22 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Event collector service - Component Diagram
+
+Container_Boundary(parent, "Iot Platform") {
+    Component(kafkaListener, "DeviceEventConsumer", "Spring Kafka Listener", "Читает сообщения DeviceEvent из Kafka")
+    Container_Boundary(EventCollector, "CollectorService") {
+    Component(service, "DeviceEventDataService", "Сохранение данных в cassandra")
+    Component(producer, "DeviceEventProducer", "Отправка deviceId в kafka")
+    Component(cache, "SimpleCache", "Кеширование deviceId")
+    collector --> service : "save(entity)"
+    collector --> producer : "sendEvent(device)"
+    collector --> cache : "contains(deviceId)\nput(deviceId)"
+    }
+}
+
+System_Ext(kafka, "Apache Kafka", "Message Broker")
+
+Rel(kafkaListener, kafka, "Подписывается на сообщения")
+Rel(kafkaListener, EventCollector, "Вызывает CollectorService")
+@enduml
