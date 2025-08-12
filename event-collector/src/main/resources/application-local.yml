@@ -1,5 +1,12 @@
 server:
   port: 8888
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
 spring:
   application:
     name: event-collector
@@ -13,10 +20,16 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      batch-size: 16384
+      compression-type: snappy
       properties:
         schema.registry.url: http://localhost:8081
         auto.register.schemas: true
     consumer:
+      max-poll-records: 100
+      fetch-max-wait: 5000
+      fetch-min-size: 1024
+      enable-auto-commit: false
       group-id: device-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -28,6 +41,7 @@ spring:
     listener:
       ack-mode: batch
       concurrency: 3
+      type: batch
 
   cassandra:
     contact-points: localhost
@@ -37,6 +51,8 @@ spring:
     schema-action: CREATE_IF_NOT_EXISTS
 
 app:
+  inter-endpoint:
+    enabled: true
   cache:
     expiration:
       seconds: 30

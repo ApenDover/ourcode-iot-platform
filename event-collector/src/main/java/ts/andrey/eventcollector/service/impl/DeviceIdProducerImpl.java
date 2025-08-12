@@ -9,10 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import ts.andrey.eventcollector.exception.ExceptionMessage;
-import ts.andrey.eventcollector.exception.IotException;
+import org.springframework.util.CollectionUtils;
 import ts.andrey.eventcollector.service.DeviceEventProducer;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -28,25 +29,33 @@ public class DeviceIdProducerImpl implements DeviceEventProducer {
     private String deviceIdTopic;
 
     @Override
-    public CompletableFuture<RecordMetadata> sendEvent(SpecificRecordBase record) {
+    public CompletableFuture<List<RecordMetadata>> sendEvents(List<? extends SpecificRecordBase> records) {
+        log.info("send device Batch");
         try {
-            if (Objects.isNull(record) || !(record instanceof Device device)) {
-                throw new IotException(ExceptionMessage.UNRECOGNIZED_RECORD_TYPE.getValue());
+            if (CollectionUtils.isEmpty(records)) {
+                return CompletableFuture.completedFuture(Collections.emptyList());
             }
-            log.debug("Отправляю Device в topic={} deviceId: {}", deviceIdTopic, device.getDeviceId());
-            final var uuid = UUID.randomUUID().toString();
-            final var future = kafkaTemplate.send(deviceIdTopic, uuid, device);
 
-            return future.whenComplete((result, ex) -> {
-                if (ex != null) {
-                    log.error("Ошибка при отправке в топик={} deviceId={}", deviceIdTopic, device.getDeviceId(), ex);
-                } else {
-                    log.info("Device успешно отправлен в kafka: topic={}, partition={}, offset={}",
-                            deviceIdTopic,
-                            result.getRecordMetadata().partition(),
-                            result.getRecordMetadata().offset());
-                }
-            }).thenApply(SendResult::getRecordMetadata);
+            final var futures = records.stream()
+                    .filter(Device.class::isInstance)
+                    .map(record -> {
+                        Device device = (Device) record;
+                        String key = UUID.randomUUID().toString();
+
+                        return kafkaTemplate.send(deviceIdTopic, key, device)
+                                .thenApply(SendResult::getRecordMetadata)
+                                .exceptionally(ex -> {
+                                    log.error("Ошибка отправки deviceId={}", device.getDeviceId(), ex);
+                                    return null;
+                                });
+                    }).toList();
+
+            return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                    .thenApply(v -> futures.stream()
+                            .map(CompletableFuture::join)
+                            .filter(Objects::nonNull)
+                            .toList()
+                    );
         } catch (Exception e) {
             log.error("Ошибка при публикации deviceId в топик {}", deviceIdTopic, e);
         }

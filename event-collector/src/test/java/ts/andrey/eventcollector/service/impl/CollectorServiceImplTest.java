@@ -1,5 +1,6 @@
 package ts.andrey.eventcollector.service.impl;
 
+import com.nashkod.avro.Device;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,9 +12,12 @@ import ts.andrey.eventcollector.service.DeviceEventProducer;
 import ts.andrey.eventcollector.service.component.SimpleCache;
 import ts.andrey.eventcollector.tdf.DummyTDF;
 
-import static org.mockito.ArgumentMatchers.any;
+import java.util.Collections;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,7 +28,10 @@ class CollectorServiceImplTest {
     private DeviceEventDataService deviceEventDataService;
 
     @Mock
-    private DeviceEventProducer deviceEventProducer;
+    private DeviceEventProducer deviceIdProducerImpl;
+
+    @Mock
+    private DeviceEventService deviceEventService;
 
     @Mock
     private DeviceEventMapper deviceEventMapper;
@@ -36,101 +43,113 @@ class CollectorServiceImplTest {
     private CollectorServiceImpl collectorService;
 
     @Test
-    void shouldSaveEventWhenDeviceCached() {
+    void collectShouldProcessEventsWhenDevicesNotInCacheAndNotInDatabase() {
         // GIVEN
-        final var event = DummyTDF.deviceEvent.getDefault();
-        final var device = DummyTDF.device.getDefault();
-        final var entity = DummyTDF.deviceEventEntity.getDefault();
+        final var events = List.of(DummyTDF.deviceEvent.getDefault());
+        final var devices = List.of(DummyTDF.device.getDefault());
+        final var entities = List.of(DummyTDF.deviceEventEntity.getDefault());
+        final var deviceIds = List.of("deviceId");
 
-        when(deviceEventMapper.toDeviceId(event)).thenReturn(device);
-        when(deviceEventMapper.toEntity(event)).thenReturn(entity);
-        when(simpleCache.contains("deviceId")).thenReturn(true);
+        when(deviceEventService.saveCashedEvents(events)).thenReturn(events);
+        when(deviceEventMapper.toDeviceIdList(events)).thenReturn(devices);
+        when(deviceEventMapper.toEntityList(events)).thenReturn(entities);
+        when(deviceEventDataService.isExistDeviceId(anyString())).thenReturn(false);
 
         // WHEN
-        collectorService.collect(event);
+        collectorService.collect(events);
 
         // THEN
-        verify(deviceEventDataService).save(entity);
-        verify(deviceEventProducer, never()).sendEvent(any());
-        verify(simpleCache, never()).put(any());
+        verify(deviceEventService).saveCashedEvents(events);
+        verify(deviceEventMapper).toDeviceIdList(events);
+        verify(deviceEventMapper).toEntityList(events);
+        verify(deviceEventDataService).isExistDeviceId("deviceId");
+        verify(deviceIdProducerImpl).sendEvents(devices);
+        verify(simpleCache).putAll(deviceIds);
+        verify(deviceEventDataService).saveAll(entities);
     }
 
     @Test
-    void shouldSendEventAndSaveWhenDeviceNotExists() {
+    void collectShouldNotSendEventsWhenDevicesAlreadyInDatabase() {
         // GIVEN
         final var event = DummyTDF.deviceEvent.getDefault();
+        final var events = List.of(event);
         final var device = DummyTDF.device.getDefault();
-        final var entity = DummyTDF.deviceEventEntity.getDefault();
+        final var devices = List.of(device);
+        final var entities = List.of(DummyTDF.deviceEventEntity.getDefault());
 
-        when(deviceEventMapper.toDeviceId(event)).thenReturn(device);
-        when(deviceEventMapper.toEntity(event)).thenReturn(entity);
-        when(simpleCache.contains("deviceId")).thenReturn(false);
-        when(deviceEventDataService.isExistDeviceId("deviceId")).thenReturn(false);
+        when(deviceEventService.saveCashedEvents(events)).thenReturn(events);
+        when(deviceEventMapper.toDeviceIdList(events)).thenReturn(devices);
+        when(deviceEventMapper.toEntityList(events)).thenReturn(entities);
+        when(deviceEventDataService.isExistDeviceId(device.getDeviceId())).thenReturn(true);
 
         // WHEN
-        collectorService.collect(event);
+        collectorService.collect(events);
 
         // THEN
-        verify(deviceEventProducer).sendEvent(device);
-        verify(simpleCache).put("deviceId");
-        verify(deviceEventDataService).save(entity);
+        verify(deviceIdProducerImpl, never()).sendEvents(anyList());
+        verify(simpleCache).putAll(Collections.emptyList()); // Ожидаем пустой список
+        verify(deviceEventDataService).saveAll(entities);
     }
 
     @Test
-    void shouldNotSendEventWhenDeviceExists() {
+    void collectShouldNotSendEventsWhenNoUnsavedDevices() {
         // GIVEN
-        final var event = DummyTDF.deviceEvent.getDefault();
-        final var device = DummyTDF.device.getDefault();
-        final var entity = DummyTDF.deviceEventEntity.getDefault();
+        final var events = List.of(DummyTDF.deviceEvent.getDefault());
+        final var devices = Collections.<Device>emptyList();
+        final var entities = List.of(DummyTDF.deviceEventEntity.getDefault());
 
-        when(deviceEventMapper.toDeviceId(event)).thenReturn(device);
-        when(deviceEventMapper.toEntity(event)).thenReturn(entity);
-        when(simpleCache.contains("deviceId")).thenReturn(false);
-        when(deviceEventDataService.isExistDeviceId("deviceId")).thenReturn(true);
+        when(deviceEventService.saveCashedEvents(events)).thenReturn(events);
+        when(deviceEventMapper.toDeviceIdList(events)).thenReturn(devices);
+        when(deviceEventMapper.toEntityList(events)).thenReturn(entities);
 
         // WHEN
-        collectorService.collect(event);
+        collectorService.collect(events);
 
         // THEN
-        verify(deviceEventProducer, never()).sendEvent(any());
-        verify(simpleCache).put("deviceId");
-        verify(deviceEventDataService).save(entity);
+        verify(deviceIdProducerImpl, never()).sendEvents(anyList());
+        verify(deviceEventDataService).saveAll(entities);
     }
 
     @Test
-    void shouldLogErrorWhenExceptionOccurs() {
+    void collectShouldLogErrorWhenExceptionThrown() {
         // GIVEN
-        final var event = DummyTDF.deviceEvent.getDefault();
-        when(deviceEventMapper.toDeviceId(event)).thenThrow(new RuntimeException("Test error"));
+        final var events = List.of(DummyTDF.deviceEvent.getDefault());
+        final var exception = new RuntimeException("Test exception");
+
+        when(deviceEventService.saveCashedEvents(events)).thenThrow(exception);
 
         // WHEN
-        collectorService.collect(event);
+        collectorService.collect(events);
 
         // THEN
-        verify(deviceEventDataService, never()).save(any());
-        verify(deviceEventProducer, never()).sendEvent(any());
-        verify(simpleCache, never()).put(any());
+        verify(deviceIdProducerImpl, never()).sendEvents(anyList());
+        verify(simpleCache, never()).putAll(anyList());
+        verify(deviceEventDataService, never()).saveAll(anyList());
     }
 
     @Test
-    void shouldCacheDeviceAfterFirstSave() {
+    void collectShouldProcessBatchWhenMultipleEventsProvided() {
         // GIVEN
-        final var event = DummyTDF.deviceEvent.getDefault();
-        final var device = DummyTDF.device.getDefault();
-        final var entity = DummyTDF.deviceEventEntity.getDefault();
+        final var events = DummyTDF.deviceEvent.getList(3);
+        final var devices = DummyTDF.device.getList(3);
+        final var entities = DummyTDF.deviceEventEntity.getList(3);
+        final var deviceIds = devices
+                .stream()
+                .map(Device::getDeviceId)
+                .toList();
 
-        when(deviceEventMapper.toDeviceId(event)).thenReturn(device);
-        when(deviceEventMapper.toEntity(event)).thenReturn(entity);
-        when(simpleCache.contains("deviceId")).thenReturn(false, true); // Первый вызов false, второй true
-        when(deviceEventDataService.isExistDeviceId("deviceId")).thenReturn(false);
+        when(deviceEventService.saveCashedEvents(events)).thenReturn(events);
+        when(deviceEventMapper.toDeviceIdList(events)).thenReturn(devices);
+        when(deviceEventMapper.toEntityList(events)).thenReturn(entities);
+        when(deviceEventDataService.isExistDeviceId(anyString())).thenReturn(false);
 
-        collectorService.collect(event);
-        collectorService.collect(event);
+        // WHEN
+        collectorService.collect(events);
 
         // THEN
-        verify(deviceEventProducer, times(1)).sendEvent(device);
-        verify(simpleCache, times(1)).put("deviceId");
-        verify(deviceEventDataService, times(2)).save(entity);
+        verify(deviceIdProducerImpl).sendEvents(devices);
+        verify(simpleCache).putAll(deviceIds);
+        verify(deviceEventDataService).saveAll(entities);
     }
 
 }

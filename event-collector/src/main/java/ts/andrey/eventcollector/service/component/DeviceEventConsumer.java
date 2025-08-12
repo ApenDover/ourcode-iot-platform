@@ -3,14 +3,12 @@ package ts.andrey.eventcollector.service.component;
 import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.annotation.DltHandler;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.annotation.RetryableTopic;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 import ts.andrey.eventcollector.service.CollectorService;
+
+import java.util.ArrayList;
 
 @Slf4j
 @Service
@@ -19,24 +17,22 @@ public class DeviceEventConsumer {
 
     private final CollectorService collectorService;
 
-    @RetryableTopic(attempts = "3", backoff = @Backoff(delay = 1000, multiplier = 2.0))
     @KafkaListener(
             topics = "${spring.kafka.template.events-topic}",
-            groupId = "${spring.kafka.consumer.group-id}"
+            groupId = "${spring.kafka.consumer.group-id}",
+            batch = "true",
+            containerFactory = "kafkaBatchListenerContainerFactory"
     )
-    public void handleEvent(
-            DeviceEvent event,
-            @Header(KafkaHeaders.RECEIVED_PARTITION) int partition
-    ) {
-        log.info("Нашел в топике новое событие: eventId={}, deviceId={}, message={}, partition={}",
-                event.getEventId(), event.getDeviceId(), event.getPayload(), partition);
-        collectorService.collect(event);
-    }
-
-    @DltHandler
-    public void handleDlt(DeviceEvent event, @Header(KafkaHeaders.EXCEPTION_MESSAGE) String ex) {
-        log.error("Попытался несколько раз разобрать сообщение, "
-                + "безуспешно: deviceId={}, error={}", event.getDeviceId(), ex);
+    public void handleEvents(ConsumerRecords<String, DeviceEvent> records) {
+        final var events = new ArrayList<DeviceEvent>();
+        records.forEach(record -> events.add(record.value()));
+        log.info("Получена пачка из {} событий", events.size());
+        try {
+            collectorService.collect(events);
+        } catch (Exception e) {
+            log.error("Ошибка обработки пачки событий", e);
+            throw e;
+        }
     }
 
 }

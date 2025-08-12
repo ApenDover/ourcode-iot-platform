@@ -1,13 +1,18 @@
 package ts.andrey.eventcollector.configuration;
 
+import com.nashkod.avro.DeviceEvent;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
+import org.springframework.kafka.core.ConsumerFactory;
 
 @Configuration
-public class KafkaTopicsConfig {
+@EnableKafka
+public class KafkaConfig {
 
     private static final Integer DEFAULT_NUM_PARTITIONS = 1;
     private static final Integer DLT_DEFAULT_NUM_PARTITIONS = 1;
@@ -56,6 +61,15 @@ public class KafkaTopicsConfig {
         return TopicBuilder.name(dltDeviceIdTopic)
                 .partitions(DLT_DEFAULT_NUM_PARTITIONS)
                 .build();
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, DeviceEvent> kafkaBatchListenerContainerFactory(
+            ConsumerFactory<String, DeviceEvent> consumerFactory) {
+        final var factory = new ConcurrentKafkaListenerContainerFactory<String, DeviceEvent>();
+        factory.setConsumerFactory(consumerFactory);
+        factory.setBatchListener(true);
+        return factory;
     }
 
 }

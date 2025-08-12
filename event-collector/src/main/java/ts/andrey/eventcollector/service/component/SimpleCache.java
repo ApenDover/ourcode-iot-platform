@@ -4,12 +4,15 @@ import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -31,6 +34,27 @@ public class SimpleCache {
         }
         cache.put(deviceId, System.currentTimeMillis());
         log.debug("deviceId={} добавлен в кеш, объектов в кеше={}", deviceId, cache.size());
+        if (expirationSize <= size()) {
+            cleanUp();
+        }
+    }
+
+    public void putAll(List<String> deviceIds) {
+        if (CollectionUtils.isEmpty(deviceIds)) {
+            return;
+        }
+        final long currentTime = System.currentTimeMillis();
+
+        final var batch = deviceIds.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(
+                        deviceId -> deviceId,
+                        deviceId -> currentTime,
+                        (oldValue, newValue) -> currentTime,
+                        () -> HashMap.newHashMap(deviceIds.size())
+                ));
+        cache.putAll(batch);
+        log.debug("добавлены в кеш {} объектов, всего в кеше={}", batch.size(), cache.size());
         if (expirationSize <= size()) {
             cleanUp();
         }

@@ -9,6 +9,8 @@ import ts.andrey.eventcollector.cassandra.repository.DeviceEventRepository;
 import ts.andrey.eventcollector.exception.ExceptionMessage;
 import ts.andrey.eventcollector.exception.IotException;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,12 @@ public class DeviceEventDataService {
     public DeviceEventEntity save(DeviceEventEntity event) {
         final var saved = repository.save(event);
         log.debug("Сохранил событие в кассандра: {}", saved);
+        return saved;
+    }
+
+    public List<DeviceEventEntity> saveAll(List<DeviceEventEntity> events) {
+        final var saved = repository.saveAll(events);
+        log.debug("Сохранил события в кассандра: {}", events.size());
         return saved;
     }
 

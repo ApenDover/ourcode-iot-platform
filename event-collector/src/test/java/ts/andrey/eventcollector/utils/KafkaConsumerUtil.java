@@ -35,6 +35,9 @@ public class KafkaConsumerUtil {
         try (Consumer<String, Device> consumer = new KafkaConsumer<>(props)) {
             consumer.subscribe(Collections.singleton(topic));
             final var records = consumer.poll(Duration.ofSeconds(5));
+            if (records.isEmpty()) {
+                return null;
+            }
             final var lastOne = records.iterator().next().value();
             assertInstanceOf(avroClass, lastOne);
             return (T) lastOne;
