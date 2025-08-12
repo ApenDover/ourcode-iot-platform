@@ -18,10 +18,10 @@ import java.util.Objects;
 public class DeviceEventEntity {
 
     @PrimaryKey
-    private String eventId;
-    private String deviceId;
-    private Long timestamp;
+    private DeviceEventKey key;
+
     private EventType type;
+
     private String payload;
 
     @Override
@@ -32,15 +32,15 @@ public class DeviceEventEntity {
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
-        final var that = (DeviceEventEntity) object;
-        return Objects.equals(eventId, that.eventId) && Objects.equals(deviceId, that.deviceId)
-                && Objects.equals(timestamp, that.timestamp)
-                && type == that.type && Objects.equals(payload, that.payload);
+        DeviceEventEntity that = (DeviceEventEntity) object;
+        return Objects.equals(key, that.key)
+                && type == that.type
+                && Objects.equals(payload, that.payload);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(eventId, deviceId, timestamp, type, payload);
+        return Objects.hash(key, type, payload);
     }
 
 }

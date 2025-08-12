@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
+import ts.andrey.eventcollector.cassandra.entity.DeviceEventKey;
 import ts.andrey.eventcollector.cassandra.repository.DeviceEventRepository;
 import ts.andrey.eventcollector.exception.ExceptionMessage;
 import ts.andrey.eventcollector.exception.IotException;
@@ -19,16 +20,20 @@ public class DeviceEventDataService {
 
     public DeviceEventEntity save(DeviceEventEntity event) {
         final var saved = repository.save(event);
-        log.info("saved event: {}", saved);
+        log.debug("Сохранил событие в кассандра: {}", saved);
         return saved;
     }
 
-    public DeviceEventEntity getByEventId(String eventId) {
-        final var deviceEvent = repository.findDeviceEventEntityByEventId(eventId);
+    public DeviceEventEntity getByEventId(DeviceEventKey key) {
+        final var deviceEvent = repository.findByKeyComponents(
+                key.getDeviceId(),
+                key.getTimestamp(),
+                key.getEventId()
+        );
         if (deviceEvent.isEmpty()) {
             throw new IotException(
                     String.format(ExceptionMessage.CASSANDRA_DEVICE_EVENT_NOT_FOUND.getValue(),
-                            EVENT_ID, eventId)
+                            EVENT_ID, key.getEventId())
             );
         }
         return deviceEvent.get();

@@ -1,6 +1,6 @@
 package ts.andrey.eventcollector.utils;
 
-import com.nashkod.avro.DeviceId;
+import com.nashkod.avro.Device;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import lombok.experimental.UtilityClass;
 import org.apache.avro.specific.SpecificRecord;
@@ -32,7 +32,7 @@ public class KafkaConsumerUtil {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
         props.put("schema.registry.url", BASE_URL + schemaRegistryPort);
         props.put("specific.avro.reader", "true");
-        try (Consumer<String, DeviceId> consumer = new KafkaConsumer<>(props)) {
+        try (Consumer<String, Device> consumer = new KafkaConsumer<>(props)) {
             consumer.subscribe(Collections.singleton(topic));
             final var records = consumer.poll(Duration.ofSeconds(5));
             final var lastOne = records.iterator().next().value();

@@ -1,6 +1,6 @@
 {
   "type": "record",
-  "name": "DeviceId",
+  "name": "Device",
   "namespace": "com.nashkod.avro",
   "fields": [
     {

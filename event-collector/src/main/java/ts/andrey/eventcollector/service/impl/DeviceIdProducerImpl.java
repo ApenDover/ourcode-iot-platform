@@ -1,6 +1,6 @@
 package ts.andrey.eventcollector.service.impl;
 
-import com.nashkod.avro.DeviceId;
+import com.nashkod.avro.Device;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
@@ -22,28 +22,35 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class DeviceIdProducerImpl implements DeviceEventProducer {
 
-    private final KafkaTemplate<String, DeviceId> kafkaTemplate;
+    private final KafkaTemplate<String, Device> kafkaTemplate;
 
     @Value("${spring.kafka.template.device-topic}")
     private String deviceIdTopic;
 
     @Override
     public CompletableFuture<RecordMetadata> sendEvent(SpecificRecordBase record) {
-        if (Objects.isNull(record) || !(record instanceof DeviceId deviceId)) {
-            throw new IotException(ExceptionMessage.UNRECOGNIZED_RECORD_TYPE.getValue());
-        }
-        final var uuid = UUID.randomUUID().toString();
-        final var future = kafkaTemplate.send(deviceIdTopic, uuid, deviceId);
-
-        return future.whenComplete((result, ex) -> {
-            if (ex != null) {
-                log.error("Failed to send deviceId: deviceId={}", deviceId.getDeviceId(), ex);
-            } else {
-                log.info("Event sent: partition={}, offset={}",
-                        result.getRecordMetadata().partition(),
-                        result.getRecordMetadata().offset());
+        try {
+            if (Objects.isNull(record) || !(record instanceof Device device)) {
+                throw new IotException(ExceptionMessage.UNRECOGNIZED_RECORD_TYPE.getValue());
             }
-        }).thenApply(SendResult::getRecordMetadata);
+            log.debug("Отправляю Device в topic={} deviceId: {}", deviceIdTopic, device.getDeviceId());
+            final var uuid = UUID.randomUUID().toString();
+            final var future = kafkaTemplate.send(deviceIdTopic, uuid, device);
+
+            return future.whenComplete((result, ex) -> {
+                if (ex != null) {
+                    log.error("Ошибка при отправке в топик={} deviceId={}", deviceIdTopic, device.getDeviceId(), ex);
+                } else {
+                    log.info("Device успешно отправлен в kafka: topic={}, partition={}, offset={}",
+                            deviceIdTopic,
+                            result.getRecordMetadata().partition(),
+                            result.getRecordMetadata().offset());
+                }
+            }).thenApply(SendResult::getRecordMetadata);
+        } catch (Exception e) {
+            log.error("Ошибка при публикации deviceId в топик {}", deviceIdTopic, e);
+        }
+        return CompletableFuture.completedFuture(null);
     }
 
 }

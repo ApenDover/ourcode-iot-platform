@@ -35,3 +35,8 @@ spring:
     local-datacenter: datacenter1
     keyspace-name: iot_service
     schema-action: CREATE_IF_NOT_EXISTS
+
+app:
+  cache:
+    expiration:
+      seconds: 30

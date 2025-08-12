@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.service;
+package ts.andrey.eventcollector.service.component;
 
 import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
@@ -10,13 +10,14 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
+import ts.andrey.eventcollector.service.CollectorService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeviceEventConsumer {
 
-    private final CollectorServiceImpl collectorService;
+    private final CollectorService collectorService;
 
     @RetryableTopic(attempts = "3", backoff = @Backoff(delay = 1000, multiplier = 2.0))
     @KafkaListener(
@@ -27,14 +28,15 @@ public class DeviceEventConsumer {
             DeviceEvent event,
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition
     ) {
-        log.info("Processing event:eventId={}, deviceId={}, message={}, partition={}",
+        log.info("Нашел в топике новое событие: eventId={}, deviceId={}, message={}, partition={}",
                 event.getEventId(), event.getDeviceId(), event.getPayload(), partition);
-        collectorService.process(event);
+        collectorService.collect(event);
     }
 
     @DltHandler
     public void handleDlt(DeviceEvent event, @Header(KafkaHeaders.EXCEPTION_MESSAGE) String ex) {
-        log.error("Event failed after retries: deviceId={}, error={}", event.getDeviceId(), ex);
+        log.error("Попытался несколько раз разобрать сообщение, "
+                + "безуспешно: deviceId={}, error={}", event.getDeviceId(), ex);
     }
 
 }

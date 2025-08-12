@@ -16,7 +16,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 import ts.andrey.eventcollector.cassandra.dataService.DeviceEventDataService;
-import ts.andrey.eventcollector.service.DeviceEventConsumer;
+import ts.andrey.eventcollector.service.component.DeviceEventConsumer;
+import ts.andrey.eventcollector.service.component.SimpleCache;
 import ts.andrey.eventcollector.service.impl.DeviceEventProducerImpl;
 
 import java.net.InetSocketAddress;
@@ -83,6 +84,9 @@ public abstract class BaseIntegrationTest {
 
     @Autowired
     public DeviceEventDataService deviceEventDataService;
+
+    @Autowired
+    public SimpleCache simpleCache;
 
     @SneakyThrows
     @BeforeAll

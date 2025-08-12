@@ -29,21 +29,28 @@ public class DeviceEventProducerImpl implements DeviceEventProducer {
 
     @Override
     public CompletableFuture<RecordMetadata> sendEvent(SpecificRecordBase record) {
-        if (Objects.isNull(record) || !(record instanceof DeviceEvent event)) {
-            throw new IotException(ExceptionMessage.UNRECOGNIZED_RECORD_TYPE.getValue());
-        }
-        final var uuid = UUID.randomUUID().toString();
-        final var future = kafkaTemplate.send(eventsTopic, uuid, event);
-
-        return future.whenComplete((result, ex) -> {
-            if (ex != null) {
-                log.error("Failed to send event: eventId={}", event.getEventId(), ex);
-            } else {
-                log.info("Event sent: partition={}, offset={}",
-                        result.getRecordMetadata().partition(),
-                        result.getRecordMetadata().offset());
+        try {
+            if (Objects.isNull(record) || !(record instanceof DeviceEvent event)) {
+                throw new IotException(ExceptionMessage.UNRECOGNIZED_RECORD_TYPE.getValue());
             }
-        }).thenApply(SendResult::getRecordMetadata);
+            log.debug("Отправляю Event в topic={} event: {}", eventsTopic, event);
+            final var uuid = UUID.randomUUID().toString();
+            final var future = kafkaTemplate.send(eventsTopic, uuid, event);
+
+            return future.whenComplete((result, ex) -> {
+                if (ex != null) {
+                    log.error("Ошибка при отправке в топик={}, eventId={}", eventsTopic, event.getEventId(), ex);
+                } else {
+                    log.info("Device успешно отправлен в kafka: topic={}, partition={}, offset={}",
+                            eventsTopic,
+                            result.getRecordMetadata().partition(),
+                            result.getRecordMetadata().offset());
+                }
+            }).thenApply(SendResult::getRecordMetadata);
+        } catch (Exception e) {
+            log.error("Ошибка при публикации event в топик {}", eventsTopic, e);
+        }
+        return CompletableFuture.completedFuture(null);
     }
 
 }
