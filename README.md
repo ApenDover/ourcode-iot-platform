@@ -24,14 +24,6 @@ postman collection вот тут: [postman](infrastructure/postman)
 
 ---
 
-## ⚙️ Заметка о используемых технологиях
-
-- **Kafka** версии `3.4` — используется в классическом режиме с Zookeeper.
-  > 💡 При переходе на KRaft Mode заменим образ на `:latest`,    
-  > _(На момент тестирования `:latest` без KRaft не запускался)_
-
----
-
 ## 📄 Настройка
 
 Перед запуском необходимо:
@@ -49,21 +41,23 @@ postman collection вот тут: [postman](infrastructure/postman)
 
 Будет выполнен запуск следующих сервисов:
 
-| Сервис            | Описание                            | Порт(ы) хоста                  |
-|-------------------|-------------------------------------|--------------------------------|
-| `event-collector` | SpringBoot service сбор метрик      | `8888`                         |
-| `zookeeper`       | Координация Kafka                   | `2181`                         |
-| `kafka`           | Брокер Kafka 3.4                    | `7071`, `9092`                 |
-| `schema-registry` | Схемы Avro для Kafka                | `8081`                         |
-| `minio`           | S3-хранилище совместимое с AWS      | `9000`, `9001`                 |
-| `camunda`         | BPM-платформа для бизнес-процессов  | `8088` (→ `8080` в контейнере) |
-| `postgres`        | База данных PostgreSQL              | `5432`                         |
-| `keycloak`        | IAM-платформа, авторизация          | `8080`                         |
-| `redis`           | In-memory кэш с паролем             | `6379`                         |
-| `cassandra`       | NoSQL база данных                   | `9042`                         |
-| `grafana`         | Визуализация метрик                 | `3000`                         |
-| `prometheus`      | Мониторинг и сбор метрик            | `9090`                         |
-| `kafka-exporter`  | Экспорт метрик Kafka для Prometheus | `9308`                         |
+| Сервис               | Описание                                | Порт(ы) хоста   |
+|----------------------|-----------------------------------------|-----------------|
+| `event-collector`    | SpringBoot service сбор метрик          | `8888`          |
+| `zookeeper`          | Координация Kafka                       | `2181`          |
+| `kafka`              | Брокер Kafka 3.4                        | `9092`, `29092` |
+| `schema-registry`    | Схемы Avro для Kafka                    | `8081`          |
+| `minio`              | S3-хранилище совместимое с AWS          | `9000`, `9001`  |
+| `camunda`            | BPM-платформа для бизнес-процессов      | `8088`          |
+| `postgres`           | База данных PostgreSQL                  | `5432`          |
+| `keycloak`           | IAM-платформа, авторизация              | `8080`          |
+| `redis`              | In-memory кэш с паролем                 | `6379`          |
+| `cassandra`          | NoSQL база данных                       | `9042`          |
+| `grafana`            | Визуализация метрик                     | `3000`          |
+| `prometheus`         | Мониторинг и сбор метрик                | `9090`          |
+| `kafka-exporter`     | Экспорт метрик Kafka для Prometheus     | `9308`          |
+| `cassandra-exporter` | Экспорт метрик cassandra для Prometheus | `9500`          |
+| `postgres-exporter`  | Экспорт метрик postgres для Prometheus  | `9187`          |
 
 ⚠️ **Важно:**  Убедитесь, что у Docker достаточно памяти и CPU. В Docker Desktop (Windows/Mac) можно выделить, например, 4+ ГБ RAM. Иначе рискуете столкнуться с тормозами или перезапусками контейнеров (особенно Java-сервисы как Keycloak могут потреблять >512МБ).
 
@@ -114,7 +108,15 @@ make down              # остановка всех сервисов
 
 <summary>Компоненты сервиса</summary>
 
-![event-collector-component.png](diagrams/event-collector/event-collector-component.png)[event-collector-component.puml](diagrams/event-collector/event-collector-component.puml)
+![event-collector-component.png](diagrams/event-collector/event-collector-component.png)
+
+</details>
+
+<details>
+
+<summary>Логическая последовательность</summary>
+
+![event-collector-sequence.png](diagrams/event-collector/event-collector-sequence.png)
 
 </details>
 

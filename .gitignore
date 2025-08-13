@@ -3,6 +3,7 @@
 
 # Log file
 *.log
+.env
 logs/
 
 # BlueJ files
