@@ -4,6 +4,7 @@ import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import ts.andrey.eventcollector.cassandra.dataService.DeviceEventDataService;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.service.component.SimpleCache;
@@ -21,11 +22,14 @@ public class DeviceEventService {
     private final DeviceEventMapper deviceEventMapper;
 
     /***
-     * Сохраняем события в cassandra deviceId, которые есть в simpleCache
+     * Сохраняем события в cassandra, deviceId которых есть в simpleCache
      * @param events - весь набор событий
-     * @return - список событий с deviceId, которых нет в simpleCache
+     * @return - список событий, deviceId которых нет в simpleCache
      */
     public List<DeviceEvent> saveCashedEvents(List<DeviceEvent> events) {
+        if (CollectionUtils.isEmpty(events)) {
+            return List.of();
+        }
         final var modifiableEvents = new ArrayList<>(events);
         final var cachedDeviceEvent = events.stream()
                 .filter(it -> simpleCache.contains(it.getDeviceId()))
@@ -34,6 +38,11 @@ public class DeviceEventService {
         final var cashedDeviceEventEntities = deviceEventMapper.toEntityList(cachedDeviceEvent);
         deviceEventDataService.saveAll(cashedDeviceEventEntities);
         return modifiableEvents;
+    }
+
+    public void saveEvents(List<DeviceEvent> events) {
+        final var toSave = deviceEventMapper.toEntityList(events);
+        deviceEventDataService.saveAll(toSave);
     }
 
 }
