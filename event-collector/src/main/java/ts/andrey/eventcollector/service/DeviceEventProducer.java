@@ -8,6 +8,6 @@ import java.util.concurrent.CompletableFuture;
 
 public interface DeviceEventProducer {
 
-    CompletableFuture<List<RecordMetadata>> sendEvents(List<? extends SpecificRecordBase> records);
+    CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records);
 
 }

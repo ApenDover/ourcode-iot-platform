@@ -38,9 +38,10 @@ spring:
         schema.registry.url: http://schema-registry:8081
         specific.avro.reader: true
     listener:
-      type: batch
-      ack-mode: MANUAL_IMMEDIATE
+      ack-mode: batch
       concurrency: 3
+      type: batch
+      idle-between-polls: 1000
 
   cassandra:
     contact-points: cassandra
@@ -50,6 +51,8 @@ spring:
     schema-action: CREATE_IF_NOT_EXISTS
 
 app:
+  inter-endpoint:
+    enabled: true
   cache:
     expiration:
       seconds: 30

@@ -10,6 +10,7 @@ import ts.andrey.eventcollector.cassandra.dataService.DeviceEventDataService;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.service.CollectorService;
 import ts.andrey.eventcollector.service.DeviceEventProducer;
+import ts.andrey.eventcollector.service.DeviceEventService;
 import ts.andrey.eventcollector.service.component.SimpleCache;
 
 import java.util.List;
@@ -28,14 +29,13 @@ public class CollectorServiceImpl implements CollectorService {
     @Override
     public void collect(List<DeviceEvent> events) {
         try {
-            log.debug("Обработка events: {}", events.size());
             final var uncachedDeviceEvent = deviceEventService.saveCashedEvents(events);
             final var uncachedDevices = deviceEventMapper.toDeviceIdList(uncachedDeviceEvent);
             final var unsavedDevices = uncachedDevices.stream()
                     .filter(deviceEvent -> !deviceEventDataService.isExistDeviceId(deviceEvent.getDeviceId()))
                     .toList();
             if (!CollectionUtils.isEmpty(unsavedDevices)) {
-                deviceIdProducerImpl.sendEvents(unsavedDevices);
+                deviceIdProducerImpl.send(unsavedDevices);
             }
             final var deviceIds = unsavedDevices.stream()
                     .map(Device::getDeviceId)

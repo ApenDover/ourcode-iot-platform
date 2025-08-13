@@ -1,0 +1,83 @@
+{
+	"info": {
+		"_postman_id": "875422f8-f1b7-40b5-9a91-a86b6afd38b3",
+		"name": "EvgLessons",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21548763"
+	},
+	"item": [
+		{
+			"name": "addDeviceEvent",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[{\n  \"eventId\": {{$guid}},\n  \"deviceId\": \"device-10\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"23\"\n},{\n  \"eventId\": {{$guid}},\n  \"deviceId\": \"device-10\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"32\"\n}]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8888/api/kafka/send",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"api",
+						"kafka",
+						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "actuator",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[{\n  \"eventId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"deviceId\": \"device-123\",\n  \"timestamp\": 12345,\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"10\"\n},{\n  \"eventId\": \"550e8400-e29b-41d4-a716-446655440001\",\n  \"deviceId\": \"device-123\",\n  \"timestamp\": 123456,\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"12\"\n}]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8888/actuator",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"actuator"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

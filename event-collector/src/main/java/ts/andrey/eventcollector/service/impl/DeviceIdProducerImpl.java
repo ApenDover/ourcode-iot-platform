@@ -29,8 +29,8 @@ public class DeviceIdProducerImpl implements DeviceEventProducer {
     private String deviceIdTopic;
 
     @Override
-    public CompletableFuture<List<RecordMetadata>> sendEvents(List<? extends SpecificRecordBase> records) {
-        log.info("send device Batch");
+    public CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records) {
+        log.info("Отправка в топик {} новых deviceId: {}", deviceIdTopic, records.size());
         try {
             if (CollectionUtils.isEmpty(records)) {
                 return CompletableFuture.completedFuture(Collections.emptyList());
@@ -41,7 +41,7 @@ public class DeviceIdProducerImpl implements DeviceEventProducer {
                     .map(record -> {
                         Device device = (Device) record;
                         String key = UUID.randomUUID().toString();
-
+                        log.debug("отправляю в топик {} deviceId={}", deviceIdTopic, device.getDeviceId());
                         return kafkaTemplate.send(deviceIdTopic, key, device)
                                 .thenApply(SendResult::getRecordMetadata)
                                 .exceptionally(ex -> {

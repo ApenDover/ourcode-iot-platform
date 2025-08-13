@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ts.andrey.eventcollector.cassandra.dataService.DeviceEventDataService;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.service.DeviceEventProducer;
+import ts.andrey.eventcollector.service.DeviceEventService;
 import ts.andrey.eventcollector.service.component.SimpleCache;
 import ts.andrey.eventcollector.tdf.DummyTDF;
 
@@ -63,7 +64,7 @@ class CollectorServiceImplTest {
         verify(deviceEventMapper).toDeviceIdList(events);
         verify(deviceEventMapper).toEntityList(events);
         verify(deviceEventDataService).isExistDeviceId("deviceId");
-        verify(deviceIdProducerImpl).sendEvents(devices);
+        verify(deviceIdProducerImpl).send(devices);
         verify(simpleCache).putAll(deviceIds);
         verify(deviceEventDataService).saveAll(entities);
     }
@@ -86,7 +87,7 @@ class CollectorServiceImplTest {
         collectorService.collect(events);
 
         // THEN
-        verify(deviceIdProducerImpl, never()).sendEvents(anyList());
+        verify(deviceIdProducerImpl, never()).send(anyList());
         verify(simpleCache).putAll(Collections.emptyList()); // Ожидаем пустой список
         verify(deviceEventDataService).saveAll(entities);
     }
@@ -106,7 +107,7 @@ class CollectorServiceImplTest {
         collectorService.collect(events);
 
         // THEN
-        verify(deviceIdProducerImpl, never()).sendEvents(anyList());
+        verify(deviceIdProducerImpl, never()).send(anyList());
         verify(deviceEventDataService).saveAll(entities);
     }
 
@@ -122,7 +123,7 @@ class CollectorServiceImplTest {
         collectorService.collect(events);
 
         // THEN
-        verify(deviceIdProducerImpl, never()).sendEvents(anyList());
+        verify(deviceIdProducerImpl, never()).send(anyList());
         verify(simpleCache, never()).putAll(anyList());
         verify(deviceEventDataService, never()).saveAll(anyList());
     }
@@ -147,7 +148,7 @@ class CollectorServiceImplTest {
         collectorService.collect(events);
 
         // THEN
-        verify(deviceIdProducerImpl).sendEvents(devices);
+        verify(deviceIdProducerImpl).send(devices);
         verify(simpleCache).putAll(deviceIds);
         verify(deviceEventDataService).saveAll(entities);
     }

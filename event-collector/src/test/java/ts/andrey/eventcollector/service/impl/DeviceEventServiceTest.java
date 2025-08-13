@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ts.andrey.eventcollector.cassandra.dataService.DeviceEventDataService;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
+import ts.andrey.eventcollector.service.DeviceEventService;
 import ts.andrey.eventcollector.service.component.SimpleCache;
 import ts.andrey.eventcollector.tdf.DummyTDF;
 

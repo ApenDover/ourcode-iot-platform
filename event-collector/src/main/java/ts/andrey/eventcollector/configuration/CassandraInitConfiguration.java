@@ -4,27 +4,51 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.cassandra.config.CqlSessionFactoryBean;
+import org.springframework.data.cassandra.core.CassandraTemplate;
 
 import java.net.InetSocketAddress;
+import java.util.Collections;
 
 @Configuration
 @RequiredArgsConstructor
 @Profile("!test")
 public class CassandraInitConfiguration {
 
-    private static final String CQL_INIT = "CREATE KEYSPACE IF NOT EXISTS iot_service "
+    private static final String CQL_INIT = "CREATE KEYSPACE IF NOT EXISTS %s "
             + "WITH replication = {'class':'SimpleStrategy','replication_factor':'1'};";
 
     @Value("${spring.cassandra.contact-points}")
     private String contactPoints;
+
+    @Value("${spring.cassandra.keyspace-name}")
+    private String keyspace;
 
     @Value("${spring.cassandra.port}")
     private int port;
 
     @Value("${spring.cassandra.local-datacenter}")
     private String localDatacenter;
+
+    @Bean
+    public CqlSessionFactoryBean session() {
+        CqlSessionFactoryBean session = new CqlSessionFactoryBean();
+        session.setContactPoints(contactPoints);
+        session.setPort(port);
+        session.setLocalDatacenter(localDatacenter);
+        session.setKeyspaceCreations(Collections.emptyList());
+        return session;
+    }
+
+    @Bean
+    public CassandraTemplate cassandraTemplate(CqlSession session) {
+        session.execute(String.format(CQL_INIT, keyspace));
+        session.execute("USE " + keyspace);
+        return new CassandraTemplate(session);
+    }
 
     @PostConstruct
     public void init() {
@@ -33,7 +57,7 @@ public class CassandraInitConfiguration {
                         new InetSocketAddress(contactPoints, port))
                 .withLocalDatacenter(localDatacenter)
                 .build()) {
-            session.execute(CQL_INIT);
+            session.execute(String.format(CQL_INIT, keyspace));
         }
     }
 

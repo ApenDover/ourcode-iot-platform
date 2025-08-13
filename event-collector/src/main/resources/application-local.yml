@@ -1,6 +1,10 @@
 server:
   port: 8888
 
+logging:
+  level:
+    ts.andrey: debug
+
 management:
   endpoints:
     web:
@@ -15,8 +19,8 @@ spring:
     template:
       events-topic: events
       dlt-events-topic: events.DLT
-      device-topic: device-id-topic
-      dlt-device-topic: device-id-topic.DLT
+      device-topic: device-id
+      dlt-device-topic: device-id.DLT
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
@@ -37,11 +41,11 @@ spring:
       properties:
         schema.registry.url: http://localhost:8081
         specific.avro.reader: true
-        use.latest.version: true
     listener:
       ack-mode: batch
       concurrency: 3
       type: batch
+      idle-between-polls: 1000
 
   cassandra:
     contact-points: localhost

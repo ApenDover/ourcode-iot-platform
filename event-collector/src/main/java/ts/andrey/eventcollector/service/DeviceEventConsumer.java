@@ -1,17 +1,16 @@
-package ts.andrey.eventcollector.service.component;
+package ts.andrey.eventcollector.service;
 
 import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Service;
-import ts.andrey.eventcollector.service.CollectorService;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 public class DeviceEventConsumer {
 
@@ -27,6 +26,7 @@ public class DeviceEventConsumer {
         final var events = new ArrayList<DeviceEvent>();
         records.forEach(record -> events.add(record.value()));
         log.info("Получена пачка из {} событий", events.size());
+        log.debug("Получены события: {}", events);
         try {
             collectorService.collect(events);
         } catch (Exception e) {

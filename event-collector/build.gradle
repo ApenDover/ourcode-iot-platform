@@ -1,21 +1,19 @@
-import com.github.spotbugs.snom.SpotBugsTask
-
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.5.4'
-    id 'io.spring.dependency-management' version '1.1.7'
-    id "com.github.davidmc24.gradle.plugin.avro" version "1.9.1"
-    id 'com.github.spotbugs' version '6.0.7'
+    id 'org.springframework.boot' version "${springBootVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+    id "com.github.davidmc24.gradle.plugin.avro" version "${gradlePluginAvro}"
+    id 'com.github.spotbugs' version "${spotbugsVersion}"
     id 'jacoco'
     id 'checkstyle'
 }
 
 group = 'ts.andrey'
-version = '1.0.0'
+version = "${appVersion}"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of("${javaVersion}")
     }
 }
 
@@ -36,45 +34,40 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "io.micrometer:micrometer-registry-prometheus"
 
-    implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
+    implementation "org.springframework.boot:spring-boot-starter-data-cassandra"
 
-    implementation 'org.liquibase:liquibase-core'
-    implementation 'org.liquibase.ext:liquibase-cassandra:4.26.0'
+    implementation "org.springframework.kafka:spring-kafka"
+    implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
+    implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
+    implementation "org.apache.avro:avro:${avroVersion}"
+    implementation "io.confluent:kafka-schema-registry-client:${confluentVersion}"
 
-    implementation 'org.springframework.kafka:spring-kafka'
-    implementation 'org.apache.commons:commons-lang3:3.18.0'
-    implementation 'io.confluent:kafka-avro-serializer:7.5.0'
-    implementation 'org.apache.avro:avro:1.11.4'
-    implementation 'io.confluent:kafka-schema-registry-client:7.5.0'
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 
-    implementation 'org.mapstruct:mapstruct:1.6.3'
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
-    compileOnly 'org.projectlombok:lombok'
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.springframework.boot:spring-boot-testcontainers"
+    testImplementation "org.testcontainers:cassandra:${testcontainersVersion}"
+    testImplementation "org.springframework.kafka:spring-kafka-test"
+    testImplementation "org.testcontainers:junit-jupiter"
+    testImplementation "org.testcontainers:kafka"
+    testImplementation "org.awaitility:awaitility:${awaitilityVersion}"
 
-    annotationProcessor 'org.projectlombok:lombok'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-    testImplementation "org.testcontainers:cassandra:1.20.3"
-    testImplementation 'org.springframework.kafka:spring-kafka-test'
-    testImplementation 'org.testcontainers:junit-jupiter'
-    testImplementation 'org.testcontainers:kafka'
-    testImplementation 'org.awaitility:awaitility:4.2.0'
-
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    testCompileOnly 'org.projectlombok:lombok'
-
-    testAnnotationProcessor 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    testCompileOnly "org.projectlombok:lombok"
+    testAnnotationProcessor "org.projectlombok:lombok"
+    testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 }
 
 checkstyle {
-    toolVersion = '10.12.3'
+    toolVersion = "${checkstyleToolVersion}"
     configFile = file("$rootDir/config/checkstyle/checkstyle.xml")
     configProperties = [
             'checkstyle.suppressions.file': "$rootDir/config/checkstyle/exclude-filter.xml"
@@ -85,7 +78,7 @@ checkstyle {
 }
 
 spotbugs {
-    toolVersion = '4.8.3'
+    toolVersion = "${spotbugsToolVersion}"
     ignoreFailures = true
     showProgress = true
     effort = 'max'
@@ -93,21 +86,22 @@ spotbugs {
     excludeFilter = file("$rootDir/config/spotbugs/exclude-filter.xml")
 }
 
-tasks.withType(SpotBugsTask).configureEach {
-    reports {
-        xml.required = false
-        html.required = true
-    }
-}
 
 jacoco {
-    toolVersion = "0.8.11"
+    toolVersion = "${jacocoToolVersion}"
+    reportsDirectory = layout.buildDirectory.dir('reports/jacoco')
 }
 
 jacocoTestReport {
+    reports {
+        xml.required = false
+        html.required = true
+        csv.required = false
+    }
+
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, excludes: [
+            fileTree(dir: it, exclude: [
                     '**/cassandra/**',
                     '**/configuration/**',
                     '**/controller/**',
@@ -118,26 +112,15 @@ jacocoTestReport {
     }
 }
 
-tasks.register('jacocoMergedReport', JacocoReport) {
-    dependsOn 'test'
-
-    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
-
-    sourceDirectories.from = files(sourceSets.main.allSource.srcDirs)
-    classDirectories.from = files(sourceSets.main.output)
-
-    reports {
-        html.required = true
-        xml.required = false
-        csv.required = false
-    }
-}
-
-
 configurations.configureEach {
     exclude group: 'org.slf4j', module: 'slf4j-simple'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+bootJar {
+    archiveFileName = "app.jar"
 }

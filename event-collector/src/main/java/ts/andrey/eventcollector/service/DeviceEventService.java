@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.service.impl;
+package ts.andrey.eventcollector.service;
 
 import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class DeviceEventService {
     private final DeviceEventMapper deviceEventMapper;
 
     /***
-     * Сохраняем события в cassandra deviceId которых есть в simpleCache
+     * Сохраняем события в cassandra deviceId, которые есть в simpleCache
      * @param events - весь набор событий
      * @return - список событий с deviceId, которых нет в simpleCache
      */

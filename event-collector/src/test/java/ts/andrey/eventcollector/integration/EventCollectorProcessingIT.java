@@ -24,7 +24,7 @@ class EventCollectorProcessingIT extends BaseIntegrationTest {
         final var deviceEvents = DummyTDF.deviceEvent.getList(size);
 
         // WHEN
-        final var metadata = producer.sendEvents(deviceEvents).get();
+        final var metadata = producer.send(deviceEvents).get();
 
         // THEN CHECK PRODUCE METADATA
         assertNotNull(metadata);

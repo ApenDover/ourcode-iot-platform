@@ -1,7 +1,6 @@
 package ts.andrey.eventcollector.controller;
 
 import com.nashkod.avro.DeviceEvent;
-import com.nashkod.avro.EventType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,8 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import ts.andrey.eventcollector.service.DeviceEventProducer;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 
 @Slf4j
@@ -25,20 +22,16 @@ public class Controller {
     private final DeviceEventProducer deviceEventProducerImpl;
 
     @Value("${app.inter-endpoint.enabled:false}")
-    private Boolean interEndpointEnabled;
+    private boolean interEndpointEnabled;
 
     @PostMapping("/api/kafka/send")
-    public ResponseEntity<String> sendKafkaMessage(@RequestBody String message) throws NoHandlerFoundException {
+    public ResponseEntity<String> sendKafkaMessage(
+            @RequestBody List<DeviceEvent> request) throws NoHandlerFoundException {
         if (!interEndpointEnabled) {
+            log.info("Inter endpoint not enabled");
             throw new NoHandlerFoundException("POST", "/api/kafka/send", new HttpHeaders());
         }
-        final var event = new DeviceEvent(
-                "one",
-                "device_one",
-                Timestamp.from(Instant.now()).getTime(),
-                EventType.TEMPERATURE,
-                message);
-        deviceEventProducerImpl.sendEvents(List.of(event));
+        deviceEventProducerImpl.send(request);
         return ResponseEntity.ok("Ok");
     }
 

@@ -1,4 +1,26 @@
 services:
+  event-collector:
+    build: ../event-collector
+    container_name: event-collector
+    ports:
+      - 8888:8888
+    depends_on:
+      kafka:
+        condition: service_healthy
+      cassandra:
+        condition: service_healthy
+      schema-registry:
+        condition: service_started
+      grafana:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD", "sh", "-c", "curl -f http://localhost:8080/actuator/health | grep -q '\"status\":\"UP\"'" ]
+      interval: 3s
+      timeout: 2s
+      retries: 2
+      start_period: 6s
+    networks:
+      - iot_network
   zookeeper:
     image: bitnami/zookeeper:latest
     container_name: zookeeper
@@ -17,8 +39,8 @@ services:
     restart: unless-stopped
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_INTERNAL://kafka:29092
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       - ALLOW_PLAINTEXT_LISTENER=yes
     depends_on:
@@ -30,7 +52,7 @@ services:
     networks:
       - iot_network
     healthcheck:
-      test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list" ]
+      test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "kafka:9092", "--list" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -157,9 +179,11 @@ services:
       test: [ "CMD", "cqlsh", "-e", "describe keyspaces" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 15
     volumes:
       - cassandra_data:/var/lib/cassandra
+    networks:
+      - iot_network
   grafana:
     image: grafana/grafana
     ports:
@@ -170,6 +194,8 @@ services:
       - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
       - ./grafana/datasources:/etc/grafana/provisioning/datasources
       - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
     networks:
       - iot_network
   prometheus:
@@ -181,6 +207,9 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
+    depends_on:
+      - kafka-exporter
+      - postgres-exporter
     networks:
       - iot_network
   kafka-exporter:
