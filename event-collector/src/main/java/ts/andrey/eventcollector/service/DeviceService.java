@@ -17,13 +17,13 @@ public class DeviceService {
     private final DeviceEventProducer deviceIdProducerImpl;
     private final SimpleCache simpleCache;
 
-    /***
+    /**
      * Проверяем есть ли такие deviceId в cassandra,
-     * если нет - отправляем в kafka топик,
-     * кешируем
+     * если нет - отправляем в kafka топик;
+     * добавляем в SimpleCache
      *
-     * @param devices - список устройств
-     * @return - список новых устройств, которые обработали
+     * @param devices список устройств
+     * @return список новых устройств
      */
     public List<Device> process(List<Device> devices) {
         if (CollectionUtils.isEmpty(devices)) {
@@ -33,13 +33,13 @@ public class DeviceService {
                 .filter(deviceEvent -> !deviceEventDataService.isExistDeviceId(deviceEvent.getDeviceId()))
                 .toList();
 
-        final var deviceIds = unsavedDevices.stream()
-                .map(Device::getDeviceId)
-                .toList();
-
         if (!CollectionUtils.isEmpty(unsavedDevices)) {
             deviceIdProducerImpl.send(unsavedDevices);
         }
+
+        final var deviceIds = devices.stream()
+                .map(Device::getDeviceId)
+                .toList();
 
         simpleCache.putAll(deviceIds);
         return unsavedDevices;

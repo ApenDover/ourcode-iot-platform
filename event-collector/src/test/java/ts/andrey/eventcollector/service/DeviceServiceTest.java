@@ -48,7 +48,7 @@ class DeviceServiceTest {
         // THEN
         assertTrue(result.isEmpty());
         verify(deviceIdProducerImpl, never()).send(anyList());
-        verify(simpleCache, never()).putAll(anyList());
+        verify(simpleCache).putAll(List.of("deviceId-0"));
     }
 
     @Test
@@ -83,7 +83,7 @@ class DeviceServiceTest {
         // THEN
         assertTrue(CollectionUtils.isEmpty(result));
         verify(deviceIdProducerImpl, never()).send(anyList());
-        verify(simpleCache, never()).putAll(anyList());
+        verify(simpleCache).putAll(List.of("deviceId-0"));
     }
 
     @Test

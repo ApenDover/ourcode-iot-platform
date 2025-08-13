@@ -1,5 +1,7 @@
 package ts.andrey.eventcollector.service.impl;
 
+import com.nashkod.avro.DeviceEvent;
+import com.nashkod.avro.EventType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,7 +14,7 @@ import ts.andrey.eventcollector.tdf.DummyTDF;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,9 +70,9 @@ class CollectorServiceImplTest {
         collectorService.collect(List.of());
 
         // THEN
-        verify(deviceEventService, never()).saveCashedEvents(any());
-        verify(deviceService, never()).process(any());
-        verify(deviceEventService, never()).saveEvents(any());
+        verify(deviceEventService, never()).saveCashedEvents(anyList());
+        verify(deviceService, never()).process(anyList());
+        verify(deviceEventService, never()).saveEvents(anyList());
     }
 
     @Test
@@ -83,8 +85,23 @@ class CollectorServiceImplTest {
         collectorService.collect(events);
 
         // THEN
-        verify(deviceService, never()).process(any());
-        verify(deviceEventService, never()).saveEvents(any());
+        verify(deviceService, never()).process(anyList());
+        verify(deviceEventService, never()).saveEvents(anyList());
+    }
+
+    @Test
+    void collectShouldFilterInvalidEvents() {
+        // GIVEN
+        final var event = new DeviceEvent("new", "", 123L, EventType.HUMIDITY, "payload");
+        final var events = List.of(event);
+
+        // WHEN
+        collectorService.collect(events);
+
+        // THEN
+        verify(deviceService, never()).process(anyList());
+        verify(deviceEventService, never()).saveEvents(anyList());
+        verify(deviceEventMapper, never()).toDeviceIdList(anyList());
     }
 
 }

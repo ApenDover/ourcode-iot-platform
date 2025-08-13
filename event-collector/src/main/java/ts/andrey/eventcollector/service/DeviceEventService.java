@@ -21,22 +21,24 @@ public class DeviceEventService {
     private final SimpleCache simpleCache;
     private final DeviceEventMapper deviceEventMapper;
 
-    /***
-     * Сохраняем события в cassandra, deviceId которых есть в simpleCache
-     * @param events - весь набор событий
-     * @return - список событий, deviceId которых нет в simpleCache
+    /**
+     * Сохраняем только те события в cassandra, deviceId которых есть в simpleCache
+     * @param events набор событий
+     * @return не сохраненные события
      */
     public List<DeviceEvent> saveCashedEvents(List<DeviceEvent> events) {
         if (CollectionUtils.isEmpty(events)) {
             return List.of();
         }
-        final var modifiableEvents = new ArrayList<>(events);
         final var cachedDeviceEvent = events.stream()
                 .filter(it -> simpleCache.contains(it.getDeviceId()))
                 .toList();
-        modifiableEvents.removeAll(cachedDeviceEvent);
+
         final var cashedDeviceEventEntities = deviceEventMapper.toEntityList(cachedDeviceEvent);
         deviceEventDataService.saveAll(cashedDeviceEventEntities);
+
+        final var modifiableEvents = new ArrayList<>(events);
+        modifiableEvents.removeAll(cachedDeviceEvent);
         return modifiableEvents;
     }
 
