@@ -9,6 +9,8 @@ services:
         condition: service_healthy
       cassandra:
         condition: service_healthy
+      cassandra-exporter:
+        condition: service_started
       schema-registry:
         condition: service_started
       grafana:
@@ -175,6 +177,14 @@ services:
       CASSANDRA_NUM_TOKENS: 256
       CASSANDRA_DC: "datacenter1"
       CASSANDRA_RACK: "rack1"
+      JVM_OPTS: >-
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.port=7199
+        -Dcom.sun.management.jmxremote.rmi.port=7199
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.local.only=false
+        -Djava.rmi.server.hostname=cassandra
     healthcheck:
       test: [ "CMD", "cqlsh", "-e", "describe keyspaces" ]
       interval: 10s
@@ -236,6 +246,19 @@ services:
       DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
     depends_on:
       postgres:
+        condition: service_healthy
+    networks:
+      - iot_network
+  cassandra-exporter:
+    image: criteord/cassandra_exporter:latest
+    container_name: cassandra-exporter
+    restart: unless-stopped
+    ports:
+      - "9500:8080"
+    environment:
+      CASSANDRA_EXPORTER_CONFIG_host: cassandra:7199
+    depends_on:
+      cassandra:
         condition: service_healthy
     networks:
       - iot_network
