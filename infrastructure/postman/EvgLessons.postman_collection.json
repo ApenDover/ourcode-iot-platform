@@ -25,7 +25,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "[{\n  \"eventId\": {{$guid}},\n  \"deviceId\": \"device-10\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"23\"\n},{\n  \"eventId\": {{$guid}},\n  \"deviceId\": \"device-10\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"32\"\n}]",
+					"raw": "[{\n  \"eventId\": \"{{$guid}}\",\n  \"deviceId\": \"device-10\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"23\"\n},{\n  \"eventId\": \"{{$guid}}\",\n  \"deviceId\": \"device-10\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"32\"\n}]",
 					"options": {
 						"raw": {
 							"language": "json"

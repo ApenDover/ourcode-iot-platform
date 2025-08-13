@@ -33,13 +33,15 @@ public class DeviceService {
                 .filter(deviceEvent -> !deviceEventDataService.isExistDeviceId(deviceEvent.getDeviceId()))
                 .toList();
 
+        final var deviceIds = unsavedDevices.stream()
+                .map(Device::getDeviceId)
+                .toList();
+
         if (!CollectionUtils.isEmpty(unsavedDevices)) {
             deviceIdProducerImpl.send(unsavedDevices);
-            final var deviceIds = unsavedDevices.stream()
-                    .map(Device::getDeviceId)
-                    .toList();
-            simpleCache.putAll(deviceIds);
         }
+
+        simpleCache.putAll(deviceIds);
         return unsavedDevices;
     }
 

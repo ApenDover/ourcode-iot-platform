@@ -1,22 +1,39 @@
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
-title Event collector service - Component Diagram
+AddElementTag("microservice", $bgColor="#E6F3F7", $fontColor="#333333", $borderColor="#3F668F")
+AddElementTag("storage", $bgColor="#F7E9E6", $fontColor="#333333", $borderColor="#8F3F3F")
+AddElementTag("queue", $bgColor="#E6F7E6", $fontColor="#333333", $borderColor="#3F8F5F")
 
-Container_Boundary(parent, "Iot Platform") {
-    Component(kafkaListener, "DeviceEventConsumer", "Spring Kafka Listener", "Читает сообщения DeviceEvent из Kafka")
-    Container_Boundary(EventCollector, "CollectorService") {
-    Component(service, "DeviceEventDataService", "Сохранение данных в cassandra")
-    Component(producer, "DeviceEventProducer", "Отправка deviceId в kafka")
-    Component(cache, "SimpleCache", "Кеширование deviceId")
-    collector --> service : "save(entity)"
-    collector --> producer : "sendEvent(device)"
-    collector --> cache : "contains(deviceId)\nput(deviceId)"
-    }
+Container_Boundary(app, "event-collector") {
+    Component(consumer, "DeviceEventConsumer", "Кафка-консьюмер", "class")
+    Component(collector, "CollectorService", "Оркестратор процесса", "class")
+    Component(event_service, "DeviceEventService", "Работа с событиями", "class")
+    Component(device_service, "DeviceService", "Проверка устройств", "class")
+    Component(producer, "DeviceEventProducer", "Кафка-продюсер", "class")
+    Component(event_data_service, "DeviceEventDataService", "repository", "class")
+    Component(cache, "SimpleCache", "In-memory кеш", "storage")
 }
 
-System_Ext(kafka, "Apache Kafka", "Message Broker")
+System_Ext(kafka, "Apache Kafka", "Топик device-events", "queue")
+System_Ext(schema_reg, "Schema Registry", "Avro-схемы", "storage")
+System_Ext(cassandra, "Cassandra", "Постоянное хранилище", "storage")
 
-Rel(kafkaListener, kafka, "Подписывается на сообщения")
-Rel(kafkaListener, EventCollector, "Вызывает CollectorService")
+Rel(kafka, consumer, "Чтение сообщений", "Kafka")
+Rel(consumer, schema_reg, "Получение схемы", "HTTP")
+Rel(consumer, collector, "Передача сообщения", "Java-вызов")
+
+Rel(collector, event_service, "Обработать кешированные", "Java-вызов")
+Rel(event_service, cache, "Проверить deviceId", "Java-вызов")
+Rel(event_service, event_data_service, "Сохранить известные", "Java-вызов")
+
+Rel(collector, device_service, "Обработать новые", "Java-вызов")
+Rel(device_service, event_data_service, "Проверить наличие", "Java-вызов")
+Rel(device_service, producer, "Отправить новые", "Java-вызов")
+Rel(event_data_service, cassandra, "Проверить наличие", "CQL")
+Rel(producer, kafka, "Публикация в топик", "Kafka")
+Rel(device_service, cache, "Добавить в кеш", "Java-вызов")
+
+Rel(collector, event_data_service, "Сохранить остальные данные", "Java-вызов")
+
 @enduml

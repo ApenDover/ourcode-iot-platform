@@ -19,8 +19,8 @@ postman collection вот тут: [postman](infrastructure/postman)
 ## 📁 Структура
 
 - puml диаграммы в аннотации C4 можно найти в папке [diagrams](diagrams)
-
-- Все инфраструктурные сервисы описаны в `docker-compose.yml`, см. папку [infrastructure](infrastructure)
+- инфраструктурные сервисы описаны в `docker-compose.yml`, см. папку [infrastructure](infrastructure)
+- [event-collector](event-collector) сервис подписывается на kafka topic, сохраняет события в cassandra, все уникальные deviceId складывает в отдельный топик
 
 ---
 
@@ -98,3 +98,31 @@ make up                # запуск всех сервисов
 make logs-kafka        # логи только Kafka
 make down              # остановка всех сервисов
 </pre>
+
+# Описание сервисов
+
+## event-collector
+
+### Процесс
+
+- подписывается на Kafka-топик events,
+- получает события в формате Avro (валидация через Schema Registry),
+- сохраняет события в Apache Cassandra для аналитики,
+- публикует уникальные device_id в отдельный Kafka-топик device-id.
+
+<details>
+
+<summary>Компоненты сервиса</summary>
+
+![event-collector-component.png](diagrams/event-collector/event-collector-component.png)[event-collector-component.puml](diagrams/event-collector/event-collector-component.puml)
+
+</details>
+
+### Технологии:
+- Язык программирования: Java 24
+- Фреймворк: Spring Boot 3.5
+- Обмен сообщениями: Apache Kafka
+- Сериализация: Avro (Confluent Schema Registry)
+- Хранилище: Apache Cassandra
+- Тестирование и окружение: Testcontainers (Kafka, Cassandra, Schema Registry)
+- Система сборки: Gradle
