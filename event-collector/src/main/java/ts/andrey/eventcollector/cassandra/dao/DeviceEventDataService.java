@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.cassandra.dataService;
+package ts.andrey.eventcollector.cassandra.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

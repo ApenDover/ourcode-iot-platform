@@ -7,12 +7,13 @@ AddElementTag("queue", $bgColor="#E6F7E6", $fontColor="#333333", $borderColor="#
 
 Container_Boundary(app, "event-collector") {
     Component(consumer, "DeviceEventConsumer", "Кафка-консьюмер", "class")
-    Component(collector, "CollectorService", "Оркестратор процесса", "class")
-    Component(event_service, "DeviceEventService", "Работа с событиями", "class")
-    Component(device_service, "DeviceService", "Проверка устройств", "class")
-    Component(producer, "DeviceEventProducer", "Кафка-продюсер", "class")
-    Component(event_data_service, "DeviceEventDataService", "repository", "class")
+    Component(collector, "CollectorFacade", "Оркестратор процесса", "class")
+    Component(deduplicate_service, "DeduplicateService", "Поиск новых девайсов", "class")
+    Component(device_event_service, "DeviceEventService", "Обработка событий", "class")
     Component(cache, "SimpleCache", "In-memory кеш", "storage")
+    Component(event_data_service, "DeviceEventDataService", "repository", "class")
+    Component(device_service, "DeviceService", "отправка в kafka", "class")
+    Component(producer, "DeviceEventProducer", "Кафка-продюсер", "class")
 }
 
 System_Ext(kafka, "Apache Kafka", "Топик device-events", "queue")
@@ -23,17 +24,18 @@ Rel(kafka, consumer, "Чтение сообщений", "Kafka")
 Rel(consumer, schema_reg, "Получение схемы", "HTTP")
 Rel(consumer, collector, "Передача сообщения", "Java-вызов")
 
-Rel(collector, event_service, "Обработать кешированные", "Java-вызов")
-Rel(event_service, cache, "Проверить deviceId", "Java-вызов")
-Rel(event_service, event_data_service, "Сохранить известные", "Java-вызов")
+Rel(collector, deduplicate_service, "Поиск новых девайсов", "Java-вызов")
+Rel(collector, device_event_service, "Обработка событий", "Java-вызов")
+Rel(collector, device_service, "обработка новых девайсов", "Java-вызов")
 
-Rel(collector, device_service, "Обработать новые", "Java-вызов")
-Rel(device_service, event_data_service, "Проверить наличие", "Java-вызов")
-Rel(device_service, producer, "Отправить новые", "Java-вызов")
-Rel(event_data_service, cassandra, "Проверить наличие", "CQL")
-Rel(producer, kafka, "Публикация в топик", "Kafka")
-Rel(device_service, cache, "Добавить в кеш", "Java-вызов")
+Rel(deduplicate_service, cache, "Проверка в cache", "Java-вызов")
+Rel(deduplicate_service, event_data_service, "Проверка в cassandra", "Java-вызов")
+Rel(event_data_service, cassandra, "Проверка в cassandra", "CQL")
 
-Rel(collector, event_data_service, "Сохранить остальные данные", "Java-вызов")
+Rel(device_event_service, event_data_service, "Сохранить все события]", "Java-вызов")
+Rel(event_data_service, cassandra, "Сохранить события", "CQL")
+
+Rel(device_event_service, cache, "Кешировать устройства", "Java-вызов")
+Rel(device_service, producer, "Отправить новые устройства в топик", "Java-вызов")
 
 @enduml

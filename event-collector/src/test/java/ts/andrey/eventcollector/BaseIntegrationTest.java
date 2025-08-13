@@ -15,9 +15,9 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
-import ts.andrey.eventcollector.cassandra.dataService.DeviceEventDataService;
+import ts.andrey.eventcollector.cassandra.dao.DeviceEventDataService;
 import ts.andrey.eventcollector.cassandra.repository.DeviceEventRepository;
-import ts.andrey.eventcollector.service.DeviceEventConsumer;
+import ts.andrey.eventcollector.service.component.DeviceEventConsumer;
 import ts.andrey.eventcollector.service.component.SimpleCache;
 import ts.andrey.eventcollector.service.impl.DeviceEventProducerImpl;
 

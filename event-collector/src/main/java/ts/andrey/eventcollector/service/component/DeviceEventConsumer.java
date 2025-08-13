@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.service;
+package ts.andrey.eventcollector.service.component;
 
 import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 public class DeviceEventConsumer {
 
-    private final CollectorService collectorService;
+    private final CollectorFacade collectorFacade;
 
     @KafkaListener(
             topics = "${spring.kafka.template.events-topic}",
@@ -28,7 +28,7 @@ public class DeviceEventConsumer {
         log.info("Получена пачка из {} событий", events.size());
         log.debug("Получены события: {}", events);
         try {
-            collectorService.collect(events);
+            collectorFacade.collect(events);
         } catch (Exception e) {
             log.error("Ошибка обработки пачки событий", e);
             throw e;

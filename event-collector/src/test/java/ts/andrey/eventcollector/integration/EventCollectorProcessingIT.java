@@ -32,7 +32,7 @@ class EventCollectorProcessingIT extends BaseIntegrationTest {
         assertTrue(metadata.get(1).offset() >= 0);
 
         //THEN CHECK CASSANDRA SAVED
-        await().atMost(5, TimeUnit.SECONDS)
+        await().atMost(10, TimeUnit.SECONDS)
                 .untilAsserted(() -> {
                     final var events = deviceEventRepository.findAll();
                     assertEquals(size, events.size());

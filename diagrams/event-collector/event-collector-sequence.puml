@@ -2,35 +2,33 @@
 actor KafkaBroker
 participant "DeviceEventConsumer" as DEC  #lightblue
 participant "SchemaRegistry" as AVRO
-participant "CollectorService" as ECS  #lightblue
+participant "CollectorFacade" as KF  #lightblue
+participant "DeviceService" as DS  #lightblue
 participant "DeviceEventService" as DES  #lightblue
 participant "SimpleCache" as CACHE #lightblue
+participant "DeviceEventRepository" as REPO  #lightblue
 participant "Cassandra" as DB
 participant "KafkaProducer" as KP  #lightblue
+participant "Kafka" as KAFKA
 
 KafkaBroker --> DEC : события в Avro (DeviceEvents)
 DEC -> AVRO : десериализация Avro
 AVRO -> DEC : DeviceEvents
-DEC -> ECS : DeviceEvents
-ECS -> DES : DeviceEvents
+DEC -> KF : DeviceEvents
+KF -> DS : DeviceEvents
 
 alt Проверка дедупликации
-    DES -> CACHE : проверка deviceId
-    CACHE -> DES : существует?
-    opt Если дубликат
-        DES -> DB : сохранить DeviceEvents
-        DES -> CACHE : актуализировать cache
-    end
-    DES -> DB : проверка deviceId
-    DB -> DES : существует?
-    opt Если дубликат
-            DES -> DB : сохранить DeviceEvents
-            DES -> CACHE : добавить в cache
+    DS -> CACHE : проверка deviceId
+    DS -> REPO : существует?
+    opt Если не существует
+        KF -> KP : отправить в "device-id" topic
+        KP --> KAFKA : отправить
     end
 end
-    DES -> ECS : не обработанные DeviceEvents
-    ECS --> KP : отправить в "device-id" topic
-    ECS -> CACHE : добавить в cache
-    ECS -> DB : сохранить событие
+
+KF -> DES : DeviceEvents
+DES -> REPO : сохранить все события
+REPO -> DB : сохранить
+DES -> CACHE : кешировать все deviceId
 
 @enduml

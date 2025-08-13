@@ -1,48 +1,11 @@
 package ts.andrey.eventcollector.service;
 
-import com.nashkod.avro.Device;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import ts.andrey.eventcollector.cassandra.dataService.DeviceEventDataService;
-import ts.andrey.eventcollector.service.component.SimpleCache;
+import com.nashkod.avro.DeviceEvent;
 
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class DeviceService {
+public interface DeviceService {
 
-    private final DeviceEventDataService deviceEventDataService;
-    private final DeviceEventProducer deviceIdProducerImpl;
-    private final SimpleCache simpleCache;
-
-    /**
-     * Проверяем есть ли такие deviceId в cassandra,
-     * если нет - отправляем в kafka топик;
-     * добавляем в SimpleCache
-     *
-     * @param devices список устройств
-     * @return список новых устройств
-     */
-    public List<Device> process(List<Device> devices) {
-        if (CollectionUtils.isEmpty(devices)) {
-            return List.of();
-        }
-        final var unsavedDevices = devices.stream()
-                .filter(deviceEvent -> !deviceEventDataService.isExistDeviceId(deviceEvent.getDeviceId()))
-                .toList();
-
-        if (!CollectionUtils.isEmpty(unsavedDevices)) {
-            deviceIdProducerImpl.send(unsavedDevices);
-        }
-
-        final var deviceIds = devices.stream()
-                .map(Device::getDeviceId)
-                .toList();
-
-        simpleCache.putAll(deviceIds);
-        return unsavedDevices;
-    }
+    void process(List<DeviceEvent> deviceEvents);
 
 }
