@@ -58,6 +58,7 @@ postman collection вот тут: [postman](infrastructure/postman)
 | `kafka-exporter`     | Экспорт метрик Kafka для Prometheus     | `9308`          |
 | `cassandra-exporter` | Экспорт метрик cassandra для Prometheus | `9500`          |
 | `postgres-exporter`  | Экспорт метрик postgres для Prometheus  | `9187`          |
+| `kafka-ui`           | Kafka-UI для удобства просмотра         | `8099`          |
 
 ⚠️ **Важно:**  Убедитесь, что у Docker достаточно памяти и CPU. В Docker Desktop (Windows/Mac) можно выделить, например, 4+ ГБ RAM. Иначе рискуете столкнуться с тормозами или перезапусками контейнеров (особенно Java-сервисы как Keycloak могут потреблять >512МБ).
 

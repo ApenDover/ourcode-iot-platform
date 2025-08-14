@@ -59,6 +59,22 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    restart: unless-stopped
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local-kafka
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+      - KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME=local-connect
+      - KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS=http://kafka-connect:8083
+    ports:
+      - "8099:8080"
+    depends_on:
+      - kafka
+    networks:
+      - iot_network
   schema-registry:
     container_name: schema-registry
     image: confluentinc/cp-schema-registry:7.5.0
