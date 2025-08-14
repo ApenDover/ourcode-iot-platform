@@ -20,14 +20,11 @@ help: ## Показать список доступных команд
 	@echo "  \033[36mset-log-<level>-<port>\033[0m  	Установить логирование (пример: make set-log-debug-8080)"
 	@echo "  \033[36mupdate-<service>\033[0m  		Пересобрать проект и развернуть контейнер"
 
-up: bootJar ## Запустить контейнеры в фоне
-	$(DC) up -d --build event-collector
+up: ## Запустить контейнеры в фоне
+	$(DC) up -d
 
-update-%: bootJar
+update-%:
 	$(DC) up -d --build --force-recreate --no-deps $*
-
-bootJar: ## запустить bootJar
-	cd event-collector && ./gradlew bootJar
 
 down: ## Остановить и удалить контейнеры
 	$(DC) down

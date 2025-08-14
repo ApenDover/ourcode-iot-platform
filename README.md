@@ -66,6 +66,36 @@ postman collection вот тут: [postman](infrastructure/postman)
  > [GRAFANA](http://localhost:3000) \
  > [PROMETHEUS](http://localhost:9090)
 
+#### Скриншоты dashboard:
+
+<details>
+<summary>cassandra</summary>
+
+![cassandra.png](pics/cassandra.png)
+
+</details>
+
+<details>
+<summary>kafka</summary>
+
+![kafka.png](pics/kafka.png)
+
+</details>
+
+<details>
+<summary>postgres</summary>
+
+![postgres.png](pics/postgres.png)
+
+</details>
+
+<details>
+<summary>spring</summary>
+
+![spring.png](pics/spring.png)
+
+</details>
+
 ## 🚀 Запуск
 
 Из корня проекта доступны команды через `Makefile`.
