@@ -5,7 +5,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import ts.andrey.eventcollector.BaseIntegrationTest;
 import ts.andrey.eventcollector.tdf.DummyTDF;
-import ts.andrey.eventcollector.utils.KafkaConsumerUtil;
+import ts.andrey.eventcollector.testutils.KafkaConsumerUtil;
 
 import java.util.concurrent.TimeUnit;
 

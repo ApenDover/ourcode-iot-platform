@@ -30,15 +30,6 @@ class DeduplicateServiceImplTest {
     private DeduplicateServiceImpl deduplicateService;
 
     @Test
-    void shouldReturnEmptyListWhenInputIsNull() {
-        // WHEN
-        final var result = deduplicateService.getUniqueDevices(null);
-
-        // THEN
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
     void shouldReturnEmptyListWhenInputIsEmpty() {
         // WHEN
         final var result = deduplicateService.getUniqueDevices(List.of());

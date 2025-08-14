@@ -20,10 +20,12 @@ public class CollectorFacade {
     private final DeviceService deviceService;
 
     public void collect(List<DeviceEvent> events) {
-        if (CollectionUtils.isEmpty(events)) {
+
+        final var deviceEvents = DeviceEventValidFilter.getCorrect(events);
+
+        if (CollectionUtils.isEmpty(deviceEvents)) {
             return;
         }
-        final var deviceEvents = DeviceEventValidFilter.getCorrect(events);
 
         try {
             deviceService.process(events);

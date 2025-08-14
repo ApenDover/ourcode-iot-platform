@@ -3,7 +3,6 @@ package ts.andrey.eventcollector.cassandra.dao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
 import ts.andrey.eventcollector.cassandra.repository.DeviceEventRepository;
 
@@ -18,18 +17,12 @@ public class DeviceEventDataService {
     private final DeviceEventRepository repository;
 
     public List<DeviceEventEntity> saveAll(List<DeviceEventEntity> events) {
-        if (CollectionUtils.isEmpty(events)) {
-            return List.of();
-        }
         final var saved = repository.saveAll(events);
         log.debug("Сохранил события в кассандра: {}", events.size());
         return saved;
     }
 
     public List<String> getUnsavedDeviceIds(List<String> deviceIds) {
-        if (CollectionUtils.isEmpty(deviceIds)) {
-            return List.of();
-        }
         final var modified = new ArrayList<>(deviceIds);
         final var existsDeviceIds = repository.findExistingDeviceIds(deviceIds);
         final var deviceIdSet = existsDeviceIds.stream()

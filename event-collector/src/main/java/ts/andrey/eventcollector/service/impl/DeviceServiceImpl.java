@@ -3,7 +3,6 @@ package ts.andrey.eventcollector.service.impl;
 import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.service.DeduplicateService;
 import ts.andrey.eventcollector.service.DeviceEventProducer;
@@ -25,9 +24,6 @@ public class DeviceServiceImpl implements DeviceService {
      * @param deviceEvents список событий
      */
     public void process(List<DeviceEvent> deviceEvents) {
-        if (CollectionUtils.isEmpty(deviceEvents)) {
-            return;
-        }
         final var devices = deviceEventMapper.toDeviceIdList(deviceEvents);
         final var uniqueDevices = deduplicateService.getUniqueDevices(devices);
         deviceIdProducerImpl.send(uniqueDevices);

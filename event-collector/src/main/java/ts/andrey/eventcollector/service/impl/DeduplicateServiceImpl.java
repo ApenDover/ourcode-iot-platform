@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import ts.andrey.eventcollector.cassandra.dao.DeviceEventDataService;
 import ts.andrey.eventcollector.service.DeduplicateService;
 import ts.andrey.eventcollector.service.component.SimpleCache;
@@ -25,9 +24,6 @@ public class DeduplicateServiceImpl implements DeduplicateService {
      * @return список device которых нет ни в simpleCache ни в cassandra
      */
     public List<Device> getUniqueDevices(List<Device> devices) {
-        if (CollectionUtils.isEmpty(devices)) {
-            return List.of();
-        }
 
         final var uncached = devices.stream()
                 .filter(Objects::nonNull)

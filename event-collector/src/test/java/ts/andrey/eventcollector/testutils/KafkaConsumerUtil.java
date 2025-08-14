@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.utils;
+package ts.andrey.eventcollector.testutils;
 
 import com.nashkod.avro.Device;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
