@@ -5,19 +5,11 @@ import org.springframework.data.cassandra.repository.Query;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventKey;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.List;
 
 public interface DeviceEventRepository extends CassandraRepository<DeviceEventEntity, DeviceEventKey> {
 
-    @Query("SELECT * FROM device_events WHERE device_id = ?0 AND timestamp = ?1 AND event_id = ?2")
-    Optional<DeviceEventEntity> findByKeyComponents(String deviceId, long timestamp, UUID eventId);
-
-    @Query("SELECT * FROM device_events WHERE device_id = ?0 LIMIT 1")
-    Optional<DeviceEventEntity> findFirstByDeviceId(String deviceId);
-
-    default boolean existsByDeviceId(String deviceId) {
-        return findFirstByDeviceId(deviceId).isPresent();
-    }
+    @Query("SELECT device_id FROM device_events WHERE device_id IN ?0")
+    List<DeviceEventEntity> findExistingDeviceIds(List<String> deviceIds);
 
 }

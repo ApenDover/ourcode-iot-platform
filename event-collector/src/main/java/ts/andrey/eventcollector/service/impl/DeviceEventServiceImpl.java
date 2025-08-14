@@ -8,7 +8,6 @@ import ts.andrey.eventcollector.cassandra.dao.DeviceEventDataService;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.service.DeviceEventService;
 import ts.andrey.eventcollector.service.component.SimpleCache;
-import ts.andrey.eventcollector.validation.DeviceEventValidFilter;
 
 import java.util.List;
 
@@ -22,10 +21,9 @@ public class DeviceEventServiceImpl implements DeviceEventService {
     private final SimpleCache simpleCache;
 
     public void saveEvents(List<DeviceEvent> events) {
-        final var actual = DeviceEventValidFilter.getCorrect(events);
-        final var toSave = deviceEventMapper.toEntityList(actual);
+        final var toSave = deviceEventMapper.toEntityList(events);
         deviceEventDataService.saveAll(toSave);
-        final var deviceIds = actual.stream()
+        final var deviceIds = events.stream()
                 .map(DeviceEvent::getDeviceId)
                 .toList();
         simpleCache.putAll(deviceIds);
