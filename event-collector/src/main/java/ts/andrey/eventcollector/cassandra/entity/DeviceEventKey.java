@@ -8,6 +8,7 @@ import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyClass;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Getter
@@ -36,5 +37,24 @@ public class DeviceEventKey {
             ordering = Ordering.DESCENDING
     )
     private UUID eventId;
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        DeviceEventKey that = (DeviceEventKey) object;
+        return timestamp == that.timestamp
+                && Objects.equals(deviceId, that.deviceId)
+                && Objects.equals(eventId, that.eventId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(deviceId, timestamp, eventId);
+    }
 
 }

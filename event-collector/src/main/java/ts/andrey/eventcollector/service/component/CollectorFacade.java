@@ -28,7 +28,7 @@ public class CollectorFacade {
         }
 
         try {
-            deviceService.process(events);
+            deviceService.sendUniqueDeviceids(deviceEvents);
             deviceEventService.saveEvents(deviceEvents);
         } catch (Exception e) {
             log.error("Ошибка при обработке событий", e);

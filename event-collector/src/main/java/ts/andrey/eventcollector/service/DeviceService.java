@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface DeviceService {
 
-    void process(List<DeviceEvent> deviceEvents);
+    void sendUniqueDeviceids(List<DeviceEvent> deviceEvents);
 
 }

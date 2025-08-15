@@ -40,7 +40,7 @@ class CollectorFacadeTest {
         collectorService.collect(events);
 
         // THEN
-        verify(deviceServiceImpl).process(events);
+        verify(deviceServiceImpl).sendUniqueDeviceids(List.of(validEvent));
         verify(deviceEventServiceImpl).saveEvents(List.of(validEvent));
     }
 
@@ -48,7 +48,7 @@ class CollectorFacadeTest {
     void collectShouldLogErrorWhenExceptionOccurs() {
         // GIVEN
         var events = DummyTDF.deviceEvent.getList(2);
-        doThrow(new RuntimeException("test exception")).when(deviceServiceImpl).process(anyList());
+        doThrow(new RuntimeException("test exception")).when(deviceServiceImpl).sendUniqueDeviceids(anyList());
 
         // WHEN
         collectorService.collect(events);
