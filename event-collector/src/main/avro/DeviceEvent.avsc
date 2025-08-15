@@ -1,0 +1,36 @@
+{
+  "type": "record",
+  "name": "DeviceEvent",
+  "namespace": "com.nashkod.avro",
+  "fields": [
+    {
+      "name": "eventId",
+      "type": "string"
+    },
+    {
+      "name": "deviceId",
+      "type": "string"
+    },
+    {
+      "name": "timestamp",
+      "type": "long"
+    },
+    {
+      "name": "type",
+      "type": {
+        "type": "enum",
+        "name": "EventType",
+        "symbols": [
+          "TEMPERATURE",
+          "HUMIDITY",
+          "STATUS",
+          "ERROR"
+        ]
+      }
+    },
+    {
+      "name": "payload",
+      "type": "string"
+    }
+  ]
+}

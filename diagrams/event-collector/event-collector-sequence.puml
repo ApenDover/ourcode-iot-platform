@@ -1,0 +1,34 @@
+@startuml
+actor KafkaBroker
+participant "DeviceEventConsumer" as DEC  #lightblue
+participant "SchemaRegistry" as AVRO
+participant "CollectorFacade" as KF  #lightblue
+participant "DeviceService" as DS  #lightblue
+participant "DeviceEventService" as DES  #lightblue
+participant "SimpleCache" as CACHE #lightblue
+participant "DeviceEventRepository" as REPO  #lightblue
+participant "Cassandra" as DB
+participant "KafkaProducer" as KP  #lightblue
+participant "Kafka" as KAFKA
+
+KafkaBroker --> DEC : события в Avro (DeviceEvents)
+DEC -> AVRO : десериализация Avro
+AVRO -> DEC : DeviceEvents
+DEC -> KF : DeviceEvents
+KF -> DS : DeviceEvents
+
+alt Проверка дедупликации
+    DS -> CACHE : проверка deviceId
+    DS -> REPO : существует?
+    opt Если не существует
+        KF -> KP : отправить в "device-id" topic
+        KP --> KAFKA : отправить
+    end
+end
+
+KF -> DES : DeviceEvents
+DES -> REPO : сохранить все события
+REPO -> DB : сохранить
+DES -> CACHE : кешировать все deviceId
+
+@enduml

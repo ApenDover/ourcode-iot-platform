@@ -1,0 +1,2518 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": 1,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 61,
+      "panels": [],
+      "title": "README",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 63,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "### Cassandra SLA Dashboard\n#### This dashboard provides the following informations :\n_User metrics_\n* __max latencies by percentile__ : read / write / scan\n* __OPS__ : read / write\n* __Disk usage__ : live space / total space\n* __JAVA heap & non heap usage__ : current memory / max allowed\n\n_Advanced metrics_\n* __Pending operations__ :  compactions / flushes\n* __Streaming & CommitLog__ : OPS / throughput\n* __Repair ratio__ : for every keyspace\n* __Memtable statistics__\n* __Row cache__ : hit rates\n* __Thread pools metrics__ : OPS / blocked / pending",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.5.8",
+      "title": "README",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "id": 5,
+      "panels": [],
+      "title": "OVERVIEW",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFE396EC0B189D67"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "µs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.8",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "expr": "max(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:readlatency:$percentiles\"}) by (table)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{ table }}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:readlatency:$percentiles\"}",
+          "format": "time_series",
+          "hide": true,
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{ instance }}: {{ table }}",
+          "refId": "B"
+        }
+      ],
+      "title": "Read Latency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFE396EC0B189D67"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "µs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.8",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "expr": "max(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:writelatency:$percentiles\"}) by (table)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{ table }}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:writelatency:$percentiles\"}",
+          "format": "time_series",
+          "hide": true,
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{ instance }}: {{ table }}",
+          "refId": "B"
+        }
+      ],
+      "title": "Write Latency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus"
+      },
+      "description": "Local range scan latency",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "µs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.8",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "expr": "max(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:rangelatency:$percentiles\"}) by (table)",
+          "format": "time_series",
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{ table }}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:rangelatency:$percentiles\"}",
+          "format": "time_series",
+          "hide": true,
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{ instance }}: {{ table }}",
+          "refId": "B"
+        }
+      ],
+      "title": "Range Scan Latencies",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.8",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "expr": "sum(label_replace(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=~\"org:apache:cassandra:metrics:droppedmessage:.*:oneminuterate\"}, \"type\", \"$1\", \"name\", \".+:droppedmessage:(.+):oneminuterate\")) by (type)",
+          "format": "time_series",
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{ type }}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "expr": "label_replace(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=~\"org:apache:cassandra:metrics:droppedmessage:.*:oneminuterate\"}, \"type\", \"$1\", \"name\", \".+:droppedmessage:(.+):oneminuterate\")",
+          "format": "time_series",
+          "hide": true,
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{ instance }}: {{ type }}",
+          "refId": "B"
+        }
+      ],
+      "title": "Dropped Message",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 30
+      },
+      "id": 71,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.8",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:connection:totaltimeouts:oneminuterate\"}) by (name)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "Number of requests timeouts over 1 min",
+          "refId": "A"
+        }
+      ],
+      "title": "Timeouts (1 minute rate)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 30
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.8",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:totaldiskspaceused:count\"}) by (table)",
+          "format": "time_series",
+          "instant": false,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "Total: {{ table }}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:livediskspaceused.+\"}) by (table)",
+          "format": "time_series",
+          "instant": false,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "Live: {{ table }}",
+          "refId": "B"
+        }
+      ],
+      "title": "Disk Space Used",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 39
+      },
+      "id": 10,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 65
+          },
+          "id": 11,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "max(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:readlatency:$percentiles\"}) by (table)",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:readlatency:$percentiles\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ table }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Read Latency",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 73
+          },
+          "id": 12,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:readlatency:oneminuterate\"}) by (table)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:readlatency:oneminuterate\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ table }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Read Ops",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 81
+          },
+          "id": 13,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:readstage:totalblockedtasks:count\"}) by (name)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Blocked request readstage",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:readstage:pendingtasks:value\"}) by (name)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Pending request readstage",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:readstage:activetasks:value\"}) by (name)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Active request readstage",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:readstage:completedtasks:value\"}[5m])) by (name)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Completed request readstage",
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:readstage:totalblockedtasks:count\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Blocked request readstage",
+              "refId": "E"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:readstage:pendingtasks:value\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Pending request readstage",
+              "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:readstage:activetasks:value\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Active request readstage",
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:readstage:completedtasks:value\"}[5m])",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Completed request readstage",
+              "refId": "H"
+            }
+          ],
+          "title": "Thread Pool",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 89
+          },
+          "id": 14,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:.*:rowcachehit:count\"}[5m])) by (table)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Hit {{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:.*:rowcachemiss:count\"}[5m])) by (table)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Miss {{ table }}",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:.*:rowcachehit:count\"}[5m])",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }} Hit {{ table }}",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:.*:rowcachemiss:count\"}[5m])",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }} Miss {{ table }}",
+              "refId": "D"
+            }
+          ],
+          "title": "Row Cache (5 minute rate hit/sec)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 97
+          },
+          "id": 15,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "avg(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:.*:keycachehitrate:value\"}) by (table)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:.*:keycachehitrate:value\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ table }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Key cache hit rate",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 105
+          },
+          "id": 16,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "avg(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:cache:chunkcache:oneminutehitrate:value\"}) by (name)",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Chunk cache hit rate",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:cache:chunkcache:oneminutehitrate:value\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Chunk cache hit rate",
+              "refId": "B"
+            }
+          ],
+          "title": "Chunck cache hit rate",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 113
+          },
+          "id": 17,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "max(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:sstablesperreadhistogram:$percentiles\"}) by (table)",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", table=~\"$table\", cluster=\"$cluster\",name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:sstablesperreadhistogram:$percentiles\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ table }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Max nb SSTables per Read",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 121
+          },
+          "id": 18,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "max(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:tombstonescannedhistogram:$percentiles\"}) by (table)",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:tombstonescannedhistogram:$percentiles\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ table }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Max Nb Scanned Tombstones",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 129
+          },
+          "id": 19,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:livesstablecount:value\"}) by (table)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:livesstablecount:value\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ table }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Nb Live SSTables",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 137
+          },
+          "id": 20,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", table=~\"$table\", cluster=\"$cluster\",name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:estimatedpartitionsizehistogram:max\"}) by (table)",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:estimatedpartitionsizehistogram:max\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ table }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Estimated Partition Count",
+          "type": "timeseries"
+        }
+      ],
+      "title": "READ PATH",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 40
+      },
+      "id": 22,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 66
+          },
+          "id": 23,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "max(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:writelatency:$percentiles\"}) by (table)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:writelatency:$percentiles\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ table }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Write Latency",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 74
+          },
+          "id": 24,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:writelatency:oneminuterate\"}) by (table)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:writelatency:oneminuterate\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ table }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Write Ops",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 82
+          },
+          "id": 70,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:mutationstage:totalblockedtasks:count\"}) by (name)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Blocked request mutationstage",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:mutationstage:pendingtasks:value\"}) by (name)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Pending request mutationstage",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:mutationstage:activetasks:value\"}) by (name)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Active request mutationstage",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:mutationstage:completedtasks:value\"}) by (name)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Completed request mutationstage",
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:mutationstage:totalblockedtasks:count\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Blocked request mutationstage",
+              "refId": "E"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:mutationstage:pendingtasks:value\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Pending request mutationstage",
+              "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:mutationstage:activetasks:value\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Active request mutationstage",
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:threadpools:request:mutationstage:completedtasks:value\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Completed request mutationstage",
+              "refId": "H"
+            }
+          ],
+          "title": "Thread Pool",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 90
+          },
+          "id": 26,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:commitlog:waitingoncommit:oneminuterate\"}) by (name)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Wait time to commit over 1 min",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:commitlog:completedtasks:value\"}) by (name)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Completed CommitLog Task / sec (avg on 5min)",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:commitlog:waitingoncommit:oneminuterate\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Wait time to commit over 1 min",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:commitlog:completedtasks:value\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Completed CommitLog Task / sec (avg on 5min)",
+              "refId": "D"
+            }
+          ],
+          "title": "CommitLog",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 98
+          },
+          "id": 27,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "max(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:memtableswitchcount:.*\"}) by (table)",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:memtableswitchcount:.*\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ table }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Memtable OPS",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 106
+          },
+          "id": 28,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "max(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:.*:allmemtablesheapsize:value\"}) by (table)",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Total heap {{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "max(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:.*:allmemtableslivedatasize:value\"}) by (table)",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Live heap {{ table }}",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:.*:allmemtablesheapsize:value\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Total heap {{ table }}",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:.*:allmemtableslivedatasize:value\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Live heap {{ table }}",
+              "refId": "D"
+            }
+          ],
+          "title": "Memtable Data Size",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 114
+          },
+          "id": 29,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "max(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:.*:waitingonfreememtablespace:max\"}) by (table)",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:.*:waitingonfreememtablespace:max\"}",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ table }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Waiting Free Memtable Space",
+          "type": "timeseries"
+        }
+      ],
+      "title": "WRITE PATH",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "id": 31,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 67
+          },
+          "id": 33,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:pendingcompactions:value\"}[1m])) by (table)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "Compactions {{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:pendingflushes:count\"}) by (table)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "Flush {{ table }}",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",table=~\"$table\",name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:pendingcompactions:value\"}[1m])",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Compactions {{ table }}",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:pendingflushes:count\"}",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Flush {{ table }}",
+              "refId": "D"
+            }
+          ],
+          "title": "Pending Operations",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 67
+          },
+          "id": 34,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:compactionbyteswritten:count\"}[3m])) by (table)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "Compactions {{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:compactionbyteswritten:count\"}[3m])",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }} Compactions {{ table }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Compaction rate",
+          "type": "timeseries"
+        }
+      ],
+      "title": "COMPACTIONS",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 42
+      },
+      "id": 36,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 68
+          },
+          "id": 39,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(label_replace(rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=~\"org:apache:cassandra:metrics:threadpools:.*:completedtasks:value\"}[5m]), \"info\", \"$1 $2\", \"name\", \".+:threadpools:(.+?):(.+?):.+\")) by (info)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "{{ info }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "label_replace(rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=~\"org:apache:cassandra:metrics:threadpools:.*:completedtasks:value\"}[5m]), \"info\", \"$1 $2\", \"name\", \".+:threadpools:(.+?):(.+?):.+\")",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ info }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Thread Pool (Completed over 5 min)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 77
+          },
+          "id": 40,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(label_replace(rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=~\"org:apache:cassandra:metrics:threadpools:.+:totalblockedtasks:count\"}[1m]), \"info\", \"$1 $2\", \"name\", \"org:apache:cassandra:metrics:threadpools:(.+?)::(.+?)totalblockedtasks:count\")) by (info)",
+              "format": "time_series",
+              "hide": false,
+              "intervalFactor": 1,
+              "legendFormat": "Blocked {{ info }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(label_replace(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=~\"org:apache:cassandra:metrics:threadpools:.+:pendingtasks:value\"}, \"info\", \"$1 $2\", \"name\", \"org:apache:cassandra:metrics:threadpools:(.+?):(.+?):pendingtasks:value\")) by (info)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "Pending {{ info }}",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "label_replace(rate(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=~\"org:apache:cassandra:metrics:threadpools:.+:totalblockedtasks:count\"}[1m]), \"info\", \"$1 $2\", \"name\", \"org:apache:cassandra:metrics:threadpools:(.+?)::(.+?)totalblockedtasks:count\")",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }} Blocked {{ info }}",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "label_replace(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=~\"org:apache:cassandra:metrics:threadpools:.+:pendingtasks:value\"}, \"info\", \"$1 $2\", \"name\", \"org:apache:cassandra:metrics:threadpools:(.+?):(.+?):pendingtasks:value\")",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }} Pending {{ info }}",
+              "refId": "D"
+            }
+          ],
+          "title": "Thread Pool (pending & blocked)",
+          "type": "timeseries"
+        }
+      ],
+      "title": "THREADPOOLS",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 43
+      },
+      "id": 42,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 69
+          },
+          "id": 45,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "max(label_replace(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=~\"java:lang:garbagecollector:.+:lastgcinfo:duration\"}, \"info\", \"$1\", \"name\", \"java:lang:garbagecollector:(.+?):lastgcinfo:duration\")) by (info)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "{{ info }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "label_replace(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=~\"java:lang:garbagecollector:.+:lastgcinfo:duration\"}, \"info\", \"$1\", \"name\", \"java:lang:garbagecollector:(.+?):lastgcinfo:duration\")",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ info }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Max Last GC duration",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 69
+          },
+          "id": 44,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(label_replace(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=~\"java:lang:memory:.+:(committed|max|used)\"}, \"info\", \"$1 $2\", \"name\", \"java:lang:memory:(.+?):(.+?)\")) by (name)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "{{ name }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "label_replace(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=~\"java:lang:memory:.+:(committed|max|used)\"}, \"info\", \"$1 $2\", \"name\", \"java:lang:memory:(.+?):(.+?)\")",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ info }}",
+              "refId": "B"
+            }
+          ],
+          "title": "JAVA Heap + NonHeap Memory usage",
+          "type": "timeseries"
+        }
+      ],
+      "title": "JVM",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 44
+      },
+      "id": 47,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 70
+          },
+          "id": 49,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:livediskspaceused:count\"}) by (table)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "Live {{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:totaldiskspaceused:count\"}) by (table)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "Total {{ table }}",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:livediskspaceused:count\"}",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }} Live {{ table }}",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:totaldiskspaceused:count\"}",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }} Total {{ table }}",
+              "refId": "D"
+            }
+          ],
+          "title": "Disk Space Used",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 78
+          },
+          "id": 50,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:livesstablecount:value\"}) by (table)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "{{ table }}",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:livesstablecount:value\"}",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: {{ table }}",
+              "refId": "B"
+            }
+          ],
+          "title": "Nb Live SSTables",
+          "type": "timeseries"
+        }
+      ],
+      "title": "DISK",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 45
+      },
+      "id": 52,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 71
+          },
+          "id": 54,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "max(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\", table=~\"$table\", name=~\"org:apache:cassandra:metrics:table:$keyspace:$table:percentrepaired:value\"}) by (table)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "{{ table }}",
+              "refId": "A"
+            }
+          ],
+          "title": "Repair Ratio (% repaired)",
+          "type": "timeseries"
+        }
+      ],
+      "title": "REPAIRS",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
+      "id": 56,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 72
+          },
+          "id": 58,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:streaming:totalincomingbytes:count\"}) by (name)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "Total Incoming B/s",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:streaming:totaloutgoingbytes:count\"}) by (name)",
+              "format": "time_series",
+              "hide": false,
+              "intervalFactor": 1,
+              "legendFormat": "Total Outgoing B/s",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:streaming:totalincomingbytes:count\"}",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Total Incoming B/s",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:streaming:totaloutgoingbytes:count\"}",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}: Total Outgoing B/s",
+              "refId": "D"
+            }
+          ],
+          "title": "Streaming",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 72
+          },
+          "id": 59,
+          "options": {},
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "expr": "sum(cassandra_stats{datacenter=\"$datacenter\", cluster=\"$cluster\",name=\"org:apache:cassandra:metrics:connection:totaltimeouts:oneminuterate\"}) by (name)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Number of requests timeouts over 1 min",
+              "refId": "A"
+            }
+          ],
+          "title": "Timeouts (1 minute rate)",
+          "type": "timeseries"
+        }
+      ],
+      "title": "COMMUNICATION",
+      "type": "row"
+    }
+  ],
+  "preload": false,
+  "refresh": false,
+  "schemaVersion": 40,
+  "tags": [
+    "cassandra"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "datacenter1",
+          "value": "datacenter1"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFE396EC0B189D67"
+        },
+        "definition": "label_values(cassandra_stats,datacenter)",
+        "includeAll": false,
+        "name": "datacenter",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(cassandra_stats,datacenter)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "TestCluster",
+          "value": "TestCluster"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFE396EC0B189D67"
+        },
+        "definition": "label_values(cassandra_stats,cluster)",
+        "includeAll": false,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(cassandra_stats,cluster)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "iot_service",
+          "value": "iot_service"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFE396EC0B189D67"
+        },
+        "definition": "label_values(cassandra_stats,keyspace)",
+        "includeAll": false,
+        "name": "keyspace",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(cassandra_stats,keyspace)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "device_events"
+          ],
+          "value": [
+            "device_events"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFE396EC0B189D67"
+        },
+        "definition": "label_values(cassandra_stats,table)",
+        "includeAll": true,
+        "multi": true,
+        "name": "table",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(cassandra_stats,table)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "max",
+          "value": "max"
+        },
+        "includeAll": false,
+        "name": "percentiles",
+        "options": [
+          {
+            "selected": false,
+            "text": "50thpercentile",
+            "value": "50thpercentile"
+          },
+          {
+            "selected": false,
+            "text": "98thpercentile",
+            "value": "98thpercentile"
+          },
+          {
+            "selected": false,
+            "text": "99thpercentile",
+            "value": "99thpercentile"
+          },
+          {
+            "selected": true,
+            "text": "max",
+            "value": "max"
+          }
+        ],
+        "query": "50thpercentile,98thpercentile,99thpercentile,max",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Cassandra",
+  "uid": "cassandra",
+  "version": 1,
+  "weekStart": ""
+}

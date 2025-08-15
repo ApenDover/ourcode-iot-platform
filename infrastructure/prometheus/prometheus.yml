@@ -9,3 +9,14 @@ scrape_configs:
     scrape_timeout: 10s
     static_configs:
       - targets: [ 'postgres-exporter:9187' ]
+  - job_name: 'event-collector'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'event-collector:8888' ]
+  - job_name: 'cassandra-exporter'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    static_configs:
+      - targets: [ 'cassandra-exporter:8080' ]

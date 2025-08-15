@@ -1,4 +1,28 @@
 services:
+  event-collector:
+    build: ../event-collector
+    container_name: event-collector
+    ports:
+      - 8888:8888
+    depends_on:
+      kafka:
+        condition: service_healthy
+      cassandra:
+        condition: service_healthy
+      cassandra-exporter:
+        condition: service_started
+      schema-registry:
+        condition: service_started
+      grafana:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD", "sh", "-c", "curl -f http://localhost:8080/actuator/health | grep -q '\"status\":\"UP\"'" ]
+      interval: 3s
+      timeout: 2s
+      retries: 2
+      start_period: 6s
+    networks:
+      - iot_network
   zookeeper:
     image: bitnami/zookeeper:latest
     container_name: zookeeper
@@ -7,6 +31,8 @@ services:
       - ALLOW_ANONYMOUS_LOGIN=yes
     ports:
       - "2181:2181"
+    volumes:
+      - zookeeper_data:/bitnami/zookeeper
     networks:
       - iot_network
   kafka:
@@ -15,23 +41,40 @@ services:
     restart: unless-stopped
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
     depends_on:
       - zookeeper
     ports:
-      - "7071:7071"
+      - "9092:9092"
     volumes:
       - kafka_data:/bitnami/kafka
     networks:
       - iot_network
     healthcheck:
-      test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list" ]
+      test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "kafka:9092", "--list" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    restart: unless-stopped
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local-kafka
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+      - KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME=local-connect
+      - KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS=http://kafka-connect:8083
+    ports:
+      - "8099:8080"
+    depends_on:
+      - kafka
+    networks:
+      - iot_network
   schema-registry:
     container_name: schema-registry
     image: confluentinc/cp-schema-registry:7.5.0
@@ -43,7 +86,7 @@ services:
         condition: service_healthy
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
     networks:
       - iot_network
   minio:
@@ -148,10 +191,25 @@ services:
     environment:
       CASSANDRA_CLUSTER_NAME: "TestCluster"
       CASSANDRA_NUM_TOKENS: 256
-      CASSANDRA_DC: "dc1"
+      CASSANDRA_DC: "datacenter1"
       CASSANDRA_RACK: "rack1"
+      JVM_OPTS: >-
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.port=7199
+        -Dcom.sun.management.jmxremote.rmi.port=7199
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.local.only=false
+        -Djava.rmi.server.hostname=cassandra
+    healthcheck:
+      test: [ "CMD", "cqlsh", "-e", "describe keyspaces" ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
     volumes:
       - cassandra_data:/var/lib/cassandra
+    networks:
+      - iot_network
   grafana:
     image: grafana/grafana
     ports:
@@ -162,6 +220,8 @@ services:
       - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
       - ./grafana/datasources:/etc/grafana/provisioning/datasources
       - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
     networks:
       - iot_network
   prometheus:
@@ -173,6 +233,9 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
+    depends_on:
+      - kafka-exporter
+      - postgres-exporter
     networks:
       - iot_network
   kafka-exporter:
@@ -182,7 +245,7 @@ services:
     ports:
       - "9308:9308"
     environment:
-      - KAFKA_URI=kafka:9092
+      - KAFKA_URI=kafka:29092
       - KAFKA_GROUP_FILTER=.*
     depends_on:
       kafka:
@@ -202,7 +265,21 @@ services:
         condition: service_healthy
     networks:
       - iot_network
+  cassandra-exporter:
+    image: criteord/cassandra_exporter:latest
+    container_name: cassandra-exporter
+    restart: unless-stopped
+    ports:
+      - "9500:8080"
+    environment:
+      CASSANDRA_EXPORTER_CONFIG_host: cassandra:7199
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    networks:
+      - iot_network
 volumes:
+  zookeeper_data:
   postgres_data:
   redis_data:
   cassandra_data:

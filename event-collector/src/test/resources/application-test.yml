@@ -1,0 +1,19 @@
+spring:
+  kafka:
+    bootstrap-servers: ${kafka.bootstrap.servers}
+    producer:
+      properties:
+        schema.registry.url: ${schema.registry.url}
+    consumer:
+      properties:
+        schema.registry.url: ${schema.registry.url}
+  cassandra:
+    contact-points: ${spring.cassandra.contact-points}
+    local-datacenter: datacenter1
+    keyspace-name: iot_service
+    schema-action: CREATE_IF_NOT_EXISTS
+
+app:
+  cache:
+    expiration:
+      seconds: 10

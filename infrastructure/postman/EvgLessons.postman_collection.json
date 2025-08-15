@@ -1,0 +1,72 @@
+{
+	"info": {
+		"_postman_id": "875422f8-f1b7-40b5-9a91-a86b6afd38b3",
+		"name": "EvgLessons",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21548763"
+	},
+	"item": [
+		{
+			"name": "addDeviceEvent",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"random\", _.random(1, 20))",
+							"pm.environment.set(\"temp\", _.random(-30, 35))"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[{\n  \"eventId\": \"{{$guid}}\",\n  \"deviceId\": \"{{random}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\"\n},{\n  \"eventId\": \"{{$guid}}\",\n  \"deviceId\": \"{{random}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\"\n},{\n  \"eventId\": \"{{$guid}}\",\n  \"deviceId\": \"{{random}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\"\n},{\n  \"eventId\": \"{{$guid}}\",\n  \"deviceId\": \"{{random}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\"\n},{\n  \"eventId\": \"{{$guid}}\",\n  \"deviceId\": \"{{random}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\"\n}]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8888/api/kafka/send",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"api",
+						"kafka",
+						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "actuator",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8888/actuator",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"actuator"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
