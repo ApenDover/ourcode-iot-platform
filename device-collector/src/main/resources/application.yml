@@ -1,3 +1,43 @@
+server:
+  port: 8889
 spring:
   application:
     name: device-collector
+  liquibase:
+    enabled: true
+    change-log: classpath:/liquibase/changelog.yml
+    default-schema: public
+    user: myuser
+    password: strongpassword
+    url: jdbc:postgresql://localhost:5432/iot_platform
+  datasource:
+    url: jdbc:postgresql://localhost:5432/iot_platform
+    username: myuser
+    password: strongpassword
+  jpa:
+    hibernate:
+      ddl-auto: none
+  sql:
+    init:
+      mode: always
+  kafka:
+    bootstrap-servers: localhost:9092
+    template:
+      device-topic: device-id
+    consumer:
+      max-poll-records: 100
+      fetch-max-wait: 5000
+      fetch-min-size: 1024
+      enable-auto-commit: false
+      group-id: device-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        schema.registry.url: http://localhost:8081
+        specific.avro.reader: true
+    listener:
+      ack-mode: batch
+      concurrency: 3
+      type: batch
+      idle-between-polls: 1000

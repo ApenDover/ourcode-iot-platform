@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250815203900
+      author: a.tsaregorodtsev
+      changes:
+        - createTable:
+            tableName: t_device
+            columns:
+              - column:
+                  name: device_id
+                  type: CHAR(26)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: device_type
+                  type: varchar(20)
+              - column:
+                  name: created_at
+                  type: bigint
+              - column:
+                  name: mate
+                  type: text
