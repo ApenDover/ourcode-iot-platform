@@ -24,7 +24,9 @@ public class DeviceServiceImpl implements DeviceService {
      * @param deviceEvents список событий
      */
     public void sendUniqueDeviceids(List<DeviceEvent> deviceEvents) {
-        final var devices = deviceEventMapper.toDeviceIdList(deviceEvents);
+        final var devices = deviceEvents.stream()
+                .map(DeviceEvent::getDevice)
+                .toList();
         final var uniqueDevices = deduplicateService.getUniqueDevices(devices);
         deviceIdProducerImpl.send(uniqueDevices);
     }

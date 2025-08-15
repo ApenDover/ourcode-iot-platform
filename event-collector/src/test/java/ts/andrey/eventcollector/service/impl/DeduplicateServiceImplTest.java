@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ts.andrey.eventcollector.cassandra.dao.DeviceEventDataService;
 import ts.andrey.eventcollector.service.component.SimpleCache;
+import ts.andrey.eventcollector.tdf.DummyTDF;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,14 +42,11 @@ class DeduplicateServiceImplTest {
     @Test
     void shouldFilterNullDevices() {
         // GIVEN
-        final var input = new ArrayList<>(
-                List.of(new Device("id1"),
-                        new Device("id2"))
-        );
+        final var input = DummyTDF.device.getList(2);
         input.add(null);
 
         Mockito.when(cache.contains(Mockito.anyString())).thenReturn(false);
-        Mockito.when(dataService.getUnsavedDeviceIds(anyList())).thenReturn(List.of("id1", "id2"));
+        Mockito.when(dataService.getUnsavedDeviceIds(anyList())).thenReturn(List.of("deviceId-0", "deviceId-1"));
 
         // WHEN
         final var result = deduplicateService.getUniqueDevices(input);
@@ -62,15 +60,15 @@ class DeduplicateServiceImplTest {
         // GIVEN
         final var input = new ArrayList<>(
                 List.of(
-                        new Device("id1"),
-                        new Device(""),
-                        new Device(null),
-                        new Device("id2")
+                        new Device("deviceId-1", "type", 312L, "meta"),
+                        new Device("deviceId-2", "type", 312L, "meta"),
+                        new Device("", "type", 312L, "meta"),
+                        new Device(null, "type", 312L, "meta")
                 )
         );
 
         Mockito.when(cache.contains(Mockito.anyString())).thenReturn(false);
-        Mockito.when(dataService.getUnsavedDeviceIds(anyList())).thenReturn(List.of("id1", "id2"));
+        Mockito.when(dataService.getUnsavedDeviceIds(anyList())).thenReturn(List.of("deviceId-1", "deviceId-2"));
 
         // WHEN
         final var result = deduplicateService.getUniqueDevices(input);
@@ -82,70 +80,71 @@ class DeduplicateServiceImplTest {
     @Test
     void shouldFilterDevicesInCache() {
         // GIVEN
-        final var cachedDevice = new Device("cached");
-        final var uncachedDevice = new Device("uncached");
+        final var cachedDevice = DummyTDF.device.getDefault(1);
+        final var uncachedDevice = DummyTDF.device.getDefault(2);
 
-        Mockito.when(cache.contains("cached")).thenReturn(true);
-        Mockito.when(cache.contains("uncached")).thenReturn(false);
-        Mockito.when(dataService.getUnsavedDeviceIds(List.of("uncached"))).thenReturn(List.of("uncached"));
+        Mockito.when(cache.contains("deviceId-1")).thenReturn(true);
+        Mockito.when(cache.contains("deviceId-2")).thenReturn(false);
+        Mockito.when(dataService.getUnsavedDeviceIds(List.of("deviceId-2"))).thenReturn(List.of("deviceId-2"));
 
         // WHEN
         final var result = deduplicateService.getUniqueDevices(List.of(cachedDevice, uncachedDevice));
 
         // THEN
         assertEquals(1, result.size());
-        assertEquals("uncached", result.get(0).getDeviceId());
+        assertEquals("deviceId-2", result.get(0).getDeviceId());
     }
 
     @Test
     void shouldFilterDevicesInDatabase() {
         // GIVEN
-        final var newDevice = new Device("new");
-        final var existingDevice = new Device("existing");
+        final var newDevice = DummyTDF.device.getDefault(1);
+        final var existingDevice = DummyTDF.device.getDefault(2);
 
         Mockito.when(cache.contains(Mockito.anyString())).thenReturn(false);
-        Mockito.when(dataService.getUnsavedDeviceIds(List.of("new", "existing")))
-                .thenReturn(List.of("new"));
+        Mockito.when(dataService.getUnsavedDeviceIds(List.of("deviceId-1", "deviceId-2")))
+                .thenReturn(List.of("deviceId-1"));
 
         // WHEN
         final var result = deduplicateService.getUniqueDevices(List.of(newDevice, existingDevice));
 
         // THEN
         assertEquals(1, result.size());
-        assertEquals("new", result.get(0).getDeviceId());
+        assertEquals("deviceId-1", result.get(0).getDeviceId());
     }
 
     @Test
     void shouldReturnOnlyDevicesNotInCacheAndNotInDb() {
         // GIVEN
-        final var device1 = new Device("id1");
-        final var device2 = new Device("id2");
-        final var device3 = new Device("id3");
+        final var device1 = DummyTDF.device.getDefault(1);
+        final var device2 = DummyTDF.device.getDefault(2);
+        final var device3 = DummyTDF.device.getDefault(3);
 
-        Mockito.when(cache.contains("id1")).thenReturn(true);
-        Mockito.when(cache.contains("id2")).thenReturn(false);
-        Mockito.when(cache.contains("id3")).thenReturn(false);
+        Mockito.when(cache.contains("deviceId-1")).thenReturn(true);
+        Mockito.when(cache.contains("deviceId-2")).thenReturn(false);
+        Mockito.when(cache.contains("deviceId-3")).thenReturn(false);
 
-        Mockito.when(dataService.getUnsavedDeviceIds(List.of("id2", "id3")))
-                .thenReturn(List.of("id3"));
+        Mockito.when(dataService.getUnsavedDeviceIds(List.of("deviceId-2", "deviceId-3")))
+                .thenReturn(List.of("deviceId-3"));
 
         // WHEN
         final var result = deduplicateService.getUniqueDevices(List.of(device1, device2, device3));
 
         // THEN
         assertEquals(1, result.size());
-        assertEquals("id3", result.get(0).getDeviceId());
+        assertEquals("deviceId-3", result.get(0).getDeviceId());
     }
 
     @Test
     void shouldDeduplicateDeviceIds() {
         // GIVEN
-        final var device1 = new Device("id1");
-        final var device2 = new Device("id1");
+        final var device1 = DummyTDF.device.getDefault(1);
+        final var device2 = DummyTDF.device.getDefault(2);
 
-        Mockito.when(cache.contains("id1")).thenReturn(false);
-        Mockito.when(dataService.getUnsavedDeviceIds(List.of("id1")))
-                .thenReturn(List.of("id1"));
+        Mockito.when(cache.contains("deviceId-1")).thenReturn(false);
+        Mockito.when(cache.contains("deviceId-2")).thenReturn(true);
+        Mockito.when(dataService.getUnsavedDeviceIds(List.of("deviceId-1")))
+                .thenReturn(List.of("deviceId-1"));
 
         // WHEN
         final var result = deduplicateService.getUniqueDevices(List.of(device1, device2));

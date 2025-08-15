@@ -11,11 +11,11 @@ import java.util.List;
 public class DummyDevice {
 
     public Device getDefault() {
-        return new Device("deviceId");
+        return new Device("deviceId", "deviceType", 300L, "meta");
     }
 
     public Device getDefault(int i) {
-        return new Device("deviceId-" + i);
+        return new Device("deviceId-" + i, "deviceType", 300L, "meta");
     }
 
     public List<Device> getList(int size) {

@@ -87,6 +87,8 @@ services:
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
+    volumes:
+      - schema-registry-data:/var/lib/schema-registry
     networks:
       - iot_network
   minio:
@@ -279,6 +281,7 @@ services:
     networks:
       - iot_network
 volumes:
+  schema-registry-data:
   zookeeper_data:
   postgres_data:
   redis_data:

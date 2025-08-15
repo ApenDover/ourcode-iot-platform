@@ -1,6 +1,5 @@
 package ts.andrey.eventcollector.mapper;
 
-import com.nashkod.avro.Device;
 import com.nashkod.avro.DeviceEvent;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,10 +16,7 @@ public interface DeviceEventMapper {
 
     List<DeviceEventEntity> toEntityList(List<DeviceEvent> deviceEvent);
 
+    @Mapping(target = "deviceId", source = "deviceEvent.device.deviceId")
     DeviceEventKey toEntityKey(DeviceEvent deviceEvent);
-
-    Device toDeviceId(DeviceEvent deviceEvent);
-
-    List<Device> toDeviceIdList(List<DeviceEvent> deviceEvents);
 
 }
