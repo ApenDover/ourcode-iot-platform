@@ -21,6 +21,12 @@ public class CassandraInitConfiguration extends AbstractCassandraConfiguration {
     @Value("${spring.cassandra.keyspace-name}")
     private String keyspace;
 
+    @Value("${spring.cassandra.port}")
+    private Integer port;
+
+    @Value("${spring.cassandra.contact-points}")
+    private String contactPoints;
+
     @Value("${spring.cassandra.replication-strategy}")
     private String replicationStrategy;
 
@@ -30,8 +36,17 @@ public class CassandraInitConfiguration extends AbstractCassandraConfiguration {
     }
 
     @Override
+    protected int getPort() {
+        return port;
+    }
+
+    @Override
+    protected String getContactPoints() {
+        return contactPoints;
+    }
+
+    @Override
     public SessionBuilderConfigurer getSessionBuilderConfigurer() {
-        log.info("Initializing Cassandra keyspace {}, command={}", keyspace, String.format(CQL_INIT, keyspace, replicationStrategy));
         return cqlSessionBuilder -> {
             try (CqlSession tempSession = cqlSessionBuilder.build()) {
                 tempSession.execute(String.format(CQL_INIT, keyspace, replicationStrategy));

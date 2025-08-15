@@ -11,7 +11,7 @@ spring:
   application:
     name: event-collector
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: kafka:29092
     template:
       events-topic: events
       dlt-events-topic: events.DLT
