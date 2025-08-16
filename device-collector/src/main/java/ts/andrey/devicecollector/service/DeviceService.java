@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface DeviceService {
 
-    List<Device> createOrUpdateDevice(List<Device> devices);
+    void createOrUpdateDevice(List<Device> devices);
 
 }

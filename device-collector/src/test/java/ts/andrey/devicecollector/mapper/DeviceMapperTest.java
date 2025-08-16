@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import ts.andrey.devicecollector.tdf.DummyTDF;
 
+import java.time.Instant;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DeviceMapperTest {
@@ -21,7 +23,7 @@ class DeviceMapperTest {
         //THEN
         assertEquals("deviceId", deviceEntity.getDeviceId());
         assertEquals("deviceType", deviceEntity.getDeviceType());
-        assertEquals(300L, deviceEntity.getCreatedAt());
+        assertEquals(Instant.ofEpochMilli(300L), deviceEntity.getCreatedAt());
         assertEquals("meta", deviceEntity.getMeta());
     }
 

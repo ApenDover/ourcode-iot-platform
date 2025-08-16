@@ -7,6 +7,7 @@ import ts.andrey.eventcollector.BaseIntegrationTest;
 import ts.andrey.eventcollector.tdf.DummyTDF;
 import ts.andrey.eventcollector.testutils.KafkaConsumerUtil;
 
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
@@ -44,7 +45,7 @@ class EventCollectorProcessingIT extends BaseIntegrationTest {
                 schemaRegistry.getFirstMappedPort(), Device.class
         );
         assertEquals("deviceId-0", kafkaBody.getDeviceId());
-        assertEquals(300L, kafkaBody.getCreatedAt());
+        assertEquals(Instant.ofEpochMilli(300L), kafkaBody.getCreatedAt());
         assertEquals("meta", kafkaBody.getMeta());
         assertEquals("deviceType", kafkaBody.getDeviceType());
 

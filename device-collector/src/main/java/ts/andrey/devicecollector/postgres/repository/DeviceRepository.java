@@ -5,5 +5,4 @@ import ts.andrey.devicecollector.postgres.entity.DeviceEntity;
 
 public interface DeviceRepository extends JpaRepository<DeviceEntity, String> {
 
-
 }

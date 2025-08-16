@@ -1,21 +1,27 @@
 package ts.andrey.devicecollector.postgres.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.util.Objects;
+import java.time.Instant;
 
-@AllArgsConstructor
+@Builder
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
 @Table(name = "t_device")
+@AllArgsConstructor
 public class DeviceEntity {
 
     @Id
@@ -23,28 +29,23 @@ public class DeviceEntity {
 
     private String deviceType;
 
-    private Long createdAt;
+    private Instant createdAt;
+
+    @Version
+    private Long version;
 
     private String meta;
 
     @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || getClass() != object.getClass()) {
-            return false;
-        }
-        DeviceEntity that = (DeviceEntity) object;
-        return Objects.equals(deviceId, that.deviceId)
-                && Objects.equals(deviceType, that.deviceType)
-                && Objects.equals(createdAt, that.createdAt)
-                && Objects.equals(meta, that.meta);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DeviceEntity)) return false;
+        return deviceId != null && deviceId.equals(((DeviceEntity) o).getDeviceId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(deviceId, deviceType, createdAt, meta);
+        return getClass().hashCode();
     }
 
 }

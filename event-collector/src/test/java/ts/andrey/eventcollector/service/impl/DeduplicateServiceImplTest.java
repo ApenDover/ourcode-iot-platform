@@ -11,6 +11,7 @@ import ts.andrey.eventcollector.cassandra.dao.DeviceEventDataService;
 import ts.andrey.eventcollector.service.component.SimpleCache;
 import ts.andrey.eventcollector.tdf.DummyTDF;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,10 +61,10 @@ class DeduplicateServiceImplTest {
         // GIVEN
         final var input = new ArrayList<>(
                 List.of(
-                        new Device("deviceId-1", "type", "meta", 312L),
-                        new Device("deviceId-2", "type", "meta", 312L),
-                        new Device("", "type", "meta", 312L),
-                        new Device(null, "type", "meta", 312L)
+                        new Device("deviceId-1", "type", "meta", Instant.ofEpochMilli(312L)),
+                        new Device("deviceId-2", "type", "meta", Instant.ofEpochMilli(312L)),
+                        new Device("", "type", "meta", Instant.ofEpochMilli(312L)),
+                        new Device(null, "type", "meta", Instant.ofEpochMilli(312L))
                 )
         );
 

@@ -19,9 +19,10 @@ public class DeviceServiceImpl implements DeviceService {
     private final DeviceMapper deviceMapper;
 
     @Override
-    public List<Device> createOrUpdateDevice(List<Device> devices) {
-        final var saved = deviceDataService.saveAll(devices);
-        return deviceMapper.toDeviceList(saved);
+    public void createOrUpdateDevice(List<Device> devices) {
+        deviceDataService.batchUpsert(devices);
+//        final var saved = deviceDataService.saveAll(devices);
+//        return deviceMapper.toDeviceList(saved);
     }
 
 }

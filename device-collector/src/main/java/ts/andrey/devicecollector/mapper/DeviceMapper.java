@@ -2,13 +2,16 @@ package ts.andrey.devicecollector.mapper;
 
 import com.nashkod.avro.Device;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import ts.andrey.devicecollector.postgres.entity.DeviceEntity;
 
+import java.time.Instant;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface DeviceMapper {
 
+    @Mapping(target = "version", ignore = true)
     DeviceEntity toDeviceEntity(Device device);
 
     Device toDevice(DeviceEntity device);

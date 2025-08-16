@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventKey;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -37,7 +38,7 @@ public class DummyDeviceEventEntity {
         final var deviceEventKey = new DeviceEventKey();
         deviceEventKey.setDeviceId("deviceIdKey");
         deviceEventKey.setEventId(UUID.fromString("892dd1da-6f3f-49bc-a60d-a2b282d6efd0"));
-        deviceEventKey.setTimestamp(897L);
+        deviceEventKey.setTimestamp(Instant.ofEpochMilli(897L));
         return deviceEventKey;
     }
 
@@ -45,7 +46,7 @@ public class DummyDeviceEventEntity {
         final var deviceEventKey = new DeviceEventKey();
         deviceEventKey.setDeviceId("deviceIdKey-" + i);
         deviceEventKey.setEventId(UUID.randomUUID());
-        deviceEventKey.setTimestamp(System.currentTimeMillis());
+        deviceEventKey.setTimestamp(Instant.ofEpochMilli(431L));
         return deviceEventKey;
     }
 

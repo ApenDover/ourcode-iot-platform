@@ -17,6 +17,9 @@ databaseChangeLog:
                   type: varchar(20)
               - column:
                   name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+              - column:
+                  name: version
                   type: bigint
               - column:
                   name: meta

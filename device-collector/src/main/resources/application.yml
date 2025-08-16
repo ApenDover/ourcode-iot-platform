@@ -1,5 +1,20 @@
 server:
   port: 8889
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    tags:
+      application: device-collector
+
 spring:
   application:
     name: device-collector

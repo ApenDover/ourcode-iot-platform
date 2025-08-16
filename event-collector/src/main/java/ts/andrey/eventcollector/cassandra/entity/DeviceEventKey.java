@@ -8,6 +8,7 @@ import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyClass;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 
+import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -29,7 +30,7 @@ public class DeviceEventKey {
             type = PrimaryKeyType.CLUSTERED,
             ordering = Ordering.DESCENDING
     )
-    private long timestamp;
+    private Instant timestamp;
 
     @PrimaryKeyColumn(
             name = "event_id",
