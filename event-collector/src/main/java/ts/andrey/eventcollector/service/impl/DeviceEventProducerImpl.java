@@ -10,7 +10,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import ts.andrey.eventcollector.service.DeviceEventProducer;
+import ts.andrey.eventcollector.service.DeviceProducer;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DeviceEventProducerImpl implements DeviceEventProducer {
+public class DeviceEventProducerImpl implements DeviceProducer {
 
     private final KafkaTemplate<String, DeviceEvent> kafkaTemplate;
 

@@ -108,7 +108,7 @@ public abstract class BaseIntegrationTest {
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.cassandra.contact-points", () -> LOCALHOST + cassandra.getMappedPort(9042));
+        registry.add("spring.cassandra.contact-points", () -> LOCALHOST + cassandra.getFirstMappedPort());
         registry.add("kafka.bootstrap.servers", () -> LOCALHOST + kafka.getFirstMappedPort());
         registry.add("schema.registry.url", () -> LOCALHOST_HTTP + schemaRegistry.getFirstMappedPort());
     }

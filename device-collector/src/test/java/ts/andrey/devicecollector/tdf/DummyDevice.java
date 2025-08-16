@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.tdf;
+package ts.andrey.devicecollector.tdf;
 
 import com.nashkod.avro.Device;
 import lombok.AccessLevel;

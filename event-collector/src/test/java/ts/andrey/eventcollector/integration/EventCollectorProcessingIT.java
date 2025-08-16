@@ -44,6 +44,9 @@ class EventCollectorProcessingIT extends BaseIntegrationTest {
                 schemaRegistry.getFirstMappedPort(), Device.class
         );
         assertEquals("deviceId-0", kafkaBody.getDeviceId());
+        assertEquals(300L, kafkaBody.getCreatedAt());
+        assertEquals("meta", kafkaBody.getMeta());
+        assertEquals("deviceType", kafkaBody.getDeviceType());
 
         //THEN CHECK IS CACHED
         assertEquals(10, simpleCache.size());

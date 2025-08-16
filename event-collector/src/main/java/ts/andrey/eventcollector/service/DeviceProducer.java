@@ -6,7 +6,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public interface DeviceEventProducer {
+public interface DeviceProducer {
 
     CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records);
 

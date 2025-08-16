@@ -23,7 +23,7 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     template:
-      device-topic: device-id
+      device-topic: device
     consumer:
       max-poll-records: 100
       fetch-max-wait: 5000

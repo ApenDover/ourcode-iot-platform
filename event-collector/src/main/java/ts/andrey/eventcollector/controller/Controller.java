@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import ts.andrey.eventcollector.service.DeviceEventProducer;
+import ts.andrey.eventcollector.service.DeviceProducer;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Controller {
 
-    private final DeviceEventProducer deviceEventProducerImpl;
+    private final DeviceProducer deviceEventProducerImpl;
 
     @Value("${app.inter-endpoint.enabled:false}")
     private boolean interEndpointEnabled;

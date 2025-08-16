@@ -60,10 +60,10 @@ class DeduplicateServiceImplTest {
         // GIVEN
         final var input = new ArrayList<>(
                 List.of(
-                        new Device("deviceId-1", "type", 312L, "meta"),
-                        new Device("deviceId-2", "type", 312L, "meta"),
-                        new Device("", "type", 312L, "meta"),
-                        new Device(null, "type", 312L, "meta")
+                        new Device("deviceId-1", "type", "meta", 312L),
+                        new Device("deviceId-2", "type", "meta", 312L),
+                        new Device("", "type", "meta", 312L),
+                        new Device(null, "type", "meta", 312L)
                 )
         );
 

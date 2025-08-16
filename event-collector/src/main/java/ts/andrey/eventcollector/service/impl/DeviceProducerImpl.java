@@ -10,7 +10,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import ts.andrey.eventcollector.service.DeviceEventProducer;
+import ts.andrey.eventcollector.service.DeviceProducer;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DeviceIdProducerImpl implements DeviceEventProducer {
+public class DeviceProducerImpl implements DeviceProducer {
 
     private final KafkaTemplate<String, Device> kafkaTemplate;
 
@@ -30,7 +30,7 @@ public class DeviceIdProducerImpl implements DeviceEventProducer {
 
     @Override
     public CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records) {
-        log.info("Отправка в топик {} новых deviceId: {}", deviceIdTopic, records.size());
+        log.info("Отправка в топик {} новых device: {}", deviceIdTopic, records.size());
         try {
             if (CollectionUtils.isEmpty(records)) {
                 return CompletableFuture.completedFuture(Collections.emptyList());
@@ -41,11 +41,11 @@ public class DeviceIdProducerImpl implements DeviceEventProducer {
                     .map(record -> {
                         Device device = (Device) record;
                         String key = UUID.randomUUID().toString();
-                        log.debug("отправляю в топик {} deviceId={}", deviceIdTopic, device.getDeviceId());
+                        log.debug("отправляю в топик {} device={}", deviceIdTopic, device);
                         return kafkaTemplate.send(deviceIdTopic, key, device)
                                 .thenApply(SendResult::getRecordMetadata)
                                 .exceptionally(ex -> {
-                                    log.error("Ошибка отправки deviceId={}", device.getDeviceId(), ex);
+                                    log.error("Ошибка отправки device={}", device, ex);
                                     return null;
                                 });
                     }).toList();
