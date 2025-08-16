@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: device-collector
+  kafka:
+    bootstrap-servers: ${kafka.bootstrap.servers}
+    consumer:
+      properties:
+        schema.registry.url: ${schema.registry.url}
+        avro.remove.java.properties: true
+    producer:
+      properties:
+        schema.registry.url: ${schema.registry.url}
+        avro.remove.java.properties: true
