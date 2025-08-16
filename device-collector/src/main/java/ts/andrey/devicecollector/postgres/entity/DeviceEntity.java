@@ -23,6 +23,6 @@ public class DeviceEntity {
 
     private Long createdAt;
 
-    private String mate;
+    private String meta;
 
 }

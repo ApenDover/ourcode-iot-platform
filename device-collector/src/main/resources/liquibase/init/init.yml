@@ -19,5 +19,5 @@ databaseChangeLog:
                   name: created_at
                   type: bigint
               - column:
-                  name: mate
+                  name: meta
                   type: text
