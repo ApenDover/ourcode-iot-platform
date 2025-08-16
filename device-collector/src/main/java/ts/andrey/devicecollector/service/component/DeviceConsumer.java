@@ -13,7 +13,7 @@ import java.util.ArrayList;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DeviceEventConsumer {
+public class DeviceConsumer {
 
     private final DeviceServiceImpl deviceService;
 

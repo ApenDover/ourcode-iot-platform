@@ -1,0 +1,18 @@
+@startuml
+actor KafkaBroker
+participant "DeviceConsumer" as DC  #lightblue
+participant "SchemaRegistry" as AVRO
+participant "DeviceEventConsumer" as DC  #lightblue
+participant "DeviceService" as DS  #lightblue
+participant "DeviceRepository" as REPO  #lightblue
+participant "Postgres" as DB
+
+KafkaBroker --> DC : события в Avro (DeviceEvents)
+DC -> AVRO : десериализация Avro
+AVRO -> DC : DeviceEvents
+DC -> DS : DeviceEvents
+
+DS -> REPO : сохранить
+REPO -> DB : сохранить
+
+@enduml
