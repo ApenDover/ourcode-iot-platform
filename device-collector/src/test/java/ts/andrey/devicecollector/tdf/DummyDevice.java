@@ -14,6 +14,10 @@ public class DummyDevice {
         return new Device("deviceId", "deviceType", "meta", 300L);
     }
 
+    public Device getDefaultWithOtherMeta() {
+        return new Device("deviceId", "deviceType", "updated", 600L);
+    }
+
     public Device getDefault(int i) {
         return new Device("deviceId-" + i, "deviceType", "meta", 300L);
     }

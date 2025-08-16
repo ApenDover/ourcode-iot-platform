@@ -15,6 +15,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Collections;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
 
@@ -27,7 +28,6 @@ public class KafkaProducerUtil {
     @SneakyThrows
     public <T extends SpecificRecord> Future<RecordMetadata> sendMessage(String bootstrapServers, String topic,
                                                                          Integer schemaRegistryPort, T message) {
-
         Properties producerProps = new Properties();
         producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
@@ -37,16 +37,20 @@ public class KafkaProducerUtil {
         producerProps.put("avro.remove.java.properties", "true");
 
         try (AdminClient adminClient = AdminClient.create(producerProps)) {
-            NewTopic newTopic = new NewTopic(topic, 1, (short) 1);
-            adminClient.createTopics(Collections.singleton(newTopic)).all();
-            log.info("Топик " + topic + " создан");
+            Set<String> existingTopics = adminClient.listTopics().names().get();
+            if (!existingTopics.contains(topic)) {
+                final var newTopic = new NewTopic(topic, 1, (short) 1);
+                final var created = adminClient.createTopics(Collections.singleton(newTopic)).all();
+                created.get();
+                log.info("Топик " + topic + " создан");
+            }
         }
-
-        Thread.sleep(1000);
 
         try (KafkaProducer<String, T> producer = new KafkaProducer<>(producerProps)) {
             final var record = new ProducerRecord<>(topic, UUID.randomUUID().toString(), message);
-            return producer.send(record);
+            final var result = producer.send(record);
+            result.get();
+            return result;
         }
     }
 
