@@ -40,7 +40,7 @@ class EventCollectorProcessingIT extends BaseIntegrationTest {
 
         //THEN CHECK PRODUCE DEVICE ID
         final var kafkaBody = KafkaConsumerUtil.getLastMessage(
-                kafka.getBootstrapServers(), "device-id", "device-group",
+                kafka.getBootstrapServers(), "device", "device-group",
                 schemaRegistry.getFirstMappedPort(), Device.class
         );
         assertEquals("deviceId-0", kafkaBody.getDeviceId());

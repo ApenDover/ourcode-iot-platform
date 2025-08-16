@@ -6,9 +6,9 @@ System_Boundary(s1, "IoT Monitoring Platform") {
     Container(apiOrchestrator, "API Orchestrator", "Spring Boot", "Оркестратор: вызывает event-, device- и command-сервисы")
     Container(commandService, "Command Service", "Go + gRPC", "Принимает команды по gRPC и отдает их устройствам")
     Container(deviceService, "Device Service", "Spring Boot + ShardingSphere-JDBC", "CRUD API по устройствам. Использует встроенное шардирование через JDBC.")
-    Container(eventsCollector, "Events Collector", "Spring Boot", "Kafka → Cassandra + device-id")
+    Container(eventsCollector, "Events Collector", "Spring Boot", "Kafka → Cassandra + device")
     Container(eventService, "Event Service", "Spring Boot", "Чтение событий из Cassandra")
-    Container(deviceCollector, "Device Collector", "Spring Boot", "Получает device-id, сохраняет в PostgreSQL (Devices)")
+    Container(deviceCollector, "Device Collector", "Spring Boot", "Получает device, сохраняет в PostgreSQL (Devices)")
     Container(failedEventsProcessor, "Failed Events Processor", "Spring Boot", "DLT → JSON в MinIO")
     Container(redis, "Redis", "In-memory Cache", "Кэширование запросов")
     Container(minio, "MinIO", "Объектное хранилище", "Сохранение ошибок DLT")
@@ -18,7 +18,7 @@ System_Boundary(s1, "IoT Monitoring Platform") {
     Container_Ext(keycloak, "Keycloak", "OAuth2", "Аутентификация и авторизация")
     Container_Ext(postgresCmd, "PostgreSQL (Commands)", "Реляционная БД", "Отдельная база для команд. Используется Go-сервисом.")
     Container_Ext(postgresDev, "PostgreSQL (Devices)", "Реляционная БД", "Шардированная база данных устройств. Синхронная репликация каждого шарда.")
-    Container_Ext(kafka, "Kafka Cluster", "Kafka", "event / dlt / device-id топики")
+    Container_Ext(kafka, "Kafka Cluster", "Kafka", "event / dlt / device топики")
 }
 
 Rel(apiGateway, keycloak, "OIDC авторизация")
