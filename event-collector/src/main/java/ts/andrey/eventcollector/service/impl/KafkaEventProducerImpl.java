@@ -1,6 +1,6 @@
 package ts.andrey.eventcollector.service.impl;
 
-import com.nashkod.avro.Device;
+import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
@@ -10,7 +10,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import ts.andrey.eventcollector.service.DeviceProducer;
+import ts.andrey.eventcollector.service.KafkaProducer;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,31 +21,31 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DeviceProducerImpl implements DeviceProducer {
+public class KafkaEventProducerImpl implements KafkaProducer {
 
-    private final KafkaTemplate<String, Device> kafkaTemplate;
+    private final KafkaTemplate<String, DeviceEvent> kafkaTemplate;
 
-    @Value("${spring.kafka.template.device-topic}")
-    private String deviceIdTopic;
+    @Value("${spring.kafka.template.events-topic}")
+    private String eventsTopic;
 
     @Override
     public CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records) {
-        log.info("Отправка в топик {} новых device: {}", deviceIdTopic, records.size());
+        log.info("Отправка в топик {} новых device events: {}", eventsTopic, records.size());
         try {
             if (CollectionUtils.isEmpty(records)) {
                 return CompletableFuture.completedFuture(Collections.emptyList());
             }
 
             final var futures = records.stream()
-                    .filter(Device.class::isInstance)
-                    .map(record -> {
-                        Device device = (Device) record;
+                    .filter(DeviceEvent.class::isInstance)
+                    .map(it -> {
+                        final var event = (DeviceEvent) it;
                         String key = UUID.randomUUID().toString();
-                        log.debug("отправляю в топик {} device={}", deviceIdTopic, device);
-                        return kafkaTemplate.send(deviceIdTopic, key, device)
+
+                        return kafkaTemplate.send(eventsTopic, key, event)
                                 .thenApply(SendResult::getRecordMetadata)
                                 .exceptionally(ex -> {
-                                    log.error("Ошибка отправки device={}", device, ex);
+                                    log.error("Ошибка отправки eventId={}", event.getEventId(), ex);
                                     return null;
                                 });
                     }).toList();
@@ -57,7 +57,7 @@ public class DeviceProducerImpl implements DeviceProducer {
                             .toList()
                     );
         } catch (Exception e) {
-            log.error("Ошибка при публикации deviceId в топик {}", deviceIdTopic, e);
+            log.error("Ошибка при публикации eventIds в топик {}", eventsTopic, e);
         }
         return CompletableFuture.completedFuture(null);
     }

@@ -56,8 +56,6 @@ spring:
     replication-strategy: "'class':'SimpleStrategy','replication_factor':'1'"
 
 app:
-  inter-endpoint:
-    enabled: true
   cache:
     expiration:
       seconds: 30

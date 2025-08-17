@@ -30,7 +30,7 @@ public class DeviceEventKey {
             type = PrimaryKeyType.CLUSTERED,
             ordering = Ordering.DESCENDING
     )
-    private Instant timestamp;
+    private Long timestamp;
 
     @PrimaryKeyColumn(
             name = "event_id",

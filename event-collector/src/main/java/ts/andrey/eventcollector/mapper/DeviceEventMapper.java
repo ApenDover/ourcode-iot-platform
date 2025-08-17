@@ -17,6 +17,7 @@ public interface DeviceEventMapper {
     List<DeviceEventEntity> toEntityList(List<DeviceEvent> deviceEvent);
 
     @Mapping(target = "deviceId", source = "deviceEvent.device.deviceId")
+    @Mapping(target = "timestamp", expression = "java(deviceEvent.getTimestamp().toEpochMilli())")
     DeviceEventKey toEntityKey(DeviceEvent deviceEvent);
 
 }

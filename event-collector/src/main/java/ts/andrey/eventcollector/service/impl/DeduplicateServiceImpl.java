@@ -11,6 +11,10 @@ import ts.andrey.eventcollector.service.component.SimpleCache;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Slf4j
 @Service
@@ -44,7 +48,13 @@ public class DeduplicateServiceImpl implements DeduplicateService {
                 .filter(Objects::nonNull)
                 .filter(device -> StringUtils.isNotEmpty(device.getDeviceId())
                         && unsavedDeviceIds.contains(device.getDeviceId()))
+                .filter(distinctByKey(Device::getDeviceId))
                 .toList();
+    }
+
+    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
     }
 
 }

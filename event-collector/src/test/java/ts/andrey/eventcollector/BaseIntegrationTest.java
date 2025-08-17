@@ -19,7 +19,7 @@ import ts.andrey.eventcollector.cassandra.dao.DeviceEventDataService;
 import ts.andrey.eventcollector.cassandra.repository.DeviceEventRepository;
 import ts.andrey.eventcollector.service.component.DeviceEventConsumer;
 import ts.andrey.eventcollector.service.component.SimpleCache;
-import ts.andrey.eventcollector.service.impl.DeviceEventProducerImpl;
+import ts.andrey.eventcollector.service.impl.KafkaEventProducerImpl;
 
 import java.net.InetSocketAddress;
 
@@ -78,7 +78,7 @@ public abstract class BaseIntegrationTest {
             .withExposedPorts(9042);
 
     @Autowired
-    public DeviceEventProducerImpl producer;
+    public KafkaEventProducerImpl producer;
 
     @Autowired
     public DeviceEventConsumer consumer;

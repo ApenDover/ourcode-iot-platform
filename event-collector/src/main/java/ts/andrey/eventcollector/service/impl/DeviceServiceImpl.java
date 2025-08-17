@@ -4,7 +4,7 @@ import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ts.andrey.eventcollector.service.DeduplicateService;
-import ts.andrey.eventcollector.service.DeviceProducer;
+import ts.andrey.eventcollector.service.KafkaProducer;
 import ts.andrey.eventcollector.service.DeviceService;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
 public class DeviceServiceImpl implements DeviceService {
 
     private final DeduplicateService deduplicateService;
-    private final DeviceProducer deviceProducerImpl;
+    private final KafkaProducer kafkaProducerImpl;
 
     /**
      * Отправляем в топик новые device
@@ -26,7 +26,7 @@ public class DeviceServiceImpl implements DeviceService {
                 .map(DeviceEvent::getDevice)
                 .toList();
         final var uniqueDevices = deduplicateService.getUniqueDevices(devices);
-        deviceProducerImpl.send(uniqueDevices);
+        kafkaProducerImpl.send(uniqueDevices);
     }
 
 }

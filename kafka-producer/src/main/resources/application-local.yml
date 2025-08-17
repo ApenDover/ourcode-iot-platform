@@ -1,0 +1,31 @@
+server:
+  port: 8887
+
+logging:
+  level:
+    ts.andrey: debug
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+spring:
+  application:
+    name: event-collector
+  kafka:
+    bootstrap-servers: localhost:9092
+    template:
+      events-topic: events
+      dlt-events-topic: events.DLT
+      device-topic: device
+      dlt-device-topic: device.DLT
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      batch-size: 16384
+      compression-type: snappy
+      properties:
+        schema.registry.url: http://localhost:8081
+        auto.register.schemas: true

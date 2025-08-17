@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 4,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -628,7 +628,7 @@
             "type": "prometheus",
             "uid": "PBFE396EC0B189D67"
           },
-          "expr": "sum(delta(kafka_topic_partition_current_offset{instance=~'$instance', topic=~\"$topic\"}[6h])/6) by (topic)",
+          "expr": "sum(delta(kafka_topic_partitions{instance=~'$instance', topic=~\"$topic\"}[6h])/6) by (topic)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -732,7 +732,7 @@
             "type": "prometheus",
             "uid": "PBFE396EC0B189D67"
           },
-          "expr": "sum(delta(kafka_topic_partition_current_offset{instance=~'$instance', topic=~\"$topic\"}[5m])/5) by (topic)",
+          "expr": "sum(delta(kafka_topic_partitions{instance=~'$instance', topic=~\"$topic\"}[5m])/5) by (topic)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -969,8 +969,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1056,8 +1055,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1144,7 +1142,7 @@
             "type": "prometheus",
             "uid": "PBFE396EC0B189D67"
           },
-          "expr": "sum(kafka_topic_partition_current_offset{instance=\"$instance\", topic=~\"$topic\"}) by (partition,topic)",
+          "expr": "sum(kafka_topic_partitions{instance=\"$instance\", topic=~\"$topic\"}) by (partition,topic)",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -1177,8 +1175,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               }
             ]
           },
@@ -1288,14 +1285,14 @@
           "value": "kafka-exporter"
         },
         "datasource": "PBFE396EC0B189D67",
-        "definition": "label_values(kafka_topic_partition_current_offset,job)",
+        "definition": "label_values(kafka_topic_partitions,job)",
         "includeAll": false,
         "label": "Job",
         "name": "job",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(kafka_topic_partition_current_offset,job)",
+          "query": "label_values(kafka_topic_partitions,job)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -1308,14 +1305,14 @@
           "value": "kafka-exporter:9308"
         },
         "datasource": "PBFE396EC0B189D67",
-        "definition": "label_values(kafka_topic_partition_current_offset{job=~\"$job\"},instance)",
+        "definition": "label_values(kafka_topic_partitions{job=~\"$job\"},instance)",
         "includeAll": false,
         "label": "Instance",
         "name": "instance",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(kafka_topic_partition_current_offset{job=~\"$job\"},instance)",
+          "query": "label_values(kafka_topic_partitions{job=~\"$job\"},instance)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -1332,15 +1329,16 @@
           ]
         },
         "datasource": "PBFE396EC0B189D67",
-        "definition": "",
+        "definition": "label_values(kafka_topic_partitions{instance=\"$instance\", topic!=\"__consumer_offsets\", topic!=\"--kafka\"},topic)",
         "includeAll": true,
         "label": "Topic",
         "multi": true,
         "name": "topic",
         "options": [],
         "query": {
-          "query": "label_values(kafka_topic_partition_current_offset{instance='$instance',topic!='__consumer_offsets',topic!='--kafka'}, topic)",
-          "refId": "Prometheus-topic-Variable-Query"
+          "qryType": 1,
+          "query": "label_values(kafka_topic_partitions{instance=\"$instance\", topic!=\"__consumer_offsets\", topic!=\"--kafka\"},topic)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
         "regex": "",
@@ -1357,6 +1355,6 @@
   "timezone": "browser",
   "title": "Kafka Dashboard",
   "uid": "jwPKIsniz",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }

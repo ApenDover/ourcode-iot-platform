@@ -38,7 +38,7 @@ public class DummyDeviceEventEntity {
         final var deviceEventKey = new DeviceEventKey();
         deviceEventKey.setDeviceId("deviceIdKey");
         deviceEventKey.setEventId(UUID.fromString("892dd1da-6f3f-49bc-a60d-a2b282d6efd0"));
-        deviceEventKey.setTimestamp(Instant.ofEpochMilli(897L));
+        deviceEventKey.setTimestamp(897L);
         return deviceEventKey;
     }
 
@@ -46,7 +46,7 @@ public class DummyDeviceEventEntity {
         final var deviceEventKey = new DeviceEventKey();
         deviceEventKey.setDeviceId("deviceIdKey-" + i);
         deviceEventKey.setEventId(UUID.randomUUID());
-        deviceEventKey.setTimestamp(Instant.ofEpochMilli(431L));
+        deviceEventKey.setTimestamp(431L);
         return deviceEventKey;
     }
 

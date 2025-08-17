@@ -1,4 +1,36 @@
 services:
+  kafka-producer:
+    build: ../kafka-producer
+    container_name: kafka-producer
+    ports:
+      - 8887:8887
+    depends_on:
+      event-collector:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "sh", "-c", "curl -f http://localhost:8887/actuator/health | grep -q '\"status\":\"UP\"'" ]
+      interval: 3s
+      timeout: 2s
+      retries: 2
+      start_period: 6s
+    networks:
+      - iot_network
+  device-collector:
+    build: ../device-collector
+    container_name: device-collector
+    ports:
+      - 8889:8889
+    depends_on:
+      event-collector:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "sh", "-c", "curl -f http://localhost:8889/actuator/health | grep -q '\"status\":\"UP\"'" ]
+      interval: 3s
+      timeout: 2s
+      retries: 2
+      start_period: 6s
+    networks:
+      - iot_network
   event-collector:
     build: ../event-collector
     container_name: event-collector
@@ -16,7 +48,7 @@ services:
       grafana:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "sh", "-c", "curl -f http://localhost:8080/actuator/health | grep -q '\"status\":\"UP\"'" ]
+      test: [ "CMD", "sh", "-c", "curl -f http://localhost:8888/actuator/health | grep -q '\"status\":\"UP\"'" ]
       interval: 3s
       timeout: 2s
       retries: 2
