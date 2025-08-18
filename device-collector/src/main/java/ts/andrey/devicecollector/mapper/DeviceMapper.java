@@ -5,7 +5,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ts.andrey.devicecollector.postgres.entity.DeviceEntity;
 
-import java.time.Instant;
 import java.util.List;
 
 @Mapper(componentModel = "spring")

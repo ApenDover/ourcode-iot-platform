@@ -9,7 +9,6 @@ import lombok.experimental.UtilityClass;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -19,8 +18,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MessageGenerator {
 
     private static final List<String> DEVICE_TYPES = List.of("sensor", "actuator", "controller", "gateway");
-    private static final DateTimeFormatter TIMESTAMP_FORMATTER =
-            DateTimeFormatter.ISO_INSTANT.withZone(ZoneOffset.UTC);
+    private static final int RANGE_START = -50;
+    private static final int RANGE_END = 50;
 
     public List<DeviceEvent> generate(Integer messageCount, Integer deviceCount) {
         final var events = new ArrayList<DeviceEvent>();
@@ -47,7 +46,7 @@ public class MessageGenerator {
                 UUID.randomUUID().toString(), // eventId
                 generateRandomTimestamp(),    // timestamp
                 (EventType) getRandomElement(List.of(EventType.values())),
-                String.format("%.2f", random.nextDouble(-50, 50)),
+                String.format("%.2f", random.nextDouble(RANGE_START, RANGE_END)),
                 new Device(
                         (String) getRandomElement(ulidPool),
                         (String) getRandomElement(DEVICE_TYPES),

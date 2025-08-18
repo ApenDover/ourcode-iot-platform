@@ -21,8 +21,6 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public void createOrUpdateDevice(List<Device> devices) {
         deviceDataService.batchUpsert(devices);
-//        final var saved = deviceDataService.saveAll(devices);
-//        return deviceMapper.toDeviceList(saved);
     }
 
 }

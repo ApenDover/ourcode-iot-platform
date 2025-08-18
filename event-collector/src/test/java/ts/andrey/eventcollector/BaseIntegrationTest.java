@@ -22,6 +22,7 @@ import ts.andrey.eventcollector.service.component.SimpleCache;
 import ts.andrey.eventcollector.service.impl.KafkaEventProducerImpl;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -72,6 +73,7 @@ public abstract class BaseIntegrationTest {
     @Container
     protected static final GenericContainer<?> cassandra = new GenericContainer<>(
             DockerImageName.parse("cassandra:5.0"))
+            .withStartupTimeout(Duration.ofMinutes(3))
             .withCreateContainerCmdModifier(cmd -> cmd.withName("cassandra"))
             .withNetwork(Network.SHARED)
             .withNetworkAliases("cassandra")

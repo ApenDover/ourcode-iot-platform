@@ -13,6 +13,7 @@ import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.Test;
 import ts.andrey.eventcollector.tdf.DummyTDF;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +53,7 @@ class AvroConsumerServiceTest {
         // THEN
         assertEquals("c9a646d3-9c61-4cb7-b8cd-6f3b5e3d0f7a", received.getEventId());
         assertEquals("deviceId", received.getDevice().getDeviceId());
-        assertEquals(125L, received.getTimestamp());
+        assertEquals(Instant.ofEpochMilli(125L), received.getTimestamp());
         assertEquals(EventType.TEMPERATURE, received.getType());
         assertEquals("10", received.getPayload());
     }

@@ -12,6 +12,7 @@ import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.Test;
 import ts.andrey.devicecollector.tdf.DummyTDF;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +52,7 @@ class AvroConsumerServiceTest {
 
         // THEN
         assertEquals("deviceId", received.getDeviceId());
-        assertEquals(300L, received.getCreatedAt());
+        assertEquals(Instant.ofEpochMilli(300L), received.getCreatedAt());
         assertEquals("deviceType", received.getDeviceType());
         assertEquals("meta", received.getMeta());
     }

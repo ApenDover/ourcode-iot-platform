@@ -38,7 +38,7 @@ class DeviceMapperTest {
         //THEN
         assertEquals("deviceId", device.getDeviceId());
         assertEquals("deviceType", device.getDeviceType());
-        assertEquals(300L, device.getCreatedAt());
+        assertEquals(Instant.ofEpochMilli(300L), device.getCreatedAt());
         assertEquals("meta", device.getMeta());
     }
 

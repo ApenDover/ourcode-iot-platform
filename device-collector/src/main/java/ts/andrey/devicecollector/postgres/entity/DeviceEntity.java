@@ -1,7 +1,6 @@
 package ts.andrey.devicecollector.postgres.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
@@ -10,8 +9,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
@@ -38,8 +35,12 @@ public class DeviceEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DeviceEntity)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DeviceEntity)) {
+            return false;
+        }
         return deviceId != null && deviceId.equals(((DeviceEntity) o).getDeviceId());
     }
 

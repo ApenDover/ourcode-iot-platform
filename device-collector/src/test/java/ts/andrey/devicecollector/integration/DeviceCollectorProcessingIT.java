@@ -58,7 +58,7 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
         assertEquals("deviceType", entity.getDeviceType());
         assertEquals("meta", entity.getMeta());
         assertEquals(Instant.ofEpochMilli(300L), entity.getCreatedAt());
-        assertEquals(1,entity.getVersion());
+        assertEquals(1, entity.getVersion());
 
         //GIVEN
         final var updateDevice = DummyTDF.device.getDefaultWithOtherMeta();
@@ -84,7 +84,7 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
                     assertEquals("deviceType", entityUpdate.getDeviceType());
                     assertEquals("updated", entityUpdate.getMeta());
                     assertEquals(Instant.ofEpochMilli(600L), entityUpdate.getCreatedAt());
-                    assertEquals(2,entityUpdate.getVersion());
+                    assertEquals(2, entityUpdate.getVersion());
                 });
     }
 

@@ -8,7 +8,7 @@ services:
       event-collector:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "sh", "-c", "curl -f http://localhost:8887/actuator/health | grep -q '\"status\":\"UP\"'" ]
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8887/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
       interval: 3s
       timeout: 2s
       retries: 2
@@ -24,7 +24,7 @@ services:
       event-collector:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "sh", "-c", "curl -f http://localhost:8889/actuator/health | grep -q '\"status\":\"UP\"'" ]
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8889/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
       interval: 3s
       timeout: 2s
       retries: 2
@@ -48,7 +48,7 @@ services:
       grafana:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "sh", "-c", "curl -f http://localhost:8888/actuator/health | grep -q '\"status\":\"UP\"'" ]
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8888/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
       interval: 3s
       timeout: 2s
       retries: 2

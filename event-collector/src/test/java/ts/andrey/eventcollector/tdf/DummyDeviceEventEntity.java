@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventKey;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

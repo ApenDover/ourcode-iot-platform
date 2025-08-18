@@ -3,8 +3,10 @@ ifneq (,$(wildcard infrastructure/.env))
 	export
 endif
 
-COMPOSE_FILE= ./infrastructure/docker-compose.yml
+COMPOSE_FILE=./infrastructure/docker-compose.yml
+COMPOSE_FILE_LOCAL=./infrastructure/docker-compose.override.yml
 DC=docker compose -f $(COMPOSE_FILE)
+DCL=docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_FILE_LOCAL)
 ACTUATOR_URL := http://localhost:
 LOGGER_NAME := ts.andrey
 
@@ -22,6 +24,12 @@ help: ## Показать список доступных команд
 
 up: ## Запустить контейнеры в фоне
 	$(DC) up -d
+
+up-local: ## Запустить все контейнеры в фоне c пересборкой проектов
+	$(DCL) up -d
+
+up-force-app: boot ## Пересобрать и перезагрузить проекты
+	$(DCL) up -d --build --force-recreate event-collector device-collector kafka-producer
 
 update-%:
 	$(DC) up -d --build --force-recreate --no-deps $*
@@ -54,3 +62,13 @@ set-log-%:
 
 exec-%: ## Зайти в контейнер по имени
 	docker exec -it $* bash
+
+boot:  ## локально пересобрать образы
+	cd event-collector && ./gradlew bootJar
+	cd device-collector && ./gradlew bootJar
+	cd kafka-producer && ./gradlew bootJar
+
+rebuild:  ## локально пересобрать образы
+	cd event-collector && ./gradlew clean build
+	cd device-collector && ./gradlew clean build
+	cd kafka-producer && ./gradlew clean build

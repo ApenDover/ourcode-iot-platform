@@ -28,16 +28,14 @@ public class DeviceBatchRepository {
 
     @Transactional
     public void batchUpsert(List<DeviceEntity> devices) {
-        // 1. Получаем ID всех устройств для проверки существования
         final var incomingIds = devices.stream()
                 .map(DeviceEntity::getDeviceId)
                 .collect(Collectors.toSet());
 
-        // 2. Запрос к БД для определения существующих записей (одним запросом)
         final var existingDevices = jdbcTemplate.query(
-                        "SELECT device_id, version FROM t_device WHERE device_id IN (" +
-                                incomingIds.stream().map(id -> "?")
-                                        .collect(Collectors.joining(",")) + ")",
+                        "SELECT device_id, version FROM t_device WHERE device_id IN ("
+                                + incomingIds.stream().map(id -> "?")
+                                .collect(Collectors.joining(",")) + ")",
                         incomingIds.toArray(),
                         (rs, rowNum) -> new AbstractMap.SimpleEntry<>(
                                 rs.getString("device_id").trim(),
@@ -48,7 +46,6 @@ public class DeviceBatchRepository {
                         Map.Entry::getKey, Map.Entry::getValue)
                 );
 
-        // 3. Разделяем на новые и существующие записи
         final var newDevices = new ArrayList<DeviceEntity>();
         final var devicesToUpdate = new ArrayList<DeviceEntity>();
 
@@ -61,12 +58,10 @@ public class DeviceBatchRepository {
             }
         });
 
-        // 4. Пакетная вставка новых записей
         if (!newDevices.isEmpty()) {
             batchInsert(newDevices);
         }
 
-        // 5. Пакетное обновление существующих записей
         if (!devicesToUpdate.isEmpty()) {
             batchUpdate(devicesToUpdate);
         }
@@ -88,11 +83,10 @@ public class DeviceBatchRepository {
     }
 
     private void batchUpdate(List<DeviceEntity> devicesToUpdate) {
-        int[] updateCounts = jdbcTemplate.batchUpdate(
+        final var updateCounts = jdbcTemplate.batchUpdate(
                 """
                         UPDATE t_device
-                        SET 
-                            device_type = ?,
+                        SET device_type = ?,
                             meta = ?,
                             created_at = ?,
                             version = version + 1
@@ -124,4 +118,5 @@ public class DeviceBatchRepository {
                         .toArray())
         );
     }
+
 }
