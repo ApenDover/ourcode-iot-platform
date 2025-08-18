@@ -1,8 +1,10 @@
 package ts.andrey.eventcollector.mapper;
 
+import com.nashkod.avro.Device;
 import com.nashkod.avro.DeviceEvent;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import ts.andrey.eventcollector.cassandra.entity.DeviceEntity;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventKey;
 
@@ -19,5 +21,9 @@ public interface DeviceEventMapper {
     @Mapping(target = "deviceId", source = "deviceEvent.device.deviceId")
     @Mapping(target = "timestamp", expression = "java(deviceEvent.getTimestamp().toEpochMilli())")
     DeviceEventKey toEntityKey(DeviceEvent deviceEvent);
+
+    DeviceEntity deviceCoEntity(Device device);
+
+    List<DeviceEntity> deviceToEntityList(List<Device> device);
 
 }

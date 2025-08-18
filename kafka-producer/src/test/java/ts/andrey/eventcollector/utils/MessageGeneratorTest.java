@@ -2,6 +2,7 @@ package ts.andrey.eventcollector.utils;
 
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
+import ts.andrey.kafkaproducer.utils.MessageGenerator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -12,7 +13,7 @@ class MessageGeneratorTest {
     @Test
     void generateOneDeviceId() {
         //WHEN
-        final var result = MessageGenerator.generate(10, 1);
+        final var result = MessageGenerator.generate(10, 1, true);
 
         //THEN
         assertEquals(10, result.size());
@@ -41,7 +42,7 @@ class MessageGeneratorTest {
     @Test
     void generateManyDeviceId() {
         //WHEN
-        final var result = MessageGenerator.generate(10, 10);
+        final var result = MessageGenerator.generate(10, 10, true);
 
         //THEN
         assertEquals(10, result.size());

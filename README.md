@@ -41,24 +41,26 @@ postman collection вот тут: [postman](infrastructure/postman)
 
 Будет выполнен запуск следующих сервисов:
 
-| Сервис               | Описание                                | Порт(ы) хоста   |
-|----------------------|-----------------------------------------|-----------------|
-| `event-collector`    | SpringBoot service сбор метрик          | `8888`          |
-| `zookeeper`          | Координация Kafka                       | `2181`          |
-| `kafka`              | Брокер Kafka 3.4                        | `9092`, `29092` |
-| `schema-registry`    | Схемы Avro для Kafka                    | `8081`          |
-| `minio`              | S3-хранилище совместимое с AWS          | `9000`, `9001`  |
-| `camunda`            | BPM-платформа для бизнес-процессов      | `8088`          |
-| `postgres`           | База данных PostgreSQL                  | `5432`          |
-| `keycloak`           | IAM-платформа, авторизация              | `8080`          |
-| `redis`              | In-memory кэш с паролем                 | `6379`          |
-| `cassandra`          | NoSQL база данных                       | `9042`          |
-| `grafana`            | Визуализация метрик                     | `3000`          |
-| `prometheus`         | Мониторинг и сбор метрик                | `9090`          |
-| `kafka-exporter`     | Экспорт метрик Kafka для Prometheus     | `9308`          |
-| `cassandra-exporter` | Экспорт метрик cassandra для Prometheus | `9500`          |
-| `postgres-exporter`  | Экспорт метрик postgres для Prometheus  | `9187`          |
-| `kafka-ui`           | Kafka-UI для удобства просмотра         | `8099`          |
+| Сервис               | Описание                                   | Порт(ы) хоста   |
+|----------------------|--------------------------------------------|-----------------|
+| `kafka-producer`     | SpringBoot service для тестирования        | `8887`          |
+| `event-collector`    | SpringBoot service сбор метрик в cassandra | `8888`          |
+| `device-collector`   | SpringBoot service сбор device в postgress | `8889`          |
+| `zookeeper`          | Координация Kafka                          | `2181`          |
+| `kafka`              | Брокер Kafka 3.4                           | `9092`, `29092` |
+| `schema-registry`    | Схемы Avro для Kafka                       | `8081`          |
+| `minio`              | S3-хранилище совместимое с AWS             | `9000`, `9001`  |
+| `camunda`            | BPM-платформа для бизнес-процессов         | `8088`          |
+| `postgres`           | База данных PostgreSQL                     | `5432`          |
+| `keycloak`           | IAM-платформа, авторизация                 | `8080`          |
+| `redis`              | In-memory кэш с паролем                    | `6379`          |
+| `cassandra`          | NoSQL база данных                          | `9042`          |
+| `grafana`            | Визуализация метрик                        | `3000`          |
+| `prometheus`         | Мониторинг и сбор метрик                   | `9090`          |
+| `kafka-exporter`     | Экспорт метрик Kafka для Prometheus        | `9308`          |
+| `cassandra-exporter` | Экспорт метрик cassandra для Prometheus    | `9500`          |
+| `postgres-exporter`  | Экспорт метрик postgres для Prometheus     | `9187`          |
+| `kafka-ui`           | Kafka-UI для удобства просмотра            | `8099`          |
 
 ⚠️ **Важно:**  Убедитесь, что у Docker достаточно памяти и CPU. В Docker Desktop (Windows/Mac) можно выделить, например, 4+ ГБ RAM. Иначе рискуете столкнуться с тормозами или перезапусками контейнеров (особенно Java-сервисы как Keycloak могут потреблять >512МБ).
 
@@ -101,28 +103,11 @@ postman collection вот тут: [postman](infrastructure/postman)
 
 Из корня проекта доступны команды через `Makefile`.
 
-### 📌 Основные команды:
+Справка:
 
-| Команда                       | Описание                                  |
-|-------------------------------|-------------------------------------------|
-| `make help`                   | вывод инфо по всем командам               |
-| `make up`                     | Запуск всех сервисов                      |
-| `make down`                   | Остановка и удаление всех сервисов        |
-| `make restart`                | Перезапуск всех сервисов                  |
-| `make restart-[name]`         | Перезапуск указанного контейнера          |
-| `make logs`                   | Просмотр логов всех сервисов              |
-| `make logs-[name]`            | Просмотр логов конкретного сервиса        |
-| `make exec-[name]`            | Зайти в контейнер                         |
-| `make set-log-[level]-[port]` | Установить логирование                    |
-| `make update-<service>`       | Пересобрать проект и развернуть контейнер |
-
-### 🔍 Примеры:
-
-<pre>
-make up                # запуск всех сервисов
-make logs-kafka        # логи только Kafka
-make down              # остановка всех сервисов
-</pre>
+   ```bash
+   make help
+   ```
 
 # Описание сервисов
 

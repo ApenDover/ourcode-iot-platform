@@ -12,10 +12,45 @@ management:
         include: "*"
   metrics:
     tags:
-      application: event-collector
+      application: kafka-producer
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    otlp:
+      endpoint: http://alloy:4318
+      protocol: http/protobuf
+
+opentelemetry:
+  instrumentation:
+    logback-mdc:
+      enabled: true
+  service:
+    name: ${spring.application.name}
+  exporter:
+    otlp:
+      endpoint: http://alloy:4318
+      protocol: http/protobuf
+      timeout: 10000
+      compression: gzip
+  traces:
+    exporter: otlp
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+  resource-attributes:
+    service.version: 1.0.0
+    deployment.environment: docker
+    service.name: ${spring.application.name}
+
 spring:
   application:
-    name: event-collector
+    name: kafka-producer
   kafka:
     bootstrap-servers: kafka:29092
     template:
@@ -31,35 +66,3 @@ spring:
       properties:
         schema.registry.url: http://schema-registry:8081
         auto.register.schemas: true
-    consumer:
-      max-poll-records: 100
-      fetch-max-wait: 5000
-      fetch-min-size: 1024
-      enable-auto-commit: false
-      group-id: device-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
-      properties:
-        schema.registry.url: http://schema-registry:8081
-        specific.avro.reader: true
-    listener:
-      ack-mode: batch
-      concurrency: 3
-      type: batch
-      idle-between-polls: 1000
-
-  cassandra:
-    contact-points: cassandra
-    port: 9042
-    local-datacenter: datacenter1
-    keyspace-name: iot_service
-    schema-action: CREATE_IF_NOT_EXISTS
-    replication-strategy: "'class':'SimpleStrategy','replication_factor':'1'"
-
-app:
-  inter-endpoint:
-    enabled: true
-  cache:
-    expiration:
-      seconds: 30

@@ -1,12 +1,12 @@
 package ts.andrey.eventcollector.service.impl;
 
+import io.opentelemetry.api.trace.Tracer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ts.andrey.eventcollector.service.component.CollectorFacade;
-import ts.andrey.eventcollector.service.component.SimpleCache;
 import ts.andrey.eventcollector.tdf.DummyTDF;
 
 import java.util.Collections;
@@ -25,7 +25,7 @@ class CollectorFacadeTest {
     @Mock
     DeviceServiceImpl deviceServiceImpl;
     @Mock
-    SimpleCache simpleCache;
+    Tracer tracer;
     @InjectMocks
     CollectorFacade collectorService;
 
@@ -55,7 +55,6 @@ class CollectorFacadeTest {
 
         // THEN
         verifyNoInteractions(deviceEventServiceImpl);
-        verifyNoInteractions(simpleCache);
     }
 
     @Test
@@ -66,7 +65,6 @@ class CollectorFacadeTest {
         // THEN
         verifyNoInteractions(deviceServiceImpl);
         verifyNoInteractions(deviceEventServiceImpl);
-        verifyNoInteractions(simpleCache);
     }
 
 }

@@ -6,6 +6,7 @@
 
 <suppressions>
     <suppress checks="MagicNumber" files=".*[\\/]src[\\/](test|integration-test)[\\/]"/>
+    <suppress checks="MagicNumber" files="MessageGenerator.java"/>
     <suppress checks="ConstantName" files=".*[/\\]src[/\\]test[/\\].*"/>
     <suppress checks="VisibilityModifier" files=".*[\\/]src[\\/](test|integration-test)[\\/]"/>
     <suppress checks="[a-zA-Z0-9]*" files="[\\/]generated-sources[\\/]"/>

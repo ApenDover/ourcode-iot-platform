@@ -13,6 +13,40 @@ management:
   metrics:
     tags:
       application: event-collector
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    otlp:
+      endpoint: http://alloy:4318
+      protocol: http/protobuf
+
+opentelemetry:
+  instrumentation:
+    logback-mdc:
+      enabled: true
+  service:
+    name: ${spring.application.name}
+  exporter:
+    otlp:
+      endpoint: http://alloy:4318
+      protocol: http/protobuf
+      timeout: 10000
+      compression: gzip
+  traces:
+    exporter: otlp
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+  resource-attributes:
+    service.version: 1.0.0
+    deployment.environment: docker
+    service.name: ${spring.application.name}
 
 spring:
   application:
@@ -33,8 +67,8 @@ spring:
         schema.registry.url: http://schema-registry:8081
         auto.register.schemas: true
     consumer:
-      max-poll-records: 100
-      fetch-max-wait: 5000
+      max-poll-records: 50000
+      fetch-max-wait: 500
       fetch-min-size: 1024
       enable-auto-commit: false
       group-id: device-group

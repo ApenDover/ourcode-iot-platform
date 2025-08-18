@@ -32,33 +32,18 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
         );
 
         // THEN
-//        await().atMost(10, TimeUnit.SECONDS)
-//                .pollInterval(1000, MILLISECONDS)
-//                .untilAsserted(() -> {
-//                    final var result = assertDoesNotThrow(() -> deviceRepository.findAll());
-//                    assertFalse(result.isEmpty());
-//                    assertEquals(1, result.size());
-//                    final var entity = result.get(0);
-//                    assertEquals(26, entity.getDeviceId().length());
-//                    assertEquals("deviceId", entity.getDeviceId().trim());
-//                    assertEquals("deviceType", entity.getDeviceType());
-//                    assertEquals("meta", entity.getMeta());
-//                    assertEquals(Instant.ofEpochMilli(300L), entity.getCreatedAt());
-//                    assertEquals(1,entity.getVersion());
-//                });
-
-        Thread.sleep(5000);
-
-        final var result = assertDoesNotThrow(() -> deviceRepository.findAll());
-        assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
-        final var entity = result.get(0);
-        assertEquals(26, entity.getDeviceId().length());
-        assertEquals("deviceId", entity.getDeviceId().trim());
-        assertEquals("deviceType", entity.getDeviceType());
-        assertEquals("meta", entity.getMeta());
-        assertEquals(Instant.ofEpochMilli(300L), entity.getCreatedAt());
-        assertEquals(1, entity.getVersion());
+        await().atMost(10, TimeUnit.SECONDS)
+                .pollInterval(1000, MILLISECONDS)
+                .untilAsserted(() -> {
+                    final var result = assertDoesNotThrow(() -> deviceRepository.findAll());
+                    assertFalse(result.isEmpty());
+                    assertEquals(1, result.size());
+                    final var entity = result.get(0);
+                    assertEquals("deviceId", entity.getDeviceId());
+                    assertEquals("deviceType", entity.getDeviceType());
+                    assertEquals("meta", entity.getMeta());
+                    assertEquals(Instant.ofEpochMilli(300L), entity.getCreatedAt());
+                });
 
         //GIVEN
         final var updateDevice = DummyTDF.device.getDefaultWithOtherMeta();
@@ -79,12 +64,10 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
                     assertFalse(resultUpdate.isEmpty());
                     assertEquals(1, resultUpdate.size());
                     final var entityUpdate = resultUpdate.get(0);
-                    assertEquals(26, entityUpdate.getDeviceId().length());
-                    assertEquals("deviceId", entityUpdate.getDeviceId().trim());
+                    assertEquals("deviceId", entityUpdate.getDeviceId());
                     assertEquals("deviceType", entityUpdate.getDeviceType());
                     assertEquals("updated", entityUpdate.getMeta());
                     assertEquals(Instant.ofEpochMilli(600L), entityUpdate.getCreatedAt());
-                    assertEquals(2, entityUpdate.getVersion());
                 });
     }
 

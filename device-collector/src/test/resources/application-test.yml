@@ -11,3 +11,10 @@ spring:
       properties:
         schema.registry.url: ${schema.registry.url}
         avro.remove.java.properties: true
+otel:
+  traces:
+    exporter: none
+  metrics:
+    exporter: none
+  logs:
+    exporter: none

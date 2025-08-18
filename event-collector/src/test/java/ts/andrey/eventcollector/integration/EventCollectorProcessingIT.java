@@ -40,18 +40,22 @@ class EventCollectorProcessingIT extends BaseIntegrationTest {
                 });
 
         //THEN CHECK PRODUCE DEVICE ID
-        final var kafkaBody = KafkaConsumerUtil.getLastMessage(
+        final var kafkaRecords = KafkaConsumerUtil.getLastMessage(
                 kafka.getBootstrapServers(), "device", "device-group",
                 schemaRegistry.getFirstMappedPort(), Device.class
         );
-        assertEquals("deviceId-0", kafkaBody.getDeviceId());
-        assertEquals(Instant.ofEpochMilli(300L), kafkaBody.getCreatedAt());
-        assertEquals("meta", kafkaBody.getMeta());
-        assertEquals("deviceType", kafkaBody.getDeviceType());
+        kafkaRecords.forEach(r -> {
+            final var device = r.value();
+            assertTrue(device.getDeviceId().contains("deviceId-"));
+            assertEquals(Instant.ofEpochMilli(300L), device.getCreatedAt());
+            assertEquals("meta", device.getMeta());
+            assertEquals("deviceType", device.getDeviceType());
+            assertTrue(simpleCache.contains(device.getDeviceId()));
+        });
 
-        //THEN CHECK IS CACHED
+        //THEN CHECK IT CACHED
         assertEquals(10, simpleCache.size());
-        assertTrue(simpleCache.contains(kafkaBody.getDeviceId()));
+
     }
 
 }

@@ -2,27 +2,9 @@ services:
   kafka-producer:
     build:
       dockerfile: ../kafka-producer/Dockerfile.local
-    healthcheck:
-      test: [ "CMD", "sh", "-c", "curl -f http://localhost:8887/actuator/health | grep -q '\"status\":\"UP\"'" ]
-      interval: 3s
-      timeout: 2s
-      retries: 2
-      start_period: 6s
   device-collector:
     build:
       dockerfile: ../device-collector/Dockerfile.local
-    healthcheck:
-      test: [ "CMD", "sh", "-c", "curl -f http://localhost:8889/actuator/health | grep -q '\"status\":\"UP\"'" ]
-      interval: 3s
-      timeout: 2s
-      retries: 2
-      start_period: 6s
   event-collector:
     build:
       dockerfile: ../event-collector/Dockerfile.local
-    healthcheck:
-      test: [ "CMD", "sh", "-c", "curl -f http://localhost:8888/actuator/health | grep -q '\"status\":\"UP\"'" ]
-      interval: 3s
-      timeout: 2s
-      retries: 2
-      start_period: 6s

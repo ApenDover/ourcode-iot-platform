@@ -3,7 +3,6 @@ package ts.andrey.devicecollector.postgres.entity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Builder
 @NoArgsConstructor
@@ -22,15 +22,10 @@ import java.time.Instant;
 public class DeviceEntity {
 
     @Id
+    private UUID id;
     private String deviceId;
-
     private String deviceType;
-
     private Instant createdAt;
-
-    @Version
-    private Long version;
-
     private String meta;
 
     @Override

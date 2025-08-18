@@ -10,7 +10,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import ts.andrey.eventcollector.service.KafkaProducer;
+import ts.andrey.eventcollector.service.kafka.KafkaProducer;
 
 import java.util.Collections;
 import java.util.List;
@@ -59,7 +59,7 @@ public class KafkaEventProducerImpl implements KafkaProducer {
         } catch (Exception e) {
             log.error("Ошибка при публикации eventIds в топик {}", eventsTopic, e);
         }
-        return CompletableFuture.completedFuture(null);
+        return CompletableFuture.completedFuture(Collections.emptyList());
     }
 
 }

@@ -20,16 +20,16 @@ public class CollectorFacade {
     private final DeviceService deviceService;
 
     public void collect(List<DeviceEvent> events) {
-
-        final var deviceEvents = DeviceEventValidFilter.getCorrect(events);
-
-        if (CollectionUtils.isEmpty(deviceEvents)) {
-            return;
-        }
-
         try {
+            final var deviceEvents = DeviceEventValidFilter.getCorrect(events);
+
+            if (CollectionUtils.isEmpty(deviceEvents)) {
+                return;
+            }
+
             deviceService.sendUniqueDeviceids(deviceEvents);
             deviceEventService.saveEvents(deviceEvents);
+
         } catch (Exception e) {
             log.error("Ошибка при обработке событий", e);
         }

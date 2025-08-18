@@ -10,7 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface DeviceMapper {
 
-    @Mapping(target = "version", ignore = true)
+    @Mapping(target = "id", ignore = true)
     DeviceEntity toDeviceEntity(Device device);
 
     Device toDevice(DeviceEntity device);

@@ -25,23 +25,31 @@ help: ## Показать список доступных команд
 up: ## Запустить контейнеры в фоне
 	$(DC) up -d
 
-up-local: ## Запустить все контейнеры в фоне c пересборкой проектов
+up-local: boot ## Запустить все контейнеры в фоне
 	$(DCL) up -d
 
-up-force-app: boot ## Пересобрать и перезагрузить проекты
+up-rebuild-local: boot ## Пересобрать и запустить все модули
+	$(DCL) build event-collector device-collector kafka-producer
+	$(DCL) up -d
+
+up-rebuild: ## Пересобрать и запустить все модули
+	$(DC) build event-collector device-collector kafka-producer
+	$(DC) up -d
+
+recreate-local: boot ## Пересобрать и перезагрузить все модули
 	$(DCL) up -d --build --force-recreate event-collector device-collector kafka-producer
 
-update-%:
-	$(DC) up -d --build --force-recreate --no-deps $*
+recreate: ## Пересобрать и перезагрузить все модули
+	$(DC) up -d --build --force-recreate event-collector device-collector kafka-producer
+
+update-%: ## Пересобрать и перезагрузить указанный модуль
+	$(DCL) up -d --build --force-recreate --no-deps $*
 
 down: ## Остановить и удалить контейнеры
 	$(DC) down
 
 downv: ## Остановить контейнеры и удалить тома
 	$(DC) down -v
-
-restart: ## Перезапустить контейнеры
-	$(DC) down && $(DC) up -d
 
 restart-%: ## Перезапустить контейнер по имени
 	$(DC) restart $*
@@ -64,6 +72,9 @@ exec-%: ## Зайти в контейнер по имени
 	docker exec -it $* bash
 
 boot:  ## локально пересобрать образы
+	docker image rm infrastructure-device-collector -f
+	docker image rm infrastructure-event-collector -f
+	docker image rm infrastructure-kafka-producer -f
 	cd event-collector && ./gradlew bootJar
 	cd device-collector && ./gradlew bootJar
 	cd kafka-producer && ./gradlew bootJar

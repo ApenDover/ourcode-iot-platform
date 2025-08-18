@@ -5,6 +5,7 @@ import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ts.andrey.eventcollector.annotation.WithSpan;
 import ts.andrey.eventcollector.cassandra.dao.DeviceEventDataService;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.service.DeviceEventService;
@@ -21,6 +22,7 @@ public class DeviceEventServiceImpl implements DeviceEventService {
     private final DeviceEventMapper deviceEventMapper;
     private final SimpleCache simpleCache;
 
+    @WithSpan("deviceEventService")
     public void saveEvents(List<DeviceEvent> events) {
         final var toSave = deviceEventMapper.toEntityList(events);
         deviceEventDataService.saveAll(toSave);
