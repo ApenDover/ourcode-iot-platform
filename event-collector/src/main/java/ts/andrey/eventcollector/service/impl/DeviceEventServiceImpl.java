@@ -1,6 +1,5 @@
 package ts.andrey.eventcollector.service.impl;
 
-import com.nashkod.avro.Device;
 import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +27,7 @@ public class DeviceEventServiceImpl implements DeviceEventService {
         deviceEventDataService.saveAll(toSave);
         final var deviceIds = events.stream()
                 .map(DeviceEvent::getDevice)
-                .map(Device::getDeviceId)
+                .map(d -> String.valueOf(d.getDeviceId()))
                 .toList();
         simpleCache.putAll(deviceIds);
     }

@@ -3,7 +3,6 @@ package ts.andrey.eventcollector.service.impl;
 import com.nashkod.avro.Device;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import ts.andrey.eventcollector.annotation.WithSpan;
 import ts.andrey.eventcollector.cassandra.dao.DeviceDataService;
@@ -38,9 +37,9 @@ public class DeduplicateServiceImpl implements DeduplicateService {
 
         final var uncached = devices.stream()
                 .filter(Objects::nonNull)
-                .filter(deviceEvent -> StringUtils.isNotEmpty(deviceEvent.getDeviceId()))
+                .filter(deviceEvent -> deviceEvent.getDeviceId() > 0)
                 .distinct()
-                .filter(it -> !simpleCache.contains(it.getDeviceId()))
+                .filter(it -> !simpleCache.contains(String.valueOf(it.getDeviceId())))
                 .toList();
 
         final var deviceEntities = deviceEventMapper.deviceToEntityList(uncached);
@@ -54,8 +53,8 @@ public class DeduplicateServiceImpl implements DeduplicateService {
 
         return uncached.stream()
                 .filter(Objects::nonNull)
-                .filter(device -> StringUtils.isNotEmpty(device.getDeviceId())
-                        && unsavedDeviceIds.contains(device.getDeviceId()))
+                .filter(device -> device.getDeviceId() > 0
+                        && unsavedDeviceIds.contains(String.valueOf(device.getDeviceId())))
                 .filter(distinctByKey(Device::getDeviceId))
                 .toList();
     }

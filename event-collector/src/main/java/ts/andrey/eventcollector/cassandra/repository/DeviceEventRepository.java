@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface DeviceEventRepository extends CassandraRepository<DeviceEventEntity, DeviceEventKey> {
 
-    @Query("SELECT device_id FROM device_events WHERE device_id IN ?0")
+    @Query("SELECT deviceid FROM device_events WHERE deviceid IN ?0")
     List<DeviceEventEntity> findExistingDeviceIds(List<String> deviceIds);
 
 }

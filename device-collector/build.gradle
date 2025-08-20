@@ -40,11 +40,13 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-actuator"
     implementation "io.micrometer:micrometer-registry-prometheus"
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
-    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetrySpringBootVersion}"
 
+    implementation "org.postgresql:postgresql"
+    implementation "org.springframework.boot:spring-boot-starter-jdbc"
+    implementation "org.apache.shardingsphere:shardingsphere-jdbc:${shardingsphere}"
     implementation "org.springframework.boot:spring-boot-starter-data-jpa"
     implementation "org.liquibase:liquibase-core"
-    implementation "org.springframework.boot:spring-boot-starter-jdbc"
 
     implementation "org.springframework.kafka:spring-kafka"
     implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
@@ -55,7 +57,7 @@ dependencies {
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 
     compileOnly "org.projectlombok:lombok"
-    runtimeOnly "org.postgresql:postgresql"
+
     annotationProcessor "org.projectlombok:lombok"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 

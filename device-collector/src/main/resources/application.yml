@@ -52,16 +52,10 @@ spring:
   application:
     name: device-collector
   liquibase:
-    enabled: true
-    change-log: classpath:/liquibase/changelog.yml
-    default-schema: public
-    user: myuser
-    password: strongpassword
-    url: jdbc:postgresql://postgres:5432/iot_platform
+    enabled: false
   datasource:
-    url: jdbc:postgresql://postgres:5432/iot_platform
-    username: myuser
-    password: strongpassword
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:sharding-config.yml
   jpa:
     hibernate:
       ddl-auto: none
@@ -90,3 +84,12 @@ spring:
       concurrency: 3
       type: batch
       idle-between-polls: 1000
+
+app:
+  dataSources:
+    - url: jdbc:postgresql://postgres1:5432/iot_platform
+      username: myuser
+      password: strongpassword
+    - url: jdbc:postgresql://postgres2:5432/iot_platform
+      username: myuser
+      password: strongpassword

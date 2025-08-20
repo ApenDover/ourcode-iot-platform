@@ -22,9 +22,9 @@ public class DeviceBatchRepository {
         }
 
         String sql = """
-                INSERT INTO t_device (id, device_id, device_type, created_at, meta)
+                INSERT INTO public.tdevice (id, deviceid, device_type, created_at, meta)
                 VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT (device_id) DO UPDATE SET
+                ON CONFLICT (deviceid) DO UPDATE SET
                     device_type = EXCLUDED.device_type,
                     created_at  = EXCLUDED.created_at,
                     meta        = EXCLUDED.meta
@@ -38,7 +38,6 @@ public class DeviceBatchRepository {
                         Timestamp.from(device.getCreatedAt()),
                         device.getMeta()
                 }).toList();
-
         jdbcTemplate.batchUpdate(sql, params);
     }
 

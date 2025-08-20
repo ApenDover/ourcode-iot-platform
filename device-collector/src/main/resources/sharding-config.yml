@@ -1,0 +1,42 @@
+dataSources:
+  shard1:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    jdbcUrl: jdbc:postgresql://postgres1:5432/iot_platform
+    username: myuser
+    password: strongpassword
+  #  shard1_replica:
+  #    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+  #    jdbcUrl: jdbc:postgresql://postgresr1:5432/iot_platform
+  #    username: myuser
+  #    password: strongpassword
+  shard2:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    jdbcUrl: jdbc:postgresql://postgres2:5432/iot_platform
+    username: myuser
+    password: strongpassword
+#  shard2_replica:
+#    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+#    jdbcUrl: jdbc:postgresql://postgresr2:5432/iot_platform
+#    username: myuser
+#    password: strongpassword
+
+rules:
+  - !SHARDING
+    tables:
+      tdevice:
+        actualDataNodes: shard${0..1}.tdevice
+        databaseStrategy:
+          standard:
+            shardingColumn: deviceid
+            shardingAlgorithmName: deviceid_inline
+        tableStrategy:
+          none:
+    shardingAlgorithms:
+      deviceid_inline:
+        type: INLINE
+        props:
+          algorithm-expression: shard${deviceid % 2}
+props:
+  sql-show: true
+  default-database-name: iot_platform
+databaseName: iot_platform

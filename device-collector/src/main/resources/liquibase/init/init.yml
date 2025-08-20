@@ -4,7 +4,7 @@ databaseChangeLog:
       author: a.tsaregorodtsev
       changes:
         - createTable:
-            tableName: t_device
+            tableName: tdevice
             columns:
               - column:
                   name: id
@@ -13,8 +13,8 @@ databaseChangeLog:
                     primaryKey: true
                     primaryKeyName: device_uuid_pk
               - column:
-                  name: device_id
-                  type: text
+                  name: deviceid
+                  type: bigint
                   constraints:
                     nullable: false
                     unique: true
@@ -30,3 +30,4 @@ databaseChangeLog:
               - column:
                   name: meta
                   type: text
+        - sql: SELECT * FROM public.tdevice;

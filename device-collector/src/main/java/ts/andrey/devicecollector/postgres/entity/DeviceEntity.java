@@ -13,17 +13,17 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Builder
-@NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "t_device")
+@Table(name = "tdevice")
 @AllArgsConstructor
+@NoArgsConstructor
 public class DeviceEntity {
 
     @Id
     private UUID id;
-    private String deviceId;
+    private Long deviceId;
     private String deviceType;
     private Instant createdAt;
     private String meta;

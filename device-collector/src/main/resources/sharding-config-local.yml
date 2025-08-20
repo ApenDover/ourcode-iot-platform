@@ -1,0 +1,63 @@
+dataSources:
+  shard0:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: org.postgresql.Driver
+    jdbcUrl: jdbc:postgresql://localhost:5431/iot_platform
+    username: myuser
+    password: strongpassword
+#  shard0_replica:
+#    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+#    driverClassName: org.postgresql.Driver
+#    jdbcUrl: jdbc:postgresql://localhost:5433/iot_platform
+#    username: myuser
+#    password: strongpassword
+  shard1:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: org.postgresql.Driver
+    jdbcUrl: jdbc:postgresql://localhost:5432/iot_platform
+    username: myuser
+    password: strongpassword
+#  shard1_replica:
+#    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+#    driverClassName: org.postgresql.Driver
+#    jdbcUrl: jdbc:postgresql://localhost:5434/iot_platform
+#    username: myuser
+#    password: strongpassword
+
+#rules:
+#  - !SHARDING
+#    tables:
+#      orders:
+#        actualDataNodes: shard${0..1}.tdevice
+#    defaultDatabaseStrategy:
+#      standard:
+#        shardingColumn: deviceid
+#        shardingAlgorithmName: database_inline
+#    shardingAlgorithms:
+#      database_inline:
+#        type: INLINE
+#        props:
+#          algorithm-expression: shard{(deviceid.hashCode() % 2 + 2) % 2}
+
+rules:
+  - !SHARDING
+    tables:
+      tdevice:
+        actualDataNodes: shard${0..1}.tdevice
+        databaseStrategy:
+          standard:
+            shardingColumn: deviceid
+            shardingAlgorithmName: deviceid_inline
+        tableStrategy:
+          none:
+    shardingAlgorithms:
+      deviceid_inline:
+        type: INLINE
+        props:
+          algorithm-expression: shard${deviceid % 2}
+
+props:
+  sql-show: true
+  default-database-name: iot_platform
+databaseName: iot_platform
+

@@ -59,7 +59,7 @@ public class KafkaEventProducerImpl implements KafkaProducer {
     }
 
     public CompletableFuture<RecordMetadata> sendMessage(DeviceEvent event) {
-        return kafkaTemplate.send(eventsTopic, event.getDevice().getDeviceId(), event)
+        return kafkaTemplate.send(eventsTopic, String.valueOf(event.getDevice().getDeviceId()), event)
                 .thenApply(SendResult::getRecordMetadata)
                 .exceptionally(ex -> {
                     log.error("Ошибка отправки eventId={}", event.getEventId(), ex);

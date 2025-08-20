@@ -148,50 +148,50 @@ services:
       - schema-registry-data:/var/lib/schema-registry
     networks:
       - iot_network
-  minio:
-    image: minio/minio:latest
-    container_name: minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    restart: unless-stopped
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-    command: server /data --console-address ":9001"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
-      interval: 30s
-      retries: 3
-  camunda:
-    image: camunda/camunda-bpm-platform:latest
-    container_name: camunda
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-    ports:
-      - "8088:8080"
-    environment:
-      DB_DRIVER: org.postgresql.Driver
-      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      DB_USERNAME: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/engine-rest/engine" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - iot_network
-  postgres:
-    container_name: postgres
+#  minio:
+#    image: minio/minio:latest
+#    container_name: minio
+#    ports:
+#      - "9000:9000"
+#      - "9001:9001"
+#    restart: unless-stopped
+#    environment:
+#      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+#      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+#    command: server /data --console-address ":9001"
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+#      interval: 30s
+#      retries: 3
+#  camunda:
+#    image: camunda/camunda-bpm-platform:latest
+#    container_name: camunda
+#    depends_on:
+#      postgres1:
+#        condition: service_healthy
+#    restart: unless-stopped
+#    ports:
+#      - "8088:8080"
+#    environment:
+#      DB_DRIVER: org.postgresql.Driver
+#      DB_URL: jdbc:postgresql://postgres1:5432/${POSTGRES_DB}
+#      DB_USERNAME: ${POSTGRES_USER}
+#      DB_PASSWORD: ${POSTGRES_PASSWORD}
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:8080/engine-rest/engine" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#    networks:
+#      - iot_network
+  postgres1:
+    container_name: postgres1
     image: postgres:latest
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "5431:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data1:/var/lib/postgresql/data
     env_file:
       - .env
     environment:
@@ -204,43 +204,103 @@ services:
       retries: 5
     networks:
       - iot_network
-  keycloak:
-    image: quay.io/keycloak/keycloak:21.0.1
-    container_name: keycloak
+  postgres2:
+    container_name: postgres2
+    image: postgres:latest
     restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
     ports:
-      - "8080:8080"
+      - "5432:5432"
+    volumes:
+      - postgres_data2:/var/lib/postgresql/data
+    env_file:
+      - .env
     environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KC_DB: postgres
-      KC_DB_URL_HOST: postgres
-      KC_DB_USERNAME: ${POSTGRES_USER}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
-      KC_DB_URL_DATABASE: ${POSTGRES_DB}
-      KC_HOSTNAME: "localhost"
-    command:
-      - start-dev
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}" ]
+      interval: 10s
+      retries: 5
     networks:
       - iot_network
-  redis:
-    image: redis:7-alpine
-    container_name: redis
-    ports:
-      - "6379:6379"
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+  postgres1r:
+    container_name: postgres1r
+    image: postgres:latest
     restart: unless-stopped
-    environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-    healthcheck:
-      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
-      interval: 5s
-      retries: 5
+    ports:
+      - "5433:5432"
     volumes:
-      - redis_data:/data
+      - postgres_data1r:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}" ]
+      interval: 10s
+      retries: 5
+    networks:
+      - iot_network
+  postgres2r:
+    container_name: postgres2r
+    image: postgres:latest
+    restart: unless-stopped
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data2r:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}" ]
+      interval: 10s
+      retries: 5
+    networks:
+      - iot_network
+#  keycloak:
+#    image: quay.io/keycloak/keycloak:21.0.1
+#    container_name: keycloak
+#    restart: unless-stopped
+#    depends_on:
+#      postgres1:
+#        condition: service_healthy
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+#      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+#      KC_DB: postgres
+#      KC_DB_URL_HOST: postgres
+#      KC_DB_USERNAME: ${POSTGRES_USER}
+#      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+#      KC_DB_URL_DATABASE: ${POSTGRES_DB}
+#      KC_HOSTNAME: "localhost"
+#    command:
+#      - start-dev
+#    networks:
+#      - iot_network
+#  redis:
+#    image: redis:7-alpine
+#    container_name: redis
+#    ports:
+#      - "6379:6379"
+#    command: redis-server --requirepass ${REDIS_PASSWORD}
+#    restart: unless-stopped
+#    environment:
+#      REDIS_PASSWORD: ${REDIS_PASSWORD}
+#    healthcheck:
+#      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
+#      interval: 5s
+#      retries: 5
+#    volumes:
+#      - redis_data:/data
   cassandra:
     image: cassandra:4.1
     ports:
@@ -297,15 +357,14 @@ services:
       - prometheus_data:/prometheus
     depends_on:
       - kafka-exporter
-      - postgres-exporter
+      - postgres-exporter1
+      - postgres-exporter2
     networks:
       - iot_network
   kafka-exporter:
     image: danielqsj/kafka-exporter:latest
     container_name: kafka-exporter
     restart: unless-stopped
-    ports:
-      - "9308:9308"
     environment:
       - KAFKA_URI=kafka:29092
       - KAFKA_GROUP_FILTER=.*
@@ -314,16 +373,25 @@ services:
         condition: service_healthy
     networks:
       - iot_network
-  postgres-exporter:
+  postgres-exporter1:
     image: prometheuscommunity/postgres-exporter:latest
-    container_name: postgres-exporter
+    container_name: postgres-exporter1
     restart: unless-stopped
-    ports:
-      - "9187:9187"
     environment:
-      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres1:5432/${POSTGRES_DB}?sslmode=disable"
     depends_on:
-      postgres:
+      postgres1:
+        condition: service_healthy
+    networks:
+      - iot_network
+  postgres-exporter2:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter2
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres2:5432/${POSTGRES_DB}?sslmode=disable"
+    depends_on:
+      postgres2:
         condition: service_healthy
     networks:
       - iot_network
@@ -331,8 +399,6 @@ services:
     image: criteord/cassandra_exporter:latest
     container_name: cassandra-exporter
     restart: unless-stopped
-    ports:
-      - "9500:8080"
     environment:
       CASSANDRA_EXPORTER_CONFIG_host: cassandra:7199
     depends_on:
@@ -343,8 +409,6 @@ services:
   loki:
     image: grafana/loki:2.9.2
     container_name: loki
-    ports:
-      - "3100:3100"
     command: -config.file=/etc/loki/loki-config.yaml
     user: "root"
     volumes:
@@ -390,7 +454,10 @@ services:
 volumes:
   schema-registry-data:
   zookeeper_data:
-  postgres_data:
+  postgres_data1:
+  postgres_data2:
+  postgres_data1r:
+  postgres_data2r:
   redis_data:
   cassandra_data:
   grafana_data:

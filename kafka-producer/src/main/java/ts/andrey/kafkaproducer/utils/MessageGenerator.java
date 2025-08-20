@@ -1,6 +1,5 @@
 package ts.andrey.kafkaproducer.utils;
 
-import com.github.f4b6a3.ulid.UlidCreator;
 import com.nashkod.avro.Device;
 import com.nashkod.avro.DeviceEvent;
 import com.nashkod.avro.EventType;
@@ -21,10 +20,10 @@ public class MessageGenerator {
     private static final int RANGE_START = -50;
     private static final int RANGE_END = 50;
 
-    private static List<String> devicePool = new ArrayList<>();
+    private static List<Integer> devicePool = new ArrayList<>();
 
     public List<DeviceEvent> generate(int messageCount, int deviceCount, boolean persist) {
-        List<String> ulidPool = persist ? syncDevicePool(deviceCount) : generateUlidPool(deviceCount);
+        List<Integer> ulidPool = persist ? syncDevicePool(deviceCount) : generateDeviceIdPool(deviceCount);
 
         List<DeviceEvent> events = new ArrayList<>();
         for (int i = 0; i < messageCount; i++) {
@@ -37,24 +36,24 @@ public class MessageGenerator {
         return events;
     }
 
-    private List<String> syncDevicePool(int deviceCount) {
+    private List<Integer> syncDevicePool(int deviceCount) {
         if (devicePool.size() < deviceCount) {
-            devicePool.addAll(generateUlidPool(deviceCount - devicePool.size()));
+            devicePool.addAll(generateDeviceIdPool(deviceCount - devicePool.size()));
         } else if (devicePool.size() > deviceCount) {
             devicePool = new ArrayList<>(devicePool.subList(0, deviceCount));
         }
         return devicePool;
     }
 
-    private List<String> generateUlidPool(int count) {
-        List<String> ulids = new ArrayList<>(count);
+    private List<Integer> generateDeviceIdPool(int count) {
+        List<Integer> uuids = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
-            ulids.add(UlidCreator.getUlid().toString());
+            uuids.add(i + 1);
         }
-        return ulids;
+        return uuids;
     }
 
-    private DeviceEvent generateRandomMessage(List<String> ulidPool) {
+    private DeviceEvent generateRandomMessage(List<Integer> ulidPool) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         return new DeviceEvent(
                 UUID.randomUUID().toString(),
@@ -62,7 +61,7 @@ public class MessageGenerator {
                 getRandomElement(List.of(EventType.values())),
                 String.format("%.2f", random.nextDouble(RANGE_START, RANGE_END)),
                 new Device(
-                        getRandomElement(ulidPool),
+                        (long) getRandomElement(ulidPool),
                         getRandomElement(DEVICE_TYPES),
                         "information",
                         generateRandomTimestamp()

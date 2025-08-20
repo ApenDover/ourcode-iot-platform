@@ -22,9 +22,6 @@ public class KafkaConfig {
     @Value("${spring.kafka.template.device-topic}")
     private String deviceIdTopic;
 
-    @Value("${spring.application.name}")
-    private String appName;
-
     @Bean
     public NewTopic deviceIdTopic() {
         return TopicBuilder.name(deviceIdTopic)
@@ -41,11 +38,6 @@ public class KafkaConfig {
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
         return factory;
-    }
-
-    @Bean
-    public Tracer tracer(OpenTelemetry openTelemetry) {
-        return openTelemetry.getTracer(appName, "1.0.0");
     }
 
 }

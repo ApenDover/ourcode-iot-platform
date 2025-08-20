@@ -52,16 +52,10 @@ spring:
   application:
     name: device-collector
   liquibase:
-    enabled: true
-    change-log: classpath:/liquibase/changelog.yml
-    default-schema: public
-    user: myuser
-    password: strongpassword
-    url: jdbc:postgresql://localhost:5432/iot_platform
+    enabled: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/iot_platform
-    username: myuser
-    password: strongpassword
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:sharding-config-local.yml
   jpa:
     hibernate:
       ddl-auto: none
@@ -92,3 +86,23 @@ spring:
       type: batch
       idle-between-polls: 1000
       observation-enabled: true
+
+app:
+  dataSources:
+    - url: jdbc:postgresql://localhost:5431/iot_platform
+      username: myuser
+      password: strongpassword
+    - url: jdbc:postgresql://localhost:5432/iot_platform
+      username: myuser
+      password: strongpassword
+
+shardingRule:
+  tables:
+    tdevice:
+      actualDataNodes: shard${0..1}.tdevice
+      tableStrategy:
+        none:
+      databaseStrategy:
+        inline:
+          shardingColumn: deviceid
+          algorithm-expression: shard{(deviceid.hashCode() % 2 + 2) % 2}

@@ -118,7 +118,7 @@ postman collection вот тут: [postman](infrastructure/postman)
 - подписывается на Kafka-топик events,
 - получает события в формате Avro (валидация через Schema Registry),
 - сохраняет события в Apache Cassandra для аналитики,
-- публикует уникальные device_id в отдельный Kafka-топик device.
+- публикует уникальные deviceid в отдельный Kafka-топик device.
 
 <details>
 
