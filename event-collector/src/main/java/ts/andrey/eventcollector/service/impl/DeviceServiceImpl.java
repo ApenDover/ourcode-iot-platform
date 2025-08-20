@@ -24,7 +24,7 @@ public class DeviceServiceImpl implements DeviceService {
      *
      * @param deviceEvents список событий
      */
-    @WithSpan("deviceService")
+    @WithSpan("deduplicate-save-send-process")
     public void sendUniqueDeviceids(List<DeviceEvent> deviceEvents) {
         final var devices = deviceEvents.stream()
                 .map(DeviceEvent::getDevice)

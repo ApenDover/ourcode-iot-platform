@@ -2,6 +2,7 @@ package ts.andrey.kafkaproducer.service.impl;
 
 import com.nashkod.avro.DeviceEvent;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
@@ -12,7 +13,6 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import ts.andrey.kafkaproducer.service.KafkaProducer;
-import ts.andrey.kafkaproducer.utils.TraceUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,8 +31,8 @@ public class KafkaEventProducerImpl implements KafkaProducer {
     private String eventsTopic;
 
     @Override
+    @WithSpan("publish-batch-event")
     public CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records) {
-        return TraceUtil.withSpan(tracer, "batch-start-" + records.size(), () -> {
             log.info("Отправка в топик {} новых device events: {}", eventsTopic, records.size());
             try {
                 if (CollectionUtils.isEmpty(records)) {
@@ -43,13 +43,7 @@ public class KafkaEventProducerImpl implements KafkaProducer {
                         .filter(DeviceEvent.class::isInstance)
                         .map(it -> {
                             final var event = (DeviceEvent) it;
-
-                            return kafkaTemplate.send(eventsTopic, event.getDevice().getDeviceId(), event)
-                                    .thenApply(SendResult::getRecordMetadata)
-                                    .exceptionally(ex -> {
-                                        log.error("Ошибка отправки eventId={}", event.getEventId(), ex);
-                                        return null;
-                                    });
+                            return sendMessage(event);
                         }).toList();
 
                 return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
@@ -62,7 +56,15 @@ public class KafkaEventProducerImpl implements KafkaProducer {
                 log.error("Ошибка при публикации eventIds в топик {}", eventsTopic, e);
             }
             return CompletableFuture.completedFuture(Collections.emptyList());
-        });
+    }
+
+    public CompletableFuture<RecordMetadata> sendMessage(DeviceEvent event) {
+        return kafkaTemplate.send(eventsTopic, event.getDevice().getDeviceId(), event)
+                .thenApply(SendResult::getRecordMetadata)
+                .exceptionally(ex -> {
+                    log.error("Ошибка отправки eventId={}", event.getEventId(), ex);
+                    return null;
+                });
     }
 
 }

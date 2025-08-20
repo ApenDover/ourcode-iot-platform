@@ -2,7 +2,7 @@ package ts.andrey.eventcollector.service.kafka.impl;
 
 import com.nashkod.avro.Device;
 import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import ts.andrey.eventcollector.annotation.WithSpan;
 import ts.andrey.eventcollector.service.kafka.KafkaProducer;
-import ts.andrey.eventcollector.utils.TraceUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +28,6 @@ import java.util.concurrent.CompletableFuture;
 public class KafkaDeviceProducerImpl implements KafkaProducer {
 
     private final KafkaTemplate<String, Device> kafkaTemplate;
-    private final Tracer tracer;
 
     @Value("${spring.kafka.template.device-topic}")
     private String deviceTopic;
@@ -43,9 +41,11 @@ public class KafkaDeviceProducerImpl implements KafkaProducer {
                 return CompletableFuture.completedFuture(Collections.emptyList());
             }
 
+            Context parentContext = Context.current();
+
             final var futures = records.stream()
                     .filter(Device.class::isInstance)
-                    .map(kafkaMessage -> sendToTopic((Device) kafkaMessage))
+                    .map(kafkaMessage -> sendToTopic((Device) kafkaMessage, parentContext))
                     .toList();
 
             return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
@@ -60,8 +60,7 @@ public class KafkaDeviceProducerImpl implements KafkaProducer {
         return CompletableFuture.completedFuture(Collections.emptyList());
     }
 
-    private CompletableFuture<RecordMetadata> sendToTopic(Device device) {
-        return TraceUtil.withSpan(tracer, "send-device-" + device.getDeviceId(), () -> {
+    public CompletableFuture<RecordMetadata> sendToTopic(Device device, Context parentSpan) {
             log.debug("отправляю в топик {} device={}", deviceTopic, device);
 
             final var trace = Span.current().getSpanContext();
@@ -76,7 +75,6 @@ public class KafkaDeviceProducerImpl implements KafkaProducer {
                         log.error("Ошибка отправки device={}", device, ex);
                         return null;
                     });
-        });
     }
 
 }

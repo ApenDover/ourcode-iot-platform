@@ -17,9 +17,9 @@ import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 import ts.andrey.eventcollector.cassandra.dao.DeviceEventDataService;
 import ts.andrey.eventcollector.cassandra.repository.DeviceEventRepository;
+import ts.andrey.eventcollector.service.impl.KafkaEventProducerImpl;
 import ts.andrey.eventcollector.service.kafka.impl.KafkaDeviceEventConsumer;
 import ts.andrey.eventcollector.service.component.SimpleCache;
-import ts.andrey.eventcollector.service.impl.KafkaEventProducerImpl;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;

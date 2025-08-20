@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import ts.andrey.eventcollector.annotation.WithSpan;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEntity;
 import ts.andrey.eventcollector.cassandra.repository.DeviceReactRepository;
 
@@ -17,6 +18,7 @@ public class DeviceDataService {
 
     private final DeviceReactRepository deviceReactRepository;
 
+    @WithSpan("cassandra-save-devices")
     public void saveDeviceIds(List<DeviceEntity> devices) {
         log.info("Пытаюсь сохранить Device в cassandra {} записей", devices.size());
         final var fluxEvents = Flux.fromIterable(devices);
@@ -26,6 +28,7 @@ public class DeviceDataService {
                 .subscribe();
     }
 
+    @WithSpan("cassandra-searching")
     public List<DeviceEntity> getUnsavedDeviceIds(List<DeviceEntity> devices) {
         log.info("Пытаюсь определить существование deviceId в cassandra {}", devices.size());
 

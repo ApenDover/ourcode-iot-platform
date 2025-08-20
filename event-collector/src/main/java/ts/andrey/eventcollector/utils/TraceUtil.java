@@ -5,6 +5,7 @@ import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import lombok.experimental.UtilityClass;
 import org.apache.kafka.common.header.Headers;
@@ -58,8 +59,10 @@ public class TraceUtil {
         return "";
     }
 
-    public <T> T withSpan(Tracer tracer, String spanName, Supplier<T> code) {
-        Span span = tracer.spanBuilder(spanName).startSpan();
+    public <T> T withSpan(Tracer tracer, Context parentSpan, String spanName, Supplier<T> code) {
+        Span span = tracer.spanBuilder(spanName)
+                .setParent(parentSpan)
+                .startSpan();
         try (Scope scope = span.makeCurrent()) {
             return code.get();
         } finally {
@@ -67,8 +70,10 @@ public class TraceUtil {
         }
     }
 
-    public void withSpan(Tracer tracer, String spanName, Runnable code) {
-        Span span = tracer.spanBuilder(spanName).startSpan();
+    public void withSpan(Tracer tracer, Context parentSpan, String spanName, Runnable code) {
+        Span span = tracer.spanBuilder(spanName)
+                .setParent(parentSpan)
+                .startSpan();
         try (Scope scope = span.makeCurrent()) {
             code.run();
         } finally {

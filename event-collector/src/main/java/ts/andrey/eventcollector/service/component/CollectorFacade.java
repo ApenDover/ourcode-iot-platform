@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import ts.andrey.eventcollector.annotation.WithSpan;
 import ts.andrey.eventcollector.service.DeviceEventService;
 import ts.andrey.eventcollector.service.DeviceService;
 import ts.andrey.eventcollector.validation.DeviceEventValidFilter;
@@ -19,6 +20,7 @@ public class CollectorFacade {
     private final DeviceEventService deviceEventService;
     private final DeviceService deviceService;
 
+    @WithSpan("event-collector-processing")
     public void collect(List<DeviceEvent> events) {
         try {
             final var deviceEvents = DeviceEventValidFilter.getCorrect(events);
