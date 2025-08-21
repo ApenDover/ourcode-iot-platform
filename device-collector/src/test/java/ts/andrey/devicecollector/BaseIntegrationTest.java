@@ -3,12 +3,12 @@ package ts.andrey.devicecollector;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
@@ -41,10 +41,10 @@ public abstract class BaseIntegrationTest {
     public DeviceRepository deviceRepository;
 
     @Autowired
-    public DataSource dbOneSource;
+    public PostgreSQLContainer<?> postgres1;
 
     @Autowired
-    public DataSource dbTwoSource;
+    public PostgreSQLContainer<?> postgres2;
 
     @Container
     protected static final KafkaContainer kafka = new KafkaContainer(

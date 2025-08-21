@@ -35,38 +35,6 @@ public class ShardingSphereConfig {
         return new PostgreSQLContainer<>("postgres:16");
     }
 
-    @Bean
-    public DataSource shard0(PostgreSQLContainer<?> postgres1) {
-        final var ds0 = new HikariDataSource();
-        ds0.setJdbcUrl(postgres1.getJdbcUrl());
-        ds0.setUsername(postgres1.getUsername());
-        ds0.setPassword(postgres1.getPassword());
-        ds0.setDriverClassName("org.postgresql.Driver");
-        final var migrationSource = MigrationSource.builder()
-                .url(postgres1.getJdbcUrl())
-                .username(postgres1.getUsername())
-                .password(postgres1.getPassword())
-                .build();
-        LiquibaseProcessor.runLiquibase(migrationSource);
-        return ds0;
-    }
-
-    @Bean
-    public DataSource shard1(PostgreSQLContainer<?> postgres2) {
-        final var ds1 = new HikariDataSource();
-        ds1.setJdbcUrl(postgres2.getJdbcUrl());
-        ds1.setUsername(postgres2.getUsername());
-        ds1.setPassword(postgres2.getPassword());
-        ds1.setDriverClassName("org.postgresql.Driver");
-        final var migrationSource = MigrationSource.builder()
-                .url(postgres2.getJdbcUrl())
-                .username(postgres2.getUsername())
-                .password(postgres2.getPassword())
-                .build();
-        LiquibaseProcessor.runLiquibase(migrationSource);
-        return ds1;
-    }
-
     @Primary
     @Bean
     public DataSource createShardingDataSource(

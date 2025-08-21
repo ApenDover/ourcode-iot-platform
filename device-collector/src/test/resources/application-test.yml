@@ -3,7 +3,10 @@ spring:
     enabled: false
   kafka:
     bootstrap-servers: ${kafka.bootstrap.servers}
+    template:
+      device-topic: deviceOne
     consumer:
+      max-poll-records: 1
       properties:
         schema.registry.url: ${schema.registry.url}
         avro.remove.java.properties: true
