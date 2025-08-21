@@ -37,9 +37,9 @@ rules:
           none:
     shardingAlgorithms:
       deviceid_inline:
-        type: HASH_MOD
+        type: INLINE
         props:
-          sharding-count: 2
+          algorithm-expression: shard$->{Math.abs(device_id.hashCode()) % 2}
 
   - !READWRITE_SPLITTING
     dataSourceGroups:

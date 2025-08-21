@@ -14,7 +14,7 @@ databaseChangeLog:
                     primaryKeyName: device_uuid_pk
               - column:
                   name: device_id
-                  type: bigint
+                  type: varchar(26)
                   constraints:
                     nullable: false
                     unique: true
