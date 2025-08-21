@@ -3,6 +3,7 @@ package ts.andrey.devicecollector;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -13,6 +14,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 import ts.andrey.devicecollector.postgres.repository.DeviceRepository;
+
+import javax.sql.DataSource;
 
 @Slf4j
 @SpringBootTest(
@@ -36,6 +39,12 @@ public abstract class BaseIntegrationTest {
 
     @Autowired
     public DeviceRepository deviceRepository;
+
+    @Autowired
+    public DataSource dbOneSource;
+
+    @Autowired
+    public DataSource dbTwoSource;
 
     @Container
     protected static final KafkaContainer kafka = new KafkaContainer(

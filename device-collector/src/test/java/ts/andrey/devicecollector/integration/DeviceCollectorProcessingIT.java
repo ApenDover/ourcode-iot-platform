@@ -2,9 +2,11 @@ package ts.andrey.devicecollector.integration;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
 import ts.andrey.devicecollector.BaseIntegrationTest;
 import ts.andrey.devicecollector.tdf.DummyTDF;
 import ts.andrey.devicecollector.testutils.KafkaProducerUtil;
+import ts.andrey.devicecollector.testutils.ShardUtil;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
@@ -69,6 +71,21 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
                     assertEquals("updated", entityUpdate.getMeta());
                     assertEquals(Instant.ofEpochMilli(600L), entityUpdate.getCreatedAt());
                 });
+    }
+
+    @Test
+    void shouldBeInsertToShardOne() {
+        //GIVEN
+
+        final var template = new JdbcTemplate(dbOneSource);
+        final var device = DummyTDF.device.getDefault();
+        final var q = ShardUtil.getShardByString(device.getDeviceId());
+
+        assertEquals(1, q);
+
+        //WHEN
+
+        //THEN
     }
 
 }

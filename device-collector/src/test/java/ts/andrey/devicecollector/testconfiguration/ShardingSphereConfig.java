@@ -2,7 +2,6 @@ package ts.andrey.devicecollector.testconfiguration;
 
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.apache.shardingsphere.driver.api.ShardingSphereDataSourceFactory;
 import org.apache.shardingsphere.infra.algorithm.core.config.AlgorithmConfiguration;
 import org.apache.shardingsphere.sharding.api.config.ShardingRuleConfiguration;
@@ -10,11 +9,13 @@ import org.apache.shardingsphere.sharding.api.config.rule.ShardingTableRuleConfi
 import org.apache.shardingsphere.sharding.api.config.strategy.sharding.StandardShardingStrategyConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.testcontainers.containers.PostgreSQLContainer;
 import ts.andrey.devicecollector.configuration.MigrationSource;
 import ts.andrey.devicecollector.utils.LiquibaseProcessor;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +35,39 @@ public class ShardingSphereConfig {
         return new PostgreSQLContainer<>("postgres:16");
     }
 
-    @SneakyThrows
+    @Bean
+    public DataSource shard0(PostgreSQLContainer<?> postgres1) {
+        final var ds0 = new HikariDataSource();
+        ds0.setJdbcUrl(postgres1.getJdbcUrl());
+        ds0.setUsername(postgres1.getUsername());
+        ds0.setPassword(postgres1.getPassword());
+        ds0.setDriverClassName("org.postgresql.Driver");
+        final var migrationSource = MigrationSource.builder()
+                .url(postgres1.getJdbcUrl())
+                .username(postgres1.getUsername())
+                .password(postgres1.getPassword())
+                .build();
+        LiquibaseProcessor.runLiquibase(migrationSource);
+        return ds0;
+    }
+
+    @Bean
+    public DataSource shard1(PostgreSQLContainer<?> postgres2) {
+        final var ds1 = new HikariDataSource();
+        ds1.setJdbcUrl(postgres2.getJdbcUrl());
+        ds1.setUsername(postgres2.getUsername());
+        ds1.setPassword(postgres2.getPassword());
+        ds1.setDriverClassName("org.postgresql.Driver");
+        final var migrationSource = MigrationSource.builder()
+                .url(postgres2.getJdbcUrl())
+                .username(postgres2.getUsername())
+                .password(postgres2.getPassword())
+                .build();
+        LiquibaseProcessor.runLiquibase(migrationSource);
+        return ds1;
+    }
+
+    @Primary
     @Bean
     public DataSource createShardingDataSource(
             PostgreSQLContainer<?> postgres1, PostgreSQLContainer<?> postgres2
@@ -84,11 +117,15 @@ public class ShardingSphereConfig {
 
         sources.forEach(LiquibaseProcessor::runLiquibase);
 
-        return ShardingSphereDataSourceFactory.createDataSource(
-                dataSourceMap,
-                Collections.singleton(shardingRule),
-                new Properties()
-        );
+        try {
+            return ShardingSphereDataSourceFactory.createDataSource(
+                    dataSourceMap,
+                    Collections.singleton(shardingRule),
+                    new Properties()
+            );
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
