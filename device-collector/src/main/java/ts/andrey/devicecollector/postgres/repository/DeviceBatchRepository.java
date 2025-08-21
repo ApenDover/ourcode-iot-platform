@@ -6,6 +6,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ts.andrey.devicecollector.configuration.metrics.GlobalMetrics;
 import ts.andrey.devicecollector.configuration.metrics.ShardMetrics;
 import ts.andrey.devicecollector.postgres.entity.DeviceEntity;
 import ts.andrey.devicecollector.utils.ShardUtil;
@@ -34,6 +35,7 @@ public class DeviceBatchRepository {
             """;
 
     private final ShardMetrics shardMetrics;
+    private final GlobalMetrics globalMetrics;
     private final JdbcTemplate jdbcTemplate;
 
     public void batchUpsert(List<DeviceEntity> devices) {
@@ -62,6 +64,7 @@ public class DeviceBatchRepository {
             devices.forEach(d -> {
                 final var shard = ShardUtil.getShardNameByString(d.getDeviceId());
                 shardMetrics.incrementSuccess(shard);
+                globalMetrics.incrementSuccess();
             });
 
         } catch (DataAccessException e) {

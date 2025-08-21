@@ -66,6 +66,7 @@ spring:
     bootstrap-servers: localhost:9092
     template:
       device-topic: device
+      dlt-device-topic: device.DLT
       observation-enabled: true
     consumer:
       max-poll-records: 50000

@@ -66,6 +66,8 @@ spring:
     bootstrap-servers: kafka:29092
     template:
       device-topic: device
+      dlt-device-topic: device.DLT
+      observation-enabled: true
     consumer:
       max-poll-records: 50000
       fetch-max-wait: 500

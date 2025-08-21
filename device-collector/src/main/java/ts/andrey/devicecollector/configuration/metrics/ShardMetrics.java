@@ -2,21 +2,19 @@ package ts.andrey.devicecollector.configuration.metrics;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@RequiredArgsConstructor
 public class ShardMetrics {
 
     private final MeterRegistry registry;
     private final Map<String, Counter> successCounters = new ConcurrentHashMap<>();
     private final Map<String, Counter> errorCounters = new ConcurrentHashMap<>();
-
-    public ShardMetrics(MeterRegistry registry) {
-        this.registry = registry;
-    }
 
     public void incrementSuccess(String shardId) {
         successCounters.computeIfAbsent(shardId, this::createSuccessCounter)
