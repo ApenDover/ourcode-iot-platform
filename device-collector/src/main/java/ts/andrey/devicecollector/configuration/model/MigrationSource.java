@@ -1,4 +1,4 @@
-package ts.andrey.devicecollector.configuration;
+package ts.andrey.devicecollector.configuration.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

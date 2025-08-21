@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.testcontainers.containers.PostgreSQLContainer;
-import ts.andrey.devicecollector.configuration.MigrationSource;
+import ts.andrey.devicecollector.configuration.model.MigrationSource;
 import ts.andrey.devicecollector.utils.LiquibaseProcessor;
 
 import javax.sql.DataSource;

@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.boot.cfgxml.internal.ConfigLoader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.yaml.snakeyaml.Yaml;
-import ts.andrey.devicecollector.configuration.MigrationSource;
+import ts.andrey.devicecollector.configuration.model.MigrationSource;
 
 import java.util.List;
 import java.util.Map;
