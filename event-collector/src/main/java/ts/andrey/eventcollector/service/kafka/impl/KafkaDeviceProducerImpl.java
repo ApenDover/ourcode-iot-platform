@@ -67,7 +67,7 @@ public class KafkaDeviceProducerImpl implements KafkaProducer {
             final var header = new RecordHeader("traceparent", trace.getTraceIdBytes());
 
             final var producerRecord = new ProducerRecord<String, Device>(
-                    deviceTopic, 1, String.valueOf(device.getDeviceId()), device, List.of(header));
+                    deviceTopic, 1, device.getDeviceId(), device, List.of(header));
 
             return kafkaTemplate.send(producerRecord)
                     .thenApply(SendResult::getRecordMetadata)

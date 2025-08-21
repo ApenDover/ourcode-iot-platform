@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class MigrationSource {
+
     private String url;
     private String username;
     private String password;
+
 }

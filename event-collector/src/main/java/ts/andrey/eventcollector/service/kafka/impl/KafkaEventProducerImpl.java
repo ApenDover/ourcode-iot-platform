@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.service.impl;
+package ts.andrey.eventcollector.service.kafka.impl;
 
 import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;

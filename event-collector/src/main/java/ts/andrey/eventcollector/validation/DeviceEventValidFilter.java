@@ -20,7 +20,7 @@ public class DeviceEventValidFilter {
         return events.stream()
                 .filter(Objects::nonNull)
                 .filter(it -> {
-                    final var isValid = StringUtils.isNotEmpty(String.valueOf(it.getDevice().getDeviceId()))
+                    final var isValid = StringUtils.isNotEmpty(it.getDevice().getDeviceId())
                             && StringUtils.isNotEmpty(it.getEventId())
                             && StringUtils.isNotEmpty(it.getPayload())
                             && Objects.nonNull(it.getType())

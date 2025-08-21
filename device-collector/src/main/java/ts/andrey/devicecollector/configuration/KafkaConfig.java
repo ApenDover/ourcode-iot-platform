@@ -1,8 +1,6 @@
 package ts.andrey.devicecollector.configuration;
 
 import com.nashkod.avro.Device;
-import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.trace.Tracer;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

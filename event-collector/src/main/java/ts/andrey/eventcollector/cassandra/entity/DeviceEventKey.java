@@ -18,7 +18,7 @@ import java.util.UUID;
 public class DeviceEventKey {
 
     @PrimaryKeyColumn(
-            name = "deviceid",
+            name = "device_id",
             type = PrimaryKeyType.PARTITIONED,
             ordering = Ordering.DESCENDING
     )

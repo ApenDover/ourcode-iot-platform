@@ -1,6 +1,9 @@
 spring:
-  application:
-    name: device-collector
+  liquibase:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create
   kafka:
     bootstrap-servers: ${kafka.bootstrap.servers}
     consumer:

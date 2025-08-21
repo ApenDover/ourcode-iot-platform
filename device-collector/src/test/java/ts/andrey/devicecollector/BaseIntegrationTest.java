@@ -16,7 +16,15 @@ import org.testcontainers.utility.DockerImageName;
 import ts.andrey.devicecollector.postgres.repository.DeviceRepository;
 
 @Slf4j
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+                "spring.liquibase.enabled=false",
+                "spring.jpa.hibernate.ddl-auto=create",
+                "spring.datasource.driver-class-name=org.postgresql.Driver",
+                "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect"
+        }
+)
 @Testcontainers
 @ActiveProfiles("test")
 public abstract class BaseIntegrationTest {

@@ -55,7 +55,6 @@ class EventCollectorProcessingIT extends BaseIntegrationTest {
 
         //THEN CHECK IT CACHED
         assertEquals(10, simpleCache.size());
-
     }
 
 }

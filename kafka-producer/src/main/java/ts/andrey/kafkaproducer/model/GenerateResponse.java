@@ -21,7 +21,7 @@ public class GenerateResponse {
 
     private final Integer messageCount;
     private final Integer deviceCount;
-    private final List<Long> deviceIds;
+    private final List<String> deviceIds;
     private final String trace;
 
 }

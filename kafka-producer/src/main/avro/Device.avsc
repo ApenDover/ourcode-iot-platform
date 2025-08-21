@@ -5,7 +5,7 @@
   "fields": [
     {
       "name": "deviceId",
-      "type": "long"
+      "type": "string"
     },
     {
       "name": "deviceType",
