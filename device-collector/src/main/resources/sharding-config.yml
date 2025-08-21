@@ -1,22 +1,26 @@
 dataSources:
-  shard1:
+  shard0:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: org.postgresql.Driver
     jdbcUrl: jdbc:postgresql://postgres1:5432/iot_platform
     username: myuser
     password: strongpassword
-  #  shard1_replica:
+  #  shard0_replica:
   #    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
-  #    jdbcUrl: jdbc:postgresql://postgresr1:5432/iot_platform
+  #    driverClassName: org.postgresql.Driver
+  #    jdbcUrl: jdbc:postgresql://localhost:5433/iot_platform
   #    username: myuser
   #    password: strongpassword
-  shard2:
+  shard1:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: org.postgresql.Driver
     jdbcUrl: jdbc:postgresql://postgres2:5432/iot_platform
     username: myuser
     password: strongpassword
-#  shard2_replica:
+#  shard1_replica:
 #    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
-#    jdbcUrl: jdbc:postgresql://postgresr2:5432/iot_platform
+#    driverClassName: org.postgresql.Driver
+#    jdbcUrl: jdbc:postgresql://localhost:5434/iot_platform
 #    username: myuser
 #    password: strongpassword
 
@@ -36,7 +40,9 @@ rules:
         type: INLINE
         props:
           algorithm-expression: shard${deviceid % 2}
+
 props:
   sql-show: true
   default-database-name: iot_platform
 databaseName: iot_platform
+

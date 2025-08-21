@@ -24,21 +24,6 @@ dataSources:
 #    username: myuser
 #    password: strongpassword
 
-#rules:
-#  - !SHARDING
-#    tables:
-#      orders:
-#        actualDataNodes: shard${0..1}.tdevice
-#    defaultDatabaseStrategy:
-#      standard:
-#        shardingColumn: deviceid
-#        shardingAlgorithmName: database_inline
-#    shardingAlgorithms:
-#      database_inline:
-#        type: INLINE
-#        props:
-#          algorithm-expression: shard{(deviceid.hashCode() % 2 + 2) % 2}
-
 rules:
   - !SHARDING
     tables:

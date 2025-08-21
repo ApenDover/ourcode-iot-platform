@@ -84,6 +84,7 @@ spring:
       concurrency: 3
       type: batch
       idle-between-polls: 1000
+      observation-enabled: true
 
 app:
   dataSources:
