@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor
-public class ShardMetrics {
+public class PostgresMetrics {
 
     private final MeterRegistry registry;
     private final Map<String, Counter> successCounters = new ConcurrentHashMap<>();
@@ -27,15 +27,15 @@ public class ShardMetrics {
     }
 
     private Counter createSuccessCounter(String shardId) {
-        return Counter.builder("device.processed.success")
-                .description("Number of successfully processed devices per shard")
+        return Counter.builder("device.postgres.success")
+                .description("Число успешных сохранений на шард")
                 .tag("shard", shardId)
                 .register(registry);
     }
 
     private Counter createErrorCounter(String shardId) {
-        return Counter.builder("device.processed.error")
-                .description("Number of errors per shard")
+        return Counter.builder("device.postgres.error")
+                .description("Число ошибок при сохранении на шард")
                 .tag("shard", shardId)
                 .register(registry);
     }

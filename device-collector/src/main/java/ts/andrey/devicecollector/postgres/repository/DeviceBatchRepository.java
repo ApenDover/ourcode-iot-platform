@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ts.andrey.devicecollector.configuration.metrics.GlobalMetrics;
-import ts.andrey.devicecollector.configuration.metrics.ShardMetrics;
+import ts.andrey.devicecollector.configuration.metrics.PostgresMetrics;
 import ts.andrey.devicecollector.postgres.entity.DeviceEntity;
 import ts.andrey.devicecollector.utils.ShardUtil;
 
@@ -34,7 +34,7 @@ public class DeviceBatchRepository {
                     meta        = EXCLUDED.meta
             """;
 
-    private final ShardMetrics shardMetrics;
+    private final PostgresMetrics postgresMetrics;
     private final GlobalMetrics globalMetrics;
     private final JdbcTemplate jdbcTemplate;
 
@@ -63,7 +63,7 @@ public class DeviceBatchRepository {
 
             devices.forEach(d -> {
                 final var shard = ShardUtil.getShardNameByString(d.getDeviceId());
-                shardMetrics.incrementSuccess(shard);
+                postgresMetrics.incrementSuccess(shard);
                 globalMetrics.incrementSuccess();
             });
 
@@ -74,17 +74,17 @@ public class DeviceBatchRepository {
                     if (updateCounts[i] == Statement.EXECUTE_FAILED) {
                         log.error("DeviceId {} не сохранен в базу данных: ", devices.get(i).getDeviceId(), e);
                         String shard = ShardUtil.getShardNameByString(devices.get(i).getDeviceId());
-                        shardMetrics.incrementError(shard);
+                        postgresMetrics.incrementError(shard);
                     } else {
                         String shard = ShardUtil.getShardNameByString(devices.get(i).getDeviceId());
-                        shardMetrics.incrementSuccess(shard);
+                        postgresMetrics.incrementSuccess(shard);
                     }
                 }
             } else {
                 log.error("Batch({}) с Device не сохранен в базу данных: ", devices.size(), e);
                 devices.forEach(d -> {
                     final var shard = ShardUtil.getShardNameByString(d.getDeviceId());
-                    shardMetrics.incrementError(shard);
+                    postgresMetrics.incrementError(shard);
                 });
             }
         }

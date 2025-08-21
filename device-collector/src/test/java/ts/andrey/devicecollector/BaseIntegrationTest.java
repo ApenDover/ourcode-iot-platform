@@ -15,8 +15,6 @@ import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 import ts.andrey.devicecollector.postgres.repository.DeviceRepository;
 
-import javax.sql.DataSource;
-
 @Slf4j
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,

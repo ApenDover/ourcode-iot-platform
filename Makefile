@@ -7,8 +7,8 @@ COMPOSE_FILE=./infrastructure/docker-compose.yml
 COMPOSE_FILE_LOCAL=./infrastructure/docker-compose.override.yml
 DC=docker compose -f $(COMPOSE_FILE)
 DCL=docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_FILE_LOCAL)
-ACTUATOR_URL := http://localhost:
-LOGGER_NAME := ts.andrey
+ACTUATOR_URL=http://localhost:
+LOGGER_NAME=ts.andrey
 
 .PHONY: up down downv restart logs help exec logs-
 

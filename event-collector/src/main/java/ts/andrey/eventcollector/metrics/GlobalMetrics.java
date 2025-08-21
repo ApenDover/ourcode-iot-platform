@@ -1,4 +1,4 @@
-package ts.andrey.devicecollector.configuration.metrics;
+package ts.andrey.eventcollector.metrics;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -11,12 +11,12 @@ public class GlobalMetrics {
     private final Counter errorCounter;
 
     public GlobalMetrics(MeterRegistry meterRegistry) {
-        this.successCounter = Counter.builder("device.processed.success")
-                .description("Общее число успешно обработанных устройств")
+        this.successCounter = Counter.builder("events.processed.success")
+                .description("Общее число успешно обработанных событий")
                 .register(meterRegistry);
 
-        this.errorCounter = Counter.builder("device.processed.error")
-                .description("Общее число не обработанных устройств (отправленно в DLT)")
+        this.errorCounter = Counter.builder("events.processed.error")
+                .description("Общее число не обработанных событий (отправленно в DLT)")
                 .register(meterRegistry);
     }
 

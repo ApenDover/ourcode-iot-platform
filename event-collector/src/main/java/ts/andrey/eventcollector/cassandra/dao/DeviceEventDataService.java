@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
 import ts.andrey.eventcollector.cassandra.repository.DeviceEventReactRepository;
+import ts.andrey.eventcollector.metrics.CassandraMetrics;
 
 import java.time.Duration;
 import java.util.List;
@@ -17,25 +18,43 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DeviceEventDataService {
 
+    private final CassandraMetrics cassandraMetrics;
     private final DeviceEventReactRepository deviceEventReactRepository;
 
     public void saveAll(List<DeviceEventEntity> events) {
-        log.info("Attempting to save {} DeviceEvent records to Cassandra", events.size());
+        log.info("Сохраняю: [{}] событий в Cassandra", events.size());
 
         Flux.fromIterable(events)
                 .buffer(1000)
                 .flatMap(batch -> {
                     log.debug("Processing batch of {} events", batch.size());
                     return deviceEventReactRepository.saveAll(batch)
-                            .retryWhen(Retry.backoff(3, Duration.ofMillis(100)))
+                            .collectList()
+                            .doOnSuccess(saved -> {
+                                cassandraMetrics.incrementSuccess(saved.size());
+                                log.info("Успешно сохранен батч из {} событий", batch.size());
+                            })
                             .onErrorResume(e -> {
-                                log.error("Failed to save batch of {} events "
-                                        + "to Cassandra - skipping batch", batch.size(), e);
-                                return Mono.empty();
+                                log.warn("Ошибка сохранения батча из {} событий, пробуем поштучно", batch.size(), e);
+
+                                return Flux.fromIterable(batch)
+                                        .flatMap(event ->
+                                                deviceEventReactRepository.save(event)
+                                                        .doOnSuccess(saved -> {
+                                                            cassandraMetrics.incrementSuccess();
+                                                            log.debug("Событие {} успешно сохранено", event.getKey().getEventId());
+                                                        })
+                                                        .retryWhen(Retry.backoff(3, Duration.ofMillis(100)))
+                                                        .onErrorResume(inner -> {
+                                                            cassandraMetrics.incrementError();
+                                                            log.error("Ошибка сохранения события {} в Cassandra", event.getKey().getEventId(), inner);
+                                                            return Mono.empty();
+                                                        })
+                                        )
+                                        .collectList();
                             });
                 })
-                .doOnComplete(() -> log.info("Successfully processed all {} events", events.size()))
-                .doOnError(e -> log.error("Error processing events", e))
+                .doOnComplete(() -> log.info("Завершена обработка {} событий", events.size()))
                 .blockLast();
     }
 
