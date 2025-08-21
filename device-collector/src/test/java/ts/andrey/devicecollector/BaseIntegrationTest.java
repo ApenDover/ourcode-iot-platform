@@ -8,7 +8,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
@@ -20,9 +19,9 @@ import ts.andrey.devicecollector.postgres.repository.DeviceRepository;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
                 "spring.liquibase.enabled=false",
-                "spring.jpa.hibernate.ddl-auto=create",
-                "spring.datasource.driver-class-name=org.postgresql.Driver",
-                "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect"
+                "spring.jpa.hibernate.ddl-auto=none",
+                "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
+                "spring.datasource.driver-class-name=org.apache.shardingsphere.driver.ShardingSphereDriver"
         }
 )
 @Testcontainers
@@ -37,9 +36,6 @@ public abstract class BaseIntegrationTest {
 
     @Autowired
     public DeviceRepository deviceRepository;
-
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16");
 
     @Container
     protected static final KafkaContainer kafka = new KafkaContainer(
@@ -69,9 +65,6 @@ public abstract class BaseIntegrationTest {
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("kafka.bootstrap.servers", kafka::getBootstrapServers);
         registry.add("schema.registry.url", () -> LOCALHOST_HTTP + schemaRegistry.getFirstMappedPort());
     }
