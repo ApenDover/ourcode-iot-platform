@@ -16,16 +16,20 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "tdevice")
+@Table(name = "t_device")
 @AllArgsConstructor
 @NoArgsConstructor
 public class DeviceEntity {
 
     @Id
     private UUID id;
+
     private Long deviceId;
+
     private String deviceType;
+
     private Instant createdAt;
+
     private String meta;
 
     @Override

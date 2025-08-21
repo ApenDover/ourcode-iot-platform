@@ -11,6 +11,7 @@ import ts.andrey.devicecollector.configuration.MigrationSource;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @UtilityClass
@@ -40,12 +41,23 @@ public class LiquibaseProcessor {
 
     private List<MigrationSource> loadProperties() {
         try {
+
+            var profile = System.getProperty("spring.profiles.active",
+                    System.getenv("SPRING_PROFILES_ACTIVE"));
+            if (Objects.isNull(profile)) {
+                profile = "default";
+            }
+
+            final var fileName = "application" + (profile.equals("default") ? "" : "-" + profile) + ".yml";
+
+            log.info("Loading properties from {}", fileName);
+
             final var yaml = new Yaml();
             final var inputStream = ConfigLoader.class.getClassLoader()
-                    .getResourceAsStream("application.yml");
+                    .getResourceAsStream(fileName);
 
             if (inputStream == null) {
-                throw new RuntimeException("application.yml not found in classpath");
+                throw new RuntimeException(fileName + " not found in classpath");
             }
 
             Map<String, Object> obj = yaml.load(inputStream);
@@ -59,7 +71,7 @@ public class LiquibaseProcessor {
                             .password(ds.get("password"))
                             .build()).toList();
         } catch (Exception e) {
-            throw new RuntimeException("Error loading application.yml", e);
+            throw new RuntimeException("Error loading properties file", e);
         }
     }
 

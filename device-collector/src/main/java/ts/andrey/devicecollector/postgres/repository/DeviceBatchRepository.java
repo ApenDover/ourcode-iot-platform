@@ -22,9 +22,9 @@ public class DeviceBatchRepository {
         }
 
         String sql = """
-                INSERT INTO public.tdevice (id, deviceid, device_type, created_at, meta)
+                INSERT INTO public.t_device (id, device_id, device_type, created_at, meta)
                 VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT (deviceid) DO UPDATE SET
+                ON CONFLICT (device_id) DO UPDATE SET
                     device_type = EXCLUDED.device_type,
                     created_at  = EXCLUDED.created_at,
                     meta        = EXCLUDED.meta

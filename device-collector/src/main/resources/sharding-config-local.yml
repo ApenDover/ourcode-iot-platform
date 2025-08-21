@@ -27,11 +27,11 @@ dataSources:
 rules:
   - !SHARDING
     tables:
-      tdevice:
-        actualDataNodes: shard${0..1}.tdevice
+      t_device:
+        actualDataNodes: shard${0..1}.t_device
         databaseStrategy:
           standard:
-            shardingColumn: deviceid
+            shardingColumn: device_id
             shardingAlgorithmName: deviceid_inline
         tableStrategy:
           none:
@@ -39,7 +39,7 @@ rules:
       deviceid_inline:
         type: INLINE
         props:
-          algorithm-expression: shard${deviceid % 2}
+          algorithm-expression: shard${device_id % 2}
 
   - !READWRITE_SPLITTING
     dataSourceGroups:

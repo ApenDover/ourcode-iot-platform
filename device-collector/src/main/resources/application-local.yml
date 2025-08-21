@@ -95,14 +95,3 @@ app:
     - url: jdbc:postgresql://localhost:5432/iot_platform
       username: myuser
       password: strongpassword
-
-shardingRule:
-  tables:
-    tdevice:
-      actualDataNodes: shard${0..1}.tdevice
-      tableStrategy:
-        none:
-      databaseStrategy:
-        inline:
-          shardingColumn: deviceid
-          algorithm-expression: shard{(deviceid.hashCode() % 2 + 2) % 2}
