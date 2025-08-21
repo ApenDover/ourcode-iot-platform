@@ -37,6 +37,10 @@ services:
       OTEL_LOGS_EXPORTER: none
       OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
     depends_on:
+      postgres1r:
+        condition: service_healthy
+      postgres2r:
+        condition: service_healthy
       event-collector:
         condition: service_healthy
     healthcheck:
@@ -186,11 +190,15 @@ services:
 #      - iot_network
   postgres1:
     container_name: postgres1
-    image: postgres:latest
+    image: postgres:15
     restart: unless-stopped
+    command: ["postgres", "-c", "config_file=/var/lib/postgresql/postgresql.conf"]
     ports:
       - "5431:5432"
     volumes:
+      - ./postgres/master1/scripts:/docker-entrypoint-initdb.d
+      - ./postgres/master1/master.conf:/var/lib/postgresql/postgresql.conf
+      - ./postgres/master1/pg_hba.conf:/var/lib/postgresql/pg_hba.conf
       - postgres_data1:/var/lib/postgresql/data
     env_file:
       - .env
@@ -206,11 +214,15 @@ services:
       - iot_network
   postgres2:
     container_name: postgres2
-    image: postgres:latest
+    image: postgres:15
     restart: unless-stopped
+    command: ["postgres", "-c", "config_file=/var/lib/postgresql/postgresql.conf"]
     ports:
       - "5432:5432"
     volumes:
+      - ./postgres/master2/scripts:/docker-entrypoint-initdb.d
+      - ./postgres/master2/master.conf:/var/lib/postgresql/postgresql.conf
+      - ./postgres/master2/pg_hba.conf:/var/lib/postgresql/pg_hba.conf
       - postgres_data2:/var/lib/postgresql/data
     env_file:
       - .env
@@ -226,12 +238,14 @@ services:
       - iot_network
   postgres1r:
     container_name: postgres1r
-    image: postgres:latest
+    image: postgres:15
     restart: unless-stopped
     ports:
       - "5433:5432"
     volumes:
       - postgres_data1r:/var/lib/postgresql/data
+      - ./postgres/replica1/replica.sh:/usr/local/bin/replica.sh
+    command: sh /usr/local/bin/replica.sh
     env_file:
       - .env
     environment:
@@ -242,22 +256,30 @@ services:
       test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}" ]
       interval: 10s
       retries: 5
+    depends_on:
+      postgres1:
+        condition: service_healthy
     networks:
       - iot_network
   postgres2r:
     container_name: postgres2r
-    image: postgres:latest
+    image: postgres:15
     restart: unless-stopped
     ports:
       - "5434:5432"
     volumes:
       - postgres_data2r:/var/lib/postgresql/data
+      - ./postgres/replica2/replica.sh:/usr/local/bin/replica.sh
+    command: sh /usr/local/bin/replica.sh
     env_file:
       - .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    depends_on:
+      postgres2:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}" ]
       interval: 10s

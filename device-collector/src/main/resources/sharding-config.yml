@@ -5,24 +5,24 @@ dataSources:
     jdbcUrl: jdbc:postgresql://postgres1:5432/iot_platform
     username: myuser
     password: strongpassword
-  #  shard0_replica:
-  #    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
-  #    driverClassName: org.postgresql.Driver
-  #    jdbcUrl: jdbc:postgresql://localhost:5433/iot_platform
-  #    username: myuser
-  #    password: strongpassword
+    shard0_replica:
+      dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+      driverClassName: org.postgresql.Driver
+      jdbcUrl: jdbc:postgresql://postgres1r:5432/iot_platform
+      username: myuser
+      password: strongpassword
   shard1:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
     driverClassName: org.postgresql.Driver
     jdbcUrl: jdbc:postgresql://postgres2:5432/iot_platform
     username: myuser
     password: strongpassword
-#  shard1_replica:
-#    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
-#    driverClassName: org.postgresql.Driver
-#    jdbcUrl: jdbc:postgresql://localhost:5434/iot_platform
-#    username: myuser
-#    password: strongpassword
+  shard1_replica:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: org.postgresql.Driver
+    jdbcUrl: jdbc:postgresql://postgres2r:5432/iot_platform
+    username: myuser
+    password: strongpassword
 
 rules:
   - !SHARDING
@@ -41,6 +41,21 @@ rules:
         props:
           algorithm-expression: shard${deviceid % 2}
 
+  - !READWRITE_SPLITTING
+    dataSourceGroups:
+      shard0:
+        writeDataSourceName: shard0
+        readDataSourceNames:
+          - shard0_replica
+        loadBalancerName: round_robin
+      shard1:
+        writeDataSourceName: shard1
+        readDataSourceNames:
+          - shard1_replica
+        loadBalancerName: round_robin
+    loadBalancers:
+      round_robin:
+        type: ROUND_ROBIN
 props:
   sql-show: true
   default-database-name: iot_platform
