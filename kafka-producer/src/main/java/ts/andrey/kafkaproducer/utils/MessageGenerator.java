@@ -18,16 +18,16 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MessageGenerator {
 
     private static final List<String> DEVICE_TYPES = List.of("sensor", "actuator", "controller", "gateway");
-    private static final int RANGE_START = -50;
-    private static final int RANGE_END = 50;
+    private static final long RANGE_START = -50;
+    private static final long RANGE_END = 50;
 
     private static List<String> devicePool = new ArrayList<>();
 
-    public List<DeviceEvent> generate(int messageCount, int deviceCount, boolean persist) {
+    public List<DeviceEvent> generate(long messageCount, long deviceCount, boolean persist) {
         List<String> ulidPool = persist ? syncDevicePool(deviceCount) : generateUlidPool(deviceCount);
 
         List<DeviceEvent> events = new ArrayList<>();
-        for (int i = 0; i < messageCount; i++) {
+        for (long i = 0; i < messageCount; i++) {
             events.add(generateRandomMessage(ulidPool));
         }
 
@@ -37,18 +37,18 @@ public class MessageGenerator {
         return events;
     }
 
-    private List<String> syncDevicePool(int deviceCount) {
+    private List<String> syncDevicePool(long deviceCount) {
         if (devicePool.size() < deviceCount) {
             devicePool.addAll(generateUlidPool(deviceCount - devicePool.size()));
         } else if (devicePool.size() > deviceCount) {
-            devicePool = new ArrayList<>(devicePool.subList(0, deviceCount));
+            devicePool = new ArrayList<>(devicePool.subList(0, (int) deviceCount));
         }
         return devicePool;
     }
 
-    private List<String> generateUlidPool(int count) {
-        List<String> ulids = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) {
+    private List<String> generateUlidPool(long count) {
+        List<String> ulids = new ArrayList<>((int) count);
+        for (long i = 0; i < count; i++) {
             ulids.add(UlidCreator.getUlid().toString());
         }
         return ulids;

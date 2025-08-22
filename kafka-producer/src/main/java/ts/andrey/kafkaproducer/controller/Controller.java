@@ -33,13 +33,17 @@ public class Controller {
 
     @GetMapping("/send/generate")
     public ResponseEntity<GenerateResponse> sendKafkaMessageGenerate(
-            @RequestParam("messageCount") Integer messageCount,
-            @RequestParam("deviceCount") Integer deviceCount,
+            @RequestParam("messageCount") long messageCount,
+            @RequestParam("deviceCount") long deviceCount,
             @RequestParam(name = "saveDevice", required = false, defaultValue = "false") Boolean saveDevice
     ) {
         final var messages = MessageGenerator.generate(messageCount, deviceCount, saveDevice);
         kafkaProducer.send(messages);
-        return ResponseEntity.ok(new GenerateResponse(messages, deviceCount, messageCount));
+        final var deviceIdsCount = messages.stream()
+                .map(it -> it.getDevice().getDeviceId())
+                .distinct()
+                .count();
+        return ResponseEntity.ok(new GenerateResponse(deviceIdsCount, messageCount));
     }
 
 }
