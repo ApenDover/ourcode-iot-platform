@@ -12,7 +12,7 @@ public class GlobalMetrics {
 
     public GlobalMetrics(MeterRegistry meterRegistry) {
         this.successCounter = Counter.builder("events.processed.success")
-                .description("Общее число успешно обработанных событий")
+                .description("Число успешно обработанных (batch) событий")
                 .register(meterRegistry);
 
         this.errorCounter = Counter.builder("events.processed.error")

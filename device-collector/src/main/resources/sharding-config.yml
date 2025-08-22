@@ -57,7 +57,7 @@ rules:
       round_robin:
         type: ROUND_ROBIN
 props:
-  sql-show: true
+  sql-show: false
   default-database-name: iot_platform
 databaseName: iot_platform
 

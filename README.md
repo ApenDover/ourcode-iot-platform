@@ -99,6 +99,13 @@ postman collection вот тут: [postman](infrastructure/postman)
 
 </details>
 
+<details>
+<summary>metrics</summary>
+
+![metrics.png](pics/metrics.png)
+
+</details>
+
 ## 🚀 Запуск
 
 Из корня проекта доступны команды через `Makefile`.
@@ -143,4 +150,36 @@ postman collection вот тут: [postman](infrastructure/postman)
 - Сериализация: Avro (Confluent Schema Registry)
 - Хранилище: Apache Cassandra
 - Тестирование и окружение: Testcontainers (Kafka, Cassandra, Schema Registry)
+- Система сборки: Gradle
+
+## device-collector
+
+- получает сообщения о новых и изменённых устройствах из Kafka в формате Avro (валидация через Schema Registry)
+- cохраняет/обновляет информацию о устройствах в PostgreSQL, используя шардирование через Apache ShardingSphere
+- Гарантирует идемпотентность, корректную обработку ошибок, экспортирует метрики.
+
+<details>
+
+<summary>Компоненты сервиса</summary>
+
+![device-collector-component.png](diagrams/device-collector/device-collector-component.png)
+
+</details>
+
+<details>
+
+<summary>Логическая последовательность</summary>
+
+![device-collector-sequence.png](diagrams/device-collector/device-collector-sequence.png)
+
+</details>
+
+### Технологии:
+- Язык программирования: Java 24
+- Фреймворк: Spring Boot 3.5
+- Обмен сообщениями: Apache Kafka
+- Сериализация: Avro (Confluent Schema Registry)
+- Шардирование: ShardingSphere
+- Хранилище: Postgres
+- Тестирование и окружение: Testcontainers (Kafka, Postgres, Schema Registry)
 - Система сборки: Gradle

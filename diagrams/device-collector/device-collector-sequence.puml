@@ -5,6 +5,7 @@ participant "SchemaRegistry" as AVRO
 participant "DeviceEventConsumer" as DC  #lightblue
 participant "DeviceService" as DS  #lightblue
 participant "DeviceRepository" as REPO  #lightblue
+participant "ShardingSphere" as SS  #lightgreen
 participant "Postgres" as DB
 
 KafkaBroker --> DC : события в Avro (DeviceEvents)
@@ -13,6 +14,7 @@ AVRO -> DC : DeviceEvents
 DC -> DS : DeviceEvents
 
 DS -> REPO : сохранить
-REPO -> DB : сохранить
+REPO -> SS : сохранить
+SS -> DB : сохранить
 
 @enduml
