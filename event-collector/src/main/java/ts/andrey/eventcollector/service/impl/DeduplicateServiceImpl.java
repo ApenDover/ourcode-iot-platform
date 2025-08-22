@@ -36,11 +36,14 @@ public class DeduplicateServiceImpl implements DeduplicateService {
     @WithSpan("deduplicateService")
     public List<Device> getUniqueDevices(List<Device> devices) {
 
-        final var uncached = devices.stream()
-                .filter(Objects::nonNull)
-                .filter(deviceEvent -> StringUtils.isNotEmpty(deviceEvent.getDeviceId()))
+        final var uncachedDeviceId = devices.stream()
+                .map(Device::getDeviceId)
                 .distinct()
-                .filter(it -> !simpleCache.contains(it.getDeviceId()))
+                .filter(it -> !simpleCache.contains(it))
+                .toList();
+
+        final var uncached = devices.stream()
+                .filter(it -> uncachedDeviceId.contains(it.getDeviceId()))
                 .toList();
 
         final var deviceEntities = deviceEventMapper.deviceToEntityList(uncached);

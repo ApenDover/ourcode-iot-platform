@@ -18,7 +18,7 @@ public class DeviceDataService {
 
     private final DeviceReactRepository deviceReactRepository;
 
-    @WithSpan("cassandra-save-devices")
+    @WithSpan("cassandra-save-batch-devices")
     public void saveDeviceIds(List<DeviceEntity> devices) {
         log.info("Пытаюсь сохранить Device в cassandra {} записей", devices.size());
         final var fluxEvents = Flux.fromIterable(devices);

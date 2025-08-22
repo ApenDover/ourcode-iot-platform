@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 5,
+  "id": 4,
   "links": [],
   "panels": [
     {
@@ -602,7 +602,7 @@
       "targets": [
         {
           "editorMode": "builder",
-          "expr": "events_cassandra_fail_total",
+          "expr": "events_cassandra_error_total",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -626,5 +626,5 @@
   "timezone": "browser",
   "title": "EventCollectorMetrics",
   "uid": "a6df77c8-41dd-4835-a120-3f13193b423c",
-  "version": 12
+  "version": 1
 }
