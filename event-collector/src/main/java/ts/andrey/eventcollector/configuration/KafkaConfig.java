@@ -102,7 +102,7 @@ public class KafkaConfig {
                     return new TopicPartition(dltEventsTopic, record.partition());
                 };
 
-        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate, destinationResolver);
+        final var recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate, destinationResolver);
 
         var backoff = new ExponentialBackOffWithMaxRetries(3);
         backoff.setInitialInterval(1000L);

@@ -69,7 +69,7 @@ spring:
       dlt-device-topic: device.DLT
       observation-enabled: true
     consumer:
-      max-poll-records: 50000
+      max-poll-records: 20000
       fetch-max-wait: 500
       fetch-min-size: 1024
       enable-auto-commit: false

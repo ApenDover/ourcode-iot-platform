@@ -99,6 +99,9 @@ spring:
     replication-strategy: "'class':'SimpleStrategy','replication_factor':'1'"
 
 app:
+  cassandra:
+    batch-size: 200
+    concurrency-size: 5
   cache:
     expiration:
       seconds: 30

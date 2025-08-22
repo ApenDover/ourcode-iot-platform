@@ -2,6 +2,7 @@ package ts.andrey.eventcollector.cassandra.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -21,18 +22,24 @@ public class DeviceEventDataService {
     private final CassandraMetrics cassandraMetrics;
     private final DeviceEventReactRepository deviceEventReactRepository;
 
+    @Value("${app.cassandra.batch-size}")
+    private Integer bufferSize;
+
+    @Value("${app.cassandra.concurrency-size}")
+    private Integer concurrencySize;
+
     public void saveAll(List<DeviceEventEntity> events) {
         log.info("Сохраняю: [{}] событий в Cassandra", events.size());
 
         Flux.fromIterable(events)
-                .buffer(1000)
+                .buffer(bufferSize)
                 .flatMap(batch -> {
                     log.debug("Processing batch of {} events", batch.size());
                     return deviceEventReactRepository.saveAll(batch)
                             .collectList()
                             .doOnSuccess(saved -> {
                                 cassandraMetrics.incrementSuccess(saved.size());
-                                log.info("Успешно сохранен батч из {} событий", batch.size());
+                                log.debug("Успешно сохранен батч из {} событий", batch.size());
                             })
                             .onErrorResume(e -> {
                                 log.warn("Ошибка сохранения батча из {} событий, пробуем поштучно", batch.size(), e);
@@ -53,9 +60,9 @@ public class DeviceEventDataService {
                                         )
                                         .collectList();
                             });
-                })
+                }, concurrencySize)
                 .doOnComplete(() -> log.info("Завершена обработка {} событий", events.size()))
-                .blockLast();
+                .subscribe();
     }
 
 }
