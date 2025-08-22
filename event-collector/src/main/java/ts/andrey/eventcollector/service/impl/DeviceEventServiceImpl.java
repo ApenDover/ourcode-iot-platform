@@ -24,13 +24,13 @@ public class DeviceEventServiceImpl implements DeviceEventService {
 
     @WithSpan("cassandra-save-events-and-cache")
     public void saveEvents(List<DeviceEvent> events) {
-        final var toSave = deviceEventMapper.toEntityList(events);
-        deviceEventDataService.saveAll(toSave);
+        final var mono = deviceEventDataService.saveAll(events);
         final var deviceIds = events.stream()
                 .map(DeviceEvent::getDevice)
                 .map(Device::getDeviceId)
                 .toList();
         simpleCache.putAll(deviceIds);
+        mono.block();
     }
 
 }

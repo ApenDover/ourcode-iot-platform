@@ -10,4 +10,6 @@ public interface KafkaProducer {
 
     CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records);
 
+    CompletableFuture<List<RecordMetadata>> sendDlt(List<? extends SpecificRecordBase> records);
+
 }

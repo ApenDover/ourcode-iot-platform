@@ -102,6 +102,10 @@ app:
   cassandra:
     batch-size: 200
     concurrency-size: 5
+    error:
+      max-attempts: 3
+      min-backoff: 100
+      jitter-factor: 0.5
   cache:
     expiration:
       seconds: 30

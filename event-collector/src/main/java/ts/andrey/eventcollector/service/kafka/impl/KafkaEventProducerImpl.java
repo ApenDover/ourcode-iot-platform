@@ -10,6 +10,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import ts.andrey.eventcollector.exception.EventCollectorException;
 import ts.andrey.eventcollector.service.kafka.KafkaProducer;
 
 import java.util.Collections;
@@ -28,33 +29,45 @@ public class KafkaEventProducerImpl implements KafkaProducer {
     @Value("${spring.kafka.template.events-topic}")
     private String eventsTopic;
 
+    @Value("${spring.kafka.template.dlt-events-topic}")
+    private String dltEventsTopic;
+
     @Override
     public CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records) {
-        log.info("Отправка в топик {} новых device events: {}", eventsTopic, records.size());
-            if (CollectionUtils.isEmpty(records)) {
-                return CompletableFuture.completedFuture(Collections.emptyList());
-            }
+        return send(records, eventsTopic);
+    }
 
-            final var futures = records.stream()
-                    .filter(DeviceEvent.class::isInstance)
-                    .map(it -> {
-                        final var event = (DeviceEvent) it;
-                        String key = UUID.randomUUID().toString();
+    @Override
+    public CompletableFuture<List<RecordMetadata>> sendDlt(List<? extends SpecificRecordBase> records) {
+        return send(records, dltEventsTopic);
+    }
 
-                        return kafkaTemplate.send(eventsTopic, key, event)
-                                .thenApply(SendResult::getRecordMetadata)
-                                .exceptionally(ex -> {
-                                    log.error("Ошибка отправки eventId={}", event.getEventId(), ex);
-                                    return null;
-                                });
-                    }).toList();
+    private CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records, String topic) {
+        log.info("Отправка в топик {} новых device events: {}", topic, records.size());
+        if (CollectionUtils.isEmpty(records)) {
+            return CompletableFuture.completedFuture(Collections.emptyList());
+        }
 
-            return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                    .thenApply(v -> futures.stream()
-                            .map(CompletableFuture::join)
-                            .filter(Objects::nonNull)
-                            .toList()
-                    );
+        final var futures = records.stream()
+                .filter(DeviceEvent.class::isInstance)
+                .map(it -> {
+                    final var event = (DeviceEvent) it;
+                    String key = UUID.randomUUID().toString();
+
+                    return kafkaTemplate.send(topic, key, event)
+                            .thenApply(SendResult::getRecordMetadata)
+                            .exceptionally(ex -> {
+                                log.error("Ошибка отправки eventId={}", event.getEventId(), ex);
+                                throw new EventCollectorException(ex);
+                            });
+                }).toList();
+
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> futures.stream()
+                        .map(CompletableFuture::join)
+                        .filter(Objects::nonNull)
+                        .toList()
+                );
     }
 
 }

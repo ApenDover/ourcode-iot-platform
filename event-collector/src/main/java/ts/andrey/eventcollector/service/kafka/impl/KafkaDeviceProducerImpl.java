@@ -14,6 +14,7 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import ts.andrey.eventcollector.annotation.WithSpan;
+import ts.andrey.eventcollector.exception.EventCollectorException;
 import ts.andrey.eventcollector.metrics.GlobalMetrics;
 import ts.andrey.eventcollector.service.kafka.KafkaProducer;
 
@@ -38,8 +39,17 @@ public class KafkaDeviceProducerImpl implements KafkaProducer {
     private String dltDeviceTopic;
 
     @Override
-    @WithSpan("kafkaDeviceProducer")
     public CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records) {
+        return send(records, deviceTopic);
+    }
+
+    @Override
+    public CompletableFuture<List<RecordMetadata>> sendDlt(List<? extends SpecificRecordBase> records) {
+        return send(records, dltDeviceTopic);
+    }
+
+    @WithSpan("kafkaDeviceProducer")
+    public CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records, String deviceTopic) {
         log.info("Отправка в топик {} новых device: {}", deviceTopic, records.size());
         if (CollectionUtils.isEmpty(records)) {
             return CompletableFuture.completedFuture(Collections.emptyList());
@@ -47,7 +57,7 @@ public class KafkaDeviceProducerImpl implements KafkaProducer {
 
         final var futures = records.stream()
                 .filter(Device.class::isInstance)
-                .map(kafkaMessage -> sendToTopic((Device) kafkaMessage))
+                .map(kafkaMessage -> sendToTopic((Device) kafkaMessage, deviceTopic))
                 .toList();
 
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
@@ -58,21 +68,20 @@ public class KafkaDeviceProducerImpl implements KafkaProducer {
                 );
     }
 
-    public CompletableFuture<RecordMetadata> sendToTopic(Device device) {
-        log.debug("отправляю в топик {} device={}", deviceTopic, device);
+    public CompletableFuture<RecordMetadata> sendToTopic(Device device, String topic) {
+        log.debug("отправляю в топик {} device={}", topic, device);
         final var trace = Span.current().getSpanContext();
         final var header = new RecordHeader("traceparent", trace.getTraceIdBytes());
 
         final var producerRecord = new ProducerRecord<>(
-                    deviceTopic, 1, device.getDeviceId(), device, List.of(header));
+                topic, 1, device.getDeviceId(), device, List.of(header));
 
         return kafkaTemplate.send(producerRecord)
                 .thenApply(SendResult::getRecordMetadata)
                 .exceptionally(ex -> {
                     globalMetrics.incrementError();
                     log.error("Ошибка отправки device={}", device, ex);
-                    kafkaTemplate.send(dltDeviceTopic, device.getDeviceId(), device);
-                    return null;
+                    throw new EventCollectorException(ex);
                 });
     }
 

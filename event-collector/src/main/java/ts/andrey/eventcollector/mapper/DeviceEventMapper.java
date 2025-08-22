@@ -8,22 +8,25 @@ import ts.andrey.eventcollector.cassandra.entity.DeviceEntity;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventKey;
 
+import java.time.Instant;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface DeviceEventMapper {
 
-    @Mapping(target = "key", expression = "java(toEntityKey(deviceEvent))")
-    DeviceEventEntity toEntity(DeviceEvent deviceEvent);
+    @Mapping(target = "key", expression = "java(eventToEntityKey(deviceEvent))")
+    DeviceEventEntity eventToEntity(DeviceEvent deviceEvent);
 
-    List<DeviceEventEntity> toEntityList(List<DeviceEvent> deviceEvent);
+    List<DeviceEventEntity> eventToEntityList(List<DeviceEvent> deviceEvent);
 
     @Mapping(target = "deviceId", source = "deviceEvent.device.deviceId")
     @Mapping(target = "timestamp", expression = "java(deviceEvent.getTimestamp().toEpochMilli())")
-    DeviceEventKey toEntityKey(DeviceEvent deviceEvent);
+    DeviceEventKey eventToEntityKey(DeviceEvent deviceEvent);
 
-    DeviceEntity deviceCoEntity(Device device);
+    DeviceEntity deviceToEntity(Device device);
 
     List<DeviceEntity> deviceToEntityList(List<Device> device);
+
+    DeviceEvent eventEntityToAvroEvent(DeviceEventEntity deviceEventEntity);
 
 }
