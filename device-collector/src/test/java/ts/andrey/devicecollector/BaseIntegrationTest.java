@@ -1,5 +1,6 @@
 package ts.andrey.devicecollector;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +32,9 @@ public abstract class BaseIntegrationTest {
 
     private static final String LOCALHOST = "localhost:";
     private static final String LOCALHOST_HTTP = "http://localhost:";
+
+    @Autowired
+    public MeterRegistry meterRegistry;
 
     @Autowired
     public DynamicPropertyRegistry registry;

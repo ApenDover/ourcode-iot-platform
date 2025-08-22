@@ -25,7 +25,7 @@ public class DeviceEntity {
     @Id
     private UUID id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String deviceId;
 
     private String deviceType;

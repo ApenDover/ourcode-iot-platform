@@ -174,6 +174,12 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
         );
 
         assertEquals("Incorrect result size: expected 1, actual 0", emptyResultExTwo.getMessage());
+
+        final var counter = meterRegistry.find("device.postgres.success")
+                .counter()
+                .count();
+
+        assertEquals(2.0, counter);
     }
 
 }
