@@ -88,6 +88,8 @@ public class TraceUtil {
         Span parentSpan = Span.wrap(parentContext);
         try (Scope scope = parentSpan.makeCurrent()) {
             return code.get();
+        } finally {
+            parentSpan.end();
         }
     }
 
@@ -98,6 +100,8 @@ public class TraceUtil {
         Span parentSpan = Span.wrap(parentContext);
         try (Scope scope = parentSpan.makeCurrent()) {
             code.run();
+        } finally {
+            parentSpan.end();
         }
     }
 

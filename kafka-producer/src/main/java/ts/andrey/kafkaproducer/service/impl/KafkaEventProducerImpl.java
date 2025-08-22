@@ -33,29 +33,29 @@ public class KafkaEventProducerImpl implements KafkaProducer {
     @Override
     @WithSpan("publish-batch-event")
     public CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records) {
-            log.info("Отправка в топик {} новых device events: {}", eventsTopic, records.size());
-            try {
-                if (CollectionUtils.isEmpty(records)) {
-                    return CompletableFuture.completedFuture(Collections.emptyList());
-                }
-
-                final var futures = records.stream()
-                        .filter(DeviceEvent.class::isInstance)
-                        .map(it -> {
-                            final var event = (DeviceEvent) it;
-                            return sendMessage(event);
-                        }).toList();
-
-                return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                        .thenApply(v -> futures.stream()
-                                .map(CompletableFuture::join)
-                                .filter(Objects::nonNull)
-                                .toList()
-                        );
-            } catch (Exception e) {
-                log.error("Ошибка при публикации eventIds в топик {}", eventsTopic, e);
+        log.info("Отправка в топик {} новых device events: {}", eventsTopic, records.size());
+        try {
+            if (CollectionUtils.isEmpty(records)) {
+                return CompletableFuture.completedFuture(Collections.emptyList());
             }
-            return CompletableFuture.completedFuture(Collections.emptyList());
+
+            final var futures = records.stream()
+                    .filter(DeviceEvent.class::isInstance)
+                    .map(it -> {
+                        final var event = (DeviceEvent) it;
+                        return sendMessage(event);
+                    }).toList();
+
+            return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                    .thenApply(v -> futures.stream()
+                            .map(CompletableFuture::join)
+                            .filter(Objects::nonNull)
+                            .toList()
+                    );
+        } catch (Exception e) {
+            log.error("Ошибка при публикации eventIds в топик {}", eventsTopic, e);
+        }
+        return CompletableFuture.completedFuture(Collections.emptyList());
     }
 
     public CompletableFuture<RecordMetadata> sendMessage(DeviceEvent event) {

@@ -1,13 +1,11 @@
 package ts.andrey.eventcollector.service.kafka.impl;
 
 import com.nashkod.avro.Device;
-import io.opentelemetry.api.trace.Span;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.header.internals.RecordHeader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -70,11 +68,13 @@ public class KafkaDeviceProducerImpl implements KafkaProducer {
 
     public CompletableFuture<RecordMetadata> sendToTopic(Device device, String topic) {
         log.debug("отправляю в топик {} device={}", topic, device);
-        final var trace = Span.current().getSpanContext();
-        final var header = new RecordHeader("traceparent", trace.getTraceIdBytes());
+//        final var trace = Span.current().getSpanContext();
+//        final var header = new RecordHeader("traceparent", trace.getTraceIdBytes());
+//
+//        final var producerRecord = new ProducerRecord<>(
+//                topic, 1, device.getDeviceId(), device, List.of(header));
 
-        final var producerRecord = new ProducerRecord<>(
-                topic, 1, device.getDeviceId(), device, List.of(header));
+        final var producerRecord = new ProducerRecord<>(topic, device.getDeviceId(), device);
 
         return kafkaTemplate.send(producerRecord)
                 .thenApply(SendResult::getRecordMetadata)
