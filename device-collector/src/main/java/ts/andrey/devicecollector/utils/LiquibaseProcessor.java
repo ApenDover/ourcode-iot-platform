@@ -4,11 +4,14 @@ import com.zaxxer.hikari.HikariDataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.boot.cfgxml.internal.ConfigLoader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.yaml.snakeyaml.Yaml;
 import ts.andrey.devicecollector.configuration.model.MigrationSource;
+import ts.andrey.devicecollector.exception.DeviceCollectorException;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,7 +36,7 @@ public class LiquibaseProcessor {
             liquibase.afterPropertiesSet();
             log.info("Liquibase changelog applied for {}", migrationSource.getUrl());
         } catch (Exception e) {
-            throw new RuntimeException("Liquibase failed for shard " + migrationSource.getUrl(), e);
+            throw new DeviceCollectorException("Liquibase failed for shard " + migrationSource.getUrl(), e);
         }
     }
 
@@ -41,16 +44,24 @@ public class LiquibaseProcessor {
         loadProperties().forEach(LiquibaseProcessor::runLiquibase);
     }
 
+    public void run(String[] args) {
+        if (Arrays.asList(args).contains("--spring.profiles.active=test")) {
+            return;
+        }
+        run();
+    }
+
     private List<MigrationSource> loadProperties() {
         try {
-
-            var profile = System.getProperty("spring.profiles.active",
-                    System.getenv("SPRING_PROFILES_ACTIVE"));
+            var profile = System.getProperty(
+                    "spring.profiles.active",
+                    System.getenv("SPRING_PROFILES_ACTIVE")
+            );
             if (Objects.isNull(profile)) {
                 profile = "default";
             }
 
-            final var fileName = "application" + (profile.equals("default") ? "" : "-" + profile) + ".yml";
+            final var fileName = "application" + (profile.equals("default") ? StringUtils.EMPTY : "-" + profile) + ".yml";
 
             log.info("Loading properties from {}", fileName);
 
@@ -59,21 +70,24 @@ public class LiquibaseProcessor {
                     .getResourceAsStream(fileName);
 
             if (inputStream == null) {
-                throw new RuntimeException(fileName + " not found in classpath");
+                throw new DeviceCollectorException(fileName + " not found in classpath");
             }
 
             Map<String, Object> obj = yaml.load(inputStream);
+
             List<Map<String, String>> dataSources = (List<Map<String, String>>)
-                    ((Map<String, Object>) obj.get("app")).get("dataSources");
+                    ((Map<String, Object>) obj.get("app"))
+                            .get("dataSources");
 
             return dataSources.stream()
                     .map(ds -> MigrationSource.builder()
                             .url(ds.get("url"))
                             .username(ds.get("username"))
                             .password(ds.get("password"))
-                            .build()).toList();
+                            .build())
+                    .toList();
         } catch (Exception e) {
-            throw new RuntimeException("Error loading properties file", e);
+            throw new DeviceCollectorException("Error loading properties file", e);
         }
     }
 

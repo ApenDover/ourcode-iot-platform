@@ -19,6 +19,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Repository
@@ -61,6 +62,8 @@ public class DeviceBatchRepository {
                 }
             });
 
+            log.info("сохраняю устройства: {}", devices.size());
+
             devices.forEach(d -> {
                 final var shard = ShardUtil.getShardNameByString(d.getDeviceId());
                 postgresMetrics.incrementSuccess(shard);
@@ -70,16 +73,16 @@ public class DeviceBatchRepository {
         } catch (DataAccessException e) {
             if (e.getCause() instanceof BatchUpdateException ex) {
                 final var updateCounts = ex.getUpdateCounts();
-                for (int i = 0; i < updateCounts.length; i++) {
+                IntStream.range(0, updateCounts.length).forEach(i -> {
+                    final var device = devices.get(i);
+                    final var shard = ShardUtil.getShardNameByString(device.getDeviceId());
                     if (updateCounts[i] == Statement.EXECUTE_FAILED) {
-                        log.error("DeviceId {} не сохранен в базу данных: ", devices.get(i).getDeviceId(), e);
-                        String shard = ShardUtil.getShardNameByString(devices.get(i).getDeviceId());
+                        log.error("DeviceId {} не сохранен в базу данных: ", device.getDeviceId(), e);
                         postgresMetrics.incrementError(shard);
                     } else {
-                        String shard = ShardUtil.getShardNameByString(devices.get(i).getDeviceId());
                         postgresMetrics.incrementSuccess(shard);
                     }
-                }
+                });
             } else {
                 log.error("Batch({}) с Device не сохранен в базу данных: ", devices.size(), e);
                 devices.forEach(d -> {

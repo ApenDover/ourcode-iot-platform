@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.testcontainers.containers.PostgreSQLContainer;
 import ts.andrey.devicecollector.configuration.model.MigrationSource;
+import ts.andrey.devicecollector.exception.DeviceCollectorException;
 import ts.andrey.devicecollector.utils.LiquibaseProcessor;
 
 import javax.sql.DataSource;
@@ -92,7 +93,7 @@ public class ShardingSphereConfig {
                     new Properties()
             );
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DeviceCollectorException(e);
         }
     }
 
