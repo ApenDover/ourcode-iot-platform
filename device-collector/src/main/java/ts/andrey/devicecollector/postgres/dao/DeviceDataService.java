@@ -1,8 +1,10 @@
 package ts.andrey.devicecollector.postgres.dao;
 
+import com.google.common.collect.Lists;
 import com.nashkod.avro.Device;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ts.andrey.devicecollector.annotation.WithSpan;
 import ts.andrey.devicecollector.mapper.DeviceMapper;
@@ -16,6 +18,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DeviceDataService {
 
+    @Value("${app.postgres.batch-size}")
+    Integer batchSize;
+
     private final DeviceMapper deviceMapper;
     private final DeviceBatchRepository deviceBatchRepository;
 
@@ -23,7 +28,9 @@ public class DeviceDataService {
     public void batchUpsert(List<Device> devices) {
         final var deviceEntities = deviceMapper.toDeviceEntityList(devices);
         deviceEntities.forEach(e -> e.setId(UUID.randomUUID()));
-        deviceBatchRepository.batchUpsert(deviceEntities);
+
+        Lists.partition(deviceEntities, batchSize)
+                .forEach(deviceBatchRepository::batchUpsert);
     }
 
 }

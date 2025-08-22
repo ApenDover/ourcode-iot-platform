@@ -67,7 +67,7 @@ spring:
         schema.registry.url: http://schema-registry:8081
         auto.register.schemas: true
     consumer:
-      max-poll-records: 20000
+      max-poll-records: 50000
       fetch-max-wait: 500
       fetch-min-size: 1024
       enable-auto-commit: false

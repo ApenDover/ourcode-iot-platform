@@ -62,7 +62,7 @@ public class DeviceEventDataService {
                             });
                 }, concurrencySize)
                 .doOnComplete(() -> log.info("Завершена обработка {} событий", events.size()))
-                .subscribe();
+                .blockLast();
     }
 
 }

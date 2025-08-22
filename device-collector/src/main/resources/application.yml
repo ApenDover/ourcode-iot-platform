@@ -89,6 +89,8 @@ spring:
       observation-enabled: true
 
 app:
+  postgres:
+    batch-size: 300
   dataSources:
     - url: jdbc:postgresql://postgres1:5432/iot_platform
       username: myuser
