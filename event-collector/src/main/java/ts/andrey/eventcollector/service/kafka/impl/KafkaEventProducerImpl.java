@@ -31,7 +31,6 @@ public class KafkaEventProducerImpl implements KafkaProducer {
     @Override
     public CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records) {
         log.info("Отправка в топик {} новых device events: {}", eventsTopic, records.size());
-        try {
             if (CollectionUtils.isEmpty(records)) {
                 return CompletableFuture.completedFuture(Collections.emptyList());
             }
@@ -56,10 +55,6 @@ public class KafkaEventProducerImpl implements KafkaProducer {
                             .filter(Objects::nonNull)
                             .toList()
                     );
-        } catch (Exception e) {
-            log.error("Ошибка при публикации eventIds в топик {}", eventsTopic, e);
-        }
-        return CompletableFuture.completedFuture(Collections.emptyList());
     }
 
 }

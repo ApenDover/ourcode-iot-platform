@@ -1,4 +1,4 @@
-package ts.andrey.devicecollector.configuration.metrics;
+package ts.andrey.devicecollector.metrics;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;

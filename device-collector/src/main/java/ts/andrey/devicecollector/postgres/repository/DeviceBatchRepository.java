@@ -6,8 +6,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import ts.andrey.devicecollector.configuration.metrics.GlobalMetrics;
-import ts.andrey.devicecollector.configuration.metrics.PostgresMetrics;
+import ts.andrey.devicecollector.metrics.GlobalMetrics;
+import ts.andrey.devicecollector.metrics.PostgresMetrics;
 import ts.andrey.devicecollector.postgres.entity.DeviceEntity;
 import ts.andrey.devicecollector.utils.ShardUtil;
 
