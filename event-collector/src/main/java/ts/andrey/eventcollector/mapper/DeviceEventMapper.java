@@ -8,7 +8,6 @@ import ts.andrey.eventcollector.cassandra.entity.DeviceEntity;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventKey;
 
-import java.time.Instant;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
@@ -26,7 +25,5 @@ public interface DeviceEventMapper {
     DeviceEntity deviceToEntity(Device device);
 
     List<DeviceEntity> deviceToEntityList(List<Device> device);
-
-    DeviceEvent eventEntityToAvroEvent(DeviceEventEntity deviceEventEntity);
 
 }

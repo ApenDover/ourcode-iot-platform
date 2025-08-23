@@ -19,7 +19,7 @@ import java.util.UUID;
 public class DeviceDataService {
 
     @Value("${app.postgres.batch-size}")
-    Integer batchSize;
+    private Integer batchSize;
 
     private final DeviceMapper deviceMapper;
     private final DeviceBatchRepository deviceBatchRepository;

@@ -29,16 +29,4 @@ class DeviceEventKeyMapperTest {
         assertEquals("10", actual.getPayload());
     }
 
-    @Test
-    void entityToAvro() {
-        // GIVEN
-        final var deviceEvent = DummyTDF.deviceEventEntity.getDefault();
-
-        // WHEN
-        final var actual = deviceEventMapper.eventEntityToAvroEvent(deviceEvent);
-
-        // THEN
-        assertEquals(125L, actual.getTimestamp());
-    }
-
 }

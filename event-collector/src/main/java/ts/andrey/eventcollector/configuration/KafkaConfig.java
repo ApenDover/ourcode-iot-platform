@@ -47,7 +47,7 @@ public class KafkaConfig {
     private String appName;
 
     @Bean
-    public NewTopic deviceEventsTopic() {
+    public NewTopic eventTopic() {
         return TopicBuilder.name(eventsTopic)
                 .partitions(DEFAULT_NUM_PARTITIONS)
                 .replicas(DEFAULT_REPLICAS)
@@ -56,14 +56,14 @@ public class KafkaConfig {
     }
 
     @Bean
-    public NewTopic deviceEventsDlt() {
+    public NewTopic eventDlt() {
         return TopicBuilder.name(dltEventsTopic)
                 .partitions(DLT_DEFAULT_NUM_PARTITIONS)
                 .build();
     }
 
     @Bean
-    public NewTopic deviceIdTopic() {
+    public NewTopic deviceTopic() {
         return TopicBuilder.name(deviceIdTopic)
                 .partitions(DEFAULT_NUM_PARTITIONS)
                 .replicas(DEFAULT_REPLICAS)
@@ -72,7 +72,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public NewTopic deviceIdDlt() {
+    public NewTopic deviceDlt() {
         return TopicBuilder.name(dltDeviceIdTopic)
                 .partitions(DLT_DEFAULT_NUM_PARTITIONS)
                 .build();

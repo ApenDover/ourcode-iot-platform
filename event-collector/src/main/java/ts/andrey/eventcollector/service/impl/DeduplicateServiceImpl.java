@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import ts.andrey.eventcollector.annotation.WithSpan;
 import ts.andrey.eventcollector.cassandra.dao.DeviceDataService;
-import ts.andrey.eventcollector.cassandra.dao.DeviceEventDataService;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEntity;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.service.DeduplicateService;
@@ -25,7 +24,6 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 public class DeduplicateServiceImpl implements DeduplicateService {
 
-    private final DeviceEventDataService deviceEventDataService;
     private final DeviceDataService deviceDataService;
     private final SimpleCache simpleCache;
     private final DeviceEventMapper deviceEventMapper;

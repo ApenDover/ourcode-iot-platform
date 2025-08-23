@@ -68,8 +68,8 @@ public class DeviceBatchRepository {
 
         } catch (DataAccessException e) {
             log.error("Batch({}) с Device не сохранен в базу данных: ", devices.size(), e);
-            devices.forEach(d -> {
-                final var shard = ShardUtil.getShardNameByString(d.getDeviceId());
+            devices.forEach(failDevice -> {
+                final var shard = ShardUtil.getShardNameByString(failDevice.getDeviceId());
                 postgresMetrics.incrementError(shard);
             });
         }

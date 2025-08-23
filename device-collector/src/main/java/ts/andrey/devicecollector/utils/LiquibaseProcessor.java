@@ -61,7 +61,9 @@ public class LiquibaseProcessor {
                 profile = "default";
             }
 
-            final var fileName = "application" + (profile.equals("default") ? StringUtils.EMPTY : "-" + profile) + ".yml";
+            final var fileName = "application" + (profile.equals("default")
+                    ? StringUtils.EMPTY
+                    : "-" + profile) + ".yml";
 
             log.info("Loading properties from {}", fileName);
 

@@ -90,7 +90,7 @@ public class DeviceEventDataService {
                     cassandraMetrics.incrementError();
                     log.error("Ошибка сохранения события {} в Cassandra", event.getKey().getEventId(), inner);
                     Optional.ofNullable(eventMap.get(event.getKey().getEventId()))
-                            .ifPresent(original -> kafkaEventProducerImpl.sendDlt(List.of(original)));
+                            .ifPresent(original -> kafkaEventProducerImpl.send(List.of(original)));
                     return Mono.empty();
                 }).then();
     }

@@ -26,7 +26,6 @@ public class CollectorFacade {
     public void collect(List<DeviceEvent> events) {
         try {
             final var deviceEvents = DeviceEventValidFilter.getCorrect(events);
-
             if (CollectionUtils.isEmpty(deviceEvents)) {
                 return;
             }

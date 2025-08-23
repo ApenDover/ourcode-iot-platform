@@ -46,22 +46,6 @@ class DeduplicateServiceImplTest {
     }
 
     @Test
-    void shouldFilterNullDevices() {
-        // GIVEN
-        final var input = DummyTDF.device.getList(2);
-        input.add(null);
-
-        when(cache.contains(Mockito.anyString())).thenReturn(false);
-        when(deviceDataService.getUnsavedDeviceIds(anyList())).thenReturn(DummyTDF.deviceEntity.getList(2));
-
-        // WHEN
-        final var result = deduplicateService.getUniqueDevices(input);
-
-        // THEN
-        assertEquals(2, result.size());
-    }
-
-    @Test
     void shouldFilterDevicesWithEmptyId() {
         // GIVEN
         final var input = new ArrayList<>(

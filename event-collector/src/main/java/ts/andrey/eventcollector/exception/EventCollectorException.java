@@ -18,7 +18,8 @@ public class EventCollectorException extends RuntimeException {
         super(cause);
     }
 
-    protected EventCollectorException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected EventCollectorException(String message, Throwable cause,
+                                      boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 

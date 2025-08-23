@@ -1,11 +1,12 @@
 package ts.andrey.eventcollector.service.impl;
 
-import io.opentelemetry.api.trace.Tracer;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ts.andrey.eventcollector.metrics.GlobalMetrics;
 import ts.andrey.eventcollector.service.component.CollectorFacade;
 import ts.andrey.eventcollector.tdf.DummyTDF;
 
@@ -22,10 +23,13 @@ class CollectorFacadeTest {
 
     @Mock
     DeviceEventServiceImpl deviceEventServiceImpl;
+
     @Mock
     DeviceServiceImpl deviceServiceImpl;
+
     @Mock
-    Tracer tracer;
+    GlobalMetrics globalMetrics;
+
     @InjectMocks
     CollectorFacade collectorService;
 
@@ -51,7 +55,7 @@ class CollectorFacadeTest {
         doThrow(new RuntimeException("test exception")).when(deviceServiceImpl).sendUniqueDeviceids(anyList());
 
         // WHEN
-        collectorService.collect(events);
+        Assertions.assertThrows(RuntimeException.class, () -> collectorService.collect(events));
 
         // THEN
         verifyNoInteractions(deviceEventServiceImpl);
