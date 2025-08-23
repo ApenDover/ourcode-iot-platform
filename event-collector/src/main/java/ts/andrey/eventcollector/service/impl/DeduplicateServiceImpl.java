@@ -1,11 +1,11 @@
 package ts.andrey.eventcollector.service.impl;
 
 import com.nashkod.avro.Device;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import ts.andrey.eventcollector.annotation.WithSpan;
 import ts.andrey.eventcollector.cassandra.dao.DeviceDataService;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEntity;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;

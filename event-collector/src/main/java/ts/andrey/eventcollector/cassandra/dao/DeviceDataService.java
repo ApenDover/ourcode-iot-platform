@@ -1,10 +1,10 @@
 package ts.andrey.eventcollector.cassandra.dao;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import ts.andrey.eventcollector.annotation.WithSpan;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEntity;
 import ts.andrey.eventcollector.cassandra.repository.DeviceReactRepository;
 

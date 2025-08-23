@@ -1,10 +1,9 @@
 package ts.andrey.eventcollector.service.impl;
 
 import com.nashkod.avro.DeviceEvent;
-import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ts.andrey.eventcollector.annotation.WithSpan;
 import ts.andrey.eventcollector.service.DeduplicateService;
 import ts.andrey.eventcollector.service.DeviceService;
 import ts.andrey.eventcollector.service.kafka.KafkaProducer;
@@ -17,7 +16,6 @@ public class DeviceServiceImpl implements DeviceService {
 
     private final DeduplicateService deduplicateService;
     private final KafkaProducer kafkaDeviceProducerImpl;
-    private final Tracer tracer;
 
     /**
      * Отправляем в топик новые device

@@ -2,6 +2,7 @@ package ts.andrey.devicecollector.integration;
 
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,6 +14,7 @@ import ts.andrey.devicecollector.testutils.KafkaProducerUtil;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -26,21 +28,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DeviceCollectorProcessingIT extends BaseIntegrationTest {
 
-    @Test
-    @SneakyThrows
-    void successCase() {
-        // GIVEN
-        final var deviceOne = DummyTDF.device.getForShardOne();
-        final var deviceTwo = DummyTDF.device.getForShardTwo();
-        final var toSend = List.of(deviceOne, deviceTwo);
+    JdbcTemplate templateDsTwo;
+    JdbcTemplate templateDsOne;
 
+    @BeforeEach
+    void setUp() {
         final var ds0 = new HikariDataSource();
         ds0.setJdbcUrl(postgres1.getJdbcUrl());
         ds0.setUsername(postgres1.getUsername());
         ds0.setPassword(postgres1.getPassword());
         ds0.setDriverClassName("org.postgresql.Driver");
 
-        final var templateDsOne = new JdbcTemplate(ds0);
+        templateDsOne = new JdbcTemplate(ds0);
 
         final var ds1 = new HikariDataSource();
         ds1.setJdbcUrl(postgres2.getJdbcUrl());
@@ -48,7 +47,16 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
         ds1.setPassword(postgres2.getPassword());
         ds1.setDriverClassName("org.postgresql.Driver");
 
-        final var templateDsTwo = new JdbcTemplate(ds1);
+        templateDsTwo = new JdbcTemplate(ds1);
+    }
+
+    @Test
+    @SneakyThrows
+    void successCase() {
+        // GIVEN
+        final var deviceOne = DummyTDF.device.getForShardOne();
+        final var deviceTwo = DummyTDF.device.getForShardTwo();
+        final var toSend = List.of(deviceOne, deviceTwo);
 
         // WHEN
         toSend.forEach(message ->
@@ -175,8 +183,8 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
 
         assertEquals("Incorrect result size: expected 1, actual 0", emptyResultExTwo.getMessage());
 
-        final var counter = meterRegistry.find("device.postgres.success")
-                .counter()
+        final var counter = Objects.requireNonNull(meterRegistry.find("device.postgres.success")
+                        .counter())
                 .count();
 
         assertEquals(2.0, counter);

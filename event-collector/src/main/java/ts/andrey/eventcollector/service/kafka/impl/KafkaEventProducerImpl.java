@@ -1,6 +1,7 @@
 package ts.andrey.eventcollector.service.kafka.impl;
 
 import com.nashkod.avro.DeviceEvent;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -8,7 +9,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import ts.andrey.eventcollector.annotation.WithSpan;
 import ts.andrey.eventcollector.metrics.GlobalMetrics;
 import ts.andrey.eventcollector.service.kafka.AbstractKafkaProducer;
 

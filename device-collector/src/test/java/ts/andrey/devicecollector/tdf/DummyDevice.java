@@ -38,8 +38,8 @@ public class DummyDevice {
         return device;
     }
 
-    public Device getDefaultWithOtherMeta() {
-        return new Device("deviceId", "deviceType", "updated", Instant.ofEpochMilli(600L));
+    public Device getInvalid() {
+        return new Device(null, "deviceType", "updated", Instant.ofEpochMilli(600L));
     }
 
     public Device getDefault(int i) {

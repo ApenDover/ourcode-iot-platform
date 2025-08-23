@@ -2,7 +2,6 @@ package ts.andrey.devicecollector.postgres.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ts.andrey.devicecollector.metrics.GlobalMetrics;
@@ -54,25 +53,15 @@ public class DeviceBatchRepository {
             params.add(Timestamp.from(device.getCreatedAt()));
             params.add(device.getMeta());
         });
+        jdbcTemplate.update(sql, params.toArray());
 
-        try {
-            jdbcTemplate.update(sql, params.toArray());
+        log.info("сохраняю устройства: {}", devices.size());
 
-            log.info("сохраняю устройства: {}", devices.size());
-
-            devices.forEach(d -> {
-                final var shard = ShardUtil.getShardNameByString(d.getDeviceId());
-                postgresMetrics.incrementSuccess(shard);
-                globalMetrics.incrementSuccess();
-            });
-
-        } catch (DataAccessException e) {
-            log.error("Batch({}) с Device не сохранен в базу данных: ", devices.size(), e);
-            devices.forEach(failDevice -> {
-                final var shard = ShardUtil.getShardNameByString(failDevice.getDeviceId());
-                postgresMetrics.incrementError(shard);
-            });
-        }
+        devices.forEach(d -> {
+            final var shard = ShardUtil.getShardNameByString(d.getDeviceId());
+            postgresMetrics.incrementSuccess(shard);
+            globalMetrics.incrementSuccess();
+        });
     }
 
 }

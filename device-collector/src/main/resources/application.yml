@@ -90,6 +90,10 @@ spring:
 
 app:
   postgres:
+    retry:
+      max-attempts: 3
+      initial-delay: 100
+      multiplier: 2
     batch-size: 300
   dataSources:
     - url: jdbc:postgresql://postgres1:5432/iot_platform

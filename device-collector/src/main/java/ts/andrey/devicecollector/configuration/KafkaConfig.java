@@ -35,7 +35,7 @@ public class KafkaConfig {
     private String dltDeviceTopic;
 
     @Bean
-    public NewTopic deviceIdTopic() {
+    public NewTopic deviceTopic() {
         return TopicBuilder.name(deviceTopic)
                 .partitions(DEFAULT_NUM_PARTITIONS)
                 .replicas(DEFAULT_REPLICAS)
@@ -44,7 +44,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public NewTopic deviceIdDltTopic() {
+    public NewTopic deviceDlt() {
         return TopicBuilder.name(dltDeviceTopic)
                 .partitions(DEFAULT_NUM_PARTITIONS)
                 .replicas(DEFAULT_REPLICAS)
