@@ -20,7 +20,6 @@ public class DeviceDataService {
 
     @WithSpan("cassandra-save-batch-devices")
     public void saveDeviceIds(List<DeviceEntity> devices) {
-        log.info("Пытаюсь сохранить Device в cassandra {} записей", devices.size());
         final var fluxEvents = Flux.fromIterable(devices);
         deviceReactRepository.saveAll(fluxEvents)
                 .then()
@@ -30,12 +29,12 @@ public class DeviceDataService {
 
     @WithSpan("cassandra-searching")
     public List<DeviceEntity> getUnsavedDeviceIds(List<DeviceEntity> devices) {
-        log.info("Пытаюсь определить существование deviceId в cassandra {}", devices.size());
-
         final var ids = devices.stream()
                 .map(DeviceEntity::getDeviceId)
                 .distinct()
                 .toList();
+
+        log.info("Пытаюсь определить существование deviceId в cassandra {}", ids.size());
 
         final var modified = new ArrayList<>(devices);
 

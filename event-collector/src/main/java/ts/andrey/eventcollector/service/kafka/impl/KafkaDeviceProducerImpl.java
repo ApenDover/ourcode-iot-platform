@@ -21,11 +21,13 @@ import java.util.concurrent.CompletableFuture;
 public class KafkaDeviceProducerImpl extends AbstractKafkaProducer implements KafkaProducer {
 
     private final String deviceTopic;
+    private final String dltDeviceTopic;
 
     protected KafkaDeviceProducerImpl(KafkaTemplate<String, SpecificRecordBase> kafkaTemplate,
                                       GlobalMetrics globalMetrics, NewTopic deviceTopic, NewTopic deviceDlt) {
         super(kafkaTemplate, globalMetrics, deviceDlt.name());
         this.deviceTopic = deviceTopic.name();
+        this.dltDeviceTopic = deviceDlt.name();
     }
 
     @WithSpan("kafkaDeviceProducer")
@@ -36,6 +38,18 @@ public class KafkaDeviceProducerImpl extends AbstractKafkaProducer implements Ka
                 .map(recordBase -> {
                     final var device = (Device) recordBase;
                     return new ProducerRecord<>(deviceTopic, device.getDeviceId(), device);
+                })
+                .toList();
+        return innerSend(recordsToSend);
+    }
+
+    @Override
+    public CompletableFuture<List<RecordMetadata>> sendDlt(List<? extends SpecificRecordBase> records) {
+        final var recordsToSend = records.stream()
+                .filter(Device.class::isInstance)
+                .map(recordBase -> {
+                    final var device = (Device) recordBase;
+                    return new ProducerRecord<>(dltDeviceTopic, device.getDeviceId(), device);
                 })
                 .toList();
         return innerSend(recordsToSend);

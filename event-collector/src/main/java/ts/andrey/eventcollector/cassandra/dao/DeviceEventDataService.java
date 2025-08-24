@@ -7,14 +7,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
 import ts.andrey.eventcollector.cassandra.repository.DeviceEventReactRepository;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.metrics.CassandraMetrics;
 import ts.andrey.eventcollector.service.kafka.KafkaProducer;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -70,9 +68,9 @@ public class DeviceEventDataService {
                     log.debug("Событие {} успешно сохранено", e.getKey().getEventId());
                 })
                 .then()
-                .doOnSuccess(v -> log.debug("Успешно сохранен батч из {} событий", batch.size()))
+                .doOnSuccess(v -> log.info("Успешно сохранен батч из {} событий", batch.size()))
                 .onErrorResume(e -> {
-                    log.warn("Ошибка сохранения батча из {} событий, пробуем поштучно", batch.size(), e);
+                    log.warn("Ошибка сохранения батча из {} событий, обработка ошибки", batch.size(), e);
                     return Flux.fromIterable(batch)
                             .flatMap(event -> saveSingle(event, eventMap))
                             .then();
@@ -80,17 +78,16 @@ public class DeviceEventDataService {
     }
 
     private Mono<Void> saveSingle(DeviceEventEntity event, Map<UUID, DeviceEvent> eventMap) {
+        log.info("Обработка ошибки для {}", event);
         return deviceEventReactRepository.save(event)
                 .doOnSuccess(e -> {
                     cassandraMetrics.incrementSuccess();
                     log.debug("Событие {} успешно сохранено", e.getKey().getEventId());
-                })
-                .retryWhen(Retry.backoff(maxAttempts, Duration.ofMillis(minBackoff)).jitter(jitterFactor))
-                .onErrorResume(inner -> {
+                }).onErrorResume(inner -> {
                     cassandraMetrics.incrementError();
                     log.error("Ошибка сохранения события {} в Cassandra", event.getKey().getEventId(), inner);
                     Optional.ofNullable(eventMap.get(event.getKey().getEventId()))
-                            .ifPresent(original -> kafkaEventProducerImpl.send(List.of(original)));
+                            .ifPresent(original -> kafkaEventProducerImpl.sendDlt(List.of(original)));
                     return Mono.empty();
                 }).then();
     }

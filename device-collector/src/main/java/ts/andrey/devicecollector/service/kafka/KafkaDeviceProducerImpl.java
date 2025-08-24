@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class KafkaDeviceProducerImpl extends AbstractKafkaProducer implements KafkaProducer {
 
-    private String dltTopic;
+    private final String dltTopic;
 
     protected KafkaDeviceProducerImpl(KafkaTemplate<String, SpecificRecordBase> kafkaTemplate, NewTopic deviceDlt) {
         super(kafkaTemplate, deviceDlt);

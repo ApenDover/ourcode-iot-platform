@@ -27,7 +27,7 @@ public abstract class AbstractKafkaProducer {
 
     protected CompletableFuture<List<RecordMetadata>> innerSend(
             List<? extends ProducerRecord<String, ? extends SpecificRecordBase>> records) {
-        log.error("Отправка в kafka[{}] записей={}", records.getFirst().topic(), records.size());
+        log.info("Отправка в kafka записей={}", records.size());
         List<CompletableFuture<RecordMetadata>> futures = records.stream()
                 .map(message -> kafkaTemplate.send(
                                 new ProducerRecord<>(message.topic(), message.key(), message.value())
