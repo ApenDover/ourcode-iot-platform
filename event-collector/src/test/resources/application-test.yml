@@ -1,10 +1,26 @@
 spring:
   kafka:
     bootstrap-servers: ${kafka.bootstrap.servers}
+    events-topic: events
+    dlt-events-topic: events.DLT
+    device-topic: device
+    dlt-device-topic: device.DLT
     producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      batch-size: 16384
+      compression-type: snappy
       properties:
         schema.registry.url: ${schema.registry.url}
     consumer:
+      max-poll-records: 100
+      fetch-max-wait: 500
+      fetch-min-size: 1024
+      enable-auto-commit: false
+      group-id: device-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
       properties:
         schema.registry.url: ${schema.registry.url}
   cassandra:

@@ -12,6 +12,7 @@ import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import ts.andrey.devicecollector.mapper.DeviceMapper;
+import ts.andrey.devicecollector.metrics.GlobalMetrics;
 import ts.andrey.devicecollector.metrics.PostgresMetrics;
 import ts.andrey.devicecollector.postgres.repository.DeviceBatchRepository;
 import ts.andrey.devicecollector.service.kafka.KafkaProducer;
@@ -30,6 +31,7 @@ public class DeviceDataService {
 
     private final DeviceMapper deviceMapper;
     private final PostgresMetrics postgresMetrics;
+    private final GlobalMetrics globalMetrics;
     private final KafkaProducer kafkaProducer;
     private final DeviceBatchRepository deviceBatchRepository;
 
@@ -46,7 +48,6 @@ public class DeviceDataService {
     public void batchUpsert(List<Device> devices) {
         final var deviceEntities = deviceMapper.toDeviceEntityList(devices);
         deviceEntities.forEach(e -> e.setId(UUID.randomUUID()));
-
         Lists.partition(deviceEntities, batchSize)
                 .forEach(deviceBatchRepository::batchUpsert);
     }
@@ -57,6 +58,7 @@ public class DeviceDataService {
         devices.forEach(device -> {
             final var shard = ShardUtil.getShardNameByString(device.getDeviceId());
             postgresMetrics.incrementError(shard);
+            globalMetrics.incrementDltMessage();
         });
         try {
             kafkaProducer.sendDlt(devices);

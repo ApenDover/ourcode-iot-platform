@@ -61,7 +61,9 @@ public class ShardingSphereConfig {
     @Bean
     public DataSource createShardingDataSource() {
         final var chardMax = shardCount - 1;
-        final var deviceTableRule = new ShardingTableRuleConfiguration(logicTable, SHARD_NAME + "${0.." + chardMax + "}." + logicTable);
+        final var deviceTableRule = new ShardingTableRuleConfiguration(logicTable,
+                SHARD_NAME + "${0.." + chardMax + "}." + logicTable
+        );
         deviceTableRule.setDatabaseShardingStrategy(
                 new StandardShardingStrategyConfiguration(shardingColumn, ALGORITHM_NAME)
         );

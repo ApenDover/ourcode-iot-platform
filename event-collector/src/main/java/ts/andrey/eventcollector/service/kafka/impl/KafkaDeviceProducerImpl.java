@@ -22,12 +22,14 @@ public class KafkaDeviceProducerImpl extends AbstractKafkaProducer implements Ka
 
     private final String deviceTopic;
     private final String dltDeviceTopic;
+    private final GlobalMetrics globalMetrics;
 
     protected KafkaDeviceProducerImpl(KafkaTemplate<String, SpecificRecordBase> kafkaTemplate,
                                       GlobalMetrics globalMetrics, NewTopic deviceTopic, NewTopic deviceDlt) {
         super(kafkaTemplate, globalMetrics, deviceDlt.name());
         this.deviceTopic = deviceTopic.name();
         this.dltDeviceTopic = deviceDlt.name();
+        this.globalMetrics = globalMetrics;
     }
 
     @WithSpan("kafkaDeviceProducer")
@@ -48,6 +50,7 @@ public class KafkaDeviceProducerImpl extends AbstractKafkaProducer implements Ka
         final var recordsToSend = records.stream()
                 .filter(Device.class::isInstance)
                 .map(recordBase -> {
+                    globalMetrics.incrementDltError();
                     final var device = (Device) recordBase;
                     return new ProducerRecord<>(dltDeviceTopic, device.getDeviceId(), device);
                 })

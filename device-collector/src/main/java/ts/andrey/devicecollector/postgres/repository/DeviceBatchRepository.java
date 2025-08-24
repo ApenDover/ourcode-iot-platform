@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import ts.andrey.devicecollector.metrics.GlobalMetrics;
 import ts.andrey.devicecollector.metrics.PostgresMetrics;
 import ts.andrey.devicecollector.postgres.entity.DeviceEntity;
 import ts.andrey.devicecollector.utils.ShardUtil;
@@ -31,7 +30,6 @@ public class DeviceBatchRepository {
             """;
 
     private final PostgresMetrics postgresMetrics;
-    private final GlobalMetrics globalMetrics;
     private final JdbcTemplate jdbcTemplate;
 
     public int batchUpsert(List<DeviceEntity> devices) {
@@ -60,7 +58,6 @@ public class DeviceBatchRepository {
         devices.forEach(d -> {
             final var shard = ShardUtil.getShardNameByString(d.getDeviceId());
             postgresMetrics.incrementSuccess(shard);
-            globalMetrics.incrementSuccess();
         });
         return updated;
     }

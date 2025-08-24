@@ -33,8 +33,8 @@ public abstract class AbstractKafkaProducer {
                                 new ProducerRecord<>(message.topic(), message.key(), message.value())
                         ).thenApply(SendResult::getRecordMetadata)
                         .exceptionallyCompose(ex -> {
-                            globalMetrics.incrementError();
-                            log.error("Ошибка отправки записи={}", message.value(), ex);
+                            globalMetrics.incrementDltError();
+                            log.error("Ошибка отправки в DLT={}", message.value(), ex);
                             return kafkaTemplate.send(
                                     new ProducerRecord<>(dltTopic, message.key(), message.value())
                             ).thenApply(SendResult::getRecordMetadata);

@@ -33,6 +33,7 @@ public class CollectorFacade {
             deviceEventService.saveEvents(deviceEvents);
             globalMetrics.incrementSuccess();
         } catch (Exception e) {
+            globalMetrics.incrementError();
             log.error("Ошибка при обработке событий", e);
             throw e;
         }

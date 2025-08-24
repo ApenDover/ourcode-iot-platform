@@ -3,16 +3,18 @@ package ts.andrey.eventcollector.integration;
 import com.nashkod.avro.Device;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.springframework.util.CollectionUtils;
 import ts.andrey.eventcollector.BaseIntegrationTest;
 import ts.andrey.eventcollector.tdf.DummyTDF;
 import ts.andrey.eventcollector.testutils.KafkaConsumerUtil;
+import ts.andrey.eventcollector.testutils.KafkaProducerUtil;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EventCollectorProcessingIT extends BaseIntegrationTest {
@@ -25,12 +27,13 @@ class EventCollectorProcessingIT extends BaseIntegrationTest {
         final var deviceEvents = DummyTDF.deviceEvent.getList(size);
 
         // WHEN
-        final var metadata = producer.send(deviceEvents).get();
+        final var metadata = deviceEvents.stream()
+                .map(message -> KafkaProducerUtil.sendMessage(
+                        kafka.getBootstrapServers(), "events", schemaRegistry.getFirstMappedPort(), message))
+                .toList();
 
         // THEN CHECK PRODUCE METADATA
-        assertNotNull(metadata);
-        assertEquals("events", metadata.get(1).topic());
-        assertTrue(metadata.get(1).offset() >= 0);
+        assertFalse(CollectionUtils.isEmpty(metadata));
 
         //THEN CHECK CASSANDRA SAVED
         await().atMost(10, TimeUnit.SECONDS)

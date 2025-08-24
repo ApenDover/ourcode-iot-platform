@@ -23,12 +23,14 @@ public class KafkaEventProducerImpl extends AbstractKafkaProducer implements Kaf
 
     private final String eventTopic;
     private final String dltEventTopic;
+    private final GlobalMetrics globalMetrics;
 
     protected KafkaEventProducerImpl(KafkaTemplate<String, SpecificRecordBase> kafkaTemplate,
                                      GlobalMetrics globalMetrics, NewTopic eventTopic, NewTopic eventDlt) {
         super(kafkaTemplate, globalMetrics, eventDlt.name());
         this.eventTopic = eventTopic.name();
         this.dltEventTopic = eventDlt.name();
+        this.globalMetrics = globalMetrics;
     }
 
     @WithSpan("kafkaDeviceProducer")
@@ -50,9 +52,11 @@ public class KafkaEventProducerImpl extends AbstractKafkaProducer implements Kaf
                 .filter(DeviceEvent.class::isInstance)
                 .map(recordBase -> {
                     final var event = (DeviceEvent) recordBase;
+                    globalMetrics.incrementDltError();
                     return new ProducerRecord<>(dltEventTopic, event.getDevice().getDeviceId(), event);
                 })
                 .toList();
         return innerSend(recordsToSend);
     }
+
 }

@@ -24,4 +24,4 @@ otel:
   logs:
     exporter: none
 
-app.postgres.retry.max-attempts: 1
+app.postgres.retry.max-attempts: 2

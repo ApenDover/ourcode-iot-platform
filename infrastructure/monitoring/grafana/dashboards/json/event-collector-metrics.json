@@ -46,8 +46,68 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
+        "w": 8,
         "x": 0,
+        "y": 0
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0-16979757807",
+      "targets": [
+        {
+          "editorMode": "builder",
+          "expr": "events_cassandra_success_total",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Cassandra total",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFE396EC0B189D67"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 8,
         "y": 0
       },
       "id": 4,
@@ -111,10 +171,138 @@
       "gridPos": {
         "h": 6,
         "w": 4,
-        "x": 4,
+        "x": 12,
         "y": 0
       },
       "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0-16979757807",
+      "targets": [
+        {
+          "editorMode": "builder",
+          "expr": "events_dlt_error_total",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Event fail (DLT)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFE396EC0B189D67"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 16,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0-16979757807",
+      "targets": [
+        {
+          "editorMode": "builder",
+          "expr": "events_cassandra_error_total",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Cassandra fail",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFE396EC0B189D67"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "#EAB839",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "id": 14,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -142,67 +330,7 @@
           "refId": "A"
         }
       ],
-      "title": "Event fail (DLT)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFE396EC0B189D67"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 0
-      },
-      "id": 6,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.2.0-16979757807",
-      "targets": [
-        {
-          "editorMode": "builder",
-          "expr": "device_processed_success_total",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Device success (saved)",
+      "title": "Events Batch error",
       "type": "stat"
     },
     {
@@ -231,8 +359,8 @@
       "gridPos": {
         "h": 6,
         "w": 4,
-        "x": 16,
-        "y": 0
+        "x": 0,
+        "y": 6
       },
       "id": 8,
       "options": {
@@ -291,8 +419,8 @@
       "gridPos": {
         "h": 6,
         "w": 4,
-        "x": 20,
-        "y": 0
+        "x": 4,
+        "y": 6
       },
       "id": 9,
       "options": {
@@ -351,10 +479,10 @@
       "gridPos": {
         "h": 6,
         "w": 4,
-        "x": 0,
+        "x": 8,
         "y": 6
       },
-      "id": 11,
+      "id": 6,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -376,77 +504,13 @@
       "targets": [
         {
           "editorMode": "builder",
-          "expr": "events_cassandra_success_total",
+          "expr": "device_processed_success_total",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Cassandra total",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFE396EC0B189D67"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 4,
-        "y": 6
-      },
-      "id": 2,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.2.0-16979757807",
-      "targets": [
-        {
-          "editorMode": "builder",
-          "expr": "events_cassandra_error_total",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Cassandra fail",
+      "title": "Device batch success",
       "type": "stat"
     },
     {
@@ -478,8 +542,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 8,
+        "w": 4,
+        "x": 12,
         "y": 6
       },
       "id": 7,
@@ -504,7 +568,7 @@
       "targets": [
         {
           "editorMode": "builder",
-          "expr": "device_processed_error_total",
+          "expr": "device_dlt_error_total",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -575,7 +639,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
+        "w": 4,
         "x": 16,
         "y": 6
       },
@@ -605,6 +669,70 @@
       ],
       "title": "Postgres fail",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFE396EC0B189D67"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 20,
+        "y": 6
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0-16979757807",
+      "targets": [
+        {
+          "editorMode": "builder",
+          "expr": "device_processed_error_total",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Device batch error",
+      "type": "stat"
     },
     {
       "datasource": {
@@ -664,7 +792,7 @@
       },
       "gridPos": {
         "h": 10,
-        "w": 13,
+        "w": 12,
         "x": 0,
         "y": 12
       },
@@ -762,8 +890,8 @@
       },
       "gridPos": {
         "h": 10,
-        "w": 11,
-        "x": 13,
+        "w": 12,
+        "x": 12,
         "y": 12
       },
       "id": 12,
@@ -808,5 +936,5 @@
   "timezone": "browser",
   "title": "EventCollectorMetrics",
   "uid": "a6df77c8-41dd-4835-a120-3f13193b423c",
-  "version": 2
+  "version": 1
 }

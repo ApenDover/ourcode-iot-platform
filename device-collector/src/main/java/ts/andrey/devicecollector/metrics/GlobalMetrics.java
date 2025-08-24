@@ -9,14 +9,19 @@ public class GlobalMetrics {
 
     private final Counter successCounter;
     private final Counter errorCounter;
+    private final Counter dltCounter;
 
     public GlobalMetrics(MeterRegistry meterRegistry) {
         this.successCounter = Counter.builder("device.processed.success")
-                .description("Общее число успешно обработанных устройств")
+                .description("Общее число успешно обработанных батчей")
                 .register(meterRegistry);
 
         this.errorCounter = Counter.builder("device.processed.error")
-                .description("Общее число не обработанных устройств (отправленно в DLT)")
+                .description("Общее число проблемных батчей")
+                .register(meterRegistry);
+
+        this.dltCounter = Counter.builder("device.dlt.error")
+                .description("Общее число отправленных в dlt девайсов")
                 .register(meterRegistry);
     }
 
@@ -26,6 +31,10 @@ public class GlobalMetrics {
 
     public void incrementError() {
         errorCounter.increment();
+    }
+
+    public void incrementDltMessage() {
+        dltCounter.increment();
     }
 
 }

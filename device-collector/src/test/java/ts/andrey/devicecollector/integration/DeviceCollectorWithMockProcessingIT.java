@@ -59,7 +59,8 @@ class DeviceCollectorWithMockProcessingIT extends BaseIntegrationTest {
         final var deviceOne = DummyTDF.device.getForShardOne();
         final var deviceTwo = DummyTDF.device.getForShardTwo();
         final var toSend = List.of(deviceOne, deviceTwo);
-        when(deviceBatchRepository.batchUpsert(anyList())).thenThrow(new DataIntegrityViolationException("Simulated DB error"));
+        when(deviceBatchRepository.batchUpsert(anyList()))
+                .thenThrow(new DataIntegrityViolationException("Simulated DB error"));
 
         // WHEN
         toSend.forEach(message ->
@@ -74,8 +75,7 @@ class DeviceCollectorWithMockProcessingIT extends BaseIntegrationTest {
                 .pollInterval(1000, MILLISECONDS)
                 .untilAsserted(() -> {
                     final var records = KafkaConsumerUtil.getMessages(kafka.getBootstrapServers(), "dltDeviceOne",
-                            "group", schemaRegistry.getFirstMappedPort(),
-                            Device.class);
+                            "group", schemaRegistry.getFirstMappedPort(), Device.class);
                     assertNotNull(records);
                     assertFalse(records.isEmpty());
                     assertEquals(2, records.count());
