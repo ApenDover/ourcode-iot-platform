@@ -34,9 +34,9 @@ public class DeviceBatchRepository {
     private final GlobalMetrics globalMetrics;
     private final JdbcTemplate jdbcTemplate;
 
-    public void batchUpsert(List<DeviceEntity> devices) {
+    public int batchUpsert(List<DeviceEntity> devices) {
         if (devices == null || devices.isEmpty()) {
-            return;
+            return 0;
         }
 
         final var placeholders = devices.stream()
@@ -53,7 +53,7 @@ public class DeviceBatchRepository {
             params.add(Timestamp.from(device.getCreatedAt()));
             params.add(device.getMeta());
         });
-        jdbcTemplate.update(sql, params.toArray());
+        final var updated = jdbcTemplate.update(sql, params.toArray());
 
         log.info("сохраняю устройства: {}", devices.size());
 
@@ -62,6 +62,7 @@ public class DeviceBatchRepository {
             postgresMetrics.incrementSuccess(shard);
             globalMetrics.incrementSuccess();
         });
+        return updated;
     }
 
 }

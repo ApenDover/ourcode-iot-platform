@@ -30,8 +30,8 @@ public class KafkaProducerUtil {
                                                                          Integer schemaRegistryPort, T message) {
         Properties producerProps = new Properties();
         producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
+        producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
         producerProps.put("schema.registry.url", BASE_URL + schemaRegistryPort);
         producerProps.put("specific.avro.reader", "true");
         producerProps.put("avro.remove.java.properties", "true");

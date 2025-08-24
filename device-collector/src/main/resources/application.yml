@@ -68,6 +68,14 @@ spring:
       device-topic: device
       dlt-device-topic: device.DLT
       observation-enabled: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      batch-size: 16384
+      compression-type: snappy
+      properties:
+        schema.registry.url: http://schema-registry:8081
+        auto.register.schemas: true
     consumer:
       max-poll-records: 20000
       fetch-max-wait: 500

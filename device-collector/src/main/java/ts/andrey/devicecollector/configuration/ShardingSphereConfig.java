@@ -12,7 +12,7 @@ import org.apache.shardingsphere.sharding.api.config.strategy.sharding.StandardS
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import ts.andrey.devicecollector.exception.DeviceCollectorException;
 import ts.andrey.devicecollector.utils.LiquibaseProcessor;
 import ts.andrey.devicecollector.utils.ShardUtil;
@@ -29,6 +29,7 @@ import java.util.stream.IntStream;
 
 @Configuration
 @RequiredArgsConstructor
+@Profile("!test")
 public class ShardingSphereConfig {
 
     private static final String MASTER_PROPERTY_NAME = "dataSources";
@@ -57,7 +58,6 @@ public class ShardingSphereConfig {
     @Value("${app.shardingSphere.shardCount}")
     private Integer shardCount;
 
-    @Primary
     @Bean
     public DataSource createShardingDataSource() {
         final var chardMax = shardCount - 1;

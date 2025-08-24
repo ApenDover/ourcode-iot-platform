@@ -5,15 +5,17 @@ spring:
     bootstrap-servers: ${kafka.bootstrap.servers}
     template:
       device-topic: deviceOne
+      dlt-device-topic: dltDeviceOne
     consumer:
       max-poll-records: 1
       properties:
         schema.registry.url: ${schema.registry.url}
         avro.remove.java.properties: true
+      group-id: group
     producer:
       properties:
         schema.registry.url: ${schema.registry.url}
-        avro.remove.java.properties: true
+
 otel:
   traces:
     exporter: none
@@ -21,3 +23,5 @@ otel:
     exporter: none
   logs:
     exporter: none
+
+app.postgres.retry.max-attempts: 1
