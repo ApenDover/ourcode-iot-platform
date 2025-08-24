@@ -35,11 +35,11 @@ public class DeviceDataService {
 
     @WithSpan
     @Retryable(
-            value = DataAccessException.class,
-            maxAttemptsExpression = "${app.postgres.retry.max-attempts:100}",
+            retryFor = DataAccessException.class,
+            maxAttemptsExpression = "${app.postgres.retry.max-attempts:2}",
             backoff = @Backoff(
-                    delayExpression = "${app.postgres.retry.initial-delay:100}",
-                    multiplierExpression = "${app.postgres.retry.multiplier:2}",
+                    delayExpression = "${app.postgres.retry.initial-delay:1000}",
+                    multiplierExpression = "${app.postgres.retry.multiplier:5}",
                     random = true
             )
     )
@@ -59,7 +59,7 @@ public class DeviceDataService {
             postgresMetrics.incrementError(shard);
         });
         try {
-            kafkaProducer.send(devices);
+            kafkaProducer.sendDlt(devices);
         } catch (Exception kafkaEx) {
             log.error("Ошибка отправки в DLT devices {}", devices, kafkaEx);
         }
