@@ -7,12 +7,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
 import ts.andrey.eventcollector.cassandra.repository.DeviceEventReactRepository;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.metrics.CassandraMetrics;
 import ts.andrey.eventcollector.service.kafka.KafkaProducer;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,8 +41,8 @@ public class DeviceEventDataService {
     @Value("${app.cassandra.error.max-attempts}")
     private Integer maxAttempts;
 
-    @Value("${app.cassandra.error.min-backoff}")
-    private Integer minBackoff;
+    @Value("${app.cassandra.error.max-backoff}")
+    private Integer maxBackoff;
 
     @Value("${app.cassandra.error.jitter-factor}")
     private Double jitterFactor;
@@ -56,21 +58,20 @@ public class DeviceEventDataService {
         return Flux.fromIterable(deviceEventMapper.eventToEntityList(events))
                 .buffer(bufferSize)
                 .flatMap(batch -> saveBatch(batch, eventMap), concurrencySize)
-                .doOnComplete(() -> log.info("Завершена обработка {} событий", events.size()))
+                .doOnComplete(() -> log.info("Завершена обработка [{}] событий", events.size()))
                 .then();
     }
 
     private Mono<Void> saveBatch(List<DeviceEventEntity> batch, Map<UUID, DeviceEvent> eventMap) {
-        log.debug("Processing batch of {} events", batch.size());
+        log.debug("Processing batch of [{}] events", batch.size());
         return deviceEventReactRepository.saveAll(batch)
                 .doOnNext(e -> {
                     cassandraMetrics.incrementSuccess();
-                    log.debug("Событие {} успешно сохранено", e.getKey().getEventId());
+                    log.debug("Событие [{}] успешно сохранено", e.getKey().getEventId());
                 })
                 .then()
-                .doOnSuccess(v -> log.info("Успешно сохранен батч из {} событий", batch.size()))
                 .onErrorResume(e -> {
-                    log.warn("Ошибка сохранения батча из {} событий, обработка ошибки", batch.size(), e);
+                    log.warn("Ошибка сохранения батча из [{}] событий, обработка ошибки", batch.size(), e);
                     return Flux.fromIterable(batch)
                             .flatMap(event -> saveSingle(event, eventMap))
                             .then();
@@ -82,14 +83,29 @@ public class DeviceEventDataService {
         return deviceEventReactRepository.save(event)
                 .doOnSuccess(e -> {
                     cassandraMetrics.incrementSuccess();
-                    log.debug("Событие {} успешно сохранено", e.getKey().getEventId());
-                }).onErrorResume(inner -> {
+                    log.debug("Событие [{}] успешно сохранено", e.getKey().getEventId());
+                })
+                .retryWhen(
+                        Retry.backoff(maxAttempts, Duration.ofSeconds(1))
+                                .maxBackoff(Duration.ofSeconds(maxBackoff))
+                                .jitter(jitterFactor)
+                                .doBeforeRetry(retrySignal ->
+                                        log.warn("Повторная попытка сохранения события [{}], попытка {}/{}",
+                                                event.getKey().getEventId(),
+                                                retrySignal.totalRetries() + 1,
+                                                maxAttempts))
+                )
+                .onErrorResume(inner -> {
                     cassandraMetrics.incrementError();
-                    log.error("Ошибка сохранения события {} в Cassandra", event.getKey().getEventId(), inner);
+                    log.error("Ошибка сохранения события [{}] в Cassandra после всех попыток",
+                            event.getKey().getEventId(), inner);
+
                     Optional.ofNullable(eventMap.get(event.getKey().getEventId()))
                             .ifPresent(original -> kafkaEventProducerImpl.sendDlt(List.of(original)));
+
                     return Mono.empty();
-                }).then();
+                })
+                .then();
     }
 
 }

@@ -67,7 +67,7 @@ public class KafkaConfig {
         BiFunction<ConsumerRecord<?, ?>, Exception, TopicPartition> destinationResolver =
                 (record, ex) -> {
                     globalMetrics.incrementDltMessage();
-                    log.warn("Сообщение {} ушло в DLT из-за ошибки {}", record.key(), ex.getMessage());
+                    log.warn("Сообщение [{}] ушло в DLT из-за ошибки {}", record.key(), ex.getMessage());
                     return new TopicPartition(dltDeviceTopic, record.partition());
                 };
 

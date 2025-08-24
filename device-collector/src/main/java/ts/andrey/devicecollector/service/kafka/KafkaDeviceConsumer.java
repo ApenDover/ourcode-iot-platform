@@ -29,7 +29,7 @@ public class KafkaDeviceConsumer {
         TraceUtil.withRootSpan(trace, () -> {
             final var devices = new ArrayList<Device>();
             records.forEach(message -> devices.add(message.value()));
-            log.info("Получена пачка из {} девайсов", devices.size());
+            log.info("Получена пачка из [{}] девайсов", devices.size());
             log.debug("Получены девайсы: {}", devices);
             try {
                 deviceService.createOrUpdateDevice(devices);

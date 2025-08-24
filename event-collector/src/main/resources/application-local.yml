@@ -104,7 +104,7 @@ app:
     concurrency-size: 5
     error:
       max-attempts: 3
-      min-backoff: 100
+      max-backoff: 100
       jitter-factor: 0.5
   cache:
     expiration:

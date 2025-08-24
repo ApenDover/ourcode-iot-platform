@@ -33,7 +33,7 @@ public class KafkaEventProducerImpl implements KafkaProducer {
     @Override
     @WithSpan("publish-batch-event")
     public CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records) {
-        log.info("Отправка в топик {} новых device events: {}", eventsTopic, records.size());
+        log.info("Отправка в топик [{}] новых device events: {}", eventsTopic, records.size());
         try {
             if (CollectionUtils.isEmpty(records)) {
                 return CompletableFuture.completedFuture(Collections.emptyList());
