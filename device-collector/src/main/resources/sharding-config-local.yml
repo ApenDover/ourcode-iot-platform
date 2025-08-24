@@ -42,7 +42,7 @@ rules:
           algorithm-expression: shard$->{Math.abs(device_id.hashCode()) % 2}
 
   - !READWRITE_SPLITTING
-    dataSourceGroups:
+    dataSources:
       shard0:
         writeDataSourceName: shard0
         readDataSourceNames:

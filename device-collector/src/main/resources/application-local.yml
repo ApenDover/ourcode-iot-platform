@@ -64,7 +64,7 @@ spring:
     enabled: false
   datasource:
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
-    url: jdbc:shardingsphere:classpath:sharding-config-local.yml
+#    url: jdbc:shardingsphere:classpath:sharding-config-local.yml
   jpa:
     properties:
       generate_statistics: true
@@ -106,11 +106,22 @@ spring:
 
 app:
   postgres:
+    retry:
+      max-attempts: 3
+      initial-delay: 100
+      multiplier: 2
     batch-size: 300
   dataSources:
     - url: jdbc:postgresql://localhost:5431/iot_platform
       username: myuser
       password: strongpassword
     - url: jdbc:postgresql://localhost:5432/iot_platform
+      username: myuser
+      password: strongpassword
+  replicaDataSources:
+    - url: jdbc:postgresql://localhost:5433/iot_platform
+      username: myuser
+      password: strongpassword
+    - url: jdbc:postgresql://localhost:5434/iot_platform
       username: myuser
       password: strongpassword

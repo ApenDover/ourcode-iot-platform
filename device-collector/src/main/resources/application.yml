@@ -55,7 +55,7 @@ spring:
     enabled: false
   datasource:
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
-    url: jdbc:shardingsphere:classpath:sharding-config.yml
+  #    url: jdbc:shardingsphere:classpath:sharding-config.yml
   jpa:
     hibernate:
       ddl-auto: none
@@ -100,5 +100,12 @@ app:
       username: myuser
       password: strongpassword
     - url: jdbc:postgresql://postgres2:5432/iot_platform
+      username: myuser
+      password: strongpassword
+  replicaDataSources:
+    - url: jdbc:postgresql://postgres3:5432/iot_platform
+      username: myuser
+      password: strongpassword
+    - url: jdbc:postgresql://postgres4:5432/iot_platform
       username: myuser
       password: strongpassword
