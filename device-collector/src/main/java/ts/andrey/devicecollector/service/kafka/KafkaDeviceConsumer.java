@@ -30,7 +30,7 @@ public class KafkaDeviceConsumer {
             final var devices = new ArrayList<Device>();
             records.forEach(message -> devices.add(message.value()));
             log.info("Получена пачка из [{}] девайсов", devices.size());
-            log.debug("Получены девайсы: {}", devices);
+            log.debug("Получены девайсы: [{}]", devices);
             try {
                 deviceService.createOrUpdateDevice(devices);
             } catch (Exception e) {

@@ -79,7 +79,7 @@ public class DeviceEventDataService {
     }
 
     private Mono<Void> saveSingle(DeviceEventEntity event, Map<UUID, DeviceEvent> eventMap) {
-        log.info("Обработка ошибки для {}", event);
+        log.info("Обработка ошибки для [{}]", event);
         return deviceEventReactRepository.save(event)
                 .doOnSuccess(e -> {
                     cassandraMetrics.incrementSuccess();
@@ -90,7 +90,7 @@ public class DeviceEventDataService {
                                 .maxBackoff(Duration.ofSeconds(maxBackoff))
                                 .jitter(jitterFactor)
                                 .doBeforeRetry(retrySignal ->
-                                        log.warn("Повторная попытка сохранения события [{}], попытка {}/{}",
+                                        log.warn("Повторная попытка сохранения события [{}], попытка {}/[{}]",
                                                 event.getKey().getEventId(),
                                                 retrySignal.totalRetries() + 1,
                                                 maxAttempts))

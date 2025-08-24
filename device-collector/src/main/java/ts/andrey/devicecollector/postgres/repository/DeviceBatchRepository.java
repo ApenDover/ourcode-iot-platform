@@ -53,7 +53,7 @@ public class DeviceBatchRepository {
         });
         final var updated = jdbcTemplate.update(sql, params.toArray());
 
-        log.info("сохраняю устройства: {}", devices.size());
+        log.info("сохраняю устройства: [{}]", devices.size());
 
         devices.forEach(d -> {
             final var shard = ShardUtil.getShardNameByString(d.getDeviceId());

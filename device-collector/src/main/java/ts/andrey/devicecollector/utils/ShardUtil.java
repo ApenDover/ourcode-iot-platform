@@ -38,7 +38,7 @@ public class ShardUtil {
                     ? StringUtils.EMPTY
                     : "-" + profile) + ".yml";
 
-            log.info("Loading properties from {}", fileName);
+            log.info("Loading properties from [{}]", fileName);
 
             final var yaml = new Yaml();
             final var inputStream = ConfigLoader.class.getClassLoader()

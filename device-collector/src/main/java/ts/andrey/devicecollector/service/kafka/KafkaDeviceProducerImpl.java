@@ -25,7 +25,7 @@ public class KafkaDeviceProducerImpl extends AbstractKafkaProducer implements Ka
 
     @Override
     public CompletableFuture<List<RecordMetadata>> sendDlt(List<? extends SpecificRecordBase> records) {
-        log.error("Отправляю Device в DLT topic: {}", dltTopic);
+        log.error("Отправляю Device в DLT topic: [{}]", dltTopic);
         final var recordsToSend = records.stream()
                 .filter(Device.class::isInstance)
                 .map(recordBase -> {

@@ -63,7 +63,7 @@ public class DeviceDataService {
         try {
             kafkaProducer.sendDlt(devices);
         } catch (Exception kafkaEx) {
-            log.error("Ошибка отправки в DLT devices {}", devices, kafkaEx);
+            log.error("Ошибка отправки в DLT devices [{}]", devices, kafkaEx);
         }
     }
 

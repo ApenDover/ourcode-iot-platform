@@ -30,7 +30,7 @@ public class KafkaDeviceEventConsumer {
             final var events = new ArrayList<DeviceEvent>();
             records.forEach(message -> events.add(message.value()));
             log.info("Получена пачка из [{}] событий", events.size());
-            log.debug("Получены события: {}", events);
+            log.debug("Получены события: [{}]", events);
             collectorFacade.collect(events);
         });
     }

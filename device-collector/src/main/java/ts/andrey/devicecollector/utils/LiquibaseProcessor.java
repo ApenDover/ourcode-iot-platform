@@ -28,7 +28,7 @@ public class LiquibaseProcessor {
         liquibase.setShouldRun(true);
         try {
             liquibase.afterPropertiesSet();
-            log.info("Liquibase changelog applied for {}", migrationSource.getUrl());
+            log.info("Liquibase changelog applied for [{}]", migrationSource.getUrl());
         } catch (Exception e) {
             throw new DeviceCollectorException("Liquibase failed for shard " + migrationSource.getUrl(), e);
         }

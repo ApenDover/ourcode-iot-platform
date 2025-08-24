@@ -3,6 +3,7 @@ package ts.andrey.eventcollector.cassandra.dao;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import ts.andrey.eventcollector.cassandra.entity.DeviceEntity;
@@ -20,10 +21,13 @@ public class DeviceDataService {
 
     @WithSpan("cassandra-save-batch-devices")
     public void saveDeviceIds(List<DeviceEntity> devices) {
+        if (CollectionUtils.isEmpty(devices)) {
+            return;
+        }
         final var fluxEvents = Flux.fromIterable(devices);
         deviceReactRepository.saveAll(fluxEvents)
                 .then()
-                .doOnTerminate(() -> log.info("Сохранил Device в Cassandra: {}", devices.size()))
+                .doOnTerminate(() -> log.info("Сохранил Device в Cassandra: [{}]", devices.size()))
                 .subscribe();
     }
 
@@ -34,7 +38,7 @@ public class DeviceDataService {
                 .distinct()
                 .toList();
 
-        log.info("Пытаюсь определить существование deviceId в cassandra {}", ids.size());
+        log.info("Пытаюсь определить существование deviceId в cassandra [{}]", ids.size());
 
         final var modified = new ArrayList<>(devices);
 

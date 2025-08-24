@@ -26,7 +26,7 @@ public class DeviceEventValidFilter {
                             && Objects.nonNull(it.getType())
                             && Objects.nonNull(it.getTimestamp());
                     if (!isValid) {
-                        log.warn("Невалидное событие: {}", it);
+                        log.warn("Невалидное событие: [{}]", it);
                     }
                     return isValid;
                 }).toList();

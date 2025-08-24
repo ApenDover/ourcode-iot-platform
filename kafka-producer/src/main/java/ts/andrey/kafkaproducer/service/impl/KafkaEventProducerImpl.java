@@ -33,7 +33,7 @@ public class KafkaEventProducerImpl implements KafkaProducer {
     @Override
     @WithSpan("publish-batch-event")
     public CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records) {
-        log.info("Отправка в топик [{}] новых device events: {}", eventsTopic, records.size());
+        log.info("Отправка в топик [{}] новых device events: [{}]", eventsTopic, records.size());
         try {
             if (CollectionUtils.isEmpty(records)) {
                 return CompletableFuture.completedFuture(Collections.emptyList());
@@ -53,7 +53,7 @@ public class KafkaEventProducerImpl implements KafkaProducer {
                             .toList()
                     );
         } catch (Exception e) {
-            log.error("Ошибка при публикации eventIds в топик {}", eventsTopic, e);
+            log.error("Ошибка при публикации eventIds в топик [{}]", eventsTopic, e);
         }
         return CompletableFuture.completedFuture(Collections.emptyList());
     }
@@ -62,7 +62,7 @@ public class KafkaEventProducerImpl implements KafkaProducer {
         return kafkaTemplate.send(eventsTopic, event.getDevice().getDeviceId(), event)
                 .thenApply(SendResult::getRecordMetadata)
                 .exceptionally(ex -> {
-                    log.error("Ошибка отправки eventId={}", event.getEventId(), ex);
+                    log.error("Ошибка отправки eventId=[{}]", event.getEventId(), ex);
                     return null;
                 });
     }

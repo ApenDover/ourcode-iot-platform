@@ -2,6 +2,7 @@ package ts.andrey.eventcollector.service.kafka;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -27,14 +28,17 @@ public abstract class AbstractKafkaProducer {
 
     protected CompletableFuture<List<RecordMetadata>> innerSend(
             List<? extends ProducerRecord<String, ? extends SpecificRecordBase>> records) {
-        log.info("Отправка в kafka записей={}", records.size());
+        if (CollectionUtils.isEmpty(records)) {
+            return CompletableFuture.completedFuture(List.of());
+        }
+        log.error("Отправка в kafka[{}] записей [{}]", records.getFirst().topic(), records.size());
         List<CompletableFuture<RecordMetadata>> futures = records.stream()
                 .map(message -> kafkaTemplate.send(
                                 new ProducerRecord<>(message.topic(), message.key(), message.value())
                         ).thenApply(SendResult::getRecordMetadata)
                         .exceptionallyCompose(ex -> {
                             globalMetrics.incrementDltError();
-                            log.error("Ошибка отправки в DLT={}", message.value(), ex);
+                            log.error("Ошибка отправки в DLT [{}]", message.value(), ex);
                             return kafkaTemplate.send(
                                     new ProducerRecord<>(dltTopic, message.key(), message.value())
                             ).thenApply(SendResult::getRecordMetadata);
