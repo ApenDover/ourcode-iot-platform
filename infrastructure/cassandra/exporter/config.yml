@@ -1,5 +1,5 @@
 host: cassandra:7199
-ssl: False
+ssl: false
 user:
 password:
 listenAddress: 0.0.0.0
