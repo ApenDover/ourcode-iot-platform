@@ -9,7 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ts.andrey.devicecollector.BaseIntegrationTest;
-import ts.andrey.devicecollector.postgres.repository.DeviceBatchRepository;
+import ts.andrey.devicecollector.data.repository.DeviceBatchRepository;
 import ts.andrey.devicecollector.tdf.DummyTDF;
 import ts.andrey.devicecollector.testutils.KafkaConsumerUtil;
 import ts.andrey.devicecollector.testutils.KafkaProducerUtil;

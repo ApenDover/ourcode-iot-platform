@@ -3,7 +3,7 @@ package ts.andrey.devicecollector.mapper;
 import com.nashkod.avro.Device;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ts.andrey.devicecollector.postgres.entity.DeviceEntity;
+import ts.andrey.devicecollector.data.entity.DeviceEntity;
 
 import java.util.List;
 

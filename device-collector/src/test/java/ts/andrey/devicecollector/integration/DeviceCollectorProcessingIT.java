@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ts.andrey.devicecollector.BaseIntegrationTest;
-import ts.andrey.devicecollector.postgres.entity.DeviceEntity;
+import ts.andrey.devicecollector.data.entity.DeviceEntity;
 import ts.andrey.devicecollector.tdf.DummyTDF;
 import ts.andrey.devicecollector.testutils.DateUtil;
 import ts.andrey.devicecollector.testutils.KafkaProducerUtil;

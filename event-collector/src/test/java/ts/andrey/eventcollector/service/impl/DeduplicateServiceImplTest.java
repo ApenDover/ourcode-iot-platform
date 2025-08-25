@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ts.andrey.eventcollector.cassandra.dao.DeviceDataService;
+import ts.andrey.eventcollector.data.dao.DeviceDataService;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.service.component.SimpleCache;
 import ts.andrey.eventcollector.tdf.DummyTDF;

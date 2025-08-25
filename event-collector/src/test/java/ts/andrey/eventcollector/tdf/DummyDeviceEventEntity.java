@@ -3,8 +3,8 @@ package ts.andrey.eventcollector.tdf;
 import com.nashkod.avro.EventType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
-import ts.andrey.eventcollector.cassandra.entity.DeviceEventKey;
+import ts.andrey.eventcollector.data.entity.DeviceEventEntity;
+import ts.andrey.eventcollector.data.entity.DeviceEventKey;
 
 import java.util.ArrayList;
 import java.util.List;

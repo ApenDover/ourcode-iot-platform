@@ -1,4 +1,4 @@
-package ts.andrey.devicecollector.postgres.repository;
+package ts.andrey.devicecollector.data.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ts.andrey.devicecollector.metrics.PostgresMetrics;
-import ts.andrey.devicecollector.postgres.entity.DeviceEntity;
+import ts.andrey.devicecollector.data.entity.DeviceEntity;
 import ts.andrey.devicecollector.utils.ShardUtil;
 
 import java.sql.Timestamp;

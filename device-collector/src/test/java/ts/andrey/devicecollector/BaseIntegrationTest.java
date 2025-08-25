@@ -14,7 +14,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
-import ts.andrey.devicecollector.postgres.repository.DeviceRepository;
+import ts.andrey.devicecollector.data.repository.DeviceRepository;
 
 @Slf4j
 @SpringBootTest(

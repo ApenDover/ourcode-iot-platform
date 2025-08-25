@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.cassandra.entity;
+package ts.andrey.eventcollector.data.entity;
 
 import lombok.Getter;
 import lombok.Setter;

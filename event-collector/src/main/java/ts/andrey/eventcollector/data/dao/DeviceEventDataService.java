@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.cassandra.dao;
+package ts.andrey.eventcollector.data.dao;
 
 import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
-import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
-import ts.andrey.eventcollector.cassandra.repository.DeviceEventReactRepository;
+import ts.andrey.eventcollector.data.entity.DeviceEventEntity;
+import ts.andrey.eventcollector.data.repository.DeviceEventReactRepository;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.metrics.CassandraMetrics;
 import ts.andrey.eventcollector.service.kafka.KafkaProducer;

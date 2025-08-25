@@ -1,4 +1,4 @@
-package ts.andrey.devicecollector.postgres.dao;
+package ts.andrey.devicecollector.data.dao;
 
 import com.google.common.collect.Lists;
 import com.nashkod.avro.Device;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import ts.andrey.devicecollector.mapper.DeviceMapper;
 import ts.andrey.devicecollector.metrics.GlobalMetrics;
 import ts.andrey.devicecollector.metrics.PostgresMetrics;
-import ts.andrey.devicecollector.postgres.repository.DeviceBatchRepository;
+import ts.andrey.devicecollector.data.repository.DeviceBatchRepository;
 import ts.andrey.devicecollector.service.kafka.KafkaProducer;
 import ts.andrey.devicecollector.utils.ShardUtil;
 

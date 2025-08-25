@@ -2,7 +2,7 @@ package ts.andrey.eventcollector.tdf;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ts.andrey.eventcollector.cassandra.entity.DeviceEntity;
+import ts.andrey.eventcollector.data.entity.DeviceEntity;
 
 import java.util.ArrayList;
 import java.util.List;

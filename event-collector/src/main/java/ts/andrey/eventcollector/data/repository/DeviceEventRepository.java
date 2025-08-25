@@ -1,9 +1,9 @@
-package ts.andrey.eventcollector.cassandra.repository;
+package ts.andrey.eventcollector.data.repository;
 
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
-import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
-import ts.andrey.eventcollector.cassandra.entity.DeviceEventKey;
+import ts.andrey.eventcollector.data.entity.DeviceEventEntity;
+import ts.andrey.eventcollector.data.entity.DeviceEventKey;
 
 import java.util.List;
 

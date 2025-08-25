@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.cassandra.entity;
+package ts.andrey.eventcollector.data.entity;
 
 import com.nashkod.avro.EventType;
 import lombok.Getter;

@@ -12,7 +12,6 @@ import org.apache.shardingsphere.sharding.api.config.strategy.sharding.StandardS
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import ts.andrey.devicecollector.configuration.model.DataSourcesConfig;
 import ts.andrey.devicecollector.exception.DeviceCollectorException;
 import ts.andrey.devicecollector.utils.MigrationProcessor;
@@ -29,7 +28,6 @@ import java.util.stream.IntStream;
 
 @Configuration
 @RequiredArgsConstructor
-@Profile("!test")
 public class ShardingSphereConfig {
 
     private static final String ALGORITHM_NAME = "deviceid_inline";

@@ -2,7 +2,7 @@ package ts.andrey.devicecollector.tdf;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ts.andrey.devicecollector.postgres.entity.DeviceEntity;
+import ts.andrey.devicecollector.data.entity.DeviceEntity;
 
 import java.time.Instant;
 

@@ -1,4 +1,4 @@
-package ts.andrey.devicecollector.postgres.entity;
+package ts.andrey.devicecollector.data.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

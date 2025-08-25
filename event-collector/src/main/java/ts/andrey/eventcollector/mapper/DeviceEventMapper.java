@@ -4,9 +4,9 @@ import com.nashkod.avro.Device;
 import com.nashkod.avro.DeviceEvent;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ts.andrey.eventcollector.cassandra.entity.DeviceEntity;
-import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
-import ts.andrey.eventcollector.cassandra.entity.DeviceEventKey;
+import ts.andrey.eventcollector.data.entity.DeviceEntity;
+import ts.andrey.eventcollector.data.entity.DeviceEventEntity;
+import ts.andrey.eventcollector.data.entity.DeviceEventKey;
 
 import java.util.List;
 

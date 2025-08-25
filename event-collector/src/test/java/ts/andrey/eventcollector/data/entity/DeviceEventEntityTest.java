@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.cassandra.entity;
+package ts.andrey.eventcollector.data.entity;
 
 import org.junit.jupiter.api.Test;
 import ts.andrey.eventcollector.tdf.DummyTDF;
