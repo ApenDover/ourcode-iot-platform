@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Profile;
 import ts.andrey.devicecollector.configuration.model.DataSourcesConfig;
 import ts.andrey.devicecollector.exception.DeviceCollectorException;
 import ts.andrey.devicecollector.utils.MigrationProcessor;
-import ts.andrey.devicecollector.utils.ShardUtil;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -32,10 +31,6 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 @Profile("!test")
 public class ShardingSphereConfig {
-
-    private static final String MASTER_PROPERTY_NAME = "dataSources";
-
-    private static final String REPLICA_PROPERTY_NAME = "replicaDataSources";
 
     private static final String ALGORITHM_NAME = "deviceid_inline";
 
