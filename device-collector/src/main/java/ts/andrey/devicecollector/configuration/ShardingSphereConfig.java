@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import ts.andrey.devicecollector.exception.DeviceCollectorException;
-import ts.andrey.devicecollector.utils.LiquibaseProcessor;
+import ts.andrey.devicecollector.utils.MigrationProcessor;
 import ts.andrey.devicecollector.utils.ShardUtil;
 
 import javax.sql.DataSource;
@@ -75,7 +75,7 @@ public class ShardingSphereConfig {
         shardingRule.getShardingAlgorithms().put(ALGORITHM_NAME, new AlgorithmConfiguration("INLINE", props));
 
         final var masterSource = ShardUtil.loadShardProperties(MASTER_PROPERTY_NAME);
-        masterSource.forEach(LiquibaseProcessor::runLiquibase);
+        masterSource.forEach(MigrationProcessor::runFlyway);
 
         final var dataSourceGroups = IntStream.range(0, chardMax)
                 .mapToObj(i -> {

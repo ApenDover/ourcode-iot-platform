@@ -60,8 +60,9 @@ opentelemetry:
 spring:
   application:
     name: device-collector
-  liquibase:
+  flyway:
     enabled: false
+    locations: classpath:db/migration
   datasource:
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
 #    url: jdbc:shardingsphere:classpath:sharding-config-local.yml
