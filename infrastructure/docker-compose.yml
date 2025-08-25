@@ -2,6 +2,8 @@ services:
   kafka-producer:
     build: ../kafka-producer
     container_name: kafka-producer
+    env_file:
+      - .env
     ports:
       - 8887:8887
     environment:
@@ -26,6 +28,8 @@ services:
   device-collector:
     build: ../device-collector
     container_name: device-collector
+    env_file:
+      - .env
     ports:
       - 8889:8889
     environment:
@@ -56,6 +60,8 @@ services:
     container_name: event-collector
     ports:
       - 8888:8888
+    env_file:
+      - .env
     environment:
       OTEL_SERVICE_NAME: event-collector
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
@@ -445,9 +451,9 @@ services:
     container_name: alloy
     user: root
     ports:
-      - "9080:9080"  # HTTP-интерфейс Alloy (по умолчанию)
-      - "4317:4317"   # OTLP gRPC (важно!)
-      - "4318:4318"   # OTLP HTTP (если нужен)
+      - "9080:9080"  # HTTP-интерфейс Alloy
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
     volumes:
       - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
