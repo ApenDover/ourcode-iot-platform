@@ -2,6 +2,7 @@ package ts.andrey.devicecollector.postgres.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ts.andrey.devicecollector.metrics.PostgresMetrics;
@@ -28,6 +29,9 @@ public class DeviceBatchRepository {
                     created_at  = EXCLUDED.created_at,
                     meta        = EXCLUDED.meta
             """;
+
+    @Value("${app.shardingSphere.shardCount}")
+    private Integer shardCount;
 
     private final PostgresMetrics postgresMetrics;
     private final JdbcTemplate jdbcTemplate;
@@ -56,7 +60,7 @@ public class DeviceBatchRepository {
         log.info("сохраняю устройства: [{}]", devices.size());
 
         devices.forEach(d -> {
-            final var shard = ShardUtil.getShardNameByString(d.getDeviceId());
+            final var shard = ShardUtil.getShardNameByString(d.getDeviceId(), shardCount);
             postgresMetrics.incrementSuccess(shard);
         });
         return updated;

@@ -38,7 +38,7 @@ public class ShardingSphereConfig {
 
     private static final String ALGORITHM_NAME = "deviceid_inline";
 
-    private static final String SHARD_NAME = "shard";
+    public static final String SHARD_NAME = "shard";
 
     private static final String REPLICA_POSTFIX = "_replica";
 

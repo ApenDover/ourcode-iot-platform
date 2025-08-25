@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.boot.cfgxml.internal.ConfigLoader;
 import org.yaml.snakeyaml.Yaml;
+import ts.andrey.devicecollector.configuration.ShardingSphereConfig;
 import ts.andrey.devicecollector.configuration.model.MigrationSource;
 import ts.andrey.devicecollector.exception.DeviceCollectorException;
 
@@ -16,12 +17,13 @@ import java.util.Objects;
 @UtilityClass
 public class ShardUtil {
 
-    public int getShardNumByString(String deviceId) {
-        return Math.abs(deviceId.hashCode()) % 2;
+    public int getShardNumByString(String deviceId, int shardNum) {
+        return Math.abs(deviceId.hashCode()) % shardNum;
     }
 
-    public String getShardNameByString(String deviceId) {
-        return getShardNumByString(deviceId) > 0 ? "shard-1" : "shard-0";
+    public String getShardNameByString(String deviceId, int shardNum) {
+        int shard = getShardNumByString(deviceId, shardNum);
+        return ShardingSphereConfig.SHARD_NAME + "-" + shard;
     }
 
     public List<MigrationSource> loadShardProperties(String appConfigName) {

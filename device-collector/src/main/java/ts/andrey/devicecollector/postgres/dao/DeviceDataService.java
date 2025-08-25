@@ -26,6 +26,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DeviceDataService {
 
+    @Value("${app.shardingSphere.shardCount}")
+    private Integer shardCount;
+
     @Value("${app.postgres.batch-size:300}")
     private int batchSize;
 
@@ -56,7 +59,7 @@ public class DeviceDataService {
     public void recover(DataAccessException e, List<Device> devices) {
         log.error("После нескольких попыток не удалось сохранить устройства в postgres, отправляем в DLT", e);
         devices.forEach(device -> {
-            final var shard = ShardUtil.getShardNameByString(device.getDeviceId());
+            final var shard = ShardUtil.getShardNameByString(device.getDeviceId(), shardCount);
             postgresMetrics.incrementError(shard);
             globalMetrics.incrementDltMessage();
         });
