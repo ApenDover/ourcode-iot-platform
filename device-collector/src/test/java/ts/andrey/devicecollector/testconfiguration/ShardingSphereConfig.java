@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.testcontainers.containers.PostgreSQLContainer;
-import ts.andrey.devicecollector.configuration.model.MigrationSource;
+import ts.andrey.devicecollector.configuration.model.DataSourcesConfig;
 import ts.andrey.devicecollector.exception.DeviceCollectorException;
 import ts.andrey.devicecollector.utils.MigrationProcessor;
 
@@ -19,12 +19,13 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Properties;
 
 @Configuration
 @RequiredArgsConstructor
 public class ShardingSphereConfig {
+
+    private final DataSourcesConfig dataSourcesConfig;
 
     @Bean
     public PostgreSQLContainer<?> postgres1() {
@@ -71,20 +72,7 @@ public class ShardingSphereConfig {
         dataSourceMap.put("shard0", ds0);
         dataSourceMap.put("shard1", ds1);
 
-        final var sources = List.of(
-                MigrationSource.builder()
-                        .url(postgres1.getJdbcUrl())
-                        .username(postgres1.getUsername())
-                        .password(postgres1.getPassword())
-                        .build(),
-                MigrationSource.builder()
-                        .url(postgres2.getJdbcUrl())
-                        .username(postgres2.getUsername())
-                        .password(postgres2.getPassword())
-                        .build()
-        );
-
-        sources.forEach(MigrationProcessor::runFlyway);
+        dataSourcesConfig.getDataSources().forEach(MigrationProcessor::runFlyway);
 
         try {
             return ShardingSphereDataSourceFactory.createDataSource(

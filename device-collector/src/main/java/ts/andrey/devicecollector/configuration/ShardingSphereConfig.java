@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import ts.andrey.devicecollector.configuration.model.DataSourcesConfig;
 import ts.andrey.devicecollector.exception.DeviceCollectorException;
 import ts.andrey.devicecollector.utils.MigrationProcessor;
 import ts.andrey.devicecollector.utils.ShardUtil;
@@ -58,6 +59,8 @@ public class ShardingSphereConfig {
     @Value("${app.shardingSphere.shardCount}")
     private Integer shardCount;
 
+    private final DataSourcesConfig dataSourcesConfig;
+
     @Bean
     public DataSource createShardingDataSource() {
         final var chardMax = shardCount - 1;
@@ -74,7 +77,7 @@ public class ShardingSphereConfig {
         props.put("algorithm-expression", String.format(algorithmExpression, shardCount));
         shardingRule.getShardingAlgorithms().put(ALGORITHM_NAME, new AlgorithmConfiguration("INLINE", props));
 
-        final var masterSource = ShardUtil.loadShardProperties(MASTER_PROPERTY_NAME);
+        final var masterSource = dataSourcesConfig.getDataSources();
         masterSource.forEach(MigrationProcessor::runFlyway);
 
         final var dataSourceGroups = IntStream.range(0, chardMax)
@@ -115,8 +118,9 @@ public class ShardingSphereConfig {
     }
 
     private void putDataSources(HashMap<String, DataSource> dataSourceMap, boolean isReplica) {
-        final var propName = isReplica ? REPLICA_PROPERTY_NAME : MASTER_PROPERTY_NAME;
-        final var sourceList = ShardUtil.loadShardProperties(propName);
+        final var sourceList = isReplica
+                ? dataSourcesConfig.getReplicaDataSources()
+                : dataSourcesConfig.getDataSources();
         for (int i = 0; i < sourceList.size(); i++) {
             final var name = isReplica ? SHARD_NAME + i + REPLICA_POSTFIX : SHARD_NAME + i;
             final var source = sourceList.get(i);
