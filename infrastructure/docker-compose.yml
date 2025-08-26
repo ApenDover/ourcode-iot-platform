@@ -1,9 +1,75 @@
 services:
+  kafka-producer:
+    build: ../kafka-producer
+    container_name: kafka-producer
+    env_file:
+      - .env
+    ports:
+      - 8887:8887
+    environment:
+      OTEL_SERVICE_NAME: kafka-producer
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: none
+      OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
+    depends_on:
+      event-collector:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8887/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
+      interval: 3s
+      timeout: 2s
+      retries: 2
+      start_period: 6s
+    networks:
+      - iot_network
+  device-collector:
+    build: ../device-collector
+    container_name: device-collector
+    env_file:
+      - .env
+    ports:
+      - 8889:8889
+    environment:
+      OTEL_SERVICE_NAME: device-collector
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: none
+      OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
+    depends_on:
+      postgres1r:
+        condition: service_healthy
+      postgres2r:
+        condition: service_healthy
+      event-collector:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8889/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
+      interval: 3s
+      timeout: 2s
+      retries: 2
+      start_period: 6s
+    networks:
+      - iot_network
   event-collector:
     build: ../event-collector
     container_name: event-collector
     ports:
       - 8888:8888
+    env_file:
+      - .env
+    environment:
+      OTEL_SERVICE_NAME: event-collector
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: none
+      OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
     depends_on:
       kafka:
         condition: service_healthy
@@ -16,7 +82,7 @@ services:
       grafana:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "sh", "-c", "curl -f http://localhost:8080/actuator/health | grep -q '\"status\":\"UP\"'" ]
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8888/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
       interval: 3s
       timeout: 2s
       retries: 2
@@ -67,6 +133,7 @@ services:
       - KAFKA_CLUSTERS_0_NAME=local-kafka
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
       - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+      - KAFKA_CLUSTERS_0_SCHEMAREGISTRY=http://schema-registry:8081
       - KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME=local-connect
       - KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS=http://kafka-connect:8083
     ports:
@@ -87,101 +154,181 @@ services:
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
-    networks:
-      - iot_network
-  minio:
-    image: minio/minio:latest
-    container_name: minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    restart: unless-stopped
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-    command: server /data --console-address ":9001"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
-      interval: 30s
-      retries: 3
-  camunda:
-    image: camunda/camunda-bpm-platform:latest
-    container_name: camunda
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-    ports:
-      - "8088:8080"
-    environment:
-      DB_DRIVER: org.postgresql.Driver
-      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      DB_USERNAME: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/engine-rest/engine" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - iot_network
-  postgres:
-    container_name: postgres
-    image: postgres:latest
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - schema-registry-data:/var/lib/schema-registry
+    networks:
+      - iot_network
+#  minio:
+#    image: minio/minio:latest
+#    container_name: minio
+#    ports:
+#      - "9000:9000"
+#      - "9001:9001"
+#    restart: unless-stopped
+#    environment:
+#      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+#      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+#    command: server /data --console-address ":9001"
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+#      interval: 30s
+#      retries: 3
+#  camunda:
+#    image: camunda/camunda-bpm-platform:latest
+#    container_name: camunda
+#    depends_on:
+#      postgres1:
+#        condition: service_healthy
+#    restart: unless-stopped
+#    ports:
+#      - "8088:8080"
+#    environment:
+#      DB_DRIVER: org.postgresql.Driver
+  #      DB_URL: jdbc:postgresql://postgres1:5432/${APP_DATASOURCE_1_URL}
+  #      DB_USERNAME: ${APP_DATASOURCE_1_USERNAME}
+  #      DB_PASSWORD: ${APP_DATASOURCE_1_URL}
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:8080/engine-rest/engine" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#    networks:
+#      - iot_network
+  postgres1:
+    container_name: postgres1
+    image: postgres:15
+    restart: unless-stopped
+    command: ["postgres", "-c", "config_file=/var/lib/postgresql/postgresql.conf"]
+    ports:
+      - "5431:5432"
+    volumes:
+      - ./postgres/master1/scripts:/docker-entrypoint-initdb.d
+      - ./postgres/master1/master.conf:/var/lib/postgresql/postgresql.conf
+      - ./postgres/master1/pg_hba.conf:/var/lib/postgresql/pg_hba.conf
+      - postgres_data1:/var/lib/postgresql/data
     env_file:
       - .env
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${APP_DATASOURCE_1_USERNAME}
+      POSTGRES_PASSWORD: ${APP_DATASOURCE_1_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}" ]
+      test: [ "CMD", "pg_isready", "-U", "${APP_DATASOURCE_1_USERNAME}", "-d", "${APP_DATASOURCE_1_URL}" ]
       interval: 10s
       retries: 5
     networks:
       - iot_network
-  keycloak:
-    image: quay.io/keycloak/keycloak:21.0.1
-    container_name: keycloak
+  postgres2:
+    container_name: postgres2
+    image: postgres:15
     restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
+    command: ["postgres", "-c", "config_file=/var/lib/postgresql/postgresql.conf"]
     ports:
-      - "8080:8080"
+      - "5432:5432"
+    volumes:
+      - ./postgres/master2/scripts:/docker-entrypoint-initdb.d
+      - ./postgres/master2/master.conf:/var/lib/postgresql/postgresql.conf
+      - ./postgres/master2/pg_hba.conf:/var/lib/postgresql/pg_hba.conf
+      - postgres_data2:/var/lib/postgresql/data
+    env_file:
+      - .env
     environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KC_DB: postgres
-      KC_DB_URL_HOST: postgres
-      KC_DB_USERNAME: ${POSTGRES_USER}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
-      KC_DB_URL_DATABASE: ${POSTGRES_DB}
-      KC_HOSTNAME: "localhost"
-    command:
-      - start-dev
+      POSTGRES_USER: ${APP_DATASOURCE_2_USERNAME}
+      POSTGRES_PASSWORD: ${APP_DATASOURCE_2_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${APP_DATASOURCE_2_USERNAME}", "-d", "${APP_DATASOURCE_2_URL}" ]
+      interval: 10s
+      retries: 5
     networks:
       - iot_network
-  redis:
-    image: redis:7-alpine
-    container_name: redis
-    ports:
-      - "6379:6379"
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+  postgres1r:
+    container_name: postgres1r
+    image: postgres:15
     restart: unless-stopped
-    environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-    healthcheck:
-      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
-      interval: 5s
-      retries: 5
+    ports:
+      - "5433:5432"
     volumes:
-      - redis_data:/data
+      - postgres_data1r:/var/lib/postgresql/data
+      - ./postgres/replica1/replica.sh:/usr/local/bin/replica.sh
+    command: sh /usr/local/bin/replica.sh
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${APP_REPLICA_DATASOURCE_1_USERNAME}
+      POSTGRES_PASSWORD: ${APP_REPLICA_DATASOURCE_1_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${APP_REPLICA_DATASOURCE_1_USERNAME}", "-d", "${APP_REPLICA_DATASOURCE_1_URL}" ]
+      interval: 10s
+      retries: 5
+    depends_on:
+      postgres1:
+        condition: service_healthy
+    networks:
+      - iot_network
+  postgres2r:
+    container_name: postgres2r
+    image: postgres:15
+    restart: unless-stopped
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data2r:/var/lib/postgresql/data
+      - ./postgres/replica2/replica.sh:/usr/local/bin/replica.sh
+    command: sh /usr/local/bin/replica.sh
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${APP_REPLICA_DATASOURCE_2_USERNAME}
+      POSTGRES_PASSWORD: ${APP_REPLICA_DATASOURCE_2_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    depends_on:
+      postgres2:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${APP_REPLICA_DATASOURCE_2_USERNAME}", "-d", "${APP_REPLICA_DATASOURCE_2_URL}" ]
+      interval: 10s
+      retries: 5
+    networks:
+      - iot_network
+#  keycloak:
+#    image: quay.io/keycloak/keycloak:21.0.1
+#    container_name: keycloak
+#    restart: unless-stopped
+#    depends_on:
+#      postgres1:
+#        condition: service_healthy
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+#      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+#      KC_DB: postgres
+#      KC_DB_URL_HOST: postgres
+#      KC_DB_USERNAME: ${POSTGRES_USER}
+#      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+#      KC_DB_URL_DATABASE: ${POSTGRES_DB}
+#      KC_HOSTNAME: "localhost"
+#    command:
+#      - start-dev
+#    networks:
+#      - iot_network
+#  redis:
+#    image: redis:7-alpine
+#    container_name: redis
+#    ports:
+#      - "6379:6379"
+#    command: redis-server --requirepass ${REDIS_PASSWORD}
+#    restart: unless-stopped
+#    environment:
+#      REDIS_PASSWORD: ${REDIS_PASSWORD}
+#    healthcheck:
+#      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
+#      interval: 5s
+#      retries: 5
+#    volumes:
+#      - redis_data:/data
   cassandra:
     image: cassandra:4.1
     ports:
@@ -217,11 +364,14 @@ services:
     container_name: grafana
     restart: unless-stopped
     volumes:
-      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
       - grafana_data:/var/lib/grafana
     depends_on:
       - prometheus
+      - loki
+      - alloy
+      - tempo
     networks:
       - iot_network
   prometheus:
@@ -231,19 +381,18 @@ services:
     container_name: prometheus
     restart: unless-stopped
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     depends_on:
       - kafka-exporter
-      - postgres-exporter
+      - postgres-exporter1
+      - postgres-exporter2
     networks:
       - iot_network
   kafka-exporter:
     image: danielqsj/kafka-exporter:latest
     container_name: kafka-exporter
     restart: unless-stopped
-    ports:
-      - "9308:9308"
     environment:
       - KAFKA_URI=kafka:29092
       - KAFKA_GROUP_FILTER=.*
@@ -252,16 +401,25 @@ services:
         condition: service_healthy
     networks:
       - iot_network
-  postgres-exporter:
+  postgres-exporter1:
     image: prometheuscommunity/postgres-exporter:latest
-    container_name: postgres-exporter
+    container_name: postgres-exporter1
     restart: unless-stopped
-    ports:
-      - "9187:9187"
     environment:
-      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://${APP_DATASOURCE_1_USERNAME}:${APP_DATASOURCE_1_PASSWORD}@postgres1:5432/${APP_DATASOURCE_1_URL}?sslmode=disable"
     depends_on:
-      postgres:
+      postgres1:
+        condition: service_healthy
+    networks:
+      - iot_network
+  postgres-exporter2:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter2
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${APP_DATASOURCE_2_USERNAME}:${APP_DATASOURCE_2_PASSWORD}@postgres2:5432/${APP_DATASOURCE_2_URL}?sslmode=disable"
+    depends_on:
+      postgres2:
         condition: service_healthy
     networks:
       - iot_network
@@ -269,8 +427,6 @@ services:
     image: criteord/cassandra_exporter:latest
     container_name: cassandra-exporter
     restart: unless-stopped
-    ports:
-      - "9500:8080"
     environment:
       CASSANDRA_EXPORTER_CONFIG_host: cassandra:7199
     depends_on:
@@ -278,13 +434,66 @@ services:
         condition: service_healthy
     networks:
       - iot_network
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: loki
+    command: -config.file=/etc/loki/loki-config.yaml
+    user: "root"
+    volumes:
+      - ./monitoring/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki_chunks:/tmp/loki/chunks
+      - loki_index:/tmp/loki/index
+      - loki_rules:/tmp/loki/rules
+    networks:
+      - iot_network
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    user: root
+    ports:
+      - "9080:9080"  # HTTP-интерфейс Alloy
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    volumes:
+      - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/log:/var/log:ro
+    environment:
+      GRAFANA_LOKI_URL: http://loki:3100/loki/api/v1/push  # локальный Loki
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:9080
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    networks:
+      - iot_network
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo/tempo.yaml" ]
+    volumes:
+      - ./monitoring/tempo/tempo.yaml:/etc/tempo/tempo.yaml
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+    networks:
+      - iot_network
 volumes:
+  schema-registry-data:
   zookeeper_data:
-  postgres_data:
+  postgres_data1:
+  postgres_data2:
+  postgres_data1r:
+  postgres_data2r:
   redis_data:
   cassandra_data:
   grafana_data:
   prometheus_data:
   kafka_data:
+  loki_chunks:
+  loki_index:
+  loki_rules:
+  tempo_data:
 networks:
   iot_network:

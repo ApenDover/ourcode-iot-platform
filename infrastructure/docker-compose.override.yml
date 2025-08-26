@@ -1,0 +1,10 @@
+services:
+  kafka-producer:
+    build:
+      dockerfile: ../kafka-producer/Dockerfile.local
+  device-collector:
+    build:
+      dockerfile: ../device-collector/Dockerfile.local
+  event-collector:
+    build:
+      dockerfile: ../event-collector/Dockerfile.local

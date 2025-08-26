@@ -33,7 +33,7 @@ public class SimpleCache {
             return;
         }
         cache.put(deviceId, System.currentTimeMillis());
-        log.debug("deviceId={} добавлен в кеш, объектов в кеше={}", deviceId, cache.size());
+        log.debug("deviceId={} добавлен в кеш, объектов в кеше=[{}]", deviceId, cache.size());
         if (expirationSize <= size()) {
             cleanUp();
         }
@@ -54,7 +54,7 @@ public class SimpleCache {
                         () -> HashMap.newHashMap(deviceIds.size())
                 ));
         cache.putAll(batch);
-        log.debug("добавлены в кеш {} объектов, всего в кеше={}", batch.size(), cache.size());
+        log.debug("добавлены в кеш [{}] объектов, всего в кеше=[{}]", batch.size(), cache.size());
         if (expirationSize <= size()) {
             cleanUp();
         }
@@ -82,7 +82,7 @@ public class SimpleCache {
                         || entry.getValue() == null
                         || isExpired(entry.getValue())
         );
-        log.debug("Кеш очищен, {} -> {}", size, cache.size());
+        log.debug("Кеш очищен, [{}] -> [{}]", size, cache.size());
     }
 
     private boolean isExpired(long timestamp) {

@@ -1,0 +1,73 @@
+server:
+  port: 8887
+
+logging:
+  level:
+    ts.andrey: debug
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    tags:
+      application: kafka-producer
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    otlp:
+      endpoint: http://localhost:4318
+      protocol: http/protobuf
+
+opentelemetry:
+  instrumentation:
+    logback-mdc:
+      enabled: true
+  service:
+    name: ${spring.application.name}
+  exporter:
+    otlp:
+      endpoint: http://localhost:4318
+      protocol: http/protobuf
+      timeout: 10000
+      compression: gzip
+  traces:
+    exporter: otlp
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+  resource-attributes:
+    service.version: 1.0.0
+    deployment.environment: docker
+    service.name: ${spring.application.name}
+
+spring:
+  application:
+    name: kafka-producer
+  kafka:
+    bootstrap-servers: localhost:9092
+    template:
+      events-topic: events
+      dlt-events-topic: events.DLT
+      device-topic: device
+      dlt-device-topic: device.DLT
+      observation-enabled: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      batch-size: 16384
+      compression-type: snappy
+      properties:
+        schema.registry.url: http://localhost:8081
+        auto.register.schemas: true

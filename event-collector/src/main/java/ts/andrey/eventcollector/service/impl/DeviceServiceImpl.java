@@ -1,12 +1,12 @@
 package ts.andrey.eventcollector.service.impl;
 
 import com.nashkod.avro.DeviceEvent;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.service.DeduplicateService;
-import ts.andrey.eventcollector.service.DeviceEventProducer;
 import ts.andrey.eventcollector.service.DeviceService;
+import ts.andrey.eventcollector.service.kafka.KafkaProducer;
 
 import java.util.List;
 
@@ -15,18 +15,21 @@ import java.util.List;
 public class DeviceServiceImpl implements DeviceService {
 
     private final DeduplicateService deduplicateService;
-    private final DeviceEventProducer deviceIdProducerImpl;
-    private final DeviceEventMapper deviceEventMapper;
+    private final KafkaProducer kafkaDeviceProducerImpl;
 
     /**
-     * Отправляем в топик новые deviceId
+     * Отправляем в топик новые device
      *
      * @param deviceEvents список событий
      */
+    @WithSpan("deduplicate-save-send-process")
     public void sendUniqueDeviceids(List<DeviceEvent> deviceEvents) {
-        final var devices = deviceEventMapper.toDeviceIdList(deviceEvents);
+        final var devices = deviceEvents.stream()
+                .map(DeviceEvent::getDevice)
+                .toList();
+
         final var uniqueDevices = deduplicateService.getUniqueDevices(devices);
-        deviceIdProducerImpl.send(uniqueDevices);
+        kafkaDeviceProducerImpl.send(uniqueDevices);
     }
 
 }

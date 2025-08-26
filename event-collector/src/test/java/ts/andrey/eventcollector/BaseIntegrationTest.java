@@ -15,13 +15,14 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
-import ts.andrey.eventcollector.cassandra.dao.DeviceEventDataService;
-import ts.andrey.eventcollector.cassandra.repository.DeviceEventRepository;
-import ts.andrey.eventcollector.service.component.DeviceEventConsumer;
+import ts.andrey.eventcollector.data.dao.DeviceEventDataService;
+import ts.andrey.eventcollector.data.repository.DeviceEventRepository;
 import ts.andrey.eventcollector.service.component.SimpleCache;
-import ts.andrey.eventcollector.service.impl.DeviceEventProducerImpl;
+import ts.andrey.eventcollector.service.kafka.impl.KafkaDeviceEventConsumer;
+import ts.andrey.eventcollector.service.kafka.impl.KafkaEventProducerImpl;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -72,16 +73,17 @@ public abstract class BaseIntegrationTest {
     @Container
     protected static final GenericContainer<?> cassandra = new GenericContainer<>(
             DockerImageName.parse("cassandra:5.0"))
+            .withStartupTimeout(Duration.ofMinutes(3))
             .withCreateContainerCmdModifier(cmd -> cmd.withName("cassandra"))
             .withNetwork(Network.SHARED)
             .withNetworkAliases("cassandra")
             .withExposedPorts(9042);
 
     @Autowired
-    public DeviceEventProducerImpl producer;
+    public KafkaEventProducerImpl producer;
 
     @Autowired
-    public DeviceEventConsumer consumer;
+    public KafkaDeviceEventConsumer consumer;
 
     @Autowired
     public DeviceEventDataService deviceEventDataService;
@@ -108,7 +110,7 @@ public abstract class BaseIntegrationTest {
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.cassandra.contact-points", () -> LOCALHOST + cassandra.getMappedPort(9042));
+        registry.add("spring.cassandra.contact-points", () -> LOCALHOST + cassandra.getFirstMappedPort());
         registry.add("kafka.bootstrap.servers", () -> LOCALHOST + kafka.getFirstMappedPort());
         registry.add("schema.registry.url", () -> LOCALHOST_HTTP + schemaRegistry.getFirstMappedPort());
     }

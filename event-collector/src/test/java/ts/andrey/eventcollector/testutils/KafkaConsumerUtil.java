@@ -6,6 +6,7 @@ import lombok.experimental.UtilityClass;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
@@ -21,9 +22,10 @@ public class KafkaConsumerUtil {
     private static final String EARLIEST = "earliest";
     private static final String BASE_URL = "http://localhost:";
 
-    public <T extends SpecificRecord> T getLastMessage(String bootstrapServers, String topic,
-                                                       String groupId, Integer schemaRegistryPort,
-                                                       Class<T> avroClass) {
+    public <T extends SpecificRecord> ConsumerRecords<String, Device>
+    getLastMessage(String bootstrapServers, String topic,
+                   String groupId, Integer schemaRegistryPort,
+                   Class<T> avroClass) {
         final var props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -38,9 +40,8 @@ public class KafkaConsumerUtil {
             if (records.isEmpty()) {
                 return null;
             }
-            final var lastOne = records.iterator().next().value();
-            assertInstanceOf(avroClass, lastOne);
-            return (T) lastOne;
+            records.forEach(record -> assertInstanceOf(avroClass, record.value()));
+            return records;
         }
     }
 

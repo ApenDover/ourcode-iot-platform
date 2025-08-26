@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+        "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+        "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+
+<suppressions>
+    <suppress checks="MagicNumber" files=".*[\\/]src[\\/](test|integration-test)[\\/]"/>
+    <suppress checks="MagicNumber" files="MessageGenerator.java"/>
+    <suppress checks="ConstantName" files=".*[/\\]src[/\\]test[/\\].*"/>
+    <suppress checks="VisibilityModifier" files=".*[\\/]src[\\/](test|integration-test)[\\/]"/>
+    <suppress checks="[a-zA-Z0-9]*" files="[\\/]generated-sources[\\/]"/>
+    <suppress checks="[a-zA-Z0-9]*" files="[\\/]generated-server[\\/]"/>
+    <suppress checks="[a-zA-Z0-9]*" files="[\\/]generated[\\/]"/>
+    <suppress checks="[a-zA-Z0-9]*" files="[\\/]generated-main-avro-java[\\/]"/>
+    <suppress checks="MagicNumber" files=".*[\\/]src[\\/](test|integration-test)[\\/]"/>
+    <suppress checks="AvoidStarImport" files=".*[\\/]src[\\/](test|integration-test)[\\/]"/>
+    <suppress checks="VisibilityModifier" files=".*[\\/]src[\\/](test|integration-test)[\\/]"/>
+    <suppress checks="AvoidStarImport" files=".*[\\/]src[\\/](test|integration-test)[\\/]"/>
+    <suppress checks="MethodLength" files=".*[\\/]src[\\/](test|integration-test)[\\/]"/>
+
+    <suppress files="LocaleCode.java" checks="[a-zA-Z0-9]*"/>
+    <suppress files="LanguageCode.java" checks="[a-zA-Z0-9]*"/>
+    <suppress files="LanguageAlpha3Code.java" checks="[a-zA-Z0-9]*"/>
+</suppressions>

@@ -13,6 +13,29 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
+							"function generateUlid() {",
+							"    const ENCODING = \"0123456789ABCDEFGHJKMNPQRSTVWXYZ\"; // Crockford Base32",
+							"    const time = Date.now();",
+							"    let ulid = \"\";",
+							"",
+							"    // Первые 10 символов = время",
+							"    let modTime = time;",
+							"    let timeChars = [];",
+							"    for (let i = 0; i < 10; i++) {",
+							"        timeChars.push(ENCODING[modTime % 32]);",
+							"        modTime = Math.floor(modTime / 32);",
+							"    }",
+							"    ulid += timeChars.reverse().join(\"\");",
+							"",
+							"    // Остальные 16 символов = случайные",
+							"    for (let i = 0; i < 16; i++) {",
+							"        ulid += ENCODING[Math.floor(Math.random() * 32)];",
+							"    }",
+							"",
+							"    return ulid;",
+							"}",
+							"",
+							"pm.environment.set(\"ulid\", generateUlid());",
 							"pm.environment.set(\"random\", _.random(1, 20))",
 							"pm.environment.set(\"temp\", _.random(-30, 35))"
 						],
@@ -26,7 +49,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "[{\n  \"eventId\": \"{{$guid}}\",\n  \"deviceId\": \"{{random}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\"\n},{\n  \"eventId\": \"{{$guid}}\",\n  \"deviceId\": \"{{random}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\"\n},{\n  \"eventId\": \"{{$guid}}\",\n  \"deviceId\": \"{{random}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\"\n},{\n  \"eventId\": \"{{$guid}}\",\n  \"deviceId\": \"{{random}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\"\n},{\n  \"eventId\": \"{{$guid}}\",\n  \"deviceId\": \"{{random}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\"\n}]",
+					"raw": "[{\n  \"eventId\": \"{{$guid}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\",\n  \"device\": {\n    \"deviceId\": \"{{ulid}}\",\n    \"deviceType\": \"SENSOR\",\n    \"meta\": \"тут текст или json тогда и поле jsonb\",\n    \"createdAt\": 1692700000000\n  }\n}]",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -34,16 +57,70 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8888/api/kafka/send",
+					"raw": "http://localhost:8887/api/kafka/send",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8888",
+					"port": "8887",
 					"path": [
 						"api",
 						"kafka",
 						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "sendGeneratedEvents",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "traceId",
+						"value": "AndreyTest",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8887/api/kafka/send/generate?messageCount=1&deviceCount=1&saveDevice=false",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8887",
+					"path": [
+						"api",
+						"kafka",
+						"send",
+						"generate"
+					],
+					"query": [
+						{
+							"key": "messageCount",
+							"value": "1"
+						},
+						{
+							"key": "deviceCount",
+							"value": "1"
+						},
+						{
+							"key": "saveDevice",
+							"value": "false"
+						}
 					]
 				}
 			},
@@ -63,6 +140,28 @@
 					"port": "8888",
 					"path": [
 						"actuator"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "avro",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/subjects/events-value/versions/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"subjects",
+						"events-value",
+						"versions",
+						"1"
 					]
 				}
 			},

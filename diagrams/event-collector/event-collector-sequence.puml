@@ -21,7 +21,7 @@ alt Проверка дедупликации
     DS -> CACHE : проверка deviceId
     DS -> REPO : существует?
     opt Если не существует
-        KF -> KP : отправить в "device-id" topic
+        KF -> KP : отправить в "device" topic
         KP --> KAFKA : отправить
     end
 end

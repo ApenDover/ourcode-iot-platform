@@ -1,0 +1,68 @@
+server:
+  port: ${KAFKA_PRODUCER_SERVER_PORT:8887}
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: ${KAFKA_PRODUCER_MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED:true}
+  endpoints:
+    web:
+      exposure:
+        include: ${KAFKA_PRODUCER_MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE:*}
+  metrics:
+    tags:
+      application: ${KAFKA_PRODUCER_MANAGEMENT_METRICS_TAGS_APPLICATION:kafka-producer}
+  prometheus:
+    metrics:
+      export:
+        enabled: ${KAFKA_PRODUCER_MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED:true}
+  tracing:
+    enabled: ${KAFKA_PRODUCER_MANAGEMENT_TRACING_ENABLED:true}
+    sampling:
+      probability: ${KAFKA_PRODUCER_MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
+    otlp:
+      endpoint: ${KAFKA_PRODUCER_MANAGEMENT_TRACING_OTLP_ENDPOINT:http://alloy:4318}
+      protocol: ${KAFKA_PRODUCER_MANAGEMENT_TRACING_OTLP_PROTOCOL:http/protobuf}
+
+opentelemetry:
+  instrumentation:
+    logback-mdc:
+      enabled: ${KAFKA_PRODUCER_OPENTELEMETRY_INSTRUMENTATION_LOGBACK_MDC_ENABLED:true}
+  service:
+    name: ${KAFKA_PRODUCER_OPENTELEMETRY_SERVICE_NAME:${spring.application.name}}
+  exporter:
+    otlp:
+      endpoint: ${KAFKA_PRODUCER_OPENTELEMETRY_EXPORTER_OTLP_ENDPOINT:http://alloy:4318}
+      protocol: ${KAFKA_PRODUCER_OPENTELEMETRY_EXPORTER_OTLP_PROTOCOL:http/protobuf}
+      timeout: ${KAFKA_PRODUCER_OPENTELEMETRY_EXPORTER_OTLP_TIMEOUT:10000}
+      compression: ${KAFKA_PRODUCER_OPENTELEMETRY_EXPORTER_OTLP_COMPRESSION:gzip}
+  traces:
+    exporter: ${KAFKA_PRODUCER_OPENTELEMETRY_TRACES_EXPORTER:otlp}
+  metrics:
+    exporter: ${KAFKA_PRODUCER_OPENTELEMETRY_METRICS_EXPORTER:none}
+  logs:
+    exporter: ${KAFKA_PRODUCER_OPENTELEMETRY_LOGS_EXPORTER:none}
+  resource-attributes:
+    service.version: ${KAFKA_PRODUCER_OPENTELEMETRY_RESOURCE_ATTRIBUTES_SERVICE_VERSION:1.0.0}
+    deployment.environment: ${KAFKA_PRODUCER_OPENTELEMETRY_RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT:docker}
+    service.name: ${KAFKA_PRODUCER_OPENTELEMETRY_RESOURCE_ATTRIBUTES_SERVICE_NAME:${spring.application.name}}
+
+spring:
+  application:
+    name: kafka-producer
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
+    template:
+      events-topic: ${SPRING_KAFKA_TEMPLATE_EVENTS_TOPIC:events}
+      dlt-events-topic: ${SPRING_KAFKA_TEMPLATE_DLT_EVENTS_TOPIC:events.DLT}
+      device-topic: ${SPRING_KAFKA_TEMPLATE_DEVICE_TOPIC:device}
+      dlt-device-topic: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_TOPIC:device.DLT}
+    producer:
+      key-serializer: ${SPRING_KAFKA_PRODUCER_KEY_SERIALIZER:org.apache.kafka.common.serialization.StringSerializer}
+      value-serializer: ${SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER:io.confluent.kafka.serializers.KafkaAvroSerializer}
+      batch-size: ${SPRING_KAFKA_PRODUCER_BATCH_SIZE:16384}
+      compression-type: ${SPRING_KAFKA_PRODUCER_COMPRESSION_TYPE:snappy}
+      properties:
+        schema.registry.url: ${SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL:http://schema-registry:8081}
+        auto.register.schemas: ${SPRING_KAFKA_PRODUCER_PROPERTIES_AUTO_REGISTER_SCHEMAS:true}

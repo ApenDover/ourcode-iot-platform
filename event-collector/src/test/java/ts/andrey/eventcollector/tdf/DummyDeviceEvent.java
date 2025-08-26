@@ -5,6 +5,7 @@ import com.nashkod.avro.EventType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -15,24 +16,25 @@ public class DummyDeviceEvent {
     public DeviceEvent getDefault() {
         return new DeviceEvent(
                 "c9a646d3-9c61-4cb7-b8cd-6f3b5e3d0f7a",
-                "deviceId", 125L,
-                EventType.TEMPERATURE, "10"
+                Instant.ofEpochMilli(125L), EventType.TEMPERATURE,
+                "10", DummyTDF.device.getDefault()
         );
     }
 
     public DeviceEvent getInvalid() {
         return new DeviceEvent(
                 "c9a646d3-9c61-4cb7-b8cd-6f3b5e3d0f7a",
-                "", 125L,
-                EventType.TEMPERATURE, "10"
+                Instant.ofEpochMilli(125L), EventType.TEMPERATURE,
+                "", DummyTDF.device.getDefault()
         );
     }
 
     public DeviceEvent getRandomEventId(int i) {
         return new DeviceEvent(
                 UUID.randomUUID().toString(),
-                "deviceId-" + i, 125L,
-                EventType.TEMPERATURE, String.valueOf(i)
+                Instant.ofEpochMilli(125L),
+                EventType.TEMPERATURE, String.valueOf(i),
+                DummyTDF.device.getDefault(i)
         );
     }
 

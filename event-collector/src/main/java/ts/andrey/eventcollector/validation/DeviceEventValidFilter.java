@@ -20,13 +20,13 @@ public class DeviceEventValidFilter {
         return events.stream()
                 .filter(Objects::nonNull)
                 .filter(it -> {
-                    final var isValid = StringUtils.isNotEmpty(it.getDeviceId())
+                    final var isValid = StringUtils.isNotEmpty(it.getDevice().getDeviceId())
                             && StringUtils.isNotEmpty(it.getEventId())
                             && StringUtils.isNotEmpty(it.getPayload())
                             && Objects.nonNull(it.getType())
-                            && it.getTimestamp() > 0;
+                            && Objects.nonNull(it.getTimestamp());
                     if (!isValid) {
-                        log.warn("Невалидное событие: {}", it);
+                        log.warn("Невалидное событие: [{}]", it);
                     }
                     return isValid;
                 }).toList();

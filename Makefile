@@ -3,10 +3,12 @@ ifneq (,$(wildcard infrastructure/.env))
 	export
 endif
 
-COMPOSE_FILE= ./infrastructure/docker-compose.yml
+COMPOSE_FILE=./infrastructure/docker-compose.yml
+COMPOSE_FILE_LOCAL=./infrastructure/docker-compose.override.yml
 DC=docker compose -f $(COMPOSE_FILE)
-ACTUATOR_URL := http://localhost:
-LOGGER_NAME := ts.andrey
+DCL=docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_FILE_LOCAL)
+ACTUATOR_URL=http://localhost:
+LOGGER_NAME=ts.andrey
 
 .PHONY: up down downv restart logs help exec logs-
 
@@ -23,17 +25,31 @@ help: ## Показать список доступных команд
 up: ## Запустить контейнеры в фоне
 	$(DC) up -d
 
-update-%:
-	$(DC) up -d --build --force-recreate --no-deps $*
+up-local: ## Запустить все контейнеры в фоне
+	$(DCL) up -d
+
+up-rebuild-local: boot ## Пересобрать и запустить все модули
+	$(DCL) build event-collector device-collector kafka-producer
+	$(DCL) up -d
+
+up-rebuild: ## Пересобрать и запустить все модули
+	$(DC) build event-collector device-collector kafka-producer
+	$(DC) up -d
+
+recreate-local: boot ## Пересобрать и перезагрузить все модули
+	$(DCL) up -d --build --force-recreate event-collector device-collector kafka-producer
+
+recreate: ## Пересобрать и перезагрузить все модули
+	$(DC) up -d --build --force-recreate event-collector device-collector kafka-producer
+
+update-%: ## Пересобрать и перезагрузить указанный модуль
+	$(DCL) up -d --build --force-recreate --no-deps $*
 
 down: ## Остановить и удалить контейнеры
 	$(DC) down
 
 downv: ## Остановить контейнеры и удалить тома
 	$(DC) down -v
-
-restart: ## Перезапустить контейнеры
-	$(DC) down && $(DC) up -d
 
 restart-%: ## Перезапустить контейнер по имени
 	$(DC) restart $*
@@ -54,3 +70,16 @@ set-log-%:
 
 exec-%: ## Зайти в контейнер по имени
 	docker exec -it $* bash
+
+boot:  ## локально пересобрать образы
+	docker image rm infrastructure-device-collector -f
+	docker image rm infrastructure-event-collector -f
+	docker image rm infrastructure-kafka-producer -f
+	cd event-collector && ./gradlew bootJar
+	cd device-collector && ./gradlew bootJar
+	cd kafka-producer && ./gradlew bootJar
+
+rebuild:  ## локально пересобрать образы
+	cd event-collector && ./gradlew clean build
+	cd device-collector && ./gradlew clean build
+	cd kafka-producer && ./gradlew clean build

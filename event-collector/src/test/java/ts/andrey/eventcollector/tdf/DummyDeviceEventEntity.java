@@ -3,8 +3,8 @@ package ts.andrey.eventcollector.tdf;
 import com.nashkod.avro.EventType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ts.andrey.eventcollector.cassandra.entity.DeviceEventEntity;
-import ts.andrey.eventcollector.cassandra.entity.DeviceEventKey;
+import ts.andrey.eventcollector.data.entity.DeviceEventEntity;
+import ts.andrey.eventcollector.data.entity.DeviceEventKey;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +45,7 @@ public class DummyDeviceEventEntity {
         final var deviceEventKey = new DeviceEventKey();
         deviceEventKey.setDeviceId("deviceIdKey-" + i);
         deviceEventKey.setEventId(UUID.randomUUID());
-        deviceEventKey.setTimestamp(System.currentTimeMillis());
+        deviceEventKey.setTimestamp(431L);
         return deviceEventKey;
     }
 

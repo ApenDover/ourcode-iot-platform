@@ -1,0 +1,34 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+AddElementTag("microservice", $bgColor="#E6F3F7", $fontColor="#333333", $borderColor="#3F668F")
+AddElementTag("storage", $bgColor="#F7E9E6", $fontColor="#333333", $borderColor="#8F3F3F")
+AddElementTag("queue", $bgColor="#E6F7E6", $fontColor="#333333", $borderColor="#3F8F5F")
+
+Container_Boundary(app, "event-collector") {
+    Component(consumer, "DeviceConsumer", "Кафка-консьюмер", "class")
+    Component(device_service, "DeviceService", "Оркестратор процесса", "class")
+    Component(device_data_service, "DeviceDataService", "repository", "class")
+    Component(shardingsphere, "ShardingSphere", "shardingsphere", "class")
+}
+
+System_Ext(kafka, "Apache Kafka", "Топик device-events", "queue")
+System_Ext(schema_reg, "Schema Registry", "Avro-схемы", "storage")
+System_Ext(postgres_shard_2, "Postgres", "Постоянное хранилище", "storage")
+System_Ext(postgres_shard_1, "Postgres", "Постоянное хранилище", "storage")
+System_Ext(postgres_replica_1, "Postgres", "Постоянное хранилище", "storage")
+System_Ext(postgres_replica_2, "Postgres", "Постоянное хранилище", "storage")
+
+Rel(kafka, consumer, "Чтение сообщений", "Kafka")
+Rel(consumer, schema_reg, "Получение схемы", "HTTP")
+Rel(consumer, device_service, "Передача сообщения", "Java-вызов")
+
+Rel(device_service, device_data_service, "Сохранение\Обновление", "Java-вызов")
+Rel(device_data_service, shardingsphere, "Управление шардирование", "framework")
+
+Rel(shardingsphere, postgres_shard_1, "Сохранение\Обновление", "SQL")
+Rel(shardingsphere, postgres_shard_2, "Сохранение\Обновление", "SQL")
+Rel(postgres_shard_2, postgres_replica_2, "Репликация")
+Rel(postgres_shard_1, postgres_replica_1, "Репликация")
+
+@enduml
