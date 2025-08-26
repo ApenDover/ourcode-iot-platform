@@ -1,0 +1,141 @@
+openapi: 3.0.3
+info:
+  title: Device Service API
+  version: 1.0.0
+servers:
+  - url: /api
+paths:
+  /devices:
+    post:
+      summary: Создание устройства
+      operationId: createDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCreateRequest'
+      responses:
+        '201':
+          description: Устройтсво создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '400':
+          $ref: '#/components/responses/Problem'
+  /devices/{deviceId}:
+    get:
+      summary: Получить устройство по ID
+      operationId: getDevice
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Информация об устройстве
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          $ref: '#/components/responses/Problem'
+    put:
+      summary: Обновить устройство
+      operationId: updateDevice
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceUpdateRequest'
+      responses:
+        '200':
+          description: Устройство обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          $ref: '#/components/responses/Problem'
+    delete:
+      summary: Удалить устройство
+      operationId: deleteDevice
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Устройство удалено
+        '404':
+          $ref: '#/components/responses/Problem'
+
+components:
+  schemas:
+    Device:
+      type: object
+      properties:
+        deviceId:
+          type: string
+        deviceType:
+          type: string
+        createdAt:
+          type: integer
+          format: int64
+        meta:
+          type: object
+          additionalProperties: true
+    DeviceCreateRequest:
+      type: object
+      required: [ deviceId, deviceType ]
+      properties:
+        deviceId:
+          type: string
+        deviceType:
+          type: string
+        meta:
+          type: object
+          additionalProperties: true
+    DeviceUpdateRequest:
+      type: object
+      properties:
+        deviceType:
+          type: string
+        meta:
+          type: object
+          additionalProperties: true
+    DeviceError:
+      type: object
+      description: RFC 7807 описание ошибок
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        instance:
+          type: string
+  responses:
+    DeviceError:
+      description: Ответ с ошибкой
+      content:
+        application/error+json:
+          schema:
+            $ref: '#/components/schemas/DeviceError'

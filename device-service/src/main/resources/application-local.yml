@@ -1,5 +1,5 @@
 server:
-  port: 8889
+  port: 8886
 
 logging:
   level:
@@ -21,7 +21,7 @@ management:
         include: "*"
   metrics:
     tags:
-      application: device-collector
+      application: device-service
   prometheus:
     metrics:
       export:
@@ -59,7 +59,7 @@ opentelemetry:
 
 spring:
   application:
-    name: device-collector
+    name: device-service
   flyway:
     enabled: false
     locations: classpath:db/migration
@@ -78,31 +78,6 @@ spring:
   sql:
     init:
       mode: always
-  kafka:
-    bootstrap-servers: localhost:9092
-    template:
-      device-topic: device
-      dlt-device-topic: device.DLT
-      observation-enabled: true
-    consumer:
-      max-poll-records: 50000
-      fetch-max-wait: 500
-      fetch-min-size: 1024
-      enable-auto-commit: false
-      group-id: device-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
-      properties:
-        schema.registry.url: http://localhost:8081
-        specific.avro.reader: true
-        avro.remove.java.properties: true
-    listener:
-      ack-mode: batch
-      concurrency: 3
-      type: batch
-      idle-between-polls: 1000
-      observation-enabled: true
 
 app:
   shardingSphere:

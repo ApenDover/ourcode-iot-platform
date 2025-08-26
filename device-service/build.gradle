@@ -1,0 +1,112 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
+plugins {
+    id 'java'
+	id 'org.springframework.boot' version "${springBootVersion}"
+	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+	id 'com.github.spotbugs' version "${spotbugsVersion}"
+	id 'jacoco'
+	id 'checkstyle'
+}
+
+group = 'ts.andrey'
+version = "${appVersion}"
+description = 'device-service'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of("${javaVersion}")
+	}
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	implementation "org.flywaydb:flyway-core:11.11.2"
+	implementation "org.flywaydb:flyway-database-postgresql:11.11.2"
+
+    implementation "org.postgresql:postgresql"
+    implementation "org.springframework.boot:spring-boot-starter-jdbc"
+    implementation "org.apache.shardingsphere:shardingsphere-jdbc:${shardingsphere}"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+
+	implementation "org.apache.commons:commons-collections4:${commonsCollections}"
+	implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
+
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+
+	implementation "org.springframework.boot:spring-boot-starter-actuator"
+	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+	implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetrySpringBootVersion}"
+
+	runtimeOnly "io.micrometer:micrometer-registry-prometheus"
+	compileOnly "org.projectlombok:lombok"
+	annotationProcessor "org.projectlombok:lombok"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testCompileOnly "org.projectlombok:lombok"
+	testAnnotationProcessor "org.projectlombok:lombok"
+	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+checkstyle {
+	toolVersion = "${checkstyleToolVersion}"
+	configFile = file("$rootDir/config/checkstyle/checkstyle.xml")
+	configProperties = [
+			'checkstyle.suppressions.file': "$rootDir/config/checkstyle/exclude-filter.xml"
+	]
+	showViolations = true
+	ignoreFailures = false
+	maxWarnings = 0
+}
+
+spotbugs {
+	toolVersion = "${spotbugsToolVersion}"
+	ignoreFailures = true
+	showProgress = true
+	effort = 'max'
+	reportLevel = 'low'
+	excludeFilter = file("$rootDir/config/spotbugs/exclude-filter.xml")
+}
+
+
+jacoco {
+	toolVersion = "${jacocoToolVersion}"
+	reportsDirectory = layout.buildDirectory.dir('reports/jacoco')
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = false
+		html.required = true
+		csv.required = false
+	}
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'**/configuration/**',
+					'**/controller/**',
+					'**/exception/**',
+					'**/*DeviceServiceApplication*'
+			])
+		}))
+	}
+}

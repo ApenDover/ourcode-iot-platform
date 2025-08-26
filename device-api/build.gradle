@@ -1,0 +1,57 @@
+plugins {
+    id "java-library"
+    id "org.openapi.generator" version "7.14.0"
+    id "maven-publish"
+}
+
+group = "ts.andrey"
+version = "${appVersion}"
+description = 'device-api'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api "org.springframework.cloud:spring-cloud-starter-openfeign:4.1.1"
+    api "org.springframework.boot:spring-boot-starter-validation:3.2.5"
+    api "jakarta.validation:jakarta.validation-api:3.0.2"
+    api "org.openapitools:jackson-databind-nullable:0.2.6"
+    api "com.fasterxml.jackson.core:jackson-annotations:2.17.2"
+
+    compileOnly "io.swagger.core.v3:swagger-annotations:2.2.22"
+}
+
+openApiGenerate {
+    generatorName = "spring"
+    inputSpec = "$projectDir/src/main/resources/openapi/device-api.yml".toString()
+    outputDir = "$buildDir/generated".toString()
+    apiPackage = "ts.andrey.device.api"
+    modelPackage = "ts.andrey.device.model"
+    invokerPackage = "ts.andrey.device.client"
+    library = "spring-cloud"
+    configOptions = [
+            dateLibrary   : "java8",
+            interfaceOnly : "true",
+            useSpringBoot3: "true",
+            useJakartaEe  : "true"
+    ]
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "$buildDir/generated/src/main/java"
+        }
+    }
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}

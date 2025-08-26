@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'ts.andrey'
-version = '1.0.0'
+version = "${appVersion}"
 description = 'device-collector'
 
 java {
@@ -38,21 +38,22 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-web"
 
     implementation "org.springframework.boot:spring-boot-starter-actuator"
-    implementation "io.micrometer:micrometer-registry-prometheus"
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
     implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetrySpringBootVersion}"
+
+    implementation "org.flywaydb:flyway-core:11.11.2"
+    implementation "org.flywaydb:flyway-database-postgresql:11.11.2"
 
     implementation "org.postgresql:postgresql"
     implementation "org.springframework.boot:spring-boot-starter-jdbc"
     implementation "org.apache.shardingsphere:shardingsphere-jdbc:${shardingsphere}"
     implementation "org.springframework.boot:spring-boot-starter-data-jpa"
-    implementation "org.apache.commons:commons-collections4:${commonsCollections}"
 
-    implementation "org.flywaydb:flyway-core:11.11.2"
-    implementation "org.flywaydb:flyway-database-postgresql:11.11.2"
+    implementation "org.apache.commons:commons-collections4:${commonsCollections}"
+    implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
+
 
     implementation "org.springframework.kafka:spring-kafka"
-    implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
     implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
     implementation "org.apache.avro:avro:${avroVersion}"
     implementation "io.confluent:kafka-schema-registry-client:${confluentVersion}"
@@ -60,6 +61,7 @@ dependencies {
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 
     compileOnly "org.projectlombok:lombok"
+    runtimeOnly "io.micrometer:micrometer-registry-prometheus"
 
     annotationProcessor "org.projectlombok:lombok"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
