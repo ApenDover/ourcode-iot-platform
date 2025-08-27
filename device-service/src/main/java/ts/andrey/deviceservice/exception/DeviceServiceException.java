@@ -22,7 +22,10 @@ public class DeviceServiceException extends RuntimeException {
         super(cause);
     }
 
-    protected DeviceServiceException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected DeviceServiceException(
+            String message, Throwable cause,
+            boolean enableSuppression, boolean writableStackTrace
+    ) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 

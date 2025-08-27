@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ts.andrey.deviceservice.data.dao.DeviceDataService;
 import ts.andrey.deviceservice.mapper.DeviceMapper;
+import ts.andrey.deviceservice.metrics.DeviceMetrics;
 import ts.andrey.deviceservice.service.DeviceCrudService;
 import ts.andrey.dto.Device;
 import ts.andrey.dto.DeviceCreateRequest;
@@ -15,12 +16,14 @@ import ts.andrey.dto.DeviceUpdateRequest;
 @RequiredArgsConstructor
 public class DeviceCrudServiceImpl implements DeviceCrudService {
 
+    private final DeviceMetrics deviceMetrics;
     private final DeviceDataService deviceDataService;
     private final DeviceMapper deviceMapper;
 
     @Override
     public Device getDevice(String deviceId) {
         final var device = deviceDataService.getDeviceByDeviceId(deviceId);
+        deviceMetrics.getDeviceSuccess();
         return device;
     }
 
@@ -28,6 +31,7 @@ public class DeviceCrudServiceImpl implements DeviceCrudService {
     public Device saveDevice(DeviceCreateRequest deviceCreateRequest) {
         final var device = deviceMapper.createDevice(deviceCreateRequest);
         final var created = deviceDataService.save(device);
+        deviceMetrics.createDeviceSuccess();
         return created;
     }
 
@@ -43,12 +47,14 @@ public class DeviceCrudServiceImpl implements DeviceCrudService {
         if (StringUtils.isNoneBlank(meta)) {
             updating.setMeta(meta);
         }
+        deviceMetrics.updateDeviceSuccess();
         return updating;
     }
 
     @Override
     public void deleteDevice(String deviceId) {
         deviceDataService.deleteByDeviceId(deviceId);
+        deviceMetrics.deleteDeviceSuccess();
     }
 
 }

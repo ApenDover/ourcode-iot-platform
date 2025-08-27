@@ -2,11 +2,17 @@ package ts.andrey.deviceservice.controller;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.SQLGrammarException;
 import org.slf4j.MDC;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import ts.andrey.deviceservice.exception.DeviceServiceException;
 import ts.andrey.dto.DeviceError;
 
@@ -55,7 +61,30 @@ public class GlobalExceptionHandler {
         );
     }
 
-    private ResponseEntity<DeviceError> buildDeviceError(HttpStatus status, String title, String detail, String instance) {
+    @ExceptionHandler({
+            DataAccessException.class,
+            JpaSystemException.class,
+            SQLGrammarException.class,
+            ConstraintViolationException.class,
+            TransactionSystemException.class
+    })
+    public ResponseEntity<DeviceError> handleDatabaseExceptions(Exception ex, WebRequest request) {
+        final var error = new DeviceError();
+        error.setType(URI.create("https://example.com/errors/database"));
+        error.setTitle("Database Error");
+        error.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        error.setDetail(ex.getMessage());
+        error.setInstance(request.getDescription(false));
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
+    }
+
+    private ResponseEntity<DeviceError> buildDeviceError(
+            HttpStatus status, String title,
+            String detail, String instance
+    ) {
         DeviceError error = new DeviceError();
         error.setType(URI.create("about:blank"));
         error.setTitle(title);
@@ -65,4 +94,5 @@ public class GlobalExceptionHandler {
         error.setTrace(MDC.get("trace-id"));
         return ResponseEntity.status(status).body(error);
     }
+
 }
