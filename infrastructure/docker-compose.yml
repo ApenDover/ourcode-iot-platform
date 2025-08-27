@@ -1,9 +1,31 @@
 services:
+  nexus:
+    image: sonatype/nexus3:3.70.1
+    container_name: nexus
+    ports:
+      - "7777:8081"
+    env_file:
+      - .env
+    volumes:
+      - ${NEXUS_DATA_DIR:-nexus-data}:/nexus-data
+      - ./nexus-provisioning/create-user.sh:/opt/nexus-provisioning/create-user.sh
+    restart: unless-stopped
+    environment:
+      INSTALL4J_ADD_VM_PARAMS: "-Dnexus.scripts.allowCreation=true"
+      NEXUS_SECURITY_RANDOMPASSWORD: "false"
+    entrypoint: [ "/bin/bash", "/opt/nexus-provisioning/create-user.sh" ]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "-u", "admin:admin123", "http://localhost:8081/service/rest/v1/status/check" ]
+      interval: 10s
+      retries: 12
+      timeout: 5s
+      start_period: 30s
   kafka-producer:
     build: ../kafka-producer
     container_name: kafka-producer
     env_file:
       - .env
+    restart: unless-stopped
     ports:
       - 8887:8887
     environment:
@@ -32,6 +54,7 @@ services:
       - .env
     ports:
       - 8889:8889
+    restart: unless-stopped
     environment:
       OTEL_SERVICE_NAME: device-collector
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
@@ -58,6 +81,7 @@ services:
   event-collector:
     build: ../event-collector
     container_name: event-collector
+    restart: unless-stopped
     ports:
       - 8888:8888
     env_file:
@@ -480,6 +504,7 @@ services:
     networks:
       - iot_network
 volumes:
+  nexus-data:
   schema-registry-data:
   zookeeper_data:
   postgres_data1:

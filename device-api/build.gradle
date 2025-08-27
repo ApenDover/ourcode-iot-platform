@@ -54,4 +54,15 @@ publishing {
             from components.java
         }
     }
+    repositories {
+        maven {
+            name = "nexus"
+            url = uri("http://localhost:7777/repository/maven-releases/") // твой Nexus release repo
+            allowInsecureProtocol = true
+            credentials {
+                username = project.findProperty("nexusUser") ?: "admin"
+                password = project.findProperty("nexusPassword") ?: "admin123"
+            }
+        }
+    }
 }
