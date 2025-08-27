@@ -1,38 +1,70 @@
 package ts.andrey.deviceservice.data.dao;
 
-import com.google.common.collect.Lists;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import ts.andrey.device.model.Device;
-import ts.andrey.deviceservice.data.repository.DeviceBatchRepository;
-import ts.andrey.deviceservice.utils.ShardUtil;
-
-import java.util.List;
-import java.util.UUID;
+import ts.andrey.deviceservice.data.repository.DeviceRepository;
+import ts.andrey.deviceservice.exception.DeviceServiceException;
+import ts.andrey.deviceservice.mapper.DeviceMapper;
+import ts.andrey.dto.Device;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeviceDataService {
 
-    @Value("${app.shardingSphere.shardCount}")
-    private Integer shardCount;
+    private final DeviceMapper deviceMapper;
+    private final DeviceRepository deviceRepository;
 
-    @Value("${app.postgres.batch-size:300}")
-    private int batchSize;
+    public Device save(Device device) {
+        final var entity = deviceMapper.toEntity(device);
+        final var saved = deviceRepository.save(entity);
+        return deviceMapper.toDevice(saved);
+    }
 
-    private final DeviceBatchRepository deviceBatchRepository;
+    public int deleteByDeviceId(String deviceId) {
+        final var num = deviceRepository.deleteByDeviceId(deviceId);
+        if (num < 1) {
+            throw new DeviceServiceException("");
+        }
+        return num;
+    }
 
     @WithSpan
-    public void batchUpsert(List<Device> devices) {
-//        final var deviceEntities = deviceMapper.toDeviceEntityList(devices);
-//        deviceEntities.forEach(e -> e.setId(UUID.randomUUID()));
-//        Lists.partition(deviceEntities, batchSize)
-//                .forEach(deviceBatchRepository::batchUpsert);
+    public Device getDeviceById(String deviceId) {
+        final var device = deviceRepository.findByDeviceId(deviceId);
+        if (device.isEmpty()) {
+            throw new DeviceServiceException("");
+        }
+        return deviceMapper.toDevice(device.get());
+    }
+
+    @WithSpan
+    public int updateMeta(String deviceId, String meta) {
+        final var num = deviceRepository.updateMetaByDeviceId(deviceId, meta);
+        if (num < 1) {
+            throw new DeviceServiceException("");
+        }
+        return num;
+    }
+
+    @WithSpan
+    public int updateType(String deviceId, String deviceType) {
+        final var num = deviceRepository.updateTypeByDeviceId(deviceId, deviceType);
+        if (num < 1) {
+            throw new DeviceServiceException("");
+        }
+        return num;
+    }
+
+    @WithSpan
+    public int update(String deviceId, String deviceType, String meta) {
+        final var num = deviceRepository.updateTypeAndMetaByDeviceId(deviceId, deviceType, meta);
+        if (num < 1) {
+            throw new DeviceServiceException("");
+        }
+        return num;
     }
 
 

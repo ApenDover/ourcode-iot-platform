@@ -2,8 +2,8 @@ package ts.andrey.deviceservice.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ts.andrey.device.model.Device;
 import ts.andrey.deviceservice.data.entity.DeviceEntity;
+import ts.andrey.dto.Device;
 
 import java.time.Instant;
 import java.util.UUID;

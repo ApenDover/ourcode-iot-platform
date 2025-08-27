@@ -34,7 +34,8 @@ openApiGenerate {
             dateLibrary   : "java8",
             interfaceOnly : "true",
             useSpringBoot3: "true",
-            useJakartaEe  : "true"
+            useJakartaEe  : "true",
+            useTags       : "true"
     ]
 }
 

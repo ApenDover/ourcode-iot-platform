@@ -5,6 +5,7 @@ plugins {
 	id 'org.springframework.boot' version "${springBootVersion}"
 	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
 	id 'com.github.spotbugs' version "${spotbugsVersion}"
+	id "org.openapi.generator" version "7.0.1"
 	id 'jacoco'
 	id 'checkstyle'
 }
@@ -34,7 +35,7 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+//    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
 	implementation "org.flywaydb:flyway-core:11.11.2"
@@ -45,7 +46,11 @@ dependencies {
     implementation "org.apache.shardingsphere:shardingsphere-jdbc:${shardingsphere}"
     implementation "org.springframework.boot:spring-boot-starter-data-jpa"
 
-	implementation "ts.andrey:device-api:1.0.0"
+	implementation "jakarta.validation:jakarta.validation-api:3.0.2"
+	implementation "org.openapitools:jackson-databind-nullable:0.2.6"
+	implementation "com.fasterxml.jackson.core:jackson-annotations"
+
+	compileOnly "io.swagger.core.v3:swagger-annotations:2.2.22"
 
 	implementation "org.apache.commons:commons-collections4:${commonsCollections}"
 	implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
@@ -71,6 +76,32 @@ dependencies {
 	testCompileOnly "org.projectlombok:lombok"
 	testAnnotationProcessor "org.projectlombok:lombok"
 	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+}
+
+openApiGenerate {
+	generatorName = "spring"
+	inputSpec = "$projectDir/src/main/resources/openapi/device-api.yml"
+	outputDir = "$buildDir/generated"
+	apiPackage = "ts.andrey.api"
+	modelPackage = "ts.andrey.dto"
+	invokerPackage = "ts.andrey.invoker"
+	library = "spring-boot"
+	generateApiTests = false
+	generateModelTests = false
+	additionalProperties = [
+			interfaceOnly: "true",
+			useTags: "true",
+			java8: "true",
+			useJakartaEe: "true"
+	]
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "$buildDir/generated/src/main/java"
+		}
+	}
 }
 
 tasks.named('test') {
