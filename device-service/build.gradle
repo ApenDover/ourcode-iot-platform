@@ -3,7 +3,7 @@ plugins {
 	id 'org.springframework.boot' version "${springBootVersion}"
 	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
 	id 'com.github.spotbugs' version "${spotbugsVersion}"
-	id "org.openapi.generator" version "7.0.1"
+	id "org.openapi.generator" version "${openApiGenerator}"
 	id 'jacoco'
 	id 'checkstyle'
 }
@@ -36,8 +36,8 @@ dependencies {
 //    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
-	implementation "org.flywaydb:flyway-core:11.11.2"
-	implementation "org.flywaydb:flyway-database-postgresql:11.11.2"
+	implementation "org.flywaydb:flyway-core:${flyWay}"
+	implementation "org.flywaydb:flyway-database-postgresql:${flyWay}"
 
     implementation "org.postgresql:postgresql"
     implementation "org.springframework.boot:spring-boot-starter-jdbc"
@@ -46,11 +46,11 @@ dependencies {
 
 	implementation "com.github.f4b6a3:ulid-creator:${ulidCreator}"
 
-	implementation "jakarta.validation:jakarta.validation-api:3.0.2"
-	implementation "org.openapitools:jackson-databind-nullable:0.2.6"
+	implementation "jakarta.validation:jakarta.validation-api:{$jakartaValidation}"
+	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
 	implementation "com.fasterxml.jackson.core:jackson-annotations"
 
-	compileOnly "io.swagger.core.v3:swagger-annotations:2.2.22"
+	compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
 
 	implementation "org.apache.commons:commons-collections4:${commonsCollections}"
 	implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
@@ -71,7 +71,10 @@ dependencies {
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation "org.testcontainers:junit-jupiter"
     testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testCompileOnly "org.projectlombok:lombok"
 	testAnnotationProcessor "org.projectlombok:lombok"

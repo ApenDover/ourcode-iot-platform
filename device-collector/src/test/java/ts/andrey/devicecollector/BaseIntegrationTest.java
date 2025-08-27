@@ -20,7 +20,7 @@ import ts.andrey.devicecollector.data.repository.DeviceRepository;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
-                "spring.liquibase.enabled=false",
+                "spring.flyway.enabled=false",
                 "spring.jpa.hibernate.ddl-auto=none",
                 "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
                 "spring.datasource.driver-class-name=org.apache.shardingsphere.driver.ShardingSphereDriver"
@@ -78,12 +78,6 @@ public abstract class BaseIntegrationTest {
     static void registerProperties(DynamicPropertyRegistry registry) {
         registry.add("kafka.bootstrap.servers", kafka::getBootstrapServers);
         registry.add("schema.registry.url", () -> LOCALHOST_HTTP + schemaRegistry.getFirstMappedPort());
-//        registry.add("app.dataSources.master-one.url", postgresStatic1::getJdbcUrl);
-//        registry.add("app.dataSources.master-one.username", postgresStatic1::getUsername);
-//        registry.add("app.dataSources.master-one.password", postgresStatic1::getPassword);
-//        registry.add("app.dataSources.master-two.url", postgresStatic2::getJdbcUrl);
-//        registry.add("app.dataSources.master-two.username", postgresStatic2::getUsername);
-//        registry.add("app.dataSources.master-two.password", postgresStatic2::getPassword);
     }
 
 }

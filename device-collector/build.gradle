@@ -14,7 +14,7 @@ description = 'device-collector'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(24)
+        languageVersion = JavaLanguageVersion.of("${javaVersion}")
     }
 }
 
@@ -41,8 +41,8 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
     implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetrySpringBootVersion}"
 
-    implementation "org.flywaydb:flyway-core:11.11.2"
-    implementation "org.flywaydb:flyway-database-postgresql:11.11.2"
+    implementation "org.flywaydb:flyway-core:${flyWay}"
+    implementation "org.flywaydb:flyway-database-postgresql:${flyWay}"
 
     implementation "org.postgresql:postgresql"
     implementation "org.springframework.boot:spring-boot-starter-jdbc"
