@@ -4,6 +4,6 @@ CREATE TABLE t_device
     device_id   VARCHAR(26) NOT NULL UNIQUE,
     device_type TEXT,
     created_at  TIMESTAMPTZ,
-    meta        JSONB,
+    meta        TEXT,
     CONSTRAINT device_uuid_pk PRIMARY KEY (id)
 );

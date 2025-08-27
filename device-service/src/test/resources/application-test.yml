@@ -1,0 +1,38 @@
+spring:
+  flyway:
+    enabled: false
+
+otel:
+  traces:
+    exporter: none
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+
+app:
+  shardingSphere:
+    logicTable: t_device
+    shardingColumn: device_id
+    shardCount: 2
+    algorithmExpression: shard$->{Math.abs(device_id.hashCode()) %% %s}
+  postgres:
+    retry:
+      max-attempts: 2
+      initial-delay: 1000
+      multiplier: 5
+    batch-size: 300
+  dataSources:
+    - url: ${app.dataSources.master-one.url}
+      username: ${app.dataSources.master-one.username}
+      password: ${app.dataSources.master-one.password}
+    - url: ${app.dataSources.master-two.url}
+      username: ${app.dataSources.master-two.username}
+      password: ${app.dataSources.master-two.password}
+  replicaDataSources:
+    - url: ${app.dataSources.replica-one.url}
+      username: ${app.dataSources.replica-one.username}
+      password: ${app.dataSources.replica-one.password}
+    - url: ${app.dataSources.replica-two.url}
+      username: ${app.dataSources.replica-two.username}
+      password: ${app.dataSources.replica-two.password}

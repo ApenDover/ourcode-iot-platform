@@ -3,9 +3,9 @@ info:
   title: Device Service API
   version: 1.0.0
 servers:
-  - url: /api
+  - url: http://localhost:8886
 paths:
-  /v1/devices:
+  /api/v1/devices:
     post:
       tags:
         - DeviceV1
@@ -23,7 +23,7 @@ paths:
         '400':
           $ref: '#/components/responses/DeviceError'
 
-  /v1/devices/{deviceId}:
+  /api/v1/devices/{deviceId}:
     get:
       tags:
         - DeviceV1

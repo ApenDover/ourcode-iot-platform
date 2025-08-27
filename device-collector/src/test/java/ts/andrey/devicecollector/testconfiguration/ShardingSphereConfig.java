@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.testcontainers.containers.PostgreSQLContainer;
-import ts.andrey.devicecollector.configuration.model.DataSourcesConfig;
 import ts.andrey.devicecollector.exception.DeviceCollectorException;
 import ts.andrey.devicecollector.utils.MigrationProcessor;
 
@@ -24,8 +23,6 @@ import java.util.Properties;
 @Configuration
 @RequiredArgsConstructor
 public class ShardingSphereConfig {
-
-    private final DataSourcesConfig dataSourcesConfig;
 
     @Bean
     public PostgreSQLContainer<?> postgres1() {
@@ -72,7 +69,8 @@ public class ShardingSphereConfig {
         dataSourceMap.put("shard0", ds0);
         dataSourceMap.put("shard1", ds1);
 
-        dataSourcesConfig.getDataSources().forEach(MigrationProcessor::runFlyway);
+        MigrationProcessor.runFlyway(ds0);
+        MigrationProcessor.runFlyway(ds1);
 
         try {
             return ShardingSphereDataSourceFactory.createDataSource(

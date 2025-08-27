@@ -17,18 +17,24 @@ public class MigrationProcessor {
         ds.setUsername(migrationSource.getUsername());
         ds.setPassword(migrationSource.getPassword());
         ds.setDriverClassName("org.postgresql.Driver");
+        runFlyway(ds);
+    }
 
+    public void runFlyway(HikariDataSource ds) {
+        final var flyway = Flyway.configure()
+                .dataSource(ds)
+                .locations("classpath:db/migration")
+                .load();
+
+        migrate(flyway);
+    }
+
+    private void migrate(Flyway flyway) {
         try {
-            final var flyway = Flyway.configure()
-                    .dataSource(ds)
-                    .locations("classpath:db/migration")
-                    .load();
-
             flyway.migrate();
-
-            log.info("Flyway migrations applied for [{}]", migrationSource.getUrl());
+            log.info("Flyway migrations applied for [{}]", flyway.getConfiguration().getUrl());
         } catch (Exception e) {
-            throw new DeviceCollectorException("Flyway failed for shard " + migrationSource.getUrl(), e);
+            throw new DeviceCollectorException("Flyway failed for shard " + flyway.getConfiguration().getUrl(), e);
         }
     }
 

@@ -46,7 +46,7 @@ dependencies {
 
 	implementation "com.github.f4b6a3:ulid-creator:${ulidCreator}"
 
-	implementation "jakarta.validation:jakarta.validation-api:{$jakartaValidation}"
+	implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
 	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
 	implementation "com.fasterxml.jackson.core:jackson-annotations"
 
