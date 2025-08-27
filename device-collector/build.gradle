@@ -32,14 +32,6 @@ configurations {
 repositories {
     mavenCentral()
     maven { url "https://packages.confluent.io/maven/" }
-    maven {
-        name = "nexus"
-        url = uri("http://localhost:7777/repository/maven-releases/")
-        credentials {
-            username = project.findProperty("nexusUser") ?: "admin"
-            password = project.findProperty("nexusPassword") ?: "admin123"
-        }
-    }
 }
 
 dependencies {
@@ -64,8 +56,6 @@ dependencies {
     implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
     implementation "org.apache.avro:avro:${avroVersion}"
     implementation "io.confluent:kafka-schema-registry-client:${confluentVersion}"
-
-    implementation "ts.andrey:device-api:1.0.0"
 
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 

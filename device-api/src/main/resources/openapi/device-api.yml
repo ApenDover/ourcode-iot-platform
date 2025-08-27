@@ -5,35 +5,28 @@ info:
 servers:
   - url: /api
 paths:
-  /devices:
+  /v1/devices:
     post:
       summary: Создание устройства
       operationId: createDevice
       requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeviceCreateRequest'
+        $ref: '#/components/requestBodies/DeviceCreateRequest'
       responses:
         '201':
-          description: Устройтсво создано
+          description: Устройство создано
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Device'
         '400':
-          $ref: '#/components/responses/Problem'
-  /devices/{deviceId}:
+          $ref: '#/components/responses/DeviceError'
+
+  /v1/devices/{deviceId}:
     get:
       summary: Получить устройство по ID
       operationId: getDevice
       parameters:
-        - name: deviceId
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/DeviceId'
       responses:
         '200':
           description: Информация об устройстве
@@ -42,22 +35,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Device'
         '404':
-          $ref: '#/components/responses/Problem'
+          $ref: '#/components/responses/DeviceError'
+
     put:
       summary: Обновить устройство
       operationId: updateDevice
       parameters:
-        - name: deviceId
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/DeviceId'
       requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeviceUpdateRequest'
+        $ref: '#/components/requestBodies/DeviceUpdateRequest'
       responses:
         '200':
           description: Устройство обновлено
@@ -66,23 +52,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/Device'
         '404':
-          $ref: '#/components/responses/Problem'
+          $ref: '#/components/responses/DeviceError'
+
     delete:
       summary: Удалить устройство
       operationId: deleteDevice
       parameters:
-        - name: deviceId
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/DeviceId'
       responses:
         '204':
           description: Устройство удалено
         '404':
-          $ref: '#/components/responses/Problem'
+          $ref: '#/components/responses/DeviceError'
 
 components:
+  parameters:
+    DeviceId:
+      name: deviceId
+      in: path
+      required: true
+      schema:
+        type: string
+
+  requestBodies:
+    DeviceCreateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeviceCreateRequest'
+    DeviceUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeviceUpdateRequest'
+
   schemas:
     Device:
       type: object
@@ -95,27 +100,25 @@ components:
           type: integer
           format: int64
         meta:
-          type: object
-          additionalProperties: true
+          type: string
+
     DeviceCreateRequest:
       type: object
-      required: [ deviceId, deviceType ]
+      required: [ deviceType ]
       properties:
-        deviceId:
-          type: string
         deviceType:
           type: string
         meta:
-          type: object
-          additionalProperties: true
+          type: string
+
     DeviceUpdateRequest:
       type: object
       properties:
         deviceType:
           type: string
         meta:
-          type: object
-          additionalProperties: true
+          type: string
+
     DeviceError:
       type: object
       description: RFC 7807 описание ошибок
@@ -132,10 +135,11 @@ components:
           type: string
         instance:
           type: string
+
   responses:
     DeviceError:
       description: Ответ с ошибкой
       content:
-        application/error+json:
+        application/problem+json:
           schema:
             $ref: '#/components/schemas/DeviceError'
