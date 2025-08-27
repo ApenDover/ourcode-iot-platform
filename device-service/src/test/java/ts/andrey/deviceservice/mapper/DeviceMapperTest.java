@@ -6,6 +6,7 @@ import ts.andrey.deviceservice.tdf.DummyTDF;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class DeviceMapperTest {
 
@@ -39,6 +40,21 @@ class DeviceMapperTest {
         assertEquals("deviceId", actual.getDeviceId());
         assertEquals("deviceType", actual.getDeviceType());
         assertEquals(200L, actual.getCreatedAt());
+        assertEquals("meta", actual.getMeta());
+    }
+
+    @Test
+    void fromRequestToEntity() {
+        // GIVEN
+        final var request = DummyTDF.deviceCreateRequest.getDefault();
+
+        // WHEN
+        final var actual = deviceMapper.createDevice(request);
+
+        // THEN
+        assertNotNull(actual.getDeviceId());
+        assertNull(actual.getCreatedAt());
+        assertEquals("deviceType", actual.getDeviceType());
         assertEquals("meta", actual.getMeta());
     }
 

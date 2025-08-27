@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ts.andrey.deviceservice.data.repository.DeviceRepository;
 import ts.andrey.deviceservice.exception.DeviceServiceException;
+import ts.andrey.deviceservice.exception.TextException;
 import ts.andrey.deviceservice.mapper.DeviceMapper;
 import ts.andrey.dto.Device;
 
@@ -20,51 +21,21 @@ public class DeviceDataService {
     public Device save(Device device) {
         final var entity = deviceMapper.toEntity(device);
         final var saved = deviceRepository.save(entity);
+        log.info("Сохранено устройство {}", saved);
         return deviceMapper.toDevice(saved);
     }
 
     public int deleteByDeviceId(String deviceId) {
-        final var num = deviceRepository.deleteByDeviceId(deviceId);
-        if (num < 1) {
-            throw new DeviceServiceException("");
-        }
-        return num;
+        return deviceRepository.deleteByDeviceId(deviceId);
     }
 
     @WithSpan
-    public Device getDeviceById(String deviceId) {
+    public Device getDeviceByDeviceId(String deviceId) {
         final var device = deviceRepository.findByDeviceId(deviceId);
         if (device.isEmpty()) {
-            throw new DeviceServiceException("");
+            throw new DeviceServiceException(TextException.DEVICE_NOT_FOUND, deviceId);
         }
         return deviceMapper.toDevice(device.get());
-    }
-
-    @WithSpan
-    public int updateMeta(String deviceId, String meta) {
-        final var num = deviceRepository.updateMetaByDeviceId(deviceId, meta);
-        if (num < 1) {
-            throw new DeviceServiceException("");
-        }
-        return num;
-    }
-
-    @WithSpan
-    public int updateType(String deviceId, String deviceType) {
-        final var num = deviceRepository.updateTypeByDeviceId(deviceId, deviceType);
-        if (num < 1) {
-            throw new DeviceServiceException("");
-        }
-        return num;
-    }
-
-    @WithSpan
-    public int update(String deviceId, String deviceType, String meta) {
-        final var num = deviceRepository.updateTypeAndMetaByDeviceId(deviceId, deviceType, meta);
-        if (num < 1) {
-            throw new DeviceServiceException("");
-        }
-        return num;
     }
 
 

@@ -14,5 +14,4 @@ public interface DeviceCrudService {
 
     void deleteDevice(String deviceId);
 
-
 }

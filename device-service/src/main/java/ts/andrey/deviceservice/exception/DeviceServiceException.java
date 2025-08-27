@@ -6,6 +6,10 @@ public class DeviceServiceException extends RuntimeException {
         super();
     }
 
+    public DeviceServiceException(TextException textException, Object... args) {
+        super(textException.format(args));
+    }
+
     public DeviceServiceException(String message) {
         super(message);
     }

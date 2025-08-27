@@ -2,7 +2,7 @@ package ts.andrey.deviceservice.tdf;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ts.andrey.device.model.Device;
+import ts.andrey.dto.Device;
 
 import java.util.ArrayList;
 import java.util.List;
