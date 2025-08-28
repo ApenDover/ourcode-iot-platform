@@ -373,7 +373,7 @@ services:
     restart: unless-stopped
     command:
       - start-dev
-#      - --import-realm
+      - --import-realm
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
@@ -383,8 +383,8 @@ services:
       KC_DB_USERNAME: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
       KC_DB_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
       KC_HTTP_ENABLED: true
-#    volumes:
-#      - ./keycloak/realm-iot-platform.json:/opt/keycloak/data/import/realm-iot-platform.json
+    volumes:
+      - ./keycloak/realm-iot-platform.json:/opt/keycloak/data/import/realm-export.json
     ports:
       - "7878:8080"
     depends_on:

@@ -94,42 +94,6 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:7878/realms/iot-platform
-#  security:
-#    oauth2:
-#      client:
-#        registration:
-#          keycloak:
-#            provider: keycloak
-#            client-id: device-service
-#            client-secret: EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU
-#            client-name: device-service
-#            authorization-grant-type: authorization_code
-#            scope: openid, profile, email
-#      resourceserver:
-#        jwt:
-#          issuer-uri: http://localhost:9090/realms/iot-platform
-
-#      resourceserver:
-#        jwt:
-#          issuer-uri: http://localhost:7878/realms/iot-platform
-
-#  security:
-#    oauth2:
-#      client:
-#        registration:
-#          keycloak:
-#            client-id: device-service
-#            client-secret: i9sXbfCRgvZjFJxGQrfOSIUZPdkHeBPa
-#            authorization-grant-type: authorization_code
-#            scope: openid, profile, email
-#            redirect-uri: "http://localhost:8886/*"
-#        provider:
-#          keycloak:
-#            issuer-uri: http://localhost:7878/realms/iot-platform
-#            user-name-attribute: preferred_username
-#      resourceserver:
-#        jwt:
-#          issuer-uri: http://localhost:7878/realms/iot-platform
 
 app:
   shardingSphere:

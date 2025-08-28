@@ -14,7 +14,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/api/v1/devices/**").authenticated()
+//                                .requestMatchers("/api/v1/devices/**").authenticated()
+                        .requestMatchers("/actuator/**").hasAuthority("ROLE_deviceapp.admin")
+                        .requestMatchers("/api/v1/devices/**").hasAnyAuthority("ROLE_deviceapp.user", "ROLE_deviceapp.admin")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
