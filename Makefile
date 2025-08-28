@@ -73,13 +73,16 @@ exec-%: ## Зайти в контейнер по имени
 
 boot:  ## локально пересобрать образы
 	docker image rm infrastructure-device-collector -f
+	docker image rm infrastructure-device-service -f
 	docker image rm infrastructure-event-collector -f
 	docker image rm infrastructure-kafka-producer -f
 	cd event-collector && ./gradlew bootJar
 	cd device-collector && ./gradlew bootJar
+	cd device-service && ./gradlew bootJar
 	cd kafka-producer && ./gradlew bootJar
 
 rebuild:  ## локально пересобрать образы
 	cd event-collector && ./gradlew clean build
 	cd device-collector && ./gradlew clean build
+	cd device-service && ./gradlew clean build
 	cd kafka-producer && ./gradlew clean build

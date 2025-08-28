@@ -107,10 +107,10 @@ services:
         condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8888/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
-      interval: 3s
-      timeout: 2s
-      retries: 2
-      start_period: 6s
+      interval: 6s
+      timeout: 4s
+      retries: 6
+      start_period: 10s
     networks:
       - iot_network
   zookeeper:
@@ -218,26 +218,6 @@ services:
 #      retries: 5
 #    networks:
 #      - iot_network
-  postgres_keycloak:
-    container_name: postgres_keycloak
-    image: postgres:15
-    restart: unless-stopped
-    ports:
-      - "5430:5432"
-    volumes:
-      - postgres_keycloak_data:/var/lib/postgresql/data
-    env_file:
-      - .env
-    environment:
-      POSTGRES_USER: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
-      POSTGRES_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_KEYCLOAK_DB}
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${APP_DATASOURCE_KEYCLOAK_USERNAME}", "-d", "${POSTGRES_KEYCLOAK_DB}" ]
-      interval: 10s
-      retries: 5
-    networks:
-      - iot_network
   postgres1:
     container_name: postgres1
     image: postgres:15
@@ -336,21 +316,44 @@ services:
       retries: 5
     networks:
       - iot_network
+  postgres_keycloak:
+    container_name: postgres_keycloak
+    image: postgres:15
+    restart: unless-stopped
+    ports:
+      - "5430:5432"
+    volumes:
+      - postgres_keycloak_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
+      POSTGRES_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_KEYCLOAK_DB}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${APP_DATASOURCE_KEYCLOAK_USERNAME}", "-d", "${POSTGRES_KEYCLOAK_DB}" ]
+      interval: 10s
+      retries: 5
+    networks:
+      - iot_network
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
     container_name: keycloak
-    command: start-dev
+    command:
+      - start-dev
+      - --import-realm
     restart: unless-stopped
+#    entrypoint: ["/bin/sh", "-c", "chmod +x /opt/keycloak/data/import/init-realm.sh && /opt/keycloak/data/import/init-realm.sh"]
     environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_DB: postgres
       KC_DB_URL_HOST: postgres_keycloak
       KC_DB_URL_DATABASE: ${POSTGRES_KEYCLOAK_DB}
       KC_DB_USERNAME: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
       KC_DB_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
     volumes:
-      - .keycloak/realm-iot-platform.json:/opt/keycloak/data/import/realm-iot-platform.json
+      - ./keycloak/realm-iot-platform.json:/opt/keycloak/data/import/realm-iot-platform.json
     ports:
       - "7878:8080"
     depends_on:

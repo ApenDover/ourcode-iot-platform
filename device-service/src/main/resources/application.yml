@@ -62,6 +62,18 @@ spring:
   sql:
     init:
       mode: ${SPRING_SQL_INIT_MODE:always}
+  security:
+    client:
+      registration:
+        device-service:
+          client-id: device-service
+          client-secret: secret
+          authorization-grant-type: client_credentials
+          scope: openid
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keyloak:8080/realms/iot-platform
 
 app:
   shardingSphere:
