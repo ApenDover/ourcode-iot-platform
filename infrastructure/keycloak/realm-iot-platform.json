@@ -1,0 +1,38 @@
+{
+  "realm": "iot-platform",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {"name": "USER"},
+      {"name": "ADMIN"}
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "device-service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "my-client-secret",
+      "redirectUris": ["*"]
+    }
+  ],
+  "users": [
+    {
+      "username": "user",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "user", "temporary": false }
+      ],
+      "realmRoles": ["USER"]
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "admin", "temporary": false }
+      ],
+      "realmRoles": ["ADMIN"]
+    }
+  ]
+}

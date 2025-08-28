@@ -218,6 +218,26 @@ services:
 #      retries: 5
 #    networks:
 #      - iot_network
+  postgres_keycloak:
+    container_name: postgres_keycloak
+    image: postgres:15
+    restart: unless-stopped
+    ports:
+      - "5430:5432"
+    volumes:
+      - postgres_keycloak_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
+      POSTGRES_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_KEYCLOAK_DB}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${APP_DATASOURCE_KEYCLOAK_USERNAME}", "-d", "${POSTGRES_KEYCLOAK_DB}" ]
+      interval: 10s
+      retries: 5
+    networks:
+      - iot_network
   postgres1:
     container_name: postgres1
     image: postgres:15
@@ -316,29 +336,30 @@ services:
       retries: 5
     networks:
       - iot_network
-#  keycloak:
-#    image: quay.io/keycloak/keycloak:21.0.1
-#    container_name: keycloak
-#    restart: unless-stopped
-#    depends_on:
-#      postgres1:
-#        condition: service_healthy
-#    ports:
-#      - "8080:8080"
-#    environment:
-#      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-#      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-#      KC_DB: postgres
-#      KC_DB_URL_HOST: postgres
-#      KC_DB_USERNAME: ${POSTGRES_USER}
-#      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
-#      KC_DB_URL_DATABASE: ${POSTGRES_DB}
-#      KC_HOSTNAME: "localhost"
-#    command:
-#      - start-dev
-#    networks:
-#      - iot_network
-#  redis:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    container_name: keycloak
+    command: start-dev
+    restart: unless-stopped
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres_keycloak
+      KC_DB_URL_DATABASE: ${POSTGRES_KEYCLOAK_DB}
+      KC_DB_USERNAME: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
+      KC_DB_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
+    volumes:
+      - .keycloak/realm-iot-platform.json:/opt/keycloak/data/import/realm-iot-platform.json
+    ports:
+      - "7878:8080"
+    depends_on:
+      postgres_keycloak:
+        condition: service_healthy
+    networks:
+      - iot_network
+
+  #  redis:
 #    image: redis:7-alpine
 #    container_name: redis
 #    ports:
@@ -507,6 +528,7 @@ volumes:
   nexus-data:
   schema-registry-data:
   zookeeper_data:
+  postgres_keycloak_data:
   postgres_data1:
   postgres_data2:
   postgres_data1r:
