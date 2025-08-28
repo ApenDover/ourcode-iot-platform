@@ -75,8 +75,8 @@ spring:
             scope: profile, email
         provider:
           keycloak:
-            issuer-uri: http://keycloak:8080/realms/iot-platform
-            token-uri: http://keycloak:8080/realms/iot-platform/protocol/openid-connect/token
+            issuer-uri: http://localhost:7878/realms/iot-platform
+            token-uri: http://localhost:7878/realms/iot-platform/protocol/openid-connect/token
 #  security:
 #    client:
 #      registration:
