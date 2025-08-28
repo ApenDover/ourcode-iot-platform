@@ -1,6 +1,17 @@
 {
   "realm": "iot-platform",
   "enabled": true,
+
+  "registrationAllowed": false,
+  "registrationEmailAsUsername": false,
+  "editUsernameAllowed": false,
+  "resetPasswordAllowed": true,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+
+  "requiredCredentials": ["password"],
+
   "roles": {
     "realm": [
       {
@@ -13,6 +24,7 @@
       }
     ]
   },
+
   "clients": [
     {
       "clientId": "device-service",
