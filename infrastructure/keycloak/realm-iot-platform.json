@@ -1,17 +1,6 @@
 {
   "realm": "iot-platform",
   "enabled": true,
-
-  "registrationAllowed": false,
-  "registrationEmailAsUsername": false,
-  "editUsernameAllowed": false,
-  "resetPasswordAllowed": true,
-  "rememberMe": true,
-  "verifyEmail": false,
-  "loginWithEmailAllowed": true,
-
-  "requiredCredentials": ["password"],
-
   "roles": {
     "realm": [
       {
@@ -24,19 +13,21 @@
       }
     ]
   },
-
   "clients": [
     {
       "clientId": "device-service",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": false,
-      "secret": "my-client-secret",
-      "redirectUris": ["*"],
-      "webOrigins": ["*"],
-      "standardFlowEnabled": true,
+      "secret": "i9sXbfCRgvZjFJxGQrfOSIUZPdkHeBPa",
+      "standardFlowEnabled": false,
       "directAccessGrantsEnabled": true,
-      "serviceAccountsEnabled": false
+      "serviceAccountsEnabled": true,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {
+        "client_credentials.use_refresh_token": "false"
+      }
     }
   ]
 }

@@ -1,59 +1,39 @@
-/opt/keycloak/bin/kc.sh start-dev --import-realm &
-
-echo "Waiting for Keycloak to be ready..."
-sleep 30
-
 #!/bin/bash
 
-echo "Creating users for iot-platform realm..."
+# Получаем admin token
+ADMIN_TOKEN=$(curl -s -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=admin&password=admin&grant_type=password&client_id=admin-cli" \
+  http://localhost:7878/realms/master/protocol/openid-connect/token \
+  | jq -r '.access_token')
 
-# Настраиваем аутентификацию
-/opt/keycloak/bin/kcadm.sh config credentials \
-  --server http://localhost:8080 \
-  --realm master \
-  --user admin \
-  --password admin
+echo $ADMIN_TOKEN
 
-# Функция для создания пользователя без required actions
-create_user() {
-    local username=$1
-    local password=$2
-    local email=$3
-    local roles=$4
+# Создаем пользователя
+curl -X POST \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "user",
+    "enabled": true,
+    "email": "user@example.com",
+    "emailVerified": true,
+    "credentials": [{
+      "type": "password",
+      "value": "user",
+      "temporary": false
+    }]
+  }' \
+  http://localhost:7878/admin/realms/iot-platform/users
 
-    echo "Creating user: $username"
+# Назначаем роль
+USER_ID=$(curl -s -X GET \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  http://localhost:7878/admin/realms/iot-platform/users?username=user \
+  | jq -r '.[0].id')
 
-    # Создаем пользователя
-    user_id=$(/opt/keycloak/bin/kcadm.sh create users -r iot-platform \
-      -s username=$username \
-      -s email=$email \
-      -s enabled=true \
-      -s emailVerified=true \
-      --id)
-
-    # Устанавливаем пароль
-    /opt/keycloak/bin/kcadm.sh set-password -r iot-platform \
-      --userid $user_id \
-      --new-password $password \
-      --temporary false
-
-    # Очищаем required actions
-    /opt/keycloak/bin/kcadm.sh update users/$user_id -r iot-platform \
-      -s "requiredActions=[]"
-
-    # Назначаем роли
-    IFS=',' read -ra ROLE_ARRAY <<< "$roles"
-    for role in "${ROLE_ARRAY[@]}"; do
-        /opt/keycloak/bin/kcadm.sh add-roles -r iot-platform \
-          --userid $user_id \
-          --rolename "$role"
-    done
-
-    echo "User $username created successfully"
-}
-
-# Создаем пользователей
-create_user "user" "user" "user@example.com" "USER"
-create_user "admin" "admin" "admin@example.com" "ADMIN,USER"
-
-echo "All users created successfully!"
+curl -X POST \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '[{"name":"USER"}]' \
+  http://localhost:7878/admin/realms/iot-platform/users/$USER_ID/role-mappings/realm

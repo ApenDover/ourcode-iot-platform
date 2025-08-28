@@ -62,21 +62,22 @@ spring:
   sql:
     init:
       mode: ${SPRING_SQL_INIT_MODE:always}
-  security:
-    oauth2:
-      client:
-        registration:
-          keycloak:
-            provider: keycloak
-            client-id: device-service
-            client-secret: i9sXbfCRgvZjFJxGQrfOSIUZPdkHeBPa
-            client-name: device-service
-            authorization-grant-type: authorization_code
-            scope: profile, email
-        provider:
-          keycloak:
+  spring:
+    security:
+      oauth2:
+        resourceserver:
+          jwt:
             issuer-uri: http://localhost:7878/realms/iot-platform
-            token-uri: http://localhost:7878/realms/iot-platform/protocol/openid-connect/token
+        client:
+          registration:
+            keycloak:
+              client-id: device-service
+              client-secret: i9sXbfCRgvZjFJxGQrfOSIUZPdkHeBPa
+              authorization-grant-type: client_credentials
+              scope: device-app
+          provider:
+            keycloak:
+              token-uri: http://localhost:7878/realms/iot-platform/protocol/openid-connect/token
 #  security:
 #    client:
 #      registration:
@@ -88,7 +89,7 @@ spring:
 #    oauth2:
 #      resourceserver:
 #        jwt:
-#          issuer-uri: http://keyloak:8080/realms/iot-platform
+#          issuer-uri: http://keycloak:8080/realms/iot-platform
 
 app:
   shardingSphere:
