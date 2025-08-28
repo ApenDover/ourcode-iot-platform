@@ -370,13 +370,15 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
     container_name: keycloak
+    env_file:
+      - .env
     restart: unless-stopped
     command:
       - start-dev
       - --import-realm
     environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${ENV_KEYCLOAK_ADMIN}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${ENV_KEYCLOAK_ADMIN_PASSWORD}
       KC_DB: postgres
       KC_DB_URL_HOST: postgres_keycloak
       KC_DB_URL_DATABASE: ${POSTGRES_KEYCLOAK_DB}
@@ -384,7 +386,7 @@ services:
       KC_DB_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
       KC_HTTP_ENABLED: true
     volumes:
-      - ./keycloak/realm-iot-platform.json:/opt/keycloak/data/import/realm-export.json
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     ports:
       - "7878:8080"
     depends_on:
