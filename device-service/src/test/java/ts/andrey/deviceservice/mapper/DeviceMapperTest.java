@@ -29,6 +29,23 @@ class DeviceMapperTest {
     }
 
     @Test
+    void toEntityWithNullCreatedAt() {
+        // GIVEN
+        final var device = DummyTDF.device.getDefault();
+        device.setCreatedAt(null);
+
+        // WHEN
+        final var actual = deviceMapper.toEntity(device);
+
+        // THEN
+        assertNotNull(actual.getId());
+        assertEquals("deviceId", actual.getDeviceId());
+        assertEquals("deviceType", actual.getDeviceType());
+        assertNull(actual.getCreatedAt());
+        assertEquals("meta", actual.getMeta());
+    }
+
+    @Test
     void toDevice() {
         // GIVEN
         final var device = DummyTDF.deviceEntity.getDefault();

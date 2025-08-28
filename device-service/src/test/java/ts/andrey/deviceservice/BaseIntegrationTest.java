@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public abstract class BaseIntegrationTest {
 
     private static final String LOCALHOST_HTTP = "http://localhost:";
-    private static final String LOCALHOST_HTTPS = "https://localhost:";
+//    private static final String LOCALHOST_HTTPS = "https://localhost:";
 
     @Autowired
     public TestRestTemplate restTemplate;
@@ -91,7 +91,8 @@ public abstract class BaseIntegrationTest {
         return body;
     }
 
-    public <Res> ResponseEntity<Res> sendRequest(String url, HttpMethod method, HttpEntity<?> body, Class<Res> responseType) {
+    public <Res> ResponseEntity<Res> sendRequest(String url, HttpMethod method,
+                                                 HttpEntity<?> body, Class<Res> responseType) {
         return restTemplate.exchange(getUrl(url), method, body, responseType);
     }
 
@@ -101,10 +102,11 @@ public abstract class BaseIntegrationTest {
     }
 
     private String baseUrl() {
-        return LOCALHOST_HTTPS + localPort;
+        return LOCALHOST_HTTP + localPort;
     }
 
     private String baseUnsecuredUrl() {
         return LOCALHOST_HTTP + localPort;
     }
+
 }

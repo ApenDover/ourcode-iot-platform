@@ -2,14 +2,14 @@ package ts.andrey.deviceservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RestController;
 import ts.andrey.api.DeviceV1Api;
 import ts.andrey.deviceservice.service.DeviceCrudService;
 import ts.andrey.dto.Device;
 import ts.andrey.dto.DeviceCreateRequest;
 import ts.andrey.dto.DeviceUpdateRequest;
 
-@Component
+@RestController
 @RequiredArgsConstructor
 public class DeviceController implements DeviceV1Api {
 

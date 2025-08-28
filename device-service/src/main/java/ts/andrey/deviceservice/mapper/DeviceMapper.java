@@ -8,11 +8,13 @@ import ts.andrey.dto.Device;
 import ts.andrey.dto.DeviceCreateRequest;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 
 @Mapper(componentModel = "spring",
         imports = {
+                Objects.class,
                 UUID.class,
                 Instant.class,
                 UlidCreator.class
@@ -20,13 +22,20 @@ import java.util.UUID;
 public interface DeviceMapper {
 
     @Mapping(target = "id", expression = "java(UUID.randomUUID())")
-    @Mapping(target = "createdAt", expression = "java(Instant.ofEpochSecond(device.getCreatedAt()))")
+    @Mapping(target = "createdAt", expression = "java(Objects.isNull(device.getCreatedAt()) "
+            + "? null : Instant.ofEpochSecond(device.getCreatedAt()))")
     DeviceEntity toEntity(Device device);
 
     @Mapping(target = "createdAt", expression = "java(deviceEntity.getCreatedAt().toEpochMilli())")
     Device toDevice(DeviceEntity deviceEntity);
 
     @Mapping(target = "deviceId", expression = "java(UlidCreator.getUlid().toString())")
+    @Mapping(target = "createdAt", ignore = true)
     Device createDevice(DeviceCreateRequest deviceRequest);
+
+    @Mapping(target = "deviceId", expression = "java(UlidCreator.getUlid().toString())")
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "id", expression = "java(UUID.randomUUID())")
+    DeviceEntity createDeviceEntity(DeviceCreateRequest deviceRequest);
 
 }

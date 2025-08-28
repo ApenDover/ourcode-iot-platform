@@ -3,7 +3,6 @@ package ts.andrey.deviceservice.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ts.andrey.deviceservice.data.dao.DeviceDataService;
 import ts.andrey.deviceservice.mapper.DeviceMapper;
 import ts.andrey.deviceservice.metrics.DeviceMetrics;
@@ -24,31 +23,37 @@ public class DeviceCrudServiceImpl implements DeviceCrudService {
     public Device getDevice(String deviceId) {
         final var device = deviceDataService.getDeviceByDeviceId(deviceId);
         deviceMetrics.getDeviceSuccess();
-        return device;
+        return deviceMapper.toDevice(device);
     }
 
     @Override
     public Device saveDevice(DeviceCreateRequest deviceCreateRequest) {
-        final var device = deviceMapper.createDevice(deviceCreateRequest);
+        final var device = deviceMapper.createDeviceEntity(deviceCreateRequest);
         final var created = deviceDataService.save(device);
         deviceMetrics.createDeviceSuccess();
-        return created;
+        return deviceMapper.toDevice(created);
     }
 
     @Override
-    @Transactional
     public Device updateDevice(String deviceId, DeviceUpdateRequest deviceUpdateRequest) {
         final var meta = deviceUpdateRequest.getMeta();
         final var deviceType = deviceUpdateRequest.getDeviceType();
-        final var updating = deviceDataService.getDeviceByDeviceId(deviceId);
+        if (StringUtils.isNoneBlank(deviceType) && StringUtils.isNoneBlank(deviceId)) {
+            final var updated = deviceDataService.updateTypeMeta(deviceId, deviceType, meta);
+            deviceMetrics.updateDeviceSuccess();
+            return deviceMapper.toDevice(updated);
+        }
         if (StringUtils.isNoneBlank(deviceType)) {
-            updating.setDeviceType(deviceType);
+            final var updated = deviceDataService.updateType(deviceId, deviceType);
+            deviceMetrics.updateDeviceSuccess();
+            return deviceMapper.toDevice(updated);
         }
         if (StringUtils.isNoneBlank(meta)) {
-            updating.setMeta(meta);
+            final var updated = deviceDataService.updateMeta(deviceId, meta);
+            deviceMetrics.updateDeviceSuccess();
+            return deviceMapper.toDevice(updated);
         }
-        deviceMetrics.updateDeviceSuccess();
-        return updating;
+        return deviceMapper.toDevice(deviceDataService.getDeviceByDeviceId(deviceId));
     }
 
     @Override

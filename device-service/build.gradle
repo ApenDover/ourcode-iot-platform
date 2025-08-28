@@ -111,6 +111,8 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+compileJava.dependsOn tasks.openApiGenerate
+
 checkstyle {
 	toolVersion = "${checkstyleToolVersion}"
 	configFile = file("$rootDir/config/checkstyle/checkstyle.xml")

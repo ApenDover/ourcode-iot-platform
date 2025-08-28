@@ -1,7 +1,6 @@
 package ts.andrey.deviceservice.tdf;
 
 import lombok.experimental.UtilityClass;
-import ts.andrey.dto.DeviceCreateRequest;
 
 @UtilityClass
 public class DummyTDF {

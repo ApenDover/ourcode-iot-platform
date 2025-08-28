@@ -19,6 +19,13 @@ public class DummyDevice {
         return device;
     }
 
+    public Device getForUpdate() {
+        final var device = new Device();
+        device.setDeviceType("updatedType");
+        device.setMeta("updatedMeta");
+        return device;
+    }
+
     public Device getDefault(int i) {
         final var device = new Device();
         device.setDeviceId("deviceId" + i);

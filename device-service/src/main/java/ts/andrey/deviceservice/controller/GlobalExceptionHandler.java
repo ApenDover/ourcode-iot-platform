@@ -2,6 +2,7 @@ package ts.andrey.deviceservice.controller;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.SQLGrammarException;
 import org.slf4j.MDC;
@@ -18,11 +19,13 @@ import ts.andrey.dto.DeviceError;
 
 import java.net.URI;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<DeviceError> handleEntityNotFound(EntityNotFoundException ex, HttpServletRequest request) {
+        log.error(ex.getMessage(), ex);
         return buildDeviceError(
                 HttpStatus.NOT_FOUND,
                 "Entity not found",
@@ -33,6 +36,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<DeviceError> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+        log.error(ex.getMessage(), ex);
         return buildDeviceError(
                 HttpStatus.BAD_REQUEST,
                 "Invalid argument",
@@ -43,6 +47,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<DeviceError> handleException(Exception ex, HttpServletRequest request) {
+        log.error(ex.getMessage(), ex);
         return buildDeviceError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Unexpected error",
@@ -53,6 +58,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DeviceServiceException.class)
     public ResponseEntity<DeviceError> handleException(DeviceServiceException ex, HttpServletRequest request) {
+        log.error(ex.getMessage(), ex);
         return buildDeviceError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Process exception",
@@ -69,6 +75,7 @@ public class GlobalExceptionHandler {
             TransactionSystemException.class
     })
     public ResponseEntity<DeviceError> handleDatabaseExceptions(Exception ex, WebRequest request) {
+        log.error(ex.getMessage(), ex);
         final var error = new DeviceError();
         error.setType(URI.create("https://example.com/errors/database"));
         error.setTitle("Database Error");
