@@ -38,7 +38,7 @@ public class DeviceDataServiceImpl implements DeviceService {
     public Device updateDevice(String deviceId, DeviceUpdateRequest deviceUpdateRequest) {
         final var meta = deviceUpdateRequest.getMeta();
         final var deviceType = deviceUpdateRequest.getDeviceType();
-        if (StringUtils.isNoneBlank(deviceType) && StringUtils.isNoneBlank(deviceId)) {
+        if (StringUtils.isNoneBlank(deviceType) && StringUtils.isNoneBlank(meta)) {
             final var updated = deviceDbService.updateTypeMeta(deviceId, deviceType, meta);
             deviceMetrics.updateDeviceSuccess();
             return deviceMapper.toDevice(updated);

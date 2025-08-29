@@ -22,6 +22,30 @@ public class DummyDeviceEntity {
         return deviceEntity;
     }
 
+    public DeviceEntity getUpdatedTypeMeta() {
+        DeviceEntity entity = new DeviceEntity();
+        entity.setDeviceId("deviceId");
+        entity.setDeviceType("updatedType");
+        entity.setMeta("updatedMeta");
+        return entity;
+    }
+
+    public DeviceEntity getUpdatedType() {
+        DeviceEntity entity = new DeviceEntity();
+        entity.setDeviceId("deviceId");
+        entity.setDeviceType("updatedType");
+        entity.setMeta("meta");
+        return entity;
+    }
+
+    public DeviceEntity getUpdatedMeta() {
+        DeviceEntity entity = new DeviceEntity();
+        entity.setDeviceId("deviceId");
+        entity.setDeviceType("deviceType");
+        entity.setMeta("updatedMeta");
+        return entity;
+    }
+
     public DeviceEntity getDefault(int i) {
         final var deviceEntity = new DeviceEntity();
         deviceEntity.setDeviceId("deviceId-" + i);
