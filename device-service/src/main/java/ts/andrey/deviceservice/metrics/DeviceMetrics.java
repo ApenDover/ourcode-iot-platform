@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.function.Supplier;
 
 @Service
@@ -54,8 +55,10 @@ public class DeviceMetrics {
                 .tag("method", method)
                 .tag("uri", normalizeUri(uri))
                 .description("Время выполнения запроса")
+                .publishPercentileHistogram(true)
+                .sla(Duration.ofMillis(100), Duration.ofMillis(500), Duration.ofSeconds(1))
                 .register(meterRegistry)
-                .record(supplier::get);
+                .record(supplier);
     }
 
     public void recordDatabaseError(String operation) {
@@ -79,7 +82,7 @@ public class DeviceMetrics {
     }
 
     private String normalizeUri(String uri) {
-        return uri.replaceAll("/\\d+", "/{id}");
+        return uri.replaceAll("/[0-9A-Z]{26}$", "/{id}");
     }
 
 }
