@@ -95,6 +95,8 @@ services:
       OTEL_LOGS_EXPORTER: none
       OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
     depends_on:
+      redis:
+        condition: service_healthy
       postgres1r:
         condition: service_healthy
       postgres2r:
@@ -408,6 +410,8 @@ services:
       retries: 5
     volumes:
       - redis_data:/data
+    networks:
+      - iot_network
   redis-insight:
     image: redis/redisinsight:latest
     container_name: proselyte-redisinsight

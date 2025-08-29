@@ -12,7 +12,7 @@ import ts.andrey.dto.Device;
 public class RedisConfig {
 
     @Bean
-    public RedisTemplate<String, Device> deviceRedisTemplate(RedisConnectionFactory factory) {
+    public RedisTemplate<String, Device> redisTemplate(RedisConnectionFactory factory) {
         RedisTemplate<String, Device> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
         template.setKeySerializer(new StringRedisSerializer());
