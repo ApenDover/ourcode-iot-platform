@@ -1,0 +1,59 @@
+@startuml
+actor ExternalService
+participant "Keycloak" as KC
+participant "DeviceController" as DC #lightblue
+participant "SpringSecurity" as SS  #lightblue
+participant "DeviceCacheService" as DCS  #lightblue
+participant "DeviceCacheDataService" as DCDS #lightblue
+participant "Redis" as R
+participant "DeviceDbService" as DDBS #lightblue
+participant "Postgres" as DB
+
+ExternalService --> SS : REST запрос
+SS --> KC : Проверка JWT
+KC --> SS : Ответ о JWT
+SS -> DC : фильтрация вызова
+DC -> DCS : java-вызов
+opt GET
+    DCS -> DCDS : обращение в cache
+    DCDS -> R : чтение из cache
+    R -> DCDS : ответ
+    alt Если существует в кеше
+        DCDS -> DCS : device
+    else В кеше отсутствует
+    DCS -> DDBS : обращение в database
+    DDBS -> DB : запись в database
+    DB -> DDBS : database response
+    DDBS -> DCS : database response
+    DCS -> DCDS : обращение в cache
+    DCDS -> R : сохранение в cache
+    end
+end
+opt POST
+    DCS -> DCDS : обращение в cache
+    DCDS -> R : write в cache
+    DCDS -> DDBS : write DB
+    DCS -> DDBS : обращение в database
+    DDBS -> DB : сохранение в database
+    DB -> DDBS : database response
+    DDBS -> DCS : device
+end
+opt PUT
+    DCS -> DCDS : обращение в cache
+    DCDS -> R : write в cache
+    DCS -> DDBS : обращение в database
+    DDBS -> DB : write database
+    DB -> DDBS : database response
+    DDBS -> DCS : device
+end
+DCS -> DC : подготовка ответа
+DC -> ExternalService : ответ
+opt DELETE
+    DCS -> DCDS : обращение в cache
+    DCDS -> R : delete cache
+    DCS -> DDBS : обращение в database
+    DDBS -> DB : delete database
+end
+
+
+@enduml

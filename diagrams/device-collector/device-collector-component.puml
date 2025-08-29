@@ -5,7 +5,7 @@ AddElementTag("microservice", $bgColor="#E6F3F7", $fontColor="#333333", $borderC
 AddElementTag("storage", $bgColor="#F7E9E6", $fontColor="#333333", $borderColor="#8F3F3F")
 AddElementTag("queue", $bgColor="#E6F7E6", $fontColor="#333333", $borderColor="#3F8F5F")
 
-Container_Boundary(app, "event-collector") {
+Container_Boundary(app, "device-collector") {
     Component(consumer, "DeviceConsumer", "Кафка-консьюмер", "class")
     Component(device_service, "DeviceService", "Оркестратор процесса", "class")
     Component(device_data_service, "DeviceDataService", "repository", "class")

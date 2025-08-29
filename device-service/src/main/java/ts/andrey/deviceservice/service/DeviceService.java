@@ -4,7 +4,7 @@ import ts.andrey.dto.Device;
 import ts.andrey.dto.DeviceCreateRequest;
 import ts.andrey.dto.DeviceUpdateRequest;
 
-public interface DeviceCrudService {
+public interface DeviceService {
 
     Device getDevice(String deviceId);
 

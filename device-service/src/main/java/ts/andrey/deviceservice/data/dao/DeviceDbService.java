@@ -12,7 +12,7 @@ import ts.andrey.deviceservice.exception.TextException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DeviceDataService {
+public class DeviceDbService {
 
     private final DeviceRepository deviceRepository;
 
