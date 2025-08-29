@@ -103,6 +103,7 @@ publish-nexus:
 	@until [ $$(docker inspect --format='{{.State.Health.Status}}' nexus) = "healthy" ]; do \
 		sleep 2; \
 	done
+	@sleep 5;
 	@echo "Выгружаю api"
 	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/device-api/1.0.0/device-api-1.0.0.pom >/dev/null 2>&1; then \
 		echo "Артефакт уже опубликован, пропускаем публикацию"; \

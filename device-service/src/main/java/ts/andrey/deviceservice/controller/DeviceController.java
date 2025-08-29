@@ -13,29 +13,29 @@ import ts.andrey.dto.DeviceUpdateRequest;
 @RequiredArgsConstructor
 public class DeviceController implements DeviceV1Api {
 
-    private final DeviceCrudService deviceCrudService;
+    private final DeviceCrudService deviceCacheService;
 
     @Override
     public ResponseEntity<Device> createDevice(DeviceCreateRequest deviceCreateRequest) {
-        final var device = deviceCrudService.saveDevice(deviceCreateRequest);
+        final var device = deviceCacheService.saveDevice(deviceCreateRequest);
         return ResponseEntity.ok(device);
     }
 
     @Override
     public ResponseEntity<Void> deleteDevice(String deviceId) {
-        deviceCrudService.deleteDevice(deviceId);
+        deviceCacheService.deleteDevice(deviceId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Device> getDevice(String deviceId) {
-        final var device = deviceCrudService.getDevice(deviceId);
+        final var device = deviceCacheService.getDevice(deviceId);
         return ResponseEntity.ok(device);
     }
 
     @Override
     public ResponseEntity<Device> updateDevice(String deviceId, DeviceUpdateRequest deviceUpdateRequest) {
-        final var device = deviceCrudService.updateDevice(deviceId, deviceUpdateRequest);
+        final var device = deviceCacheService.updateDevice(deviceId, deviceUpdateRequest);
         return ResponseEntity.ok(device);
     }
 
