@@ -19,7 +19,7 @@ curl -s -u admin:admin123 -X POST "http://localhost:8081/service/rest/v1/script"
     -d "{
         \"name\": \"create-user\",
         \"type\": \"groovy\",
-        \"content\": \"security.addUser('$USER', 'user', 'user', 'user@mail', true, '$PASSWORD', ['nx-all']);\"
+        \"content\": \"security.addUser('$USER', 'user', 'user', 'user@mail', true, '$PASSWORD', ['nx-admin']);\"
     }"
 
 

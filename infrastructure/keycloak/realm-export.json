@@ -503,29 +503,6 @@
   "webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister": false,
   "webAuthnPolicyPasswordlessAcceptableAaguids": [],
   "webAuthnPolicyPasswordlessExtraOrigins": [],
-  "users": [
-    {
-      "id": "66b62f1d-b111-4a43-b11c-cb755305936f",
-      "username": "service-account-device-service",
-      "emailVerified": false,
-      "createdTimestamp": 1756411904275,
-      "enabled": true,
-      "totp": false,
-      "serviceAccountClientId": "device-service",
-      "disableableCredentialTypes": [],
-      "requiredActions": [],
-      "realmRoles": [
-        "default-roles-iot-platform"
-      ],
-      "clientRoles": {
-        "device-service": [
-          "uma_protection"
-        ]
-      },
-      "notBefore": 0,
-      "groups": []
-    }
-  ],
   "scopeMappings": [
     {
       "clientScope": "offline_access",
