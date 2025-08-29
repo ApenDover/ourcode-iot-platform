@@ -3,16 +3,21 @@
 🛠 **Инфраструктура проекта** на базе Docker Compose.
 
 ---
-# Быстрый старт
 
-   ```bash
+# Быстрый старт (deploy)
+
+- Разворачивает всю систему локально в docker контейнерах
+- Настраивает роли для keycloak и nexus
+- Публикует API клиент в nexus
+
+```bash
    cd ./infrastructure
    cp .env.example .env
    cd ..
    make up
 ```
 
-postman collection вот тут: [postman](infrastructure/postman)
+postman коллекция тут: [postman](infrastructure/postman)
 
 ---
 
@@ -20,7 +25,14 @@ postman collection вот тут: [postman](infrastructure/postman)
 
 - puml диаграммы в аннотации C4 можно найти в папке [diagrams](diagrams)
 - инфраструктурные сервисы описаны в `docker-compose.yml`, см. папку [infrastructure](infrastructure)
-- [event-collector](event-collector) сервис подписывается на kafka topic, сохраняет события в cassandra, все уникальные deviceId складывает в отдельный топик
+- [kafka-producer](kafka-producer) технический сервис для тестирования. Умеет выдавать JWT для device-service, умеет
+  генерировать события в топик events
+- [event-collector](event-collector) сервис подписывается на kafka topic events, сохраняет события в cassandra, все
+  уникальные deviceId складывает в отдельный топик devices
+- [device-collector](device-collector) сервис подписывается на kafka topic devices, сохраняет их в postgres,
+  шардированную по deviceId
+- [device-service](device-service) сервис для CRUD операций с Device, подключен к в postgres, шардированной по deviceId.
+  Защищен через keycloak. Есть redis.
 
 ---
 
@@ -46,14 +58,20 @@ postman collection вот тут: [postman](infrastructure/postman)
 | `kafka-producer`     | SpringBoot service для тестирования        | `8887`          |
 | `event-collector`    | SpringBoot service сбор метрик в cassandra | `8888`          |
 | `device-collector`   | SpringBoot service сбор device в postgress | `8889`          |
+| `device-service`     | SpringBoot service CRUD device в postgress | `8886`          |
 | `zookeeper`          | Координация Kafka                          | `2181`          |
 | `kafka`              | Брокер Kafka 3.4                           | `9092`, `29092` |
 | `schema-registry`    | Схемы Avro для Kafka                       | `8081`          |
 | `minio`              | S3-хранилище совместимое с AWS             | `9000`, `9001`  |
 | `camunda`            | BPM-платформа для бизнес-процессов         | `8088`          |
-| `postgres`           | База данных PostgreSQL                     | `5432`          |
+| `postgres1`          | База данных PostgreSQL master 1            | `5431`          |
+| `postgres2`          | База данных PostgreSQL master 2            | `5432`          |
+| `postgres1r`         | База данных PostgreSQL replica 1           | `5433`          |
+| `postgres2r`         | База данных PostgreSQL replica 2           | `5434`          |
+| `postgres-keycloak`  | База данных PostgreSQL для keycloak        | `5430`          |
 | `keycloak`           | IAM-платформа, авторизация                 | `8080`          |
 | `redis`              | In-memory кэш с паролем                    | `6379`          |
+| `redis-insight`      | UI для redis                               | `6379`          |
 | `cassandra`          | NoSQL база данных                          | `9042`          |
 | `grafana`            | Визуализация метрик                        | `3000`          |
 | `prometheus`         | Мониторинг и сбор метрик                   | `9090`          |
@@ -190,3 +208,52 @@ postman collection вот тут: [postman](infrastructure/postman)
 - Хранилище: Postgres
 - Тестирование и окружение: Testcontainers (Kafka, Postgres, Schema Registry)
 - Система сборки: Gradle
+
+## device-service
+
+- все endpoint защищены keycloak
+- СRUD операции на устройствами в PostgreSQL, используя шардирование через Apache ShardingSphere
+- между приложение и базой есть redis
+- экспортирует метрики
+
+<details>
+
+<summary>Компоненты сервиса</summary>
+
+![device-service-component.png](diagrams/device-service/device-service-component.png)
+
+</details>
+
+<details>
+
+<summary>Логическая последовательность</summary>
+
+![device-service-sequence.png](diagrams/device-service/device-service-sequence.png)
+
+</details>
+
+### Технологии:
+- Язык программирования: Java 24
+- Фреймворк: Spring Boot 3.5
+- Обмен сообщениями: REST
+- Шардирование: ShardingSphere
+- Хранилище: Postgres
+- Тестирование и окружение: Testcontainers (Postgres, Redis, Keycloak)
+- Система сборки: Gradle
+
+<details>
+
+<summary>
+дополнительная информация
+</summary>
+
+### API Documentation
+
+OpenAPI спецификация: [DeviceV1Api.pdf](infrastructure/api/DeviceV1Api.pdf)
+
+Для отправки запросов на end-point согласно спецификации, необходимо создать JWT токен, для
+этого есть отдельный endPoint в [kafka-producer](kafka-producer)
+> http://localhost:8887/auth/token?login=admin&password=admin \
+эти и другие запросы есть в [postman](infrastructure/postman)
+
+</details>
