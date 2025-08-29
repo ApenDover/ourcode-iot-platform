@@ -1,17 +1,11 @@
 #!/bin/bash
-
 . ../.env
-
-set -e
 KEYCLOAK_URL="${ENV_KEYCLOAK_URL}"
+ADMIN_USER="${KEYCLOAK_ADMIN}"
+ADMIN_PASS="${KEYCLOAK_ADMIN_PASSWORD}"
 REALM="${ENV_KEYCLOAK_REALM}"
-ADMIN_USER="${ENV_KEYCLOAK_ADMIN}"
-ADMIN_PASS="${ENV_KEYCLOAK_ADMIN_PASSWORD}"
-NEW_USER="${ENV_KEYCLOAK_USER}"
-NEW_PASS="${ENV_KEYCLOAK_USER_PASSWORD}"
-NEW_EMAIL="${ENV_KEYCLOAK_USER}@example.com"
 CLIENT_ID_NAME="${ENV_KEYCLOAK_CLIENT}"
-ROLE_NAME="${ENV_KEYCLOAK_USER_ROLE}"
+CLIENT_SECRET_VALUE="${APP_CLIENT_SECRET_KEYCLOAK}"
 
 # 1. Получаем admin token
 ADMIN_TOKEN=$(curl -s -X POST \
@@ -21,4 +15,30 @@ ADMIN_TOKEN=$(curl -s -X POST \
   | jq -r '.access_token')
 
 echo "ADMIN TOKEN получен"
+
+# 2. Получаем UUID клиента
+CLIENT_UUID=$(curl -s -X GET "$KEYCLOAK_URL/admin/realms/$REALM/clients?clientId=$CLIENT_ID_NAME" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" | jq -r '.[0].id')
+
+# Проверка, что клиент найден
+if [ -z "$CLIENT_UUID" ] || [ "$CLIENT_UUID" = "null" ]; then
+  echo "Клиент $CLIENT_ID_NAME не найден"
+  exit 1
+fi
+
+# обновляем атрибуты клиента с нужным секретом
+ RESPONSE=$(curl -s -w "%{http_code}" -X PUT \
+   "$KEYCLOAK_URL/admin/realms/$REALM/clients/$CLIENT_UUID" \
+   -H "Authorization: Bearer $ADMIN_TOKEN" \
+   -H "Content-Type: application/json" \
+   -d "{\"secret\":\"$CLIENT_SECRET_VALUE\"}")
+
+ HTTP_CODE=${RESPONSE: -3}
+ if [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 204 ]; then
+   echo "Client Secret установлен через обновление клиента"
+ else
+   echo "Ошибка установки Client Secret: HTTP $HTTP_CODE"
+   exit 1
+ fi
 

@@ -377,14 +377,13 @@ services:
       - start-dev
       - --import-realm
     environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${ENV_KEYCLOAK_ADMIN}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${ENV_KEYCLOAK_ADMIN_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_DB: postgres
       KC_DB_URL_HOST: postgres_keycloak
       KC_DB_URL_DATABASE: ${POSTGRES_KEYCLOAK_DB}
       KC_DB_USERNAME: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
       KC_DB_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
-      KC_HTTP_ENABLED: true
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     ports:
