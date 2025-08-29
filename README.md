@@ -100,9 +100,16 @@ postman collection вот тут: [postman](infrastructure/postman)
 </details>
 
 <details>
-<summary>metrics</summary>
+<summary>device-events-metrics</summary>
 
-![metrics.png](pics/metrics.png)
+![device-events-metrics.png](pics/device-events-metrics.png)
+
+</details>
+
+<details>
+<summary>device-service-metrics</summary>
+
+![device-service-metrics.png](pics/device-service-metrics.png)
 
 </details>
 
