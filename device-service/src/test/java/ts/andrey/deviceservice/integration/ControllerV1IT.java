@@ -35,6 +35,15 @@ class ControllerV1IT extends BaseIntegrationTest {
         assertEquals("meta", body.getMeta());
         assertEquals("deviceType", body.getDeviceType());
 
+        // THEN REDIS
+        final var redisActual = redisTemplate.opsForValue().get(body.getDeviceId());
+        assertNotNull(redisActual);
+        assertEquals("deviceType", redisActual.getDeviceType());
+        assertEquals("meta", redisActual.getMeta());
+        assertEquals(body.getDeviceId(), redisActual.getDeviceId());
+        assertEquals(body.getCreatedAt(), redisActual.getCreatedAt());
+
+        // THEN DATABASE
         final var actual = deviceRepository.findAll()
                 .stream()
                 .filter(device -> device.getDeviceId()
@@ -79,6 +88,14 @@ class ControllerV1IT extends BaseIntegrationTest {
         assertEquals(body.getDeviceId(), actual.getDeviceId());
         assertEquals("updatedType", actual.getDeviceType());
         assertEquals("updatedMeta", actual.getMeta());
+
+        //THEN REDIS
+        final var redisActual = redisTemplate.opsForValue().get(body.getDeviceId());
+        assertNotNull(redisActual);
+        assertEquals("updatedType", redisActual.getDeviceType());
+        assertEquals("updatedMeta", redisActual.getMeta());
+        assertEquals(body.getDeviceId(), redisActual.getDeviceId());
+        assertEquals(body.getCreatedAt(), redisActual.getCreatedAt());
     }
 
     @Test
