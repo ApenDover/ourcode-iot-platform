@@ -17,7 +17,8 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/metrics").permitAll()
                         .requestMatchers("/actuator/prometheus").permitAll()
                         .requestMatchers("/actuator/**").hasAuthority("ROLE_deviceapp.admin")
-                        .requestMatchers("/api/v1/devices/**").hasAnyAuthority("ROLE_deviceapp.user", "ROLE_deviceapp.admin")
+                        .requestMatchers("/api/v1/devices/**")
+                        .hasAnyAuthority("ROLE_deviceapp.user", "ROLE_deviceapp.admin")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

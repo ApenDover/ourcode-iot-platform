@@ -13,6 +13,10 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class DeviceMetrics {
 
+    private static final int SLA_ONE = 100;
+    private static final int SLA_TWO = 500;
+    private static final int SLA_THREE = 1;
+
     private final MeterRegistry meterRegistry;
 
     public void getDeviceRedisSuccess() {
@@ -76,7 +80,7 @@ public class DeviceMetrics {
                 .tag("uri", normalizeUri(uri))
                 .description("Время выполнения запроса")
                 .publishPercentileHistogram(true)
-                .sla(Duration.ofMillis(100), Duration.ofMillis(500), Duration.ofSeconds(1))
+                .sla(Duration.ofMillis(SLA_ONE), Duration.ofMillis(SLA_TWO), Duration.ofSeconds(SLA_THREE))
                 .register(meterRegistry)
                 .record(supplier);
     }

@@ -51,12 +51,13 @@ public class DeviceEntity {
 
     @Override
     public String toString() {
-        return "DeviceEntity{" +
-                "id=" + id +
-                ", deviceId='" + deviceId + '\'' +
-                ", deviceType='" + deviceType + '\'' +
-                ", createdAt=" + createdAt +
-                ", meta='" + meta + '\'' +
-                '}';
+        return "DeviceEntity{"
+                + "id=" + id
+                + ", deviceId='" + deviceId
+                + '\'' + ", deviceType='" + deviceType + '\''
+                + ", createdAt=" + createdAt
+                + ", meta='"
+                + meta + '\'' + '}';
     }
+
 }

@@ -23,4 +23,5 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Collec
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
+
 }
