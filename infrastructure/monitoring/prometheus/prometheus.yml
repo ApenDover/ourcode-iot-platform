@@ -36,4 +36,4 @@ scrape_configs:
     scrape_timeout: 10s
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ 'device-collector:8886' ]
+      - targets: [ 'device-service:8886' ]
