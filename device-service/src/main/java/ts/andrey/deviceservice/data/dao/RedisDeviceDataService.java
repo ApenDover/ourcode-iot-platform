@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import ts.andrey.deviceservice.exception.TextException;
+import ts.andrey.deviceservice.metrics.DeviceMetrics;
 import ts.andrey.dto.Device;
 
 import java.time.Duration;
@@ -20,13 +21,17 @@ public class RedisDeviceDataService {
     private int ttlMinutes;
 
     private final RedisTemplate<String, Device> redisTemplate;
+    private final DeviceMetrics deviceMetrics;
 
     public Optional<Device> getDevice(String deviceId) {
         try {
             final var device = redisTemplate.opsForValue().get(deviceId);
             log.info("Device найден в REDIS: {}", device);
+            deviceMetrics.getDeviceRedisSuccess();
+            deviceMetrics.deviceRedisSuccess();
             return Optional.ofNullable(device);
         } catch (Exception e) {
+            deviceMetrics.deviceRedisFailure();
             log.error(TextException.REDIS_NOT_AVAILABLE.format(e.getMessage()), e);
         }
         return Optional.empty();
@@ -37,8 +42,11 @@ public class RedisDeviceDataService {
             redisTemplate.opsForValue()
                     .set(device.getDeviceId(), device, ttl());
             log.info("Device сохранен в REDIS: {}", device);
+            deviceMetrics.saveDeviceRedisSuccess();
+            deviceMetrics.deviceRedisSuccess();
             return device;
         } catch (Exception e) {
+            deviceMetrics.deviceRedisFailure();
             log.error(TextException.REDIS_NOT_AVAILABLE.format(e.getMessage()), e);
         }
         return null;
@@ -47,8 +55,11 @@ public class RedisDeviceDataService {
     public void deleteDevice(String deviceId) {
         try {
             redisTemplate.delete(deviceId);
+            deviceMetrics.deleteDeviceRedisSuccess();
+            deviceMetrics.deviceRedisSuccess();
             log.info("Device удален из REDIS: {}", deviceId);
         } catch (Exception e) {
+            deviceMetrics.deviceRedisFailure();
             log.error(TextException.REDIS_NOT_AVAILABLE.format(e.getMessage()), e);
         }
     }

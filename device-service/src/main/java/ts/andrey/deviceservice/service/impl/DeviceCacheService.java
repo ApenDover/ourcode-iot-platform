@@ -16,8 +16,7 @@ public class DeviceCacheService implements DeviceCrudService {
 
     private final RedisDeviceDataService redisDeviceDataService;
     private final DeviceCrudService deviceCrudServiceImpl;
-
-
+    
     public Device getDevice(String deviceId) {
         final var cached = redisDeviceDataService.getDevice(deviceId);
         return cached.orElseGet(() -> {

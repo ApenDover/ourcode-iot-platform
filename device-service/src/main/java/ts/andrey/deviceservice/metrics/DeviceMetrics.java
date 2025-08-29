@@ -15,6 +15,26 @@ public class DeviceMetrics {
 
     private final MeterRegistry meterRegistry;
 
+    public void getDeviceRedisSuccess() {
+        meterRegistry.counter("device.redis.getDevice").increment();
+    }
+
+    public void saveDeviceRedisSuccess() {
+        meterRegistry.counter("device.redis.saveDevice").increment();
+    }
+
+    public void deleteDeviceRedisSuccess() {
+        meterRegistry.counter("device.redis.deleteDevice").increment();
+    }
+
+    public void deviceRedisSuccess() {
+        meterRegistry.counter("device.redis.success").increment();
+    }
+
+    public void deviceRedisFailure() {
+        meterRegistry.counter("device.redis.error").increment();
+    }
+
     public void getDeviceSuccess() {
         meterRegistry.counter("device.database.getDevice").increment();
     }
@@ -41,7 +61,7 @@ public class DeviceMetrics {
     }
 
     public void recordFailure(String method, String uri, int status, Throwable ex) {
-        meterRegistry.counter("device.requests.failure",
+        meterRegistry.counter("device.requests.error",
                 "method", method,
                 "uri", normalizeUri(uri),
                 "status", String.valueOf(status),
@@ -62,7 +82,7 @@ public class DeviceMetrics {
     }
 
     public void recordDatabaseError(String operation) {
-        meterRegistry.counter("device.database.errors",
+        meterRegistry.counter("device.database.error",
                         "operation", operation)
                 .increment();
     }
