@@ -1,5 +1,6 @@
 package ts.andrey.deviceservice.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +20,9 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class MetricsPerRequestFilter extends OncePerRequestFilter {
+public class PerRequestFilter extends OncePerRequestFilter {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final DeviceMetrics deviceMetrics;
 
@@ -66,26 +69,78 @@ public class MetricsPerRequestFilter extends OncePerRequestFilter {
                 );
             }
             logRequest(wrappedRequest);
-            logResponse(wrappedResponse);
+            logResponse(wrappedResponse, wrappedRequest);
             wrappedResponse.copyBodyToResponse();
         }
     }
 
     private void logRequest(ContentCachingRequestWrapper request) {
-        String body = new String(request.getContentAsByteArray(), StandardCharsets.UTF_8);
+        if (request.getRequestURI().contains("actuator")) {
+            return;
+        }
+        final var body = toSingleLineJson(new String(request.getContentAsByteArray(), StandardCharsets.UTF_8));
         log.info("Request: method={}, uri={}, headers={}, body={}",
                 request.getMethod(),
                 request.getRequestURI(),
-                request.getHeaderNames(),
+                formatHeaders(request),
                 body);
     }
 
-    private void logResponse(ContentCachingResponseWrapper response) {
-        String body = new String(response.getContentAsByteArray(), StandardCharsets.UTF_8);
-        log.info("Response: status={}, headers={}, body={}",
+    private void logResponse(ContentCachingResponseWrapper response, ContentCachingRequestWrapper request) {
+        if (request.getRequestURI().contains("actuator")) {
+            return;
+        }
+        final var body = toSingleLineJson(new String(response.getContentAsByteArray(), StandardCharsets.UTF_8));
+        log.info("Response from {}: status={}, headers={}, body={}",
+                request.getRequestURI(),
                 response.getStatus(),
-                response.getHeaderNames(),
+                formatHeaders(response),
                 body);
+    }
+
+    private String toSingleLineJson(String body) {
+        try {
+            Object json = OBJECT_MAPPER.readValue(body, Object.class);
+            return OBJECT_MAPPER.writeValueAsString(json);
+        } catch (Exception e) {
+            return body.replaceAll("[\\r\\n]+", " ");
+        }
+    }
+
+    private String formatHeaders(HttpServletRequest request) {
+        var headers = new StringBuilder("{");
+        var names = request.getHeaderNames();
+        while (names.hasMoreElements()) {
+            var name = names.nextElement();
+            String value = request.getHeader(name);
+            if ("authorization".equalsIgnoreCase(name)) {
+                value = "JWT_TOKEN";
+            }
+            headers.append(name).append("=")
+                    .append(value).append(", ");
+        }
+        if (headers.length() > 1) {
+            headers.setLength(headers.length() - 2);
+        }
+        headers.append("}");
+        return headers.toString();
+    }
+
+    private String formatHeaders(HttpServletResponse response) {
+        var headers = new StringBuilder("{");
+        for (String name : response.getHeaderNames()) {
+            String value = response.getHeader(name);
+            if ("authorization".equalsIgnoreCase(name)) {
+                value = "JWT_TOKEN";
+            }
+            headers.append(name).append("=")
+                    .append(value).append(", ");
+        }
+        if (headers.length() > 1) {
+            headers.setLength(headers.length() - 2);
+        }
+        headers.append("}");
+        return headers.toString();
     }
 
 }
