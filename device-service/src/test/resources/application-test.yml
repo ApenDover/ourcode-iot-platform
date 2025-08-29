@@ -1,6 +1,19 @@
 spring:
   flyway:
     enabled: false
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: device-service
+            client-secret: secret
+            authorization-grant-type: authorization_code
+            scope: openid,profile,email
 
 otel:
   traces:
