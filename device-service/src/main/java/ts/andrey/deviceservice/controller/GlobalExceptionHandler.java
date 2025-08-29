@@ -17,8 +17,6 @@ import org.springframework.web.context.request.WebRequest;
 import ts.andrey.deviceservice.exception.DeviceServiceException;
 import ts.andrey.dto.DeviceError;
 
-import java.net.URI;
-
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -76,24 +74,20 @@ public class GlobalExceptionHandler {
     })
     public ResponseEntity<DeviceError> handleDatabaseExceptions(Exception ex, WebRequest request) {
         log.error(ex.getMessage(), ex);
-        final var error = new DeviceError();
-        error.setType(URI.create("https://example.com/errors/database"));
-        error.setTitle("Database Error");
-        error.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        error.setDetail(ex.getMessage());
-        error.setInstance(request.getDescription(false));
 
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(error);
+        return buildDeviceError(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Database Error",
+                ex.getMessage(),
+                request.getDescription(false)
+        );
     }
 
     private ResponseEntity<DeviceError> buildDeviceError(
             HttpStatus status, String title,
             String detail, String instance
     ) {
-        DeviceError error = new DeviceError();
-        error.setType(URI.create("about:blank"));
+        final var error = new DeviceError();
         error.setTitle(title);
         error.setStatus(status.value());
         error.setDetail(detail);

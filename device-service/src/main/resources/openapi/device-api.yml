@@ -131,9 +131,6 @@ components:
       type: object
       description: RFC 7807 описание ошибок
       properties:
-        type:
-          type: string
-          format: uri
         title:
           type: string
         status:
