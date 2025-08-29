@@ -7,521 +7,576 @@
 	},
 	"item": [
 		{
-			"name": "addDeviceEvent",
-			"event": [
+			"name": "TECH",
+			"item": [
 				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"function generateUlid() {",
-							"    const ENCODING = \"0123456789ABCDEFGHJKMNPQRSTVWXYZ\"; // Crockford Base32",
-							"    const time = Date.now();",
-							"    let ulid = \"\";",
-							"",
-							"    // Первые 10 символов = время",
-							"    let modTime = time;",
-							"    let timeChars = [];",
-							"    for (let i = 0; i < 10; i++) {",
-							"        timeChars.push(ENCODING[modTime % 32]);",
-							"        modTime = Math.floor(modTime / 32);",
-							"    }",
-							"    ulid += timeChars.reverse().join(\"\");",
-							"",
-							"    // Остальные 16 символов = случайные",
-							"    for (let i = 0; i < 16; i++) {",
-							"        ulid += ENCODING[Math.floor(Math.random() * 32)];",
-							"    }",
-							"",
-							"    return ulid;",
-							"}",
-							"",
-							"pm.environment.set(\"ulid\", generateUlid());",
-							"pm.environment.set(\"random\", _.random(1, 20))",
-							"pm.environment.set(\"temp\", _.random(-30, 35))"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "[{\n  \"eventId\": \"{{$guid}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\",\n  \"device\": {\n    \"deviceId\": \"{{ulid}}\",\n    \"deviceType\": \"SENSOR\",\n    \"meta\": \"тут текст или json тогда и поле jsonb\",\n    \"createdAt\": 1692700000000\n  }\n}]",
-					"options": {
-						"raw": {
-							"language": "json"
+					"name": "actuator",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/actuator/metrics/events.cassandra.error",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"actuator",
+								"metrics",
+								"events.cassandra.error"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "http://localhost:8887/api/kafka/send",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8887",
-					"path": [
-						"api",
-						"kafka",
-						"send"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "sendGeneratedEvents",
-			"event": [
 				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
+					"name": "avro",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/subjects/events-value/versions/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"subjects",
+								"events-value",
+								"versions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "nexus-script",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7777/service/rest/v1/script",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"service",
+								"rest",
+								"v1",
+								"script"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "nexus-script-run",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/plain",
+								"type": "text"
+							}
 						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "traceId",
-						"value": "AndreyTest",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:8887/api/kafka/send/generate?messageCount=1&deviceCount=1&saveDevice=false",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8887",
-					"path": [
-						"api",
-						"kafka",
-						"send",
-						"generate"
-					],
-					"query": [
-						{
-							"key": "messageCount",
-							"value": "1"
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
-						{
-							"key": "deviceCount",
-							"value": "1"
-						},
-						{
-							"key": "saveDevice",
-							"value": "false"
+						"url": {
+							"raw": "http://localhost:7777/service/rest/v1/script/create-user/run",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"service",
+								"rest",
+								"v1",
+								"script",
+								"create-user",
+								"run"
+							]
 						}
-					]
+					},
+					"response": []
+				},
+				{
+					"name": "nexus-create-user",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"create-user\",\n    \"type\": \"groovy\",\n    \"content\": \"security.addUser('user', 'user', 'user', 'user@mail', true, 'strongpassword', ['nx-admin-role']);\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:7777/service/rest/v1/script",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"service",
+								"rest",
+								"v1",
+								"script"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "keycloak-auth",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "admin-cli",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:7878/realms/master/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7878",
+							"path": [
+								"realms",
+								"master",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getToken",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "device-service",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "i9sXbfCRgvZjFJxGQrfOSIUZPdkHeBPa",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:7878/realms/iot-platform/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7878",
+							"path": [
+								"realms",
+								"iot-platform",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "actuator",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8888/actuator/metrics/events.cassandra.error",
-					"protocol": "http",
-					"host": [
-						"localhost"
+			"name": "Device-collector",
+			"item": [
+				{
+					"name": "addDeviceEvent",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"function generateUlid() {",
+									"    const ENCODING = \"0123456789ABCDEFGHJKMNPQRSTVWXYZ\"; // Crockford Base32",
+									"    const time = Date.now();",
+									"    let ulid = \"\";",
+									"",
+									"    // Первые 10 символов = время",
+									"    let modTime = time;",
+									"    let timeChars = [];",
+									"    for (let i = 0; i < 10; i++) {",
+									"        timeChars.push(ENCODING[modTime % 32]);",
+									"        modTime = Math.floor(modTime / 32);",
+									"    }",
+									"    ulid += timeChars.reverse().join(\"\");",
+									"",
+									"    // Остальные 16 символов = случайные",
+									"    for (let i = 0; i < 16; i++) {",
+									"        ulid += ENCODING[Math.floor(Math.random() * 32)];",
+									"    }",
+									"",
+									"    return ulid;",
+									"}",
+									"",
+									"pm.environment.set(\"ulid\", generateUlid());",
+									"pm.environment.set(\"random\", _.random(1, 20))",
+									"pm.environment.set(\"temp\", _.random(-30, 35))"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
 					],
-					"port": "8888",
-					"path": [
-						"actuator",
-						"metrics",
-						"events.cassandra.error"
-					]
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[{\n  \"eventId\": \"{{$guid}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\",\n  \"device\": {\n    \"deviceId\": \"{{ulid}}\",\n    \"deviceType\": \"SENSOR\",\n    \"meta\": \"тут текст или json тогда и поле jsonb\",\n    \"createdAt\": 1692700000000\n  }\n}]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8887/api/kafka/send",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8887",
+							"path": [
+								"api",
+								"kafka",
+								"send"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sendGeneratedEvents",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "traceId",
+								"value": "AndreyTest",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8887/api/kafka/send/generate?messageCount=1&deviceCount=1&saveDevice=false",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8887",
+							"path": [
+								"api",
+								"kafka",
+								"send",
+								"generate"
+							],
+							"query": [
+								{
+									"key": "messageCount",
+									"value": "1"
+								},
+								{
+									"key": "deviceCount",
+									"value": "1"
+								},
+								{
+									"key": "saveDevice",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "avro",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8081/subjects/events-value/versions/1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8081",
-					"path": [
-						"subjects",
-						"events-value",
-						"versions",
-						"1"
-					]
+			"name": "Device-service",
+			"item": [
+				{
+					"name": "getDirectToken",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8887/auth/token?login=admin&password=admin",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8887",
+							"path": [
+								"auth",
+								"token"
+							],
+							"query": [
+								{
+									"key": "login",
+									"value": "admin"
+								},
+								{
+									"key": "password",
+									"value": "admin"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeviceService-EndPoint",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "clientSecret",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "authorization_code_with_pkce",
+									"type": "string"
+								},
+								{
+									"key": "scope",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "useBrowser",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "clientId",
+									"value": "device-service",
+									"type": "string"
+								},
+								{
+									"key": "authUrl",
+									"value": "http://localhost:7878/realms/iot-platform/protocol/openid-connect/auth",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://localhost:7878/realms/iot-platform/protocol/openid-connect/token",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "andrew-token",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deviceType\": \"postmanA\",\n    \"meta\": \"postmanA\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8886/api/v1/devices/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8886",
+							"path": [
+								"api",
+								"v1",
+								"devices",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeviceService-EndPoint-DirectToken",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJtMGtjb1ViV3Q3bEEtc3lWYWxvOHJyRDhQbXRQUmJBUFhOMkFhNjk0UnNrIn0.eyJleHAiOjE3NTY0NjQ4MzAsImlhdCI6MTc1NjQ2NDUzMCwianRpIjoib25ydHJvOmQ2MjA0NDIwLTI3ZmEtNDIzZC1iNTE0LWMyYmJiMDdlNzdjMCIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9pb3QtcGxhdGZvcm0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiODU2MWRmZTUtY2M4Ny00ZmE0LWFiZjEtMjJiYmFmZGRjMmMzIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2aWNlLXNlcnZpY2UiLCJzaWQiOiI2OTY2ZjJhNS04MDZhLTRkMzgtYTc0NS03YmJiYjk3YzRlYmUiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtaW90LXBsYXRmb3JtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImRldmljZS1zZXJ2aWNlIjp7InJvbGVzIjpbImRldmljZWFwcC5hZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGVzIjpbIlJPTEVfZGV2aWNlYXBwLmFkbWluIiwiUk9MRV9tYW5hZ2UtYWNjb3VudCIsIlJPTEVfdmlldy1wcm9maWxlIiwiUk9MRV9tYW5hZ2UtYWNjb3VudC1saW5rcyJdLCJuYW1lIjoidGVzdCB0ZXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4iLCJnaXZlbl9uYW1lIjoidGVzdCIsImZhbWlseV9uYW1lIjoidGVzdCIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20ifQ.LKe0UjB4FocNG7MbTusR7lzo_sOvy9g8KK2UNuYLqEL6ocCKuAztbxNb45VbY7P6dCi_BXzwFcGMIjvmrzRb4W47MAowgBrBFiqjEGG4i5AD0XGRh8xoeRBoIt2rr9zbd-lmaVH6UKFQiOjGNa-ShJsyuNPHeA8YYyBLGKvNucSPy_vdySy3r2wVRL4CrlHv-hlk5QxC_iWGpPPifYLIDSiha5I0Cpbst0VIsvNhDdbB0QBUHNhox0n3xmT8LZDM2_aYBMrfF1hqYv6xPSR5Ix9ZQNPlRwNlROFZz3s51QXf9o5tswnan-aShiJdXhBsos9VJxlBtPHwdr9GWf48Yg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deviceType\": \"postmanA\",\n    \"meta\": \"postmanA\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8886/api/v1/devices",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8886",
+							"path": [
+								"api",
+								"v1",
+								"devices"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "nexus-script",
-			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": [
-						{
-							"key": "password",
-							"value": "admin123",
-							"type": "string"
-						},
-						{
-							"key": "username",
-							"value": "admin",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:7777/service/rest/v1/script",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "7777",
-					"path": [
-						"service",
-						"rest",
-						"v1",
-						"script"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "nexus-create-user",
-			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": [
-						{
-							"key": "username",
-							"value": "admin",
-							"type": "string"
-						},
-						{
-							"key": "password",
-							"value": "admin123",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"create-user\",\n    \"type\": \"groovy\",\n    \"content\": \"security.addUser('user', 'user', 'user', 'user@mail', true, 'strongpassword', ['nx-admin-role']);\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:7777/service/rest/v1/script",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "7777",
-					"path": [
-						"service",
-						"rest",
-						"v1",
-						"script"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "nexus-script-run",
-			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": [
-						{
-							"key": "password",
-							"value": "admin123",
-							"type": "string"
-						},
-						{
-							"key": "username",
-							"value": "admin",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "text/plain",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:7777/service/rest/v1/script/create-user/run",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "7777",
-					"path": [
-						"service",
-						"rest",
-						"v1",
-						"script",
-						"create-user",
-						"run"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "DeviceService-EndPoint",
-			"request": {
-				"auth": {
-					"type": "oauth2",
-					"oauth2": [
-						{
-							"key": "clientSecret",
-							"value": "",
-							"type": "string"
-						},
-						{
-							"key": "grant_type",
-							"value": "authorization_code_with_pkce",
-							"type": "string"
-						},
-						{
-							"key": "scope",
-							"value": "",
-							"type": "string"
-						},
-						{
-							"key": "client_authentication",
-							"value": "header",
-							"type": "string"
-						},
-						{
-							"key": "useBrowser",
-							"value": true,
-							"type": "boolean"
-						},
-						{
-							"key": "clientId",
-							"value": "device-service",
-							"type": "string"
-						},
-						{
-							"key": "authUrl",
-							"value": "http://localhost:7878/realms/iot-platform/protocol/openid-connect/auth",
-							"type": "string"
-						},
-						{
-							"key": "accessTokenUrl",
-							"value": "http://localhost:7878/realms/iot-platform/protocol/openid-connect/token",
-							"type": "string"
-						},
-						{
-							"key": "tokenName",
-							"value": "andrew-token",
-							"type": "string"
-						},
-						{
-							"key": "addTokenTo",
-							"value": "header",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"deviceType\": \"postmanA\",\n    \"meta\": \"postmanA\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8886/api/v1/devices/",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8886",
-					"path": [
-						"api",
-						"v1",
-						"devices",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "keycloak-auth",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/x-www-form-urlencoded"
-					}
-				],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [
-						{
-							"key": "username",
-							"value": "admin",
-							"type": "text"
-						},
-						{
-							"key": "password",
-							"value": "admin",
-							"type": "text"
-						},
-						{
-							"key": "grant_type",
-							"value": "password",
-							"type": "text"
-						},
-						{
-							"key": "client_id",
-							"value": "admin-cli",
-							"type": "text"
-						}
-					]
-				},
-				"url": {
-					"raw": "http://localhost:7878/realms/master/protocol/openid-connect/token",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "7878",
-					"path": [
-						"realms",
-						"master",
-						"protocol",
-						"openid-connect",
-						"token"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "keycloak-get-realms",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJKQmR0VVgwR0ZaQnpCLWZYa0c3bjEtQXUtaE9OblFOcklhU0V6VXZyT1FjIn0.eyJleHAiOjE3NTYzODYxNTYsImlhdCI6MTc1NjM4NjA5NiwianRpIjoib25sdHJvOmNhNWU4ODMzLTk0YTUtNDc5NC05NzIyLWZhMmMzZGE0OWJiYyIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6Nzg3OC9yZWFsbXMvbWFzdGVyIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwic2lkIjoiMjIxZDRlYjctZjdkZC00MmEyLThjN2EtN2NjODFjOGRlMDA0Iiwic2NvcGUiOiJwcm9maWxlIGVtYWlsIn0.T-fMen-WBVEcpcKF6anjC0f5mk3rMTDL0B9XEf6gjZlDcB7iv1frE01V6MyXbNfUBCgojOlEuRfo62DlvjSdbkHKjznZnKtwxwi4VRXAMQs2lhj1KI-uXh0j1kT1kAIQqRg6q0Yrq6DpgNbgZZiUJLtflst3bjQ-vE-N8lYItDFs0TKysZNhTfN3ps1VmWZf4GzWe9DG17L1_2owKDus2pc_LYsGpWOiFn99rXhaHNYWLV_JFCdLA8buI-BSufMhu0_DBps-NRqCD5wP2rNPpEsKW24xGNYr_SaKyWXpTq64pdFvaqMRladMcwfcGyV09rPARmWo7NwmxqDJOxr1lQ",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:7878/admin/realms",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "7878",
-					"path": [
-						"admin",
-						"realms"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "getToken",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [
-						{
-							"key": "client_id",
-							"value": "device-service",
-							"type": "text"
-						},
-						{
-							"key": "client_secret",
-							"value": "i9sXbfCRgvZjFJxGQrfOSIUZPdkHeBPa",
-							"type": "text"
-						},
-						{
-							"key": "grant_type",
-							"value": "client_credentials",
-							"type": "text"
-						}
-					]
-				},
-				"url": {
-					"raw": "http://localhost:7878/realms/iot-platform/protocol/openid-connect/token",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "7878",
-					"path": [
-						"realms",
-						"iot-platform",
-						"protocol",
-						"openid-connect",
-						"token"
-					]
-				}
-			},
-			"response": []
+			]
 		}
 	]
 }

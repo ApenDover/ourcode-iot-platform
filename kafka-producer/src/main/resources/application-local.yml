@@ -71,3 +71,9 @@ spring:
       properties:
         schema.registry.url: http://localhost:8081
         auto.register.schemas: true
+
+keycloak:
+  url: http://localhost:7878
+  realm: iot-platform
+  client-id: device-service
+  client-secret: EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU

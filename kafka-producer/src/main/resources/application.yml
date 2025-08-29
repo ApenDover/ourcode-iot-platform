@@ -66,3 +66,9 @@ spring:
       properties:
         schema.registry.url: ${SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL:http://schema-registry:8081}
         auto.register.schemas: ${SPRING_KAFKA_PRODUCER_PROPERTIES_AUTO_REGISTER_SCHEMAS:true}
+
+keycloak:
+  url: http://keycloak:8080
+  realm: ${APP_CLIENT_REALM_NAME_KEYCLOAK:iot-platform}
+  client-id: ${APP_CLIENT_ID_KEYCLOAK:device-service}
+  client-secret: ${APP_CLIENT_SECRET_KEYCLOAK:secret}

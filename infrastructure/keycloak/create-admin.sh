@@ -36,6 +36,8 @@ if [ "$EXISTING_USER" = "null" ] || [ -z "$EXISTING_USER" ]; then
       \"username\": \"$NEW_USER\",
       \"enabled\": true,
       \"email\": \"$NEW_EMAIL\",
+      \"firstName\": \"test\",
+      \"lastName\": \"test\",
       \"emailVerified\": true,
       \"credentials\": [{
         \"type\": \"password\",
