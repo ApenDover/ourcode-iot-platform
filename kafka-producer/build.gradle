@@ -10,6 +10,7 @@ plugins {
 
 group = 'ts.andrey'
 version = "${appVersion}"
+description = 'kafka-producer'
 
 java {
     toolchain {
