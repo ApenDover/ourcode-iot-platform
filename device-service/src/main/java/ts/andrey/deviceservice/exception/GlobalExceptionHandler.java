@@ -1,4 +1,4 @@
-package ts.andrey.deviceservice.controller;
+package ts.andrey.deviceservice.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +14,6 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-import ts.andrey.deviceservice.exception.DeviceServiceException;
 import ts.andrey.dto.DeviceError;
 
 @Slf4j
