@@ -1,10 +1,10 @@
 package ts.andrey.deviceservice.service.impl;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ts.andrey.deviceservice.data.dao.DeviceDbService;
 import ts.andrey.deviceservice.mapper.DeviceMapper;
 import ts.andrey.deviceservice.metrics.DeviceMetrics;
@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class DeviceDataServiceImplTest {
 
     @Mock
@@ -31,13 +32,8 @@ class DeviceDataServiceImplTest {
     @InjectMocks
     private DeviceDataServiceImpl deviceDataServiceImpl;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
-    void getDevice_shouldReturnMappedDeviceAndRecordMetrics() {
+    void getDeviceShouldReturnMappedDeviceAndRecordMetrics() {
         // GIVEN
         String deviceId = "deviceId";
         var entity = DummyTDF.deviceEntity.getDefault();
@@ -56,7 +52,7 @@ class DeviceDataServiceImplTest {
     }
 
     @Test
-    void saveDevice_shouldPersistAndReturnMappedDeviceAndRecordMetrics() {
+    void saveDeviceShouldPersistAndReturnMappedDeviceAndRecordMetrics() {
         // GIVEN
         var request = DummyTDF.deviceCreateRequest.getDefault();
         var entity = DummyTDF.deviceEntity.getDefault();
@@ -78,7 +74,7 @@ class DeviceDataServiceImplTest {
     }
 
     @Test
-    void updateDevice_shouldUpdateTypeAndMeta() {
+    void updateDeviceShouldUpdateTypeAndMeta() {
         // GIVEN
         String deviceId = "deviceId";
         var request = DummyTDF.deviceUpdateRequest.getDefault();
@@ -99,7 +95,7 @@ class DeviceDataServiceImplTest {
     }
 
     @Test
-    void updateDevice_shouldUpdateOnlyType() {
+    void updateDeviceShouldUpdateOnlyType() {
         // GIVEN
         String deviceId = "deviceId";
         var request = new DeviceUpdateRequest();
@@ -120,7 +116,7 @@ class DeviceDataServiceImplTest {
     }
 
     @Test
-    void updateDevice_shouldUpdateOnlyMeta() {
+    void updateDeviceShouldUpdateOnlyMeta() {
         // GIVEN
         String deviceId = "deviceId";
         var request = new DeviceUpdateRequest();
@@ -141,7 +137,7 @@ class DeviceDataServiceImplTest {
     }
 
     @Test
-    void updateDevice_shouldReturnCurrentDevice_whenNoFieldsProvided() {
+    void updateDeviceShouldReturnCurrentDeviceWhenNoFieldsProvided() {
         // GIVEN
         String deviceId = "deviceId";
         var emptyRequest = new DeviceUpdateRequest(); // ничего не задано
@@ -161,7 +157,7 @@ class DeviceDataServiceImplTest {
     }
 
     @Test
-    void deleteDevice_shouldDeleteAndRecordMetrics() {
+    void deleteDeviceShouldDeleteAndRecordMetrics() {
         // GIVEN
         String deviceId = "deviceId";
 

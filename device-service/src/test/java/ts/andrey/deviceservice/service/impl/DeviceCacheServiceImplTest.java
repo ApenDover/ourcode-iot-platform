@@ -1,10 +1,10 @@
 package ts.andrey.deviceservice.service.impl;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ts.andrey.deviceservice.data.dao.DeviceCacheService;
 import ts.andrey.deviceservice.service.DeviceService;
 import ts.andrey.deviceservice.tdf.DummyTDF;
@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class DeviceCacheServiceImplTest {
 
     @Mock
@@ -30,13 +31,8 @@ class DeviceCacheServiceImplTest {
     @InjectMocks
     private DeviceCacheServiceImpl deviceCacheServiceImpl;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
-    void getDevice_shouldReturnFromCache_whenExists() {
+    void getDeviceShouldReturnFromCacheWhenExists() {
         // GIVEN
         String deviceId = "deviceId";
         Device cachedDevice = DummyTDF.device.getDefault();
@@ -52,7 +48,7 @@ class DeviceCacheServiceImplTest {
     }
 
     @Test
-    void getDevice_shouldFetchFromDataServiceAndCache_whenNotInCache() {
+    void getDeviceShouldFetchFromDataServiceAndCacheWhenNotInCache() {
         // GIVEN
         String deviceId = "deviceId";
         Device deviceFromDb = DummyTDF.device.getDefault();
@@ -70,7 +66,7 @@ class DeviceCacheServiceImplTest {
     }
 
     @Test
-    void saveDevice_shouldSaveToDataServiceAndCache() {
+    void saveDeviceShouldSaveToDataServiceAndCache() {
         // GIVEN
         DeviceCreateRequest request = DummyTDF.deviceCreateRequest.getDefault();
         Device createdDevice = DummyTDF.device.getDefault();
@@ -86,7 +82,7 @@ class DeviceCacheServiceImplTest {
     }
 
     @Test
-    void updateDevice_shouldUpdateAndCache() {
+    void updateDeviceShouldUpdateAndCache() {
         // GIVEN
         String deviceId = "deviceId";
         DeviceUpdateRequest request = DummyTDF.deviceUpdateRequest.getDefault();
@@ -103,7 +99,7 @@ class DeviceCacheServiceImplTest {
     }
 
     @Test
-    void deleteDevice_shouldDeleteFromBothServices() {
+    void deleteDeviceShouldDeleteFromBothServices() {
         // GIVEN
         String deviceId = "deviceId";
 
@@ -114,4 +110,5 @@ class DeviceCacheServiceImplTest {
         verify(deviceDataServiceImpl).deleteDevice(deviceId);
         verify(deviceCacheService).deleteDevice(deviceId);
     }
+
 }

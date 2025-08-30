@@ -2,7 +2,6 @@ package ts.andrey.deviceservice.tdf;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ts.andrey.dto.DeviceCreateRequest;
 import ts.andrey.dto.DeviceUpdateRequest;
 
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
