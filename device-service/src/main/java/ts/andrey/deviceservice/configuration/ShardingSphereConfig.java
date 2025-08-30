@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import ts.andrey.deviceservice.configuration.model.DataSourcesConfig;
 import ts.andrey.deviceservice.exception.DeviceServiceException;
-import ts.andrey.deviceservice.utils.MigrationProcessor;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -71,9 +70,6 @@ public class ShardingSphereConfig {
         final var props = new Properties();
         props.put("algorithm-expression", String.format(algorithmExpression, shardCount));
         shardingRule.getShardingAlgorithms().put(ALGORITHM_NAME, new AlgorithmConfiguration("INLINE", props));
-
-        final var masterSource = dataSourcesConfig.getDataSources();
-        masterSource.forEach(MigrationProcessor::runFlyway);
 
         final var dataSourceGroups = IntStream.range(0, chardMax)
                 .mapToObj(i -> {

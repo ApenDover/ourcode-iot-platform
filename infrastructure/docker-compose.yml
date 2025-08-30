@@ -95,6 +95,8 @@ services:
       OTEL_LOGS_EXPORTER: none
       OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
     depends_on:
+      device-collector:
+        condition: service_healthy
       redis:
         condition: service_healthy
       postgres1r:

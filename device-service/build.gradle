@@ -41,9 +41,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
-	implementation "org.flywaydb:flyway-core:${flyWay}"
-	implementation "org.flywaydb:flyway-database-postgresql:${flyWay}"
-
     implementation "org.postgresql:postgresql"
     implementation "org.springframework.boot:spring-boot-starter-jdbc"
     implementation "org.apache.shardingsphere:shardingsphere-jdbc:${shardingsphere}"
@@ -75,6 +72,8 @@ dependencies {
 
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
+	testImplementation "org.flywaydb:flyway-core:${flyWay}"
+	testImplementation "org.flywaydb:flyway-database-postgresql:${flyWay}"
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation "org.testcontainers:junit-jupiter"
     testImplementation 'io.projectreactor:reactor-test'
