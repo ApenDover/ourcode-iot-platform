@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<DeviceError> handleException(DeviceServiceException ex, HttpServletRequest request) {
         log.error(ex.getMessage(), ex);
         return buildDeviceError(
-                HttpStatus.INTERNAL_SERVER_ERROR,
+                ex.getStatus(),
                 "Process exception",
                 ex.getMessage(),
                 request.getRequestURI()

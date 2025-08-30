@@ -1,6 +1,14 @@
 package ts.andrey.deviceservice.exception;
 
+import org.springframework.http.HttpStatus;
+
 public class DeviceServiceException extends RuntimeException {
+
+    private HttpStatus status;
+
+    public HttpStatus getStatus() {
+        return status;
+    }
 
     public DeviceServiceException() {
         super();
@@ -8,6 +16,7 @@ public class DeviceServiceException extends RuntimeException {
 
     public DeviceServiceException(TextException textException, Object... args) {
         super(textException.format(args));
+        status = textException.getHttpStatus();
     }
 
     public DeviceServiceException(String message) {
