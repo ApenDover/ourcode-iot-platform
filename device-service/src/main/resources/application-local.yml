@@ -101,6 +101,8 @@ spring:
           issuer-uri: http://localhost:7878/realms/iot-platform
 
 app:
+  redis:
+    enabled: true
   shardingSphere:
     logicTable: t_device
     shardingColumn: device_id

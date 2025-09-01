@@ -86,6 +86,7 @@ spring:
 
 app:
   redis:
+    enabled: ${DEVICE_SERVICE_REDIS_ENABLED:true}
     ttl-minutes: 5
   shardingSphere:
     logicTable: ${APP_SHARDINGSPHERE_LOGIC_TABLE:t_device}
