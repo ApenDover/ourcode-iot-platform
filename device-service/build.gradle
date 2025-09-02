@@ -1,0 +1,168 @@
+plugins {
+    id 'java'
+	id 'org.springframework.boot' version "${springBootVersion}"
+	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+	id 'com.github.spotbugs' version "${spotbugsVersion}"
+	id "org.openapi.generator" version "${openApiGenerator}"
+	id 'jacoco'
+	id 'checkstyle'
+}
+
+group = 'ts.andrey'
+version = "${appVersion}"
+description = 'device-service'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of("${javaVersion}")
+	}
+}
+
+repositories {
+    mavenCentral()
+	maven {
+		name = "nexus"
+		allowInsecureProtocol = true
+		url = uri("http://localhost:7777/repository/maven-releases/")
+		credentials {
+			username = project.findProperty("nexusUser") ?: "admin"
+			password = project.findProperty("nexusPassword") ?: "admin123"
+		}
+	}
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    implementation "org.postgresql:postgresql"
+    implementation "org.springframework.boot:spring-boot-starter-jdbc"
+    implementation "org.apache.shardingsphere:shardingsphere-jdbc:${shardingsphere}"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+
+	implementation "com.github.f4b6a3:ulid-creator:${ulidCreator}"
+
+	implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
+	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
+	implementation "com.fasterxml.jackson.core:jackson-annotations"
+
+	compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
+
+	implementation "org.apache.commons:commons-collections4:${commonsCollections}"
+	implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
+
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+
+	implementation "org.springframework.boot:spring-boot-starter-actuator"
+	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+	implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetrySpringBootVersion}"
+
+	runtimeOnly "io.micrometer:micrometer-registry-prometheus"
+	compileOnly "org.projectlombok:lombok"
+	annotationProcessor "org.projectlombok:lombok"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+	testImplementation "org.flywaydb:flyway-core:${flyWay}"
+	testImplementation "org.flywaydb:flyway-database-postgresql:${flyWay}"
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation "org.testcontainers:junit-jupiter"
+    testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'com.github.dasniko:testcontainers-keycloak:2.1.2'
+	testImplementation 'org.testcontainers:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testCompileOnly "org.projectlombok:lombok"
+	testAnnotationProcessor "org.projectlombok:lombok"
+	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+}
+
+openApiGenerate {
+	generatorName = "spring"
+	inputSpec = "$projectDir/src/main/resources/openapi/device-api.yml"
+	outputDir = "$buildDir/generated"
+	apiPackage = "ts.andrey.api"
+	modelPackage = "ts.andrey.dto"
+	invokerPackage = "ts.andrey.invoker"
+	library = "spring-boot"
+	generateApiTests = false
+	generateModelTests = false
+	additionalProperties = [
+			interfaceOnly: "true",
+			useTags: "true",
+			java8: "true",
+			useJakartaEe: "true"
+	]
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "$buildDir/generated/src/main/java"
+		}
+	}
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+
+checkstyle {
+	toolVersion = "${checkstyleToolVersion}"
+	configFile = file("$rootDir/config/checkstyle/checkstyle.xml")
+	configProperties = [
+			'checkstyle.suppressions.file': "$rootDir/config/checkstyle/exclude-filter.xml"
+	]
+	showViolations = true
+	ignoreFailures = false
+	maxWarnings = 0
+}
+
+spotbugs {
+	toolVersion = "${spotbugsToolVersion}"
+	ignoreFailures = true
+	showProgress = true
+	effort = 'max'
+	reportLevel = 'low'
+	excludeFilter = file("$rootDir/config/spotbugs/exclude-filter.xml")
+}
+
+
+jacoco {
+	toolVersion = "${jacocoToolVersion}"
+	reportsDirectory = layout.buildDirectory.dir('reports/jacoco')
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = false
+		html.required = true
+		csv.required = false
+	}
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'**/configuration/**',
+					'**/controller/**',
+					'**/exception/**',
+					'**/*DeviceServiceApplication*'
+			])
+		}))
+	}
+}
+
+bootJar {
+	archiveFileName = "app.jar"
+}

@@ -10,6 +10,7 @@ plugins {
 
 group = 'ts.andrey'
 version = "${appVersion}"
+description = 'event-collector'
 
 java {
     toolchain {
@@ -41,9 +42,6 @@ dependencies {
 
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
     implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
-    implementation 'org.springframework.boot:spring-boot-starter-aop'
-    implementation 'org.aspectj:aspectjrt:1.9.7'
-    implementation 'org.aspectj:aspectjweaver:1.9.7'
 
     implementation 'org.springframework.boot:spring-boot-starter-data-cassandra-reactive'
     implementation 'io.projectreactor:reactor-core'

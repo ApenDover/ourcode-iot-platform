@@ -1,0 +1,5 @@
+FROM eclipse-temurin:24-jre
+WORKDIR /opt/event-collector/
+ARG CACHEBUST=1
+COPY build/libs/app.jar app.jar
+ENTRYPOINT ["java","-jar","app.jar"]

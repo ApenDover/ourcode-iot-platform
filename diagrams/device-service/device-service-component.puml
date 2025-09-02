@@ -1,0 +1,39 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+AddElementTag("microservice", $bgColor="#E6F3F7", $fontColor="#333333", $borderColor="#3F668F")
+AddElementTag("storage", $bgColor="#F7E9E6", $fontColor="#333333", $borderColor="#8F3F3F")
+AddElementTag("queue", $bgColor="#E6F7E6", $fontColor="#333333", $borderColor="#3F8F5F")
+
+Container_Boundary(app, "device-service") {
+    Component(controller, "DeviceController", "REST контроллер", "class")
+    Component(spring_security, "SpringSecurity", "starter", "framework")
+    Component(device_cache_service, "DeviceCacheService", "Redis слой", "class")
+    Component(device_redis_service, "DeviceCacheService", "redis repository", "class")
+    Component(device_db_service, "DeviceDbService", "postgres repository", "class")
+    Component(shardingsphere, "ShardingSphere", "shardingsphere", "library")
+}
+
+System_Ext(unknown_system, "Внешняя система")
+System_Ext(keycloak, "Keycloak", "Keycloak", "security")
+System_Ext(redis, "Redis", "Cache", "storage")
+System_Ext(postgres_shard_2, "Postgres", "Постоянное хранилище", "storage")
+System_Ext(postgres_shard_1, "Postgres", "Постоянное хранилище", "storage")
+System_Ext(postgres_replica_1, "Postgres", "Постоянное хранилище", "storage")
+System_Ext(postgres_replica_2, "Postgres", "Постоянное хранилище", "storage")
+
+Rel(unknown_system, spring_security, "Запрос", "REST")
+Rel(spring_security, keycloak, "проверка JWT", "REST")
+Rel(spring_security, controller, "Java-вызов")
+Rel(controller, device_cache_service, "Java-вызов")
+Rel(device_cache_service, device_redis_service, "Java-вызов")
+Rel(device_cache_service, device_db_service, "Java-вызов")
+Rel(device_db_service, shardingsphere, "Java-вызов")
+Rel(shardingsphere, postgres_shard_1, "write sql")
+Rel(shardingsphere, postgres_shard_2, "write sql")
+Rel(shardingsphere, postgres_replica_1, "read sql")
+Rel(shardingsphere, postgres_replica_2, "read sql")
+Rel(postgres_shard_1, postgres_replica_1, "репликация", "sql")
+Rel(postgres_shard_2, postgres_replica_2, "репликация", "sql")
+Rel(device_redis_service, redis, "redis")
+@enduml

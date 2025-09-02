@@ -1,0 +1,33 @@
+spring:
+  flyway:
+    enabled: false
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: device-service
+            client-secret: secret
+            authorization-grant-type: authorization_code
+            scope: openid,profile,email
+
+otel:
+  traces:
+    exporter: none
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+
+app:
+  shardingSphere:
+    logicTable: t_device
+    shardingColumn: device_id
+    shardCount: 2
+    algorithmExpression: shard$->{Math.abs(device_id.hashCode()) %% %s}
+  postgres:
+    retry:
+      max-attempts: 2
+      initial-delay: 1000
+      multiplier: 5
+    batch-size: 300

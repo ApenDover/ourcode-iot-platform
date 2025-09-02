@@ -10,6 +10,7 @@ plugins {
 
 group = 'ts.andrey'
 version = "${appVersion}"
+description = 'kafka-producer'
 
 java {
     toolchain {
@@ -47,7 +48,7 @@ dependencies {
     implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
     implementation "org.apache.avro:avro:${avroVersion}"
     implementation "io.confluent:kafka-schema-registry-client:${confluentVersion}"
-    implementation 'com.github.f4b6a3:ulid-creator:5.2.0'
+    implementation "com.github.f4b6a3:ulid-creator:${ulidCreator}"
 
     compileOnly "org.projectlombok:lombok"
     annotationProcessor "org.projectlombok:lombok"

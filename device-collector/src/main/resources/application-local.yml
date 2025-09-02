@@ -65,7 +65,6 @@ spring:
     locations: classpath:db/migration
   datasource:
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
-#    url: jdbc:shardingsphere:classpath:sharding-config-local.yml
   jpa:
     properties:
       generate_statistics: true

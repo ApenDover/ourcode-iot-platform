@@ -1,0 +1,130 @@
+server:
+  port: 8886
+
+logging:
+  level:
+    org.apache.kafka: OFF
+    springframework.kafka: OFF
+    org.springframework.jdbc.core.JdbcTemplate: DEBUG
+    org.springframework.jdbc.core.StatementCreatorUtils: TRACE
+    org.postgresql: DEBUG
+    org.hibernate.stat: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"        # все endpoints доступны по HTTP
+  endpoint:
+    health:
+      probes:
+        enabled: true       # включаем liveness/readiness
+  metrics:
+    tags:
+      application: device-service
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    otlp:
+      endpoint: http://localhost:4318
+      protocol: http/protobuf
+
+opentelemetry:
+  instrumentation:
+    logback-mdc:
+      enabled: true
+  service:
+    name: ${spring.application.name}
+  exporter:
+    otlp:
+      endpoint: http://localhost:4318
+      protocol: http/protobuf
+      timeout: 10000
+      compression: gzip
+  traces:
+    exporter: otlp
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+  resource-attributes:
+    service.version: 1.0.0
+    deployment.environment: docker
+    service.name: ${spring.application.name}
+
+spring:
+  application:
+    name: device-service
+  flyway:
+    enabled: false
+    locations: classpath:db/migration
+  datasource:
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+  jpa:
+    properties:
+      generate_statistics: true
+    hibernate:
+      query:
+        in_clause_parameter_padding: true
+      session:
+        events:
+          LOG_QUERIES_SLOWER_THAN_MS: 10
+      ddl-auto: none
+  sql:
+    init:
+      mode: always
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: redis_pass
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: device-service
+            client-secret: EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU
+            authorization-grant-type: authorization_code
+            scope: openid,profile,email
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:7878/realms/iot-platform
+            token-uri: http://localhost:7878/realms/iot-platform/protocol/openid-connect/token
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:7878/realms/iot-platform
+
+app:
+  redis:
+    enabled: true
+  shardingSphere:
+    logicTable: t_device
+    shardingColumn: device_id
+    shardCount: 2
+    algorithmExpression: shard$->{Math.abs(device_id.hashCode()) %% %s}
+  postgres:
+    retry:
+      max-attempts: 3
+      initial-delay: 1000
+      multiplier: 5
+    batch-size: 300
+  dataSources:
+    - url: jdbc:postgresql://localhost:5431/iot_platform
+      username: myuser
+      password: strongpassword
+    - url: jdbc:postgresql://localhost:5432/iot_platform
+      username: myuser
+      password: strongpassword
+  replicaDataSources:
+    - url: jdbc:postgresql://localhost:5433/iot_platform
+      username: myuser
+      password: strongpassword
+    - url: jdbc:postgresql://localhost:5434/iot_platform
+      username: myuser
+      password: strongpassword

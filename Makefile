@@ -24,9 +24,11 @@ help: ## Показать список доступных команд
 
 up: ## Запустить контейнеры в фоне
 	$(DC) up -d
+	@make deploy
 
 up-local: ## Запустить все контейнеры в фоне
 	$(DCL) up -d
+	@make deploy
 
 up-rebuild-local: boot ## Пересобрать и запустить все модули
 	$(DCL) build event-collector device-collector kafka-producer
@@ -73,13 +75,51 @@ exec-%: ## Зайти в контейнер по имени
 
 boot:  ## локально пересобрать образы
 	docker image rm infrastructure-device-collector -f
+	docker image rm infrastructure-device-service -f
 	docker image rm infrastructure-event-collector -f
 	docker image rm infrastructure-kafka-producer -f
 	cd event-collector && ./gradlew bootJar
 	cd device-collector && ./gradlew bootJar
+	cd device-service && ./gradlew bootJar
 	cd kafka-producer && ./gradlew bootJar
 
 rebuild:  ## локально пересобрать образы
 	cd event-collector && ./gradlew clean build
 	cd device-collector && ./gradlew clean build
+	cd device-service && ./gradlew clean build
 	cd kafka-producer && ./gradlew clean build
+
+
+wait-for-keycloak:
+	@echo "⏳ Жду пока keycloak запустится..."
+	@until docker logs keycloak 2>&1 | grep -q "started in"; do \
+		sleep 5; \
+	done
+	@sleep 2
+	@echo "Keycloak запущен"
+
+publish-nexus:
+	@echo "⏳ Жду пока контейнер nexus станет healthy..."
+	@until [ $$(docker inspect --format='{{.State.Health.Status}}' nexus) = "healthy" ]; do \
+		sleep 2; \
+	done
+	@sleep 5;
+	@echo "Выгружаю api"
+	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/device-api/1.0.0/device-api-1.0.0.pom >/dev/null 2>&1; then \
+		echo "Артефакт уже опубликован, пропускаем публикацию"; \
+	else \
+		echo "Артефакт не найден, выполняем публикацию Gradle..."; \
+		cd device-api && ./gradlew publish; \
+	fi
+
+keycloak-setup-users: wait-for-keycloak
+	@chmod +x ./infrastructure/keycloak/create-admin.sh
+	@chmod +x ./infrastructure/keycloak/create-user.sh
+	@chmod +x ./infrastructure/keycloak/create-secret.sh
+	@cd ./infrastructure/keycloak && ./create-admin.sh
+	@cd ./infrastructure/keycloak && ./create-user.sh
+	@cd ./infrastructure/keycloak && ./create-secret.sh
+
+deploy:
+	@make keycloak-setup-users
+	@make publish-nexus

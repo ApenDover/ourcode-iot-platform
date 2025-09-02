@@ -1,9 +1,31 @@
 services:
+  nexus:
+    image: sonatype/nexus3:3.70.1
+    container_name: nexus
+    ports:
+      - "7777:8081"
+    env_file:
+      - .env
+    volumes:
+      - ${NEXUS_DATA_DIR:-nexus-data}:/nexus-data
+      - ./nexus-provisioning/create-user.sh:/opt/nexus-provisioning/create-user.sh
+    restart: unless-stopped
+    environment:
+      INSTALL4J_ADD_VM_PARAMS: "-Dnexus.scripts.allowCreation=true"
+      NEXUS_SECURITY_RANDOMPASSWORD: "false"
+    entrypoint: [ "/bin/bash", "/opt/nexus-provisioning/create-user.sh" ]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "-u", "admin:admin123", "http://localhost:8081/service/rest/v1/status/check" ]
+      interval: 10s
+      retries: 12
+      timeout: 5s
+      start_period: 30s
   kafka-producer:
     build: ../kafka-producer
     container_name: kafka-producer
     env_file:
       - .env
+    restart: unless-stopped
     ports:
       - 8887:8887
     environment:
@@ -32,6 +54,7 @@ services:
       - .env
     ports:
       - 8889:8889
+    restart: unless-stopped
     environment:
       OTEL_SERVICE_NAME: device-collector
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
@@ -55,9 +78,45 @@ services:
       start_period: 6s
     networks:
       - iot_network
+  device-service:
+    build: ../device-service
+    container_name: device-service
+    env_file:
+      - .env
+    ports:
+      - 8886:8886
+    restart: unless-stopped
+    environment:
+      OTEL_SERVICE_NAME: device-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: none
+      OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
+    depends_on:
+      device-collector:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres1r:
+        condition: service_healthy
+      postgres2r:
+        condition: service_healthy
+      event-collector:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q -O - http://localhost:8886/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
+      interval: 3s
+      timeout: 2s
+      retries: 2
+      start_period: 6s
+    networks:
+      - iot_network
   event-collector:
     build: ../event-collector
     container_name: event-collector
+    restart: unless-stopped
     ports:
       - 8888:8888
     env_file:
@@ -83,10 +142,10 @@ services:
         condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8888/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
-      interval: 3s
-      timeout: 2s
-      retries: 2
-      start_period: 6s
+      interval: 6s
+      timeout: 4s
+      retries: 6
+      start_period: 10s
     networks:
       - iot_network
   zookeeper:
@@ -292,43 +351,81 @@ services:
       retries: 5
     networks:
       - iot_network
-#  keycloak:
-#    image: quay.io/keycloak/keycloak:21.0.1
-#    container_name: keycloak
-#    restart: unless-stopped
-#    depends_on:
-#      postgres1:
-#        condition: service_healthy
-#    ports:
-#      - "8080:8080"
-#    environment:
-#      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-#      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-#      KC_DB: postgres
-#      KC_DB_URL_HOST: postgres
-#      KC_DB_USERNAME: ${POSTGRES_USER}
-#      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
-#      KC_DB_URL_DATABASE: ${POSTGRES_DB}
-#      KC_HOSTNAME: "localhost"
-#    command:
-#      - start-dev
-#    networks:
-#      - iot_network
-#  redis:
-#    image: redis:7-alpine
-#    container_name: redis
-#    ports:
-#      - "6379:6379"
-#    command: redis-server --requirepass ${REDIS_PASSWORD}
-#    restart: unless-stopped
-#    environment:
-#      REDIS_PASSWORD: ${REDIS_PASSWORD}
-#    healthcheck:
-#      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
-#      interval: 5s
-#      retries: 5
-#    volumes:
-#      - redis_data:/data
+  postgres_keycloak:
+    container_name: postgres_keycloak
+    image: postgres:15
+    restart: unless-stopped
+    ports:
+      - "5430:5432"
+    volumes:
+      - postgres_keycloak_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
+      POSTGRES_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_KEYCLOAK_DB}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${APP_DATASOURCE_KEYCLOAK_USERNAME}", "-d", "${POSTGRES_KEYCLOAK_DB}" ]
+      interval: 10s
+      retries: 5
+    networks:
+      - iot_network
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    container_name: keycloak
+    env_file:
+      - .env
+    restart: unless-stopped
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+#      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
+#      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres_keycloak
+      KC_DB_URL_DATABASE: ${POSTGRES_KEYCLOAK_DB}
+      KC_DB_USERNAME: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
+      KC_DB_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    ports:
+      - "7878:8080"
+    depends_on:
+      postgres_keycloak:
+        condition: service_healthy
+    networks:
+      - iot_network
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
+      interval: 5s
+      retries: 5
+    volumes:
+      - redis_data:/data
+    networks:
+      - iot_network
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: proselyte-redisinsight
+    restart: always
+    depends_on:
+      - redis
+    ports:
+      - "5540:5540"
+    volumes:
+      - redis-insight:/data
+    networks:
+      - iot_network
   cassandra:
     image: cassandra:4.1
     ports:
@@ -480,13 +577,16 @@ services:
     networks:
       - iot_network
 volumes:
+  nexus-data:
   schema-registry-data:
   zookeeper_data:
+  postgres_keycloak_data:
   postgres_data1:
   postgres_data2:
   postgres_data1r:
   postgres_data2r:
   redis_data:
+  redis-insight:
   cassandra_data:
   grafana_data:
   prometheus_data:

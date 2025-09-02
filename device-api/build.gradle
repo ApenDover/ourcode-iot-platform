@@ -1,0 +1,69 @@
+plugins {
+    id "java-library"
+    id "org.openapi.generator" version "${openapiGenerator}"
+    id "maven-publish"
+}
+
+group = "ts.andrey"
+version = "${appVersion}"
+description = 'device-api'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api "org.springframework.cloud:spring-cloud-starter-openfeign:${openfeign}"
+    api "org.springframework.boot:spring-boot-starter-validation:${springValidation}"
+    api "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
+    api "org.openapitools:jackson-databind-nullable:${jacksonNullable}"
+    api "com.fasterxml.jackson.core:jackson-annotations:${jacksonAnnotation}"
+
+    compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
+}
+
+openApiGenerate {
+    generatorName = "spring"
+    inputSpec = "$projectDir/src/main/resources/openapi/device-api.yml".toString()
+    outputDir = "$buildDir/generated".toString()
+    apiPackage = "ts.andrey.device.api"
+    modelPackage = "ts.andrey.device.model"
+    invokerPackage = "ts.andrey.device.client"
+    library = "spring-cloud"
+    configOptions = [
+            dateLibrary   : "java8",
+            interfaceOnly : "true",
+            useSpringBoot3: "true",
+            useJakartaEe  : "true",
+            useTags       : "true"
+    ]
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "$buildDir/generated/src/main/java"
+        }
+    }
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = "nexus"
+            url = uri("http://localhost:7777/repository/maven-releases/")
+            allowInsecureProtocol = true
+            credentials {
+                username = project.findProperty("nexusUser") ?: "admin"
+                password = project.findProperty("nexusPassword") ?: "admin123"
+            }
+        }
+    }
+}
