@@ -1,0 +1,27 @@
+{
+  "type": "record",
+  "name": "DeviceEventError",
+  "namespace": "com.nashkod.avro",
+  "fields": [
+    {
+      "name": "failedEvent",
+      "type": "com.nashkod.avro.DeviceEvent"
+    },
+    {
+      "name": "errorMeta",
+      "type": {
+        "type": "record",
+        "name": "ErrorMeta",
+        "fields": [
+          { "name": "errorSource", "type": "string" },
+          { "name": "reason", "type": "string" },
+          { "name": "stackTrace", "type": "string" }
+        ]
+      }
+    },
+    {
+      "name": "receivedAt",
+      "type": "long"
+    }
+  ]
+}
