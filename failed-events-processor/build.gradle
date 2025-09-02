@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version "${springBootVersion}"
 	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+	id "com.github.davidmc24.gradle.plugin.avro" version "${gradlePluginAvro}"
 	id 'com.github.spotbugs' version "${spotbugsVersion}"
 	id 'jacoco'
 	id 'checkstyle'
@@ -23,8 +24,14 @@ configurations {
 	}
 }
 
+avro {
+	fieldVisibility = "PRIVATE"
+	createSetters = false
+}
+
 repositories {
 	mavenCentral()
+	maven { url "https://packages.confluent.io/maven/" }
 }
 
 dependencies {
@@ -41,14 +48,20 @@ dependencies {
 
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 	testImplementation 'org.testcontainers:junit-jupiter'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	testCompileOnly "org.projectlombok:lombok"
+	testAnnotationProcessor "org.projectlombok:lombok"
+	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 }
 
 checkstyle {
