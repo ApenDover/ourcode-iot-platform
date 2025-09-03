@@ -52,8 +52,8 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, DeviceEventError> kafkaBatchEventsErrorListenerContainerFactory(
-            ConsumerFactory<String, DeviceEventError> consumerFactory) {
+    public ConcurrentKafkaListenerContainerFactory<String, DeviceEventError>
+    kafkaBatchEventsErrorListenerContainerFactory(ConsumerFactory<String, DeviceEventError> consumerFactory) {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, DeviceEventError>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);

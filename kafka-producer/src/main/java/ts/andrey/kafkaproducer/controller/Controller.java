@@ -1,6 +1,8 @@
 package ts.andrey.kafkaproducer.controller;
 
+import com.nashkod.avro.DeviceError;
 import com.nashkod.avro.DeviceEvent;
+import com.nashkod.avro.DeviceEventError;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +24,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Controller {
 
-    private final KafkaProducer kafkaProducer;
+    private final KafkaProducer kafkaEventProducerImpl;
+    private final KafkaProducer kafkaDeviceErrorProducerImpl;
+    private final KafkaProducer kafkaEventsErrorProducerImpl;
 
     @PostMapping("/send")
     public ResponseEntity<String> sendKafkaMessage(
             @RequestBody List<DeviceEvent> request) {
-        kafkaProducer.send(request);
+        kafkaEventProducerImpl.send(request);
         return ResponseEntity.ok("Ok");
     }
 
@@ -38,12 +42,26 @@ public class Controller {
             @RequestParam(name = "saveDevice", required = false, defaultValue = "false") Boolean saveDevice
     ) {
         final var messages = MessageGenerator.generate(messageCount, deviceCount, saveDevice);
-        kafkaProducer.send(messages);
+        kafkaEventProducerImpl.send(messages);
         final var deviceIdsCount = messages.stream()
                 .map(it -> it.getDevice().getDeviceId())
                 .distinct()
                 .count();
         return ResponseEntity.ok(new GenerateResponse(deviceIdsCount, messageCount));
+    }
+
+    @PostMapping("/dlt/events/send")
+    public ResponseEntity<String> sendKafkaDltEventsMessage(
+            @RequestBody List<DeviceEventError> request) {
+        kafkaEventsErrorProducerImpl.send(request);
+        return ResponseEntity.ok("Ok");
+    }
+
+    @PostMapping("/dlt/device/send")
+    public ResponseEntity<String> sendKafkaDltDeviceMessage(
+            @RequestBody List<DeviceError> request) {
+        kafkaDeviceErrorProducerImpl.send(request);
+        return ResponseEntity.ok("Ok");
     }
 
 }

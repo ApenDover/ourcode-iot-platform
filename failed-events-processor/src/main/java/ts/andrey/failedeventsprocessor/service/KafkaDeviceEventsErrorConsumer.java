@@ -20,16 +20,16 @@ public class KafkaDeviceEventsErrorConsumer {
             containerFactory = "kafkaBatchEventsErrorListenerContainerFactory"
     )
     public void handleEvents(ConsumerRecords<String, DeviceEventError> records) {
-        final var deviceErrors = new ArrayList<DeviceEventError>();
-        records.forEach(message -> deviceErrors.add(message.value()));
-        log.info("Получена пачка из [{}] ошибок по Events", deviceErrors.size());
-        log.debug("Получены ошибки по Events: [{}]", deviceErrors);
-        try {
-
-        } catch (Exception e) {
-            log.error("Ошибка обработки пачки ошибок Events", e);
-            throw e;
-        }
+        final var eventsErrors = new ArrayList<DeviceEventError>();
+        records.forEach(message -> eventsErrors.add(message.value()));
+        log.info("Получена пачка из [{}] ошибок по Events", eventsErrors.size());
+        log.debug("Получены ошибки по Events: [{}]", eventsErrors);
+//        try {
+//
+//        } catch (Exception e) {
+//            log.error("Ошибка обработки пачки ошибок Events", e);
+//            throw e;
+//        }
     }
 
 }

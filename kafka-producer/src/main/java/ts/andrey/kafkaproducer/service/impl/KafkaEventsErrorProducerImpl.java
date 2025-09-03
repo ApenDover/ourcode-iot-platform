@@ -1,6 +1,6 @@
 package ts.andrey.kafkaproducer.service.impl;
 
-import com.nashkod.avro.DeviceEvent;
+import com.nashkod.avro.DeviceEventError;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,26 +21,26 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class KafkaEventProducerImpl implements KafkaProducer {
+public class KafkaEventsErrorProducerImpl implements KafkaProducer {
 
-    private final KafkaTemplate<String, DeviceEvent> kafkaTemplate;
+    private final KafkaTemplate<String, DeviceEventError> kafkaTemplate;
 
-    @Value("${spring.kafka.template.events-topic}")
-    private String eventsTopic;
+    @Value("${spring.kafka.template.dlt-events-topic}")
+    private String eventsDltTopic;
 
     @Override
     @WithSpan("publish-batch-event")
     public CompletableFuture<List<RecordMetadata>> send(List<? extends SpecificRecordBase> records) {
-        log.info("Отправка в топик [{}] новых device events: [{}]", eventsTopic, records.size());
+        log.info("Отправка в топик [{}] новых events errors: [{}]", eventsDltTopic, records.size());
         try {
             if (CollectionUtils.isEmpty(records)) {
                 return CompletableFuture.completedFuture(Collections.emptyList());
             }
 
             final var futures = records.stream()
-                    .filter(DeviceEvent.class::isInstance)
+                    .filter(DeviceEventError.class::isInstance)
                     .map(it -> {
-                        final var event = (DeviceEvent) it;
+                        final var event = (DeviceEventError) it;
                         return sendMessage(event);
                     }).toList();
 
@@ -51,18 +51,14 @@ public class KafkaEventProducerImpl implements KafkaProducer {
                             .toList()
                     );
         } catch (Exception e) {
-            log.error("Ошибка при публикации eventIds в топик [{}]", eventsTopic, e);
+            log.error("Ошибка при публикации eventIds в топик [{}]", eventsDltTopic, e);
         }
         return CompletableFuture.completedFuture(Collections.emptyList());
     }
 
-    public CompletableFuture<RecordMetadata> sendMessage(DeviceEvent event) {
-        return kafkaTemplate.send(eventsTopic, event.getDevice().getDeviceId(), event)
-                .thenApply(SendResult::getRecordMetadata)
-                .exceptionally(ex -> {
-                    log.error("Ошибка отправки eventId=[{}]", event.getEventId(), ex);
-                    return null;
-                });
+    public CompletableFuture<RecordMetadata> sendMessage(DeviceEventError event) {
+        return kafkaTemplate.send(eventsDltTopic, event.getErrorMeta().getErrorSource(), event)
+                .thenApply(SendResult::getRecordMetadata);
     }
 
 }

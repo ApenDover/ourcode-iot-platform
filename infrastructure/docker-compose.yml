@@ -1,25 +1,4 @@
 services:
-  nexus:
-    image: sonatype/nexus3:3.70.1
-    container_name: nexus
-    ports:
-      - "7777:8081"
-    env_file:
-      - .env
-    volumes:
-      - ${NEXUS_DATA_DIR:-nexus-data}:/nexus-data
-      - ./nexus-provisioning/create-user.sh:/opt/nexus-provisioning/create-user.sh
-    restart: unless-stopped
-    environment:
-      INSTALL4J_ADD_VM_PARAMS: "-Dnexus.scripts.allowCreation=true"
-      NEXUS_SECURITY_RANDOMPASSWORD: "false"
-    entrypoint: [ "/bin/bash", "/opt/nexus-provisioning/create-user.sh" ]
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "-u", "admin:admin123", "http://localhost:8081/service/rest/v1/status/check" ]
-      interval: 10s
-      retries: 12
-      timeout: 5s
-      start_period: 30s
   kafka-producer:
     build: ../kafka-producer
     container_name: kafka-producer
@@ -148,6 +127,54 @@ services:
       start_period: 10s
     networks:
       - iot_network
+  failed-events-processor:
+    build: ../failed-events-processor
+    container_name: failed-events-processor
+    env_file:
+      - .env
+    restart: unless-stopped
+    ports:
+      - 8880:8880
+    environment:
+      OTEL_SERVICE_NAME: failed-events-processor
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: none
+      OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
+    depends_on:
+      event-collector:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q -O - http://localhost:8880/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
+      interval: 3s
+      timeout: 2s
+      retries: 2
+      start_period: 6s
+    networks:
+      - iot_network
+  nexus:
+    image: sonatype/nexus3:3.70.1
+    container_name: nexus
+    ports:
+      - "7777:8081"
+    env_file:
+      - .env
+    volumes:
+      - ${NEXUS_DATA_DIR:-nexus-data}:/nexus-data
+      - ./nexus-provisioning/create-user.sh:/opt/nexus-provisioning/create-user.sh
+    restart: unless-stopped
+    environment:
+      INSTALL4J_ADD_VM_PARAMS: "-Dnexus.scripts.allowCreation=true"
+      NEXUS_SECURITY_RANDOMPASSWORD: "false"
+    entrypoint: [ "/bin/bash", "/opt/nexus-provisioning/create-user.sh" ]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "-u", "admin:admin123", "http://localhost:8081/service/rest/v1/status/check" ]
+      interval: 10s
+      retries: 12
+      timeout: 5s
+      start_period: 30s
   zookeeper:
     image: bitnami/zookeeper:latest
     container_name: zookeeper
@@ -217,21 +244,21 @@ services:
       - schema-registry-data:/var/lib/schema-registry
     networks:
       - iot_network
-#  minio:
-#    image: minio/minio:latest
-#    container_name: minio
-#    ports:
-#      - "9000:9000"
-#      - "9001:9001"
-#    restart: unless-stopped
-#    environment:
-#      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-#      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-#    command: server /data --console-address ":9001"
-#    healthcheck:
-#      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
-#      interval: 30s
-#      retries: 3
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      retries: 3
 #  camunda:
 #    image: camunda/camunda-bpm-platform:latest
 #    container_name: camunda

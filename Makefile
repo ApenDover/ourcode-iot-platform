@@ -31,18 +31,18 @@ up-local: ## Запустить все контейнеры в фоне
 	@make deploy
 
 up-rebuild-local: boot ## Пересобрать и запустить все модули
-	$(DCL) build event-collector device-collector kafka-producer
+	$(DCL) build event-collector device-collector kafka-producer failed-events-processor
 	$(DCL) up -d
 
 up-rebuild: ## Пересобрать и запустить все модули
-	$(DC) build event-collector device-collector kafka-producer
+	$(DC) build event-collector device-collector kafka-producer failed-events-processor
 	$(DC) up -d
 
 recreate-local: boot ## Пересобрать и перезагрузить все модули
-	$(DCL) up -d --build --force-recreate event-collector device-collector kafka-producer
+	$(DCL) up -d --build --force-recreate event-collector device-collector kafka-producer failed-events-processor
 
 recreate: ## Пересобрать и перезагрузить все модули
-	$(DC) up -d --build --force-recreate event-collector device-collector kafka-producer
+	$(DC) up -d --build --force-recreate event-collector device-collector kafka-producer failed-events-processor
 
 update-%: ## Пересобрать и перезагрузить указанный модуль
 	$(DCL) up -d --build --force-recreate --no-deps $*
@@ -78,16 +78,19 @@ boot:  ## локально пересобрать образы
 	docker image rm infrastructure-device-service -f
 	docker image rm infrastructure-event-collector -f
 	docker image rm infrastructure-kafka-producer -f
+	docker image rm infrastructure-failed-events-processor -f
 	cd event-collector && ./gradlew bootJar
 	cd device-collector && ./gradlew bootJar
 	cd device-service && ./gradlew bootJar
 	cd kafka-producer && ./gradlew bootJar
+	cd failed-events-processor && ./gradlew bootJar
 
 rebuild:  ## локально пересобрать образы
 	cd event-collector && ./gradlew clean build
 	cd device-collector && ./gradlew clean build
 	cd device-service && ./gradlew clean build
 	cd kafka-producer && ./gradlew clean build
+	cd failed-events-processor && ./gradlew clean build
 
 
 wait-for-keycloak:

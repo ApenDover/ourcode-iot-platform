@@ -24,12 +24,12 @@ public class KafkaDeviceErrorConsumer {
         records.forEach(message -> deviceErrors.add(message.value()));
         log.info("Получена пачка из [{}] ошибок по Device", deviceErrors.size());
         log.debug("Получены ошибки по Device: [{}]", deviceErrors);
-        try {
-
-        } catch (Exception e) {
-            log.error("Ошибка обработки пачки ошибок Device", e);
-            throw e;
-        }
+//        try {
+//
+//        } catch (Exception e) {
+//            log.error("Ошибка обработки пачки ошибок Device", e);
+//            throw e;
+//        }
     }
 
 }

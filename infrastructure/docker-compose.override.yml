@@ -11,3 +11,6 @@ services:
   event-collector:
     build:
       dockerfile: ../event-collector/Dockerfile.local
+  failed-events-processor:
+    build:
+      dockerfile: ../failed-events-processor/Dockerfile.local

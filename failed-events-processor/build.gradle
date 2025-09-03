@@ -3,7 +3,6 @@ plugins {
 	id 'org.springframework.boot' version "${springBootVersion}"
 	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
 	id "com.github.davidmc24.gradle.plugin.avro" version "${gradlePluginAvro}"
-	id 'com.github.spotbugs' version "${spotbugsVersion}"
 	id 'jacoco'
 	id 'checkstyle'
 }
@@ -46,11 +45,20 @@ dependencies {
 	implementation "org.apache.avro:avro:${avroVersion}"
 	implementation "io.confluent:kafka-schema-registry-client:${confluentVersion}"
 
+	implementation "io.minio:minio:${minio}"
+
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
+
 	compileOnly 'org.projectlombok:lombok'
+
+	compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugsToolVersion}"
+	testCompileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugsToolVersion}"
+	annotationProcessor "com.github.spotbugs:spotbugs-annotations:${spotbugsToolVersion}"
+	testAnnotationProcessor "com.github.spotbugs:spotbugs-annotations:${spotbugsToolVersion}"
+
 	annotationProcessor 'org.projectlombok:lombok'
 	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
@@ -74,16 +82,6 @@ checkstyle {
 	ignoreFailures = false
 	maxWarnings = 0
 }
-
-spotbugs {
-	toolVersion = "${spotbugsToolVersion}"
-	ignoreFailures = true
-	showProgress = true
-	effort = 'max'
-	reportLevel = 'low'
-	excludeFilter = file("$rootDir/config/spotbugs/exclude-filter.xml")
-}
-
 
 jacoco {
 	toolVersion = "${jacocoToolVersion}"
