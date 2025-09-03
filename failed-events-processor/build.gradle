@@ -44,6 +44,8 @@ dependencies {
 	implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
 	implementation "org.apache.avro:avro:${avroVersion}"
 	implementation "io.confluent:kafka-schema-registry-client:${confluentVersion}"
+	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-avro:${jackson}"
+	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson}"
 
 	implementation "io.minio:minio:${minio}"
 

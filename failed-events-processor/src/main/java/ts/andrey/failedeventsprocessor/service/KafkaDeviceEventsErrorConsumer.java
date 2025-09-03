@@ -14,6 +14,8 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 public class KafkaDeviceEventsErrorConsumer {
 
+    private final ErrorHandlerService errorHandlerService;
+
     @KafkaListener(
             topics = "${spring.kafka.template.dlt-events-topic}",
             groupId = "${spring.kafka.consumer.group-id}",
@@ -24,12 +26,7 @@ public class KafkaDeviceEventsErrorConsumer {
         records.forEach(message -> eventsErrors.add(message.value()));
         log.info("Получена пачка из [{}] ошибок по Events", eventsErrors.size());
         log.debug("Получены ошибки по Events: [{}]", eventsErrors);
-//        try {
-//
-//        } catch (Exception e) {
-//            log.error("Ошибка обработки пачки ошибок Events", e);
-//            throw e;
-//        }
+        eventsErrors.forEach(errorHandlerService::start);
     }
 
 }

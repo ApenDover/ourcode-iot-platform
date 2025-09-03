@@ -14,6 +14,8 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 public class KafkaDeviceErrorConsumer {
 
+    private final ErrorHandlerService errorHandlerService;
+
     @KafkaListener(
             topics = "${spring.kafka.template.dlt-device-topic}",
             groupId = "${spring.kafka.consumer.group-id}",
@@ -24,12 +26,7 @@ public class KafkaDeviceErrorConsumer {
         records.forEach(message -> deviceErrors.add(message.value()));
         log.info("Получена пачка из [{}] ошибок по Device", deviceErrors.size());
         log.debug("Получены ошибки по Device: [{}]", deviceErrors);
-//        try {
-//
-//        } catch (Exception e) {
-//            log.error("Ошибка обработки пачки ошибок Device", e);
-//            throw e;
-//        }
+        deviceErrors.forEach(errorHandlerService::start);
     }
 
 }

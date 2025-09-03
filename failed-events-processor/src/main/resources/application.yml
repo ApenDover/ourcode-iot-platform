@@ -50,8 +50,9 @@ opentelemetry:
 
 minio:
   url: ${MINIO_URL:http://minio:9000}
-  access-key: ${MINIO_ROOT_USER}
-  secret-key: ${MINIO_ROOT_PASSWORD}
+  access-key: ${MINIO_ROOT_USER:minio_admin}
+  secret-key: ${MINIO_ROOT_PASSWORD:minio_password}
+  bucket-name: ${MINIO_BUCKET_NAME:bucket}
 
 spring:
   application:
