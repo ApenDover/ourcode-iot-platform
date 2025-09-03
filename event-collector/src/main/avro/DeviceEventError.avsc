@@ -9,15 +9,7 @@
     },
     {
       "name": "errorMeta",
-      "type": {
-        "type": "record",
-        "name": "ErrorMeta",
-        "fields": [
-          { "name": "errorSource", "type": "string" },
-          { "name": "reason", "type": "string" },
-          { "name": "stackTrace", "type": "string" }
-        ]
-      }
+      "type": "com.nashkod.avro.ErrorMeta"
     },
     {
       "name": "receivedAt",

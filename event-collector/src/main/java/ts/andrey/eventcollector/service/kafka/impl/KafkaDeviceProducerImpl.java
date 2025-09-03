@@ -50,7 +50,7 @@ public class KafkaDeviceProducerImpl extends AbstractKafkaProducer implements Ka
         final var recordsToSend = records.stream()
                 .filter(Device.class::isInstance)
                 .map(recordBase -> {
-                    globalMetrics.incrementDltError();
+                    globalMetrics.incrementDltMessage();
                     final var device = (Device) recordBase;
                     return new ProducerRecord<>(dltDeviceTopic, device.getDeviceId(), device);
                 })

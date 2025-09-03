@@ -8,6 +8,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import ts.andrey.devicecollector.utils.MessageDltBuilder;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -28,15 +29,16 @@ public abstract class AbstractKafkaProducer {
         if (CollectionUtils.isEmpty(records)) {
             return CompletableFuture.completedFuture(List.of());
         }
-        log.error("Отправка в kafka[{}] записей [{}]", records.getFirst().topic(), records.size());
+        log.info("Отправка в kafka[{}] записей [{}]", records.getFirst().topic(), records.size());
         List<CompletableFuture<RecordMetadata>> futures = records.stream()
                 .map(message -> kafkaTemplate.send(
                                 new ProducerRecord<>(message.topic(), message.key(), message.value())
                         ).thenApply(SendResult::getRecordMetadata)
                         .exceptionallyCompose(ex -> {
-                            log.error("Ошибка отправки записи=[{}]", message.value(), ex);
+                            log.warn("Ошибка отправки записи=[{}]", message.value(), ex);
+                            final var errorMessage = MessageDltBuilder.getMessage(message.value(), ex);
                             return kafkaTemplate.send(
-                                    new ProducerRecord<>(dltTopic, message.key(), message.value())
+                                    new ProducerRecord<>(dltTopic, message.key(), errorMessage)
                             ).thenApply(SendResult::getRecordMetadata);
                         }))
                 .toList();

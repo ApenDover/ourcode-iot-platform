@@ -26,7 +26,7 @@ public class ErrorHandlerService {
     public void start(DeviceError deviceError) {
         log.debug("Starting error handler service for {}", deviceError);
         final var name = MinioNameGenerator.generateName(deviceError.getReceivedAt(),
-                deviceError.getErrorMeta().getErrorSource());
+                deviceError.getErrorMeta().getErrorSource().name());
         final var bytes = JsonAvroConverter.toJsonAvro(deviceError);
         minioUploader.uploadToMinio(name, bytes, bucketName);
         metrics.recordProcessed(ErrorType.DEVICE_ERROR);
@@ -35,7 +35,7 @@ public class ErrorHandlerService {
     public void start(DeviceEventError deviceEventError) {
         log.debug("Starting error handler service for {}", deviceEventError);
         final var name = MinioNameGenerator.generateName(deviceEventError.getReceivedAt(),
-                deviceEventError.getErrorMeta().getErrorSource());
+                deviceEventError.getErrorMeta().getErrorSource().name());
         final var bytes = JsonAvroConverter.toJsonAvro(deviceEventError);
         minioUploader.uploadToMinio(name, bytes, bucketName);
         metrics.recordProcessed(ErrorType.EVENTS_ERROR);

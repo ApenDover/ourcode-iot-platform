@@ -4,8 +4,10 @@ import com.nashkod.avro.DeviceEvent;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -19,8 +21,7 @@ import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
 import ts.andrey.eventcollector.metrics.GlobalMetrics;
-
-import java.util.function.BiFunction;
+import ts.andrey.eventcollector.utils.MessageDltBuilder;
 
 @Slf4j
 @Configuration
@@ -95,16 +96,28 @@ public class KafkaConfig {
     @Bean
     public DefaultErrorHandler errorHandler(KafkaTemplate<Object, Object> kafkaTemplate,
                                             GlobalMetrics globalMetrics) {
-        BiFunction<ConsumerRecord<?, ?>, Exception, TopicPartition> destinationResolver =
-                (record, ex) -> {
-                    globalMetrics.incrementDltError();
-                    log.warn("Сообщение [{}] ушло в DLT из-за ошибки [{}]", record.key(), ex.getMessage());
-                    return new TopicPartition(dltEventsTopic, record.partition());
-                };
 
-        final var recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate, destinationResolver);
+        final var recoverer = new DeadLetterPublishingRecoverer(
+                kafkaTemplate,
+                (consumerRecord, exception) ->
+                        new TopicPartition(dltEventsTopic, consumerRecord.partition())
+        ) {
+            @Override
+            public void accept(ConsumerRecord<?, ?> record, Exception exception) {
+                globalMetrics.incrementDltMessage();
+                log.warn("Сообщение [{}] ушло в DLT из-за ошибки [{}]", record.key(), exception.getMessage());
+                final var errorMessage = MessageDltBuilder.getMessage((SpecificRecordBase) record.value(), exception);
+                kafkaTemplate.send(new ProducerRecord<>(
+                        dltEventsTopic,
+                        record.partition(),
+                        record.key(),
+                        errorMessage,
+                        record.headers()
+                ));
+            }
+        };
 
-        var backoff = new ExponentialBackOffWithMaxRetries(3);
+        final var backoff = new ExponentialBackOffWithMaxRetries(3);
         backoff.setInitialInterval(1000L);
         backoff.setMultiplier(2.0);
         backoff.setMaxInterval(10000L);

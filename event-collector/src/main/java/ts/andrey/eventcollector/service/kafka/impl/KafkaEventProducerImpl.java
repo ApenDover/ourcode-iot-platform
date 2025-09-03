@@ -52,7 +52,7 @@ public class KafkaEventProducerImpl extends AbstractKafkaProducer implements Kaf
                 .filter(DeviceEvent.class::isInstance)
                 .map(recordBase -> {
                     final var event = (DeviceEvent) recordBase;
-                    globalMetrics.incrementDltError();
+                    globalMetrics.incrementDltMessage();
                     return new ProducerRecord<>(dltEventTopic, event.getDevice().getDeviceId(), event);
                 })
                 .toList();

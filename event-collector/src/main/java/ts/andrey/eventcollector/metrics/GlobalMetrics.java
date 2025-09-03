@@ -34,7 +34,7 @@ public class GlobalMetrics {
         errorCounter.increment();
     }
 
-    public void incrementDltError() {
+    public void incrementDltMessage() {
         errorDltCounter.increment();
     }
 
