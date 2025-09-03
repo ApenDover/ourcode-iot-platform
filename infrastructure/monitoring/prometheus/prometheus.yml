@@ -37,3 +37,9 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: [ 'device-service:8886' ]
+  - job_name: 'minio'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/minio/v2/metrics/cluster'
+    static_configs:
+      - targets: [ 'minio:9000' ]

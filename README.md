@@ -118,6 +118,13 @@ postman коллекция тут: [postman](infrastructure/postman)
 </details>
 
 <details>
+<summary>minio</summary>
+
+![minio.png](pics/minio.png)
+
+</details>
+
+<details>
 <summary>device-events-metrics</summary>
 
 ![device-events-metrics.png](pics/device-events-metrics.png)

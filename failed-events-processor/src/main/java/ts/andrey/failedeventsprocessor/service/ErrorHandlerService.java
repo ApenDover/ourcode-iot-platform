@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ts.andrey.failedeventsprocessor.metrics.ErrorType;
+import ts.andrey.failedeventsprocessor.metrics.GlobalMetrics;
 import ts.andrey.failedeventsprocessor.utils.JsonAvroConverter;
 import ts.andrey.failedeventsprocessor.utils.MinioNameGenerator;
 
@@ -16,6 +18,8 @@ public class ErrorHandlerService {
 
     private final MinioUploader minioUploader;
 
+    private final GlobalMetrics metrics;
+
     @Value("${minio.bucket-name}")
     private String bucketName;
 
@@ -25,6 +29,7 @@ public class ErrorHandlerService {
                 deviceError.getErrorMeta().getErrorSource());
         final var bytes = JsonAvroConverter.toJsonAvro(deviceError);
         minioUploader.uploadToMinio(name, bytes, bucketName);
+        metrics.recordProcessed(ErrorType.DEVICE_ERROR);
     }
 
     public void start(DeviceEventError deviceEventError) {
@@ -33,6 +38,7 @@ public class ErrorHandlerService {
                 deviceEventError.getErrorMeta().getErrorSource());
         final var bytes = JsonAvroConverter.toJsonAvro(deviceEventError);
         minioUploader.uploadToMinio(name, bytes, bucketName);
+        metrics.recordProcessed(ErrorType.EVENTS_ERROR);
     }
 
 }

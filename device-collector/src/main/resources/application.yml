@@ -63,7 +63,7 @@ spring:
     init:
       mode: ${SPRING_SQL_INIT_MODE:always}
   kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
     template:
       device-topic: ${SPRING_KAFKA_TEMPLATE_DEVICE_TOPIC:device}
       dlt-device-topic: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_TOPIC:device.DLT}

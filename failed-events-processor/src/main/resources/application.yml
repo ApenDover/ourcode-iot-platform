@@ -58,7 +58,7 @@ spring:
   application:
     name: failed-events-processor
   kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
     template:
       dlt-device-topic: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_TOPIC:device.DLT}
       dlt-events-topic: ${SPRING_KAFKA_TEMPLATE_DLT_EVENTS_TOPIC:events.DLT}

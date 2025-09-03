@@ -28,7 +28,6 @@ public class MinioUploader {
 
     public void uploadToMinio(String fileName, byte[] bytes, String bucketName) {
         try {
-
             minioClient.putObject(
                 PutObjectArgs.builder()
                         .bucket(bucketName)
