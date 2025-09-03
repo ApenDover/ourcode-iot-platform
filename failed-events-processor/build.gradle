@@ -38,6 +38,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
+	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+	implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
+
 	implementation "org.springframework.kafka:spring-kafka"
 	implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
 	implementation "org.apache.commons:commons-collections4:${commonsCollections}"

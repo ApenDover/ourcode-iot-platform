@@ -133,14 +133,14 @@ services:
       - iot_network
   failed-events-processor:
     build: ../failed-events-processor
-    container_name: failed-events-processor
+    container_name: failed-events-processor.json
     env_file:
       - .env
     restart: unless-stopped
     ports:
       - 8880:8880
     environment:
-      OTEL_SERVICE_NAME: failed-events-processor
+      OTEL_SERVICE_NAME: failed-events-processor.json
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
       OTEL_METRICS_EXPORTER: none

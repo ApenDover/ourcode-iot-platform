@@ -1,0 +1,30 @@
+{
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Processed Errors by Type",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 9 },
+      "targets": [
+        {
+          "expr": "sum by (errorTypex) (fails_handler_processed_total)",
+          "legendFormat": "{{errorTypex}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": { "mode": "palette-classic" }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "single" }
+      }
+    }
+  ],
+  "schemaVersion": 36,
+  "version": 1,
+  "title": "Fails Handler Metrics",
+  "editable": true,
+  "tags": ["microservice", "errors"]
+}

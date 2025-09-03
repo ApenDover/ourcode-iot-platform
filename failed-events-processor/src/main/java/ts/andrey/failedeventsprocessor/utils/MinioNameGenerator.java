@@ -1,6 +1,7 @@
 package ts.andrey.failedeventsprocessor.utils;
 
 import lombok.experimental.UtilityClass;
+import org.slf4j.MDC;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -8,7 +9,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @UtilityClass
 public class MinioNameGenerator {
@@ -25,7 +25,7 @@ public class MinioNameGenerator {
         elements.add(DEVICE_EVENT_ERROR);
         elements.add(errorSource);
         elements.add(String.valueOf(receivedAt));
-        elements.add(UUID.randomUUID().toString());
+        elements.add(MDC.get("trace_id"));
         return String.join("_", elements) + ".json";
     }
 
