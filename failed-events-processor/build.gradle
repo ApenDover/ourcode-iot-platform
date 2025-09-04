@@ -50,6 +50,8 @@ dependencies {
 	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-avro:${jackson}"
 	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson}"
 
+	implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
+
 	implementation "io.minio:minio:${minio}"
 
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"

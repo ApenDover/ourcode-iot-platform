@@ -46,6 +46,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-cassandra-reactive'
     implementation 'io.projectreactor:reactor-core'
 
+    implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
+
     implementation "org.springframework.boot:spring-boot-starter-data-cassandra"
 
     implementation "org.springframework.kafka:spring-kafka"

@@ -58,7 +58,7 @@ public class KafkaDeviceErrorProducerImpl implements KafkaProducer {
     }
 
     public CompletableFuture<RecordMetadata> sendMessage(DeviceError event) {
-        return kafkaTemplate.send(deviceDltTopic, event.getErrorMeta().getErrorSource(), event)
+        return kafkaTemplate.send(deviceDltTopic, event.getFailedEvent().getDeviceId(), event)
                 .thenApply(SendResult::getRecordMetadata);
     }
 

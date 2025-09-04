@@ -41,6 +41,8 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
     implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetrySpringBootVersion}"
 
+    implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
+
     implementation "org.flywaydb:flyway-core:${flyWay}"
     implementation "org.flywaydb:flyway-database-postgresql:${flyWay}"
 
