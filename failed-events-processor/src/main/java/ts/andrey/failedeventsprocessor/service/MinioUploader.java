@@ -37,9 +37,10 @@ public class MinioUploader {
                         .build()
             );
             log.info("Uploaded file: " + fileName);
-        } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
-                 NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
-                 InternalException e) {
+        } catch (ServerException
+                 | InsufficientDataException | ErrorResponseException | IOException
+                 | NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException
+                 | XmlParserException | InternalException e) {
             throw new RuntimeException(e);
         }
     }

@@ -34,7 +34,10 @@ class ReadAndSaveIT extends BaseIntegrationTest {
     void successDeviceErrorCase() {
         // GIVEN
         final var message = DummyTDF.deviceError.getDefault();
-        final var fileName = MinioNameGenerator.generateName(message.getReceivedAt(), message.getErrorMeta().getErrorSource().name());
+        final var fileName = MinioNameGenerator.generateName(
+                message.getReceivedAt(),
+                message.getErrorMeta().getErrorSource().name()
+        );
 
         // WHEN
         KafkaProducerUtil.sendMessage(
@@ -47,7 +50,9 @@ class ReadAndSaveIT extends BaseIntegrationTest {
         await().atMost(10, TimeUnit.SECONDS)
                 .untilAsserted(() -> {
                     // THEN
-                    final var stringFromMinio = assertDoesNotThrow(() -> MinioFileReader.getFile(minioClient, bucket, fileName));
+                    final var stringFromMinio = assertDoesNotThrow(() ->
+                            MinioFileReader.getFile(minioClient, bucket, fileName)
+                    );
                     assertNotNull(stringFromMinio);
                     final var deviceError = objectMapper.readValue(stringFromMinio, DeviceError.class);
                     assertThat(deviceError)
@@ -61,7 +66,10 @@ class ReadAndSaveIT extends BaseIntegrationTest {
     void successEventErrorCase() {
         // GIVEN
         final var message = DummyTDF.deviceEventError.getDefault();
-        final var fileName = MinioNameGenerator.generateName(message.getReceivedAt(), message.getErrorMeta().getErrorSource().name());
+        final var fileName = MinioNameGenerator.generateName(
+                message.getReceivedAt(),
+                message.getErrorMeta().getErrorSource().name()
+        );
 
         // WHEN
         KafkaProducerUtil.sendMessage(
@@ -74,7 +82,9 @@ class ReadAndSaveIT extends BaseIntegrationTest {
         await().atMost(10, TimeUnit.SECONDS)
                 .untilAsserted(() -> {
                     // THEN
-                    final var stringFromMinio = assertDoesNotThrow(() -> MinioFileReader.getFile(minioClient, bucket, fileName));
+                    final var stringFromMinio = assertDoesNotThrow(() ->
+                            MinioFileReader.getFile(minioClient, bucket, fileName)
+                    );
                     assertNotNull(stringFromMinio);
                     final var deviceError = objectMapper.readValue(stringFromMinio, DeviceEventError.class);
                     assertThat(deviceError)

@@ -24,7 +24,7 @@ class DeviceMapperTest {
         assertNotNull(actual.getId());
         assertEquals("deviceId", actual.getDeviceId());
         assertEquals("deviceType", actual.getDeviceType());
-        assertEquals("1970-01-01T00:10:00Z", actual.getCreatedAt().toString());
+        assertEquals("1970-01-01T00:00:00.600Z", actual.getCreatedAt().toString());
         assertEquals("meta", actual.getMeta());
     }
 

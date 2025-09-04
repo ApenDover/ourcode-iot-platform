@@ -1,7 +1,6 @@
 package ts.andrey.kafkaproducer.service.impl;
 
 import com.nashkod.avro.DeviceError;
-import com.nashkod.avro.DeviceEvent;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
