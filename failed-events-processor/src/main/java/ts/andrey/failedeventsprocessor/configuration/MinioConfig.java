@@ -32,6 +32,8 @@ public class MinioConfig {
                     .credentials(accessKey, secretKey)
                     .build();
 
+            log.info("MinioClient created: {}", minioUrl);
+
             final var exists = minioClient.bucketExists(
                     BucketExistsArgs.builder().bucket(bucketName).build()
             );

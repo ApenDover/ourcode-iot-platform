@@ -23,7 +23,7 @@ public interface DeviceMapper {
 
     @Mapping(target = "id", expression = "java(UUID.randomUUID())")
     @Mapping(target = "createdAt", expression = "java(Objects.isNull(device.getCreatedAt()) "
-            + "? null : Instant.ofEpochSecond(device.getCreatedAt()))")
+            + "? null : Instant.ofEpochMilli(device.getCreatedAt()))")
     DeviceEntity toEntity(Device device);
 
     @Mapping(target = "createdAt", expression = "java(deviceEntity.getCreatedAt().toEpochMilli())")

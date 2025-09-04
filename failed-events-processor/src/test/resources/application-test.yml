@@ -1,18 +1,23 @@
+management:
+  tracing:
+    enabled: false
+
+minio:
+  url: ${minio.url}
+  access-key: minio
+  secret-key: password
+  bucket-name: bucket
+
+otel:
+  sdk:
+    disabled: true
+
 spring:
   kafka:
     bootstrap-servers: ${kafka.bootstrap.servers}
     template:
-      events-topic: events
       dlt-events-topic: events.DLT
-      device-topic: device
       dlt-device-topic: device.DLT
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-      batch-size: 16384
-      compression-type: snappy
-      properties:
-        schema.registry.url: ${schema.registry.url}
     consumer:
       max-poll-records: 100
       fetch-max-wait: 500
@@ -24,13 +29,3 @@ spring:
       value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
       properties:
         schema.registry.url: ${schema.registry.url}
-  cassandra:
-    contact-points: ${spring.cassandra.contact-points}
-    local-datacenter: datacenter1
-    keyspace-name: iot_service
-    schema-action: CREATE_IF_NOT_EXISTS
-
-app:
-  cache:
-    expiration:
-      seconds: 10
