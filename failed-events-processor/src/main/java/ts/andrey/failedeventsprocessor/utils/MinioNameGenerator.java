@@ -1,8 +1,7 @@
 package ts.andrey.failedeventsprocessor.utils;
 
+import io.opentelemetry.api.trace.Span;
 import lombok.experimental.UtilityClass;
-import org.slf4j.MDC;
-import ts.andrey.failedeventsprocessor.configuration.MdcInterceptor;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -26,7 +25,7 @@ public class MinioNameGenerator {
         elements.add(DEVICE_EVENT_ERROR);
         elements.add(errorSource);
         elements.add(String.valueOf(receivedAt));
-        elements.add(MDC.get(MdcInterceptor.TRACE));
+        elements.add(Span.current().getSpanContext().getTraceId());
         return String.join("_", elements) + ".json";
     }
 

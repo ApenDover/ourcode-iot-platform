@@ -38,7 +38,6 @@ public class MdcInterceptor implements HandlerInterceptor {
             MDC.put(SPAN, spContext.getSpanId());
             MDC.put(FLAGS, spContext.getTraceFlags().asHex());
         }
-
         MDC.put(SERVICE, appName);
     }
 

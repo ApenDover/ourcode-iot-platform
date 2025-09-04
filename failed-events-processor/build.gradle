@@ -57,8 +57,6 @@ dependencies {
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
-
-
 	compileOnly 'org.projectlombok:lombok'
 
 	compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugsToolVersion}"

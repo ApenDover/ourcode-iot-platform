@@ -47,7 +47,7 @@ public class MinioConfig {
             }
             return minioClient;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize MinIO bucket", e);
+            throw new RuntimeException("Failed to initialize minio bucket", e);
         }
     }
 
