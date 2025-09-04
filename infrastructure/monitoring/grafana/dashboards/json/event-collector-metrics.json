@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -934,7 +934,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "EventCollectorMetrics",
+  "title": "Event Collector Metrics",
   "uid": "a6df77c8-41dd-4835-a120-3f13193b423c",
   "version": 1
 }

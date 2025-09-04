@@ -13,7 +13,7 @@ public class GlobalMetrics {
     public void recordProcessed(ErrorType errorType) {
         meterRegistry.counter(
                 "fails.handler.processed",
-                "errorTypex", errorType.name()
+                "errorType", errorType.name()
         ).increment();
     }
 

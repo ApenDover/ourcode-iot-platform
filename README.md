@@ -53,32 +53,33 @@ postman коллекция тут: [postman](infrastructure/postman)
 
 Будет выполнен запуск следующих сервисов:
 
-| Сервис               | Описание                                   | Порт(ы) хоста  |
-|----------------------|--------------------------------------------|----------------|
-| `kafka-producer`     | SpringBoot service для тестирования        | `8887`         |
-| `event-collector`    | SpringBoot service сбор метрик в cassandra | `8888`         |
-| `device-collector`   | SpringBoot service сбор device в postgress | `8889`         |
-| `device-service`     | SpringBoot service CRUD device в postgress | `8886`         |
-| `zookeeper`          | Координация Kafka                          | `2181`         |
-| `kafka`              | Брокер Kafka 3.4                           | `9092`         |
-| `schema-registry`    | Схемы Avro для Kafka                       | `8081`         |
-| `minio`              | S3-хранилище совместимое с AWS             | `9000`, `9001` |
-| `camunda`            | BPM-платформа для бизнес-процессов         | `8088`         |
-| `postgres1`          | База данных PostgreSQL master 1            | `5431`         |
-| `postgres2`          | База данных PostgreSQL master 2            | `5432`         |
-| `postgres1r`         | База данных PostgreSQL replica 1           | `5433`         |
-| `postgres2r`         | База данных PostgreSQL replica 2           | `5434`         |
-| `postgres-keycloak`  | База данных PostgreSQL для keycloak        | `5430`         |
-| `keycloak`           | IAM-платформа, авторизация                 | `8080`         |
-| `redis`              | In-memory кэш с паролем                    | `6379`         |
-| `redis-insight`      | UI для redis                               | `6379`         |
-| `cassandra`          | NoSQL база данных                          | `9042`         |
-| `grafana`            | Визуализация метрик                        | `3000`         |
-| `prometheus`         | Мониторинг и сбор метрик                   | `9090`         |
-| `kafka-exporter`     | Экспорт метрик Kafka для Prometheus        | `9308`         |
-| `cassandra-exporter` | Экспорт метрик cassandra для Prometheus    | `9500`         |
-| `postgres-exporter`  | Экспорт метрик postgres для Prometheus     | `9187`         |
-| `kafka-ui`           | Kafka-UI для удобства просмотра            | `8099`         |
+| Сервис                    | Описание                                         | Порт(ы) хоста  |
+|---------------------------|--------------------------------------------------|----------------|
+| `kafka-producer`          | SpringBoot service для тестирования              | `8887`         |
+| `failed-events-processor` | SpringBoot service для обработки сообщений в DLT | `8880`         |
+| `event-collector`         | SpringBoot service сбор метрик в cassandra       | `8888`         |
+| `device-collector`        | SpringBoot service сбор device в postgress       | `8889`         |
+| `device-service`          | SpringBoot service CRUD device в postgress       | `8886`         |
+| `zookeeper`               | Координация Kafka                                | `2181`         |
+| `kafka`                   | Брокер Kafka 3.4                                 | `9092`         |
+| `schema-registry`         | Схемы Avro для Kafka                             | `8081`         |
+| `minio`                   | S3-хранилище совместимое с AWS                   | `9000`, `9001` |
+| `camunda`                 | BPM-платформа для бизнес-процессов               | `8088`         |
+| `postgres1`               | База данных PostgreSQL master 1                  | `5431`         |
+| `postgres2`               | База данных PostgreSQL master 2                  | `5432`         |
+| `postgres1r`              | База данных PostgreSQL replica 1                 | `5433`         |
+| `postgres2r`              | База данных PostgreSQL replica 2                 | `5434`         |
+| `postgres-keycloak`       | База данных PostgreSQL для keycloak              | `5430`         |
+| `keycloak`                | IAM-платформа, авторизация                       | `8080`         |
+| `redis`                   | In-memory кэш с паролем                          | `6379`         |
+| `redis-insight`           | UI для redis                                     | `6379`         |
+| `cassandra`               | NoSQL база данных                                | `9042`         |
+| `grafana`                 | Визуализация метрик                              | `3000`         |
+| `prometheus`              | Мониторинг и сбор метрик                         | `9090`         |
+| `kafka-exporter`          | Экспорт метрик Kafka для Prometheus              | `9308`         |
+| `cassandra-exporter`      | Экспорт метрик cassandra для Prometheus          | `9500`         |
+| `postgres-exporter`       | Экспорт метрик postgres для Prometheus           | `9187`         |
+| `kafka-ui`                | Kafka-UI для удобства просмотра                  | `8099`         |
 
 ⚠️ **Важно:**  Убедитесь, что у Docker достаточно памяти и CPU. В Docker Desktop (Windows/Mac) можно выделить, например, 4+ ГБ RAM. Иначе рискуете столкнуться с тормозами или перезапусками контейнеров (особенно Java-сервисы как Keycloak могут потреблять >512МБ).
 
@@ -261,6 +262,39 @@ OpenAPI спецификация: [DeviceV1Api.pdf](infrastructure/api/DeviceV1A
 Для отправки запросов на end-point согласно спецификации, необходимо создать JWT токен, для
 этого есть отдельный endPoint в [kafka-producer](kafka-producer)
 > http://localhost:8887/auth/token?login=admin&password=admin \
-эти и другие запросы есть в [postman](infrastructure/postman)
+> эти и другие запросы есть в [postman](infrastructure/postman)
 
 </details>
+
+## failed-events-processor
+
+- Подписывается на Kafka Dead Letter Topic (DLT) и получает сообщения о событиях, которые не удалось обработать другими
+  сервисами.
+- Формирует на основе этих сообщений структурированные JSON-файлы.
+- Сохраняет полученные JSON-файлы в объектное хранилище MinIO.
+- Экспортирует метрики и healthcheck для мониторинга.
+
+<details>
+
+<summary>Компоненты сервиса</summary>
+
+![failed-events-processor-component.png](diagrams/failed-events-processor/failed-events-processor-component.png)
+
+</details>
+
+<details>
+
+<summary>Логическая последовательность</summary>
+
+![failed-events-processor-sequence.png](diagrams/failed-events-processor/failed-events-processor-sequence.png)
+
+</details>
+
+### Технологии:
+
+- Язык программирования: Java 24
+- Фреймворк: Spring Boot 3.5
+- Обмен сообщениями: Kafka
+- Хранилище: Minio
+- Тестирование и окружение: Testcontainers (Kafka, Minio)
+- Система сборки: Gradle

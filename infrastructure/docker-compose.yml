@@ -21,8 +21,8 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8887/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
       interval: 3s
-      timeout: 2s
-      retries: 2
+      timeout: 5s
+      retries: 5
       start_period: 6s
     networks:
       - iot_network
@@ -54,8 +54,8 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8889/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
       interval: 3s
-      timeout: 2s
-      retries: 2
+      timeout: 5s
+      retries: 5
       start_period: 6s
     networks:
       - iot_network
@@ -89,8 +89,8 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "wget -q -O - http://localhost:8886/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
       interval: 3s
-      timeout: 2s
-      retries: 2
+      timeout: 5s
+      retries: 5
       start_period: 6s
     networks:
       - iot_network
@@ -126,8 +126,8 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8888/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
       interval: 6s
-      timeout: 4s
-      retries: 6
+      timeout: 5s
+      retries: 5
       start_period: 10s
     networks:
       - iot_network
@@ -153,8 +153,8 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "wget -q -O - http://localhost:8880/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
       interval: 3s
-      timeout: 2s
-      retries: 2
+      timeout: 5s
+      retries: 5
       start_period: 6s
     networks:
       - iot_network
