@@ -53,6 +53,10 @@ minio:
   access-key: ${MINIO_ROOT_USER:minio_admin}
   secret-key: ${MINIO_ROOT_PASSWORD:minio_pass}
   bucket-name: ${MINIO_BUCKET_NAME:bucket}
+  retry:
+    max-attempts: ${MINIO_RETRY_MAX_ATTEMPTS}
+    initial-delay: ${MINIO_RETRY_INITIAL_DELAY}
+    multiplier: ${MINIO_RETRY_MULTIPLIER}
 
 spring:
   application:

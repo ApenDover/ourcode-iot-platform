@@ -54,6 +54,10 @@ minio:
   access-key: minio_admin
   secret-key: minio_pass
   bucket-name: bucket
+  retry:
+    max-attempts: 2
+    initial-delay: 1000
+    multiplier: 5
 
 otel:
   sdk:

@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.specific.SpecificRecordBase;
+import ts.andrey.failedeventsprocessor.exception.FailedEventException;
 
 import java.io.ByteArrayOutputStream;
 
@@ -19,7 +20,7 @@ public class JsonAvroConverter {
             encoder.flush();
             return out.toByteArray();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new FailedEventException(e);
         }
     }
 
