@@ -2,14 +2,14 @@
 actor KafkaBroker
 participant "SchemaRegistry" as AVRO
 participant "Consumer" as DC  #lightblue
-participant "ErrorHandlerService" as DS  #lightblue
+participant "ErrorProcessor" as DS  #lightblue
 participant "MinioUploader" as REPO  #lightblue
 participant "Minio" as DB
 
 KafkaBroker --> DC : события в Avro (DeviceEventsError)
 DC -> AVRO : десериализация Avro
-AVRO -> DC : DeviceEventsError
-DC -> DS : DeviceEventsError
+AVRO -> DC : ErrorMessage
+DC -> DS : ErrorMessage
 
 DS -> REPO : сохранить
 REPO -> DB : сохранить

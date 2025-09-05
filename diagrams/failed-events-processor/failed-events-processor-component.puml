@@ -7,7 +7,7 @@ AddElementTag("queue", $bgColor="#E6F7E6", $fontColor="#333333", $borderColor="#
 
 Container_Boundary(app, "failed-events-processor") {
     Component(consumer, "Consumer", "Кафка-консьюмер", "class")
-    Component(error_handler_service, "ErrorHandlerService", "Оркестратор процесса", "class")
+    Component(error_handler_service, "ErrorProcessor", "Оркестратор процесса", "class")
     Component(minio_uploader, "MinioUploader", "repository", "class")
 }
 

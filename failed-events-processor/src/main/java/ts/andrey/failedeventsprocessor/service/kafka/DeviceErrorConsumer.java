@@ -1,4 +1,4 @@
-package ts.andrey.failedeventsprocessor.service;
+package ts.andrey.failedeventsprocessor.service.kafka;
 
 import com.nashkod.avro.DeviceError;
 import lombok.RequiredArgsConstructor;
@@ -6,15 +6,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import ts.andrey.failedeventsprocessor.service.ErrorProcessor;
 
 import java.util.ArrayList;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class KafkaDeviceErrorConsumer {
+public class DeviceErrorConsumer {
 
-    private final ErrorHandlerService errorHandlerService;
+    private final ErrorProcessor<DeviceError> errorProcessor;
 
     @KafkaListener(
             topics = "${spring.kafka.template.dlt-device-topic}",
@@ -26,7 +27,7 @@ public class KafkaDeviceErrorConsumer {
         records.forEach(message -> deviceErrors.add(message.value()));
         log.info("Получена пачка из [{}] ошибок по Device", deviceErrors.size());
         log.debug("Получены ошибки по Device: [{}]", deviceErrors);
-        deviceErrors.forEach(errorHandlerService::start);
+        deviceErrors.forEach(errorProcessor::start);
     }
 
 }

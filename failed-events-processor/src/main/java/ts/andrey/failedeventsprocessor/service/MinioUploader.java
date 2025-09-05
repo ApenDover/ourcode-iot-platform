@@ -49,7 +49,7 @@ public class MinioUploader {
                         .contentType(CONTENT_TYPE)
                         .build()
             );
-            log.info("Uploaded file: " + fileName);
+            log.info("Uploaded file: {}", fileName);
         } catch (ServerException
                  | InsufficientDataException | ErrorResponseException | IOException
                  | NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException
