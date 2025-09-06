@@ -1,6 +1,7 @@
 server:
   port: ${KAFKA_PRODUCER_SERVER_PORT:8887}
 
+
 management:
   endpoint:
     health:
@@ -54,6 +55,18 @@ spring:
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
     template:
+      events:
+        topic: ${SPRING_KAFKA_TEMPLATE_EVENTS_TOPIC:events}
+        partition: ${SPRING_KAFKA_TEMPLATE_EVENTS_PARTITION:3}
+        replicas: ${SPRING_KAFKA_TEMPLATE_EVENTS_REPLICAS:1}
+        dlt: ${SPRING_KAFKA_TEMPLATE_DLT_EVENTS_TOPIC:events.DLT}
+        dlt-partitions: ${SPRING_KAFKA_TEMPLATE_DLT_EVENTS_PARTITION}
+      device:
+        topic: ${SPRING_KAFKA_TEMPLATE_DEVICE_TOPIC:device}
+        partition: ${SPRING_KAFKA_TEMPLATE_DEVICE_PARTITION:3}
+        replicas: ${SPRING_KAFKA_TEMPLATE_DEVICE_REPLICAS:1}
+        dlt: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_TOPIC:device.DLT}
+        dlt-partitions: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_PARTITION}
       events-topic: ${SPRING_KAFKA_TEMPLATE_EVENTS_TOPIC:events}
       dlt-events-topic: ${SPRING_KAFKA_TEMPLATE_DLT_EVENTS_TOPIC:events.DLT}
       device-topic: ${SPRING_KAFKA_TEMPLATE_DEVICE_TOPIC:device}

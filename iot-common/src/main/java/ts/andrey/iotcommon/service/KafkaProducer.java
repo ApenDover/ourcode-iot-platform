@@ -1,4 +1,4 @@
-package ts.andrey.kafkaproducer.service;
+package ts.andrey.iotcommon.service;
 
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.RecordMetadata;

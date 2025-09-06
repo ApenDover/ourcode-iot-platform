@@ -1,4 +1,4 @@
-package ts.andrey.iotcommon.kafka;
+package ts.andrey.iotcommon.service;
 
 import com.nashkod.avro.DeviceEventError;
 import lombok.extern.slf4j.Slf4j;
@@ -23,14 +23,14 @@ public abstract class AbstractKafkaProducer {
     private final KafkaTemplate<String, SpecificRecordBase> kafkaTemplate;
     private final GlobalKafkaMetrics globalKafkaMetrics;
     private final NewTopic deviceDlt;
-    private final NewTopic eventsDlt;
+    private final NewTopic deviceEventDlt;
 
     protected AbstractKafkaProducer(KafkaTemplate<String, SpecificRecordBase> kafkaTemplate,
-                                    GlobalKafkaMetrics globalKafkaMetrics, NewTopic deviceDlt, NewTopic eventsDlt) {
+                                    GlobalKafkaMetrics globalKafkaMetrics, NewTopic deviceDlt, NewTopic deviceEventDlt) {
         this.kafkaTemplate = kafkaTemplate;
         this.globalKafkaMetrics = globalKafkaMetrics;
         this.deviceDlt = deviceDlt;
-        this.eventsDlt = eventsDlt;
+        this.deviceEventDlt = deviceEventDlt;
     }
 
     protected CompletableFuture<List<RecordMetadata>> baseSend(
@@ -55,7 +55,7 @@ public abstract class AbstractKafkaProducer {
                             try {
                                 final var errorMessage = MessageDltBuilder.getMessage(messageRecord.value(), ex);
                                 if (errorMessage instanceof DeviceEventError deviceEventError) {
-                                    return dltSend(new ProducerRecord<>(eventsDlt.name(), deviceEventError));
+                                    return dltSend(new ProducerRecord<>(deviceEventDlt.name(), deviceEventError));
                                 }
                                 return dltSend(new ProducerRecord<>(deviceDlt.name(), errorMessage));
                             } catch (IotException e) {

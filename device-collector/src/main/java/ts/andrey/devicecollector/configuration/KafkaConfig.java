@@ -18,7 +18,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
-import ts.andrey.devicecollector.metrics.GlobalKafkaMetrics;
+import ts.andrey.devicecollector.metrics.GlobalMetrics;
 import ts.andrey.devicecollector.utils.MessageDltBuilder;
 
 @Configuration
@@ -63,7 +63,7 @@ public class KafkaConfig {
 
     @Bean
     public DefaultErrorHandler errorHandler(KafkaTemplate<Object, Object> kafkaTemplate,
-                                            GlobalKafkaMetrics globalKafkaMetrics) {
+                                            GlobalMetrics globalKafkaMetrics) {
 
         final var recoverer = new DeadLetterPublishingRecoverer(
                 kafkaTemplate,

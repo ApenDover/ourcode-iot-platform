@@ -11,10 +11,10 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import ts.andrey.devicecollector.mapper.DeviceMapper;
-import ts.andrey.devicecollector.metrics.GlobalKafkaMetrics;
-import ts.andrey.devicecollector.metrics.PostgresMetrics;
 import ts.andrey.devicecollector.data.repository.DeviceBatchRepository;
+import ts.andrey.devicecollector.mapper.DeviceMapper;
+import ts.andrey.devicecollector.metrics.GlobalMetrics;
+import ts.andrey.devicecollector.metrics.PostgresMetrics;
 import ts.andrey.devicecollector.service.kafka.KafkaProducer;
 import ts.andrey.devicecollector.utils.ShardUtil;
 
@@ -34,7 +34,7 @@ public class DeviceDataService {
 
     private final DeviceMapper deviceMapper;
     private final PostgresMetrics postgresMetrics;
-    private final GlobalKafkaMetrics globalKafkaMetrics;
+    private final GlobalMetrics globalKafkaMetrics;
     private final KafkaProducer kafkaProducer;
     private final DeviceBatchRepository deviceBatchRepository;
 

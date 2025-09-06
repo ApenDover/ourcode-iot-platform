@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ts.andrey.iotcommon.service.KafkaProducer;
 import ts.andrey.kafkaproducer.model.GenerateResponse;
-import ts.andrey.kafkaproducer.service.KafkaProducer;
 import ts.andrey.kafkaproducer.utils.MessageGenerator;
 
 import java.util.List;
@@ -24,14 +24,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Controller {
 
-    private final KafkaProducer kafkaEventProducerImpl;
-    private final KafkaProducer kafkaDeviceErrorProducerImpl;
-    private final KafkaProducer kafkaEventsErrorProducerImpl;
+    private final KafkaProducer kafkaProducerImpl;
+    private final KafkaProducer kafkaDltProducerImpl;
 
     @PostMapping("/send")
     public ResponseEntity<String> sendKafkaMessage(
             @RequestBody List<DeviceEvent> request) {
-        kafkaEventProducerImpl.send(request);
+        kafkaProducerImpl.send(request);
         return ResponseEntity.ok("Ok");
     }
 
@@ -42,7 +41,7 @@ public class Controller {
             @RequestParam(name = "saveDevice", required = false, defaultValue = "false") Boolean saveDevice
     ) {
         final var messages = MessageGenerator.generate(messageCount, deviceCount, saveDevice);
-        kafkaEventProducerImpl.send(messages);
+        kafkaProducerImpl.send(messages);
         final var deviceIdsCount = messages.stream()
                 .map(it -> it.getDevice().getDeviceId())
                 .distinct()
@@ -53,14 +52,14 @@ public class Controller {
     @PostMapping("/dlt/events/send")
     public ResponseEntity<String> sendKafkaDltEventsMessage(
             @RequestBody List<DeviceEventError> request) {
-        kafkaEventsErrorProducerImpl.send(request);
+        kafkaDltProducerImpl.send(request);
         return ResponseEntity.ok("Ok");
     }
 
     @PostMapping("/dlt/device/send")
     public ResponseEntity<String> sendKafkaDltDeviceMessage(
             @RequestBody List<DeviceError> request) {
-        kafkaDeviceErrorProducerImpl.send(request);
+        kafkaDltProducerImpl.send(request);
         return ResponseEntity.ok("Ok");
     }
 

@@ -1,4 +1,4 @@
-package ts.andrey.iotcommon.kafka.impl;
+package ts.andrey.iotcommon.service.impl;
 
 import com.nashkod.avro.Device;
 import com.nashkod.avro.DeviceEvent;
@@ -7,10 +7,11 @@ import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import ts.andrey.iotcommon.kafka.AbstractKafkaProducer;
-import ts.andrey.iotcommon.kafka.KafkaProducer;
+import ts.andrey.iotcommon.service.AbstractKafkaProducer;
+import ts.andrey.iotcommon.service.KafkaProducer;
 import ts.andrey.iotcommon.metrics.GlobalKafkaMetrics;
 
 import java.util.List;
@@ -26,12 +27,12 @@ public class KafkaProducerImpl extends AbstractKafkaProducer implements KafkaPro
 
     public KafkaProducerImpl(KafkaTemplate<String, SpecificRecordBase> kafkaTemplate,
                              GlobalKafkaMetrics globalKafkaMetrics,
-                             NewTopic deviceDltTopic,
-                             NewTopic eventDltTopic,
-                             NewTopic deviceTopic,
-                             NewTopic eventTopic) {
-        super(kafkaTemplate, globalKafkaMetrics, deviceDltTopic, eventDltTopic);
-        this.eventTopic = eventTopic.name();
+                             @Qualifier("deviceDlt") NewTopic deviceDlt,
+                             @Qualifier("deviceEventDlt") NewTopic deviceEventDlt,
+                             @Qualifier("deviceTopic") NewTopic deviceTopic,
+                             @Qualifier("deviceEventTopic") NewTopic deviceEventTopic) {
+        super(kafkaTemplate, globalKafkaMetrics, deviceDlt, deviceEventDlt);
+        this.eventTopic = deviceEventTopic.name();
         this.deviceTopic = deviceTopic.name();
     }
 
