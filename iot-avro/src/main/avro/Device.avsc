@@ -1,0 +1,26 @@
+{
+  "type": "record",
+  "name": "Device",
+  "namespace": "com.nashkod.avro",
+  "fields": [
+    {
+      "name": "deviceId",
+      "type": "string"
+    },
+    {
+      "name": "deviceType",
+      "type": "string"
+    },
+    {
+      "name": "meta",
+      "type": "string"
+    },
+    {
+      "name": "createdAt",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+plugins {
+    id "java-library"
+    id "com.github.davidmc24.gradle.plugin.avro" version "${gradlePluginAvro}"
+    id "maven-publish"
+}
+
+group = "ts.andrey"
+version = "${appVersion}"
+description = 'iot-avro'
+
+repositories {
+    mavenCentral()
+    maven { url "https://packages.confluent.io/maven/" }
+}
+
+avro {
+    fieldVisibility = "PRIVATE"
+    createSetters = false
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+
+dependencies {
+
+    implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
+    api "org.apache.avro:avro:${avroVersion}"
+
+    api "org.springframework.cloud:spring-cloud-starter-openfeign:${openfeign}"
+    api "org.springframework.boot:spring-boot-starter-validation:${springValidation}"
+    api "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
+    api "org.openapitools:jackson-databind-nullable:${jacksonNullable}"
+    api "com.fasterxml.jackson.core:jackson-annotations:${jacksonAnnotation}"
+
+    compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "$buildDir/generated/src/main/java"
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = "nexus"
+            url = uri("http://localhost:7777/repository/maven-releases/")
+            allowInsecureProtocol = true
+            credentials {
+                username = project.findProperty("nexusUser") ?: "admin"
+                password = project.findProperty("nexusPassword") ?: "admin123"
+            }
+        }
+    }
+}

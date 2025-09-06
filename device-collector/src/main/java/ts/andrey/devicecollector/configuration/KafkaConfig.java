@@ -18,7 +18,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
-import ts.andrey.devicecollector.metrics.GlobalMetrics;
+import ts.andrey.devicecollector.metrics.GlobalKafkaMetrics;
 import ts.andrey.devicecollector.utils.MessageDltBuilder;
 
 @Configuration
@@ -63,7 +63,7 @@ public class KafkaConfig {
 
     @Bean
     public DefaultErrorHandler errorHandler(KafkaTemplate<Object, Object> kafkaTemplate,
-                                            GlobalMetrics globalMetrics) {
+                                            GlobalKafkaMetrics globalKafkaMetrics) {
 
         final var recoverer = new DeadLetterPublishingRecoverer(
                 kafkaTemplate,
@@ -72,7 +72,7 @@ public class KafkaConfig {
         ) {
             @Override
             public void accept(ConsumerRecord<?, ?> record, Exception exception) {
-                globalMetrics.incrementDltMessage();
+                globalKafkaMetrics.incrementDltMessage();
                 log.warn("Сообщение [{}] ушло в DLT из-за ошибки [{}]", record.key(), exception.getMessage());
                 final var errorMessage = MessageDltBuilder.getMessage((SpecificRecordBase) record.value(), exception);
                 kafkaTemplate.send(new ProducerRecord<>(

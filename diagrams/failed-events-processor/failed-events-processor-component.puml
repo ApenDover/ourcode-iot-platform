@@ -20,7 +20,7 @@ Rel(consumer, schema_reg, "Получение схемы", "HTTP")
 Rel(consumer, error_handler_service, "Передача сообщения", "Java-вызов")
 
 Rel(error_handler_service, minio_uploader, "Сохранение\Обновление", "Java-вызов")
-Rel(minio_uploader, minio, "Управление шардирование", "framework")
+Rel(minio_uploader, minio, "Выгрузка json в minio", "storage")
 
 
 @enduml

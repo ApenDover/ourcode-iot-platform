@@ -1,0 +1,71 @@
+plugins {
+    id "java-library"
+    id "org.openapi.generator" version "${openapiGenerator}"
+    id "maven-publish"
+}
+
+group = "ts.andrey"
+version = "${appVersion}"
+description = 'iot-common'
+
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("http://localhost:7777/repository/maven-releases/")
+        allowInsecureProtocol = true
+        credentials {
+            username = project.findProperty("nexusUser") ?: "admin"
+            password = project.findProperty("nexusPassword") ?: "admin123"
+        }
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of("${javaVersion}")
+    }
+}
+
+dependencies {
+
+    api "ts.andrey:iot-avro:1.0.0"
+
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "io.micrometer:micrometer-registry-prometheus"
+
+    api "org.springframework.cloud:spring-cloud-starter-openfeign:${openfeign}"
+
+    api "org.springframework.boot:spring-boot-starter-validation:${springValidation}"
+    api "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
+    api "org.openapitools:jackson-databind-nullable:${jacksonNullable}"
+    api "com.fasterxml.jackson.core:jackson-annotations:${jacksonAnnotation}"
+
+    compileOnly "org.projectlombok:lombok:${lombok}"
+    annotationProcessor "org.projectlombok:lombok:${lombok}"
+
+    api "org.springframework.kafka:spring-kafka"
+    api "org.apache.commons:commons-lang3:${commonsLang3Version}"
+    api "org.apache.commons:commons-collections4:${commonsCollections}"
+
+    compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = "nexus"
+            url = uri("http://localhost:7777/repository/maven-releases/")
+            allowInsecureProtocol = true
+            credentials {
+                username = project.findProperty("nexusUser") ?: "admin"
+                password = project.findProperty("nexusPassword") ?: "admin123"
+            }
+        }
+    }
+}
