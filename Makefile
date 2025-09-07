@@ -22,13 +22,13 @@ help: ## Показать список доступных команд
 	@echo "  \033[36mset-log-<level>-<port>\033[0m  	Установить логирование (пример: make set-log-debug-8080)"
 	@echo "  \033[36mupdate-<service>\033[0m  		Пересобрать проект и развернуть контейнер"
 
-up: ## Запустить контейнеры в фоне
+up: nexus-deploy ## Запустить контейнеры в фоне
 	$(DC) up -d
-	@make deploy
+	@make keycloak-setup-users
 
 up-local: ## Запустить все контейнеры в фоне
 	$(DCL) up -d
-	@make deploy
+	@make keycloak-setup-users
 
 up-rebuild-local: boot ## Пересобрать и запустить все модули
 	$(DCL) build event-collector device-collector kafka-producer failed-events-processor
@@ -73,19 +73,20 @@ set-log-%:
 exec-%: ## Зайти в контейнер по имени
 	docker exec -it $* bash
 
-boot:  ## локально пересобрать образы
+boot: nexus-deploy  ## локально пересобрать образы
 	docker image rm infrastructure-device-collector -f
 	docker image rm infrastructure-device-service -f
 	docker image rm infrastructure-event-collector -f
 	docker image rm infrastructure-kafka-producer -f
 	docker image rm infrastructure-failed-events-processor -f
 	cd event-collector && ./gradlew bootJar
+	cd event-collector && ./gradlew bootJar
 	cd device-collector && ./gradlew bootJar
 	cd device-service && ./gradlew bootJar
 	cd kafka-producer && ./gradlew bootJar
 	cd failed-events-processor && ./gradlew bootJar
 
-rebuild:  ## локально пересобрать образы
+rebuild: nexus-deploy  ## локально пересобрать образы
 	cd event-collector && ./gradlew clean build
 	cd device-collector && ./gradlew clean build
 	cd device-service && ./gradlew clean build
@@ -109,10 +110,24 @@ publish-nexus:
 	@sleep 5;
 	@echo "Выгружаю api"
 	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/device-api/1.0.0/device-api-1.0.0.pom >/dev/null 2>&1; then \
-		echo "Артефакт уже опубликован, пропускаем публикацию"; \
+		echo "device-api уже опубликован, пропускаем публикацию"; \
 	else \
-		echo "Артефакт не найден, выполняем публикацию Gradle..."; \
+		echo "device-api не найден, выполняем публикацию Gradle..."; \
 		cd device-api && ./gradlew publish; \
+	fi
+	@echo "Выгружаю avro"
+	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-avro/1.0.0/iot-avro-1.0.0.pom >/dev/null 2>&1; then \
+		echo "iot-avro уже опубликован, пропускаем публикацию"; \
+	else \
+		echo "iot-avro не найден, выполняем публикацию Gradle..."; \
+		cd iot-avro && ./gradlew publish; \
+	fi
+	@echo "Выгружаю common"
+	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-common/1.0.0/iot-common-1.0.0.pom >/dev/null 2>&1; then \
+		echo "iot-common уже опубликован, пропускаем публикацию"; \
+	else \
+		echo "iot-common не найден, выполняем публикацию Gradle..."; \
+		cd iot-common && ./gradlew publish; \
 	fi
 
 keycloak-setup-users: wait-for-keycloak
@@ -123,6 +138,6 @@ keycloak-setup-users: wait-for-keycloak
 	@cd ./infrastructure/keycloak && ./create-user.sh
 	@cd ./infrastructure/keycloak && ./create-secret.sh
 
-deploy:
-	@make keycloak-setup-users
+nexus-deploy:
+	$(DC) up nexus -d
 	@make publish-nexus

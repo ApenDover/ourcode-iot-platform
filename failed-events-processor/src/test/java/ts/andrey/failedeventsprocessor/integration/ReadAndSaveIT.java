@@ -20,10 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ReadAndSaveIT extends BaseIntegrationTest {
 
-    @Value("${spring.kafka.template.dlt-device-topic}")
+    @Value("${spring.kafka.template.device.dlt}")
     private String dltDeviceTopic;
 
-    @Value("${spring.kafka.template.dlt-events-topic}")
+    @Value("${spring.kafka.template.events.dlt}")
     private String dltEventsTopic;
 
     @Value("${minio.bucket-name}")

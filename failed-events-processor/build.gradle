@@ -44,11 +44,8 @@ dependencies {
 	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
 	implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
 
-	implementation "ts.andrey:iot-avro:1.0.0"
+	implementation "ts.andrey:iot-common:${iotCommon}"
 
-	implementation "org.springframework.kafka:spring-kafka"
-	implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
-	implementation "org.apache.commons:commons-collections4:${commonsCollections}"
 	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-avro:${jackson}"
 	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson}"
 

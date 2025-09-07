@@ -67,8 +67,18 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     template:
-      dlt-events-topic: events.DLT
-      dlt-device-topic: device.DLT
+      events:
+        topic: events
+        partition: 3
+        replicas: 1
+        dlt: events.DLT
+        dlt-partitions: 1
+      device:
+        topic: device
+        partition: 3
+        replicas: 1
+        dlt: device.DLT
+        dlt-partitions: 1
     consumer:
       max-poll-records: 100
       fetch-max-wait: 500
@@ -80,3 +90,4 @@ spring:
       value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
       properties:
         schema.registry.url: ${schema.registry.url}
+debug: true

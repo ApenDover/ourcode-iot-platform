@@ -1,10 +1,14 @@
 package ts.andrey.iotcommon.configuration;
 
+import com.nashkod.avro.Device;
+import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
@@ -20,6 +24,24 @@ import java.util.List;
 public class KafkaExceptionHandler {
 
     private final KafkaProducer kafkaDltProducerImpl;
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Device> kafkaBatchDeviceListenerContainerFactory(
+            ConsumerFactory<String, Device> consumerFactory) {
+        final var factory = new ConcurrentKafkaListenerContainerFactory<String, Device>();
+        factory.setConsumerFactory(consumerFactory);
+        factory.setBatchListener(true);
+        return factory;
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, DeviceEvent> kafkaBatchDeviceEventsListenerContainerFactory(
+            ConsumerFactory<String, DeviceEvent> consumerFactory) {
+        final var factory = new ConcurrentKafkaListenerContainerFactory<String, DeviceEvent>();
+        factory.setConsumerFactory(consumerFactory);
+        factory.setBatchListener(true);
+        return factory;
+    }
 
     @Bean
     public DefaultErrorHandler errorHandler(KafkaTemplate<Object, Object> kafkaTemplate,

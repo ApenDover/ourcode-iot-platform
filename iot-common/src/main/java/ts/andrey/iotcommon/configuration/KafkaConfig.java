@@ -1,18 +1,16 @@
 package ts.andrey.iotcommon.configuration;
 
-import com.nashkod.avro.Device;
-import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.kafka.config.TopicBuilder;
-import org.springframework.kafka.core.ConsumerFactory;
 
 @Configuration
 @RequiredArgsConstructor
+@Lazy
 public class KafkaConfig {
 
     @Value("${spring.kafka.template.events.topic}")
@@ -75,24 +73,6 @@ public class KafkaConfig {
         return TopicBuilder.name(deviceDlt)
                 .partitions(dltDevicePartitions)
                 .build();
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Device> kafkaBatchDeviceListenerContainerFactory(
-            ConsumerFactory<String, Device> consumerFactory) {
-        final var factory = new ConcurrentKafkaListenerContainerFactory<String, Device>();
-        factory.setConsumerFactory(consumerFactory);
-        factory.setBatchListener(true);
-        return factory;
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, DeviceEvent> kafkaBatchDeviceEventsListenerContainerFactory(
-            ConsumerFactory<String, DeviceEvent> consumerFactory) {
-        final var factory = new ConcurrentKafkaListenerContainerFactory<String, DeviceEvent>();
-        factory.setConsumerFactory(consumerFactory);
-        factory.setBatchListener(true);
-        return factory;
     }
 
 }

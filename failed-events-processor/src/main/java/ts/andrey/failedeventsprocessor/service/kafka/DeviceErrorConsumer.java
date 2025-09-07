@@ -18,7 +18,7 @@ public class DeviceErrorConsumer {
     private final ErrorProcessor<DeviceError> errorProcessor;
 
     @KafkaListener(
-            topics = "${spring.kafka.template.dlt-device-topic}",
+            topics = "${spring.kafka.template.device.dlt}",
             groupId = "${spring.kafka.consumer.group-id}",
             containerFactory = "kafkaBatchDeviceErrorListenerContainerFactory"
     )

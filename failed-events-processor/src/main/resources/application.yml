@@ -64,8 +64,18 @@ spring:
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
     template:
-      dlt-device-topic: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_TOPIC:device.DLT}
-      dlt-events-topic: ${SPRING_KAFKA_TEMPLATE_DLT_EVENTS_TOPIC:events.DLT}
+      events:
+        topic: ${SPRING_KAFKA_TEMPLATE_EVENTS_TOPIC:events}
+        partition: ${SPRING_KAFKA_TEMPLATE_EVENTS_PARTITION:3}
+        replicas: ${SPRING_KAFKA_TEMPLATE_EVENTS_REPLICAS:1}
+        dlt: ${SPRING_KAFKA_TEMPLATE_DLT_EVENTS_TOPIC:events.DLT}
+        dlt-partitions: ${SPRING_KAFKA_TEMPLATE_DLT_EVENTS_PARTITION:1}
+      device:
+        topic: ${SPRING_KAFKA_TEMPLATE_DEVICE_TOPIC:device}
+        partition: ${SPRING_KAFKA_TEMPLATE_DEVICE_PARTITION:3}
+        replicas: ${SPRING_KAFKA_TEMPLATE_DEVICE_REPLICAS:1}
+        dlt: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_TOPIC:device.DLT}
+        dlt-partitions: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_PARTITION:1}
       observation-enabled: ${SPRING_KAFKA_TEMPLATE_OBSERVATION_ENABLED:true}
     consumer:
       max-poll-records: ${SPRING_KAFKA_CONSUMER_MAX_POLL_RECORDS:20000}

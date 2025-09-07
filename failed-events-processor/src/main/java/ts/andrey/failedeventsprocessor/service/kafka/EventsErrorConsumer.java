@@ -18,7 +18,7 @@ public class EventsErrorConsumer {
     private final ErrorProcessor<DeviceEventError> errorProcessor;
 
     @KafkaListener(
-            topics = "${spring.kafka.template.dlt-events-topic}",
+            topics = "${spring.kafka.template.events.dlt}",
             groupId = "${spring.kafka.consumer.group-id}",
             containerFactory = "kafkaBatchEventsErrorListenerContainerFactory"
     )
