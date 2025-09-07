@@ -10,6 +10,7 @@ description = 'iot-common'
 
 repositories {
     mavenCentral()
+    maven { url "https://packages.confluent.io/maven/" }
     maven {
         url = uri("http://localhost:7777/repository/maven-releases/")
         allowInsecureProtocol = true
@@ -40,6 +41,10 @@ dependencies {
     api "org.springframework.kafka:spring-kafka"
     api "org.apache.commons:commons-lang3:${commonsLang3Version}"
     api "org.apache.commons:commons-collections4:${commonsCollections}"
+    api "io.confluent:kafka-avro-serializer:${confluentVersion}"
+    api "io.confluent:kafka-schema-registry-client:${confluentVersion}"
+
+
 }
 
 publishing {

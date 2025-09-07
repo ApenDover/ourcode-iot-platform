@@ -26,7 +26,6 @@ configurations {
 
 
 dependencies {
-    implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
     api "org.apache.avro:avro:${avroVersion}"
 }
 
