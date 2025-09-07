@@ -53,7 +53,7 @@ dependencies {
     implementation "org.apache.shardingsphere:shardingsphere-jdbc:${shardingsphere}"
     implementation "org.springframework.boot:spring-boot-starter-data-jpa"
 
-    implementation "ts.andrey:iot-common:1.0.2"
+    implementation "ts.andrey:iot-common:${iotCommon}"
 
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 
