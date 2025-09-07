@@ -9,17 +9,17 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import ts.andrey.iotcommon.metrics.GlobalKafkaMetrics;
 import ts.andrey.iotcommon.service.AbstractKafkaProducer;
 import ts.andrey.iotcommon.service.KafkaProducer;
-import ts.andrey.iotcommon.metrics.GlobalKafkaMetrics;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
-@Service
+@Component
 public class KafkaDltProducerImpl extends AbstractKafkaProducer implements KafkaProducer {
 
     private final String deviceEventDlt;

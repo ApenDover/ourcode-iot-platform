@@ -24,7 +24,7 @@ import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
-public class KafkaTopicConfig {
+public class KafkaConfig {
 
     private final KafkaProducer kafkaDltProducerImpl;
 
