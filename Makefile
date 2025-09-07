@@ -4,8 +4,10 @@ ifneq (,$(wildcard infrastructure/.env))
 endif
 
 COMPOSE_FILE=./infrastructure/docker-compose.yml
+COMPOSE_FILE_BUILD=./infrastructure/docker-compose.build.yml
 COMPOSE_FILE_LOCAL=./infrastructure/docker-compose.override.yml
 DC=docker compose -f $(COMPOSE_FILE)
+DCB=docker compose -f $(COMPOSE_FILE_BUILD)
 DCL=docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_FILE_LOCAL)
 ACTUATOR_URL=http://localhost:
 LOGGER_NAME=ts.andrey
@@ -22,7 +24,16 @@ help: ## Показать список доступных команд
 	@echo "  \033[36mset-log-<level>-<port>\033[0m  	Установить логирование (пример: make set-log-debug-8080)"
 	@echo "  \033[36mupdate-<service>\033[0m  		Пересобрать проект и развернуть контейнер"
 
-up: nexus-deploy ## Запустить контейнеры в фоне
+up:  ## Запустить контейнеры в фоне
+	$(DC) up nexus -d
+	@echo "⏳ Жду пока контейнер nexus станет healthy..."
+	@until [ $$(docker inspect --format='{{.State.Health.Status}}' nexus) = "healthy" ]; do \
+		sleep 2; \
+	done
+	@sleep 5;
+	$(DCB) up -d build-iot-avro
+	$(DCB) up -d build-iot-common
+	$(DCB) up -d build-device-api
 	$(DC) up -d
 	@make keycloak-setup-users
 

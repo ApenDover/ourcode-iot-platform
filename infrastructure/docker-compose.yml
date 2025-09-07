@@ -179,6 +179,8 @@ services:
       retries: 12
       timeout: 5s
       start_period: 30s
+    networks:
+      - iot_network
   zookeeper:
     image: bitnami/zookeeper:latest
     container_name: zookeeper
