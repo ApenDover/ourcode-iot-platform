@@ -52,7 +52,7 @@ dependencies {
 
     implementation "org.springframework.boot:spring-boot-starter-data-cassandra"
 
-    implementation "ts.andrey:iot-common:1.0.0"
+    implementation "ts.andrey:iot-common:1.0.2"
 
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 

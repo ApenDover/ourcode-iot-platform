@@ -61,7 +61,7 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
         // WHEN
         toSend.forEach(message ->
                 KafkaProducerUtil.sendMessage(
-                        kafka.getBootstrapServers(), "deviceOne",
+                        kafka.getBootstrapServers(), "device",
                         schemaRegistry.getFirstMappedPort(), message
                 )
         );
@@ -91,7 +91,7 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
         // WHEN
         KafkaProducerUtil.sendMessage(
                 kafka.getBootstrapServers(),
-                "deviceOne",
+                "device",
                 schemaRegistry.getFirstMappedPort(),
                 deviceOneUpdated
         );

@@ -16,8 +16,6 @@ spring:
         replicas: 1
         dlt: device.DLT
         dlt-partitions: 1
-      device-topic: deviceOne
-      dlt-device-topic: dltDeviceOne
     consumer:
       max-poll-records: 1
       properties:

@@ -19,7 +19,7 @@ public class KafkaDeviceConsumer {
     private final DeviceServiceImpl deviceService;
 
     @KafkaListener(
-            topics = "${spring.kafka.template.device-topic}",
+            topics = "${spring.kafka.template.device.topic}",
             groupId = "${spring.kafka.consumer.group-id}",
             batch = "true",
             containerFactory = "kafkaBatchDeviceListenerContainerFactory"
