@@ -55,11 +55,6 @@ dependencies {
 
     implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
 
-//    implementation "org.springframework.kafka:spring-kafka"
-//    implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
-//    implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
-//    implementation "org.apache.avro:avro:${avroVersion}"
-//    implementation "io.confluent:kafka-schema-registry-client:${confluentVersion}"
     implementation "com.github.f4b6a3:ulid-creator:${ulidCreator}"
 
     compileOnly "org.projectlombok:lombok"

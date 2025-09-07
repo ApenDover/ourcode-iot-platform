@@ -26,17 +26,8 @@ configurations {
 
 
 dependencies {
-
     implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
     api "org.apache.avro:avro:${avroVersion}"
-
-    api "org.springframework.cloud:spring-cloud-starter-openfeign:${openfeign}"
-    api "org.springframework.boot:spring-boot-starter-validation:${springValidation}"
-    api "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
-    api "org.openapitools:jackson-databind-nullable:${jacksonNullable}"
-    api "com.fasterxml.jackson.core:jackson-annotations:${jacksonAnnotation}"
-
-    compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
 }
 
 sourceSets {

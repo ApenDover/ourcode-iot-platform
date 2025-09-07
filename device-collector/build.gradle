@@ -51,13 +51,7 @@ dependencies {
     implementation "org.apache.shardingsphere:shardingsphere-jdbc:${shardingsphere}"
     implementation "org.springframework.boot:spring-boot-starter-data-jpa"
 
-    implementation "org.apache.commons:commons-collections4:${commonsCollections}"
-    implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
-
-    implementation "org.springframework.kafka:spring-kafka"
-    implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
-    implementation "org.apache.avro:avro:${avroVersion}"
-    implementation "io.confluent:kafka-schema-registry-client:${confluentVersion}"
+    implementation "ts.andrey:iot-common:latest.release"
 
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 

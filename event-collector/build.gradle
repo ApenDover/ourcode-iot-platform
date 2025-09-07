@@ -32,6 +32,14 @@ configurations {
 repositories {
     mavenCentral()
     maven { url "https://packages.confluent.io/maven/" }
+    maven {
+        url = uri("http://localhost:7777/repository/maven-releases/")
+        allowInsecureProtocol = true
+        credentials {
+            username = project.findProperty("nexusUser") ?: "admin"
+            password = project.findProperty("nexusPassword") ?: "admin123"
+        }
+    }
 }
 
 dependencies {
@@ -50,12 +58,7 @@ dependencies {
 
     implementation "org.springframework.boot:spring-boot-starter-data-cassandra"
 
-    implementation "org.springframework.kafka:spring-kafka"
-    implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
-    implementation "org.apache.commons:commons-collections4:${commonsCollections}"
-    implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
-    implementation "org.apache.avro:avro:${avroVersion}"
-    implementation "io.confluent:kafka-schema-registry-client:${confluentVersion}"
+    implementation "ts.andrey:iot-common:latest.release"
 
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 

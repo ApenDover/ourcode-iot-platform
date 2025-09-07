@@ -28,7 +28,7 @@ java {
 
 dependencies {
 
-    api "ts.andrey:iot-avro:1.0.0"
+    implementation "ts.andrey:iot-avro:1.0.0"
 
     implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
     implementation "org.springframework.boot:spring-boot-starter-actuator"
@@ -40,8 +40,6 @@ dependencies {
     api "org.springframework.kafka:spring-kafka"
     api "org.apache.commons:commons-lang3:${commonsLang3Version}"
     api "org.apache.commons:commons-collections4:${commonsCollections}"
-
-    compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
 }
 
 publishing {
