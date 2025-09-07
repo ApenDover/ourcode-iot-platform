@@ -25,15 +25,15 @@ help: ## Показать список доступных команд
 	@echo "  \033[36mupdate-<service>\033[0m  		Пересобрать проект и развернуть контейнер"
 
 up:  ## Запустить контейнеры в фоне
-	$(DC) up nexus -d
-	@echo "⏳ Жду пока контейнер nexus станет healthy..."
-	@until [ $$(docker inspect --format='{{.State.Health.Status}}' nexus) = "healthy" ]; do \
-		sleep 2; \
-	done
-	@sleep 5;
-	$(DCB) up -d build-iot-avro
-	$(DCB) up -d build-iot-common
-	$(DCB) up -d build-device-api
+#	$(DC) up nexus -d
+#	@echo "⏳ Жду пока контейнер nexus станет healthy..."
+#	@until [ $$(docker inspect --format='{{.State.Health.Status}}' nexus) = "healthy" ]; do \
+#		sleep 2; \
+#	done
+#	@sleep 5;
+#	$(DCB) up -d iot-avro
+#	$(DCB) up -d iot-common
+#	$(DCB) up -d device-api
 	$(DC) up -d
 	@make keycloak-setup-users
 

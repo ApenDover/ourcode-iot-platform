@@ -1,6 +1,11 @@
 services:
   kafka-producer:
-    build: ../kafka-producer
+    build:
+      context: ../kafka-producer
+      args:
+        NEXUS_URL: ${NEXUS_URL}
+        NEXUS_USER: ${NEXUS_USER}
+        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
     container_name: kafka-producer
     env_file:
       - .env
@@ -27,7 +32,12 @@ services:
     networks:
       - iot_network
   device-collector:
-    build: ../device-collector
+    build:
+      context: ../device-collector
+      args:
+        NEXUS_URL: ${NEXUS_URL}
+        NEXUS_USER: ${NEXUS_USER}
+        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
     container_name: device-collector
     env_file:
       - .env
@@ -60,7 +70,12 @@ services:
     networks:
       - iot_network
   device-service:
-    build: ../device-service
+    build:
+      context: ../device-service
+      args:
+        NEXUS_URL: ${NEXUS_URL}
+        NEXUS_USER: ${NEXUS_USER}
+        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
     container_name: device-service
     env_file:
       - .env
@@ -95,7 +110,12 @@ services:
     networks:
       - iot_network
   event-collector:
-    build: ../event-collector
+    build:
+      context: ../event-collector
+      args:
+        NEXUS_URL: ${NEXUS_URL}
+        NEXUS_USER: ${NEXUS_USER}
+        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
     container_name: event-collector
     restart: unless-stopped
     ports:
@@ -132,7 +152,13 @@ services:
     networks:
       - iot_network
   failed-events-processor:
-    build: ../failed-events-processor
+    build:
+      context: ../failed-events-processor
+      dockerfile: Dockerfile
+      args:
+        NEXUS_URL: ${NEXUS_URL}
+        NEXUS_USER: ${NEXUS_USER}
+        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
     container_name: failed-events-processor
     env_file:
       - .env

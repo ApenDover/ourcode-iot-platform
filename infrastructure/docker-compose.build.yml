@@ -1,29 +1,29 @@
 services:
-  build-iot-avro:
+  iot-avro:
     restart: "no"
     build:
       context: ../iot-avro
-    container_name: build-iot-avro
+    container_name: iot-avro
     entrypoint: ["./gradlew", "--no-daemon", "publish"]
     env_file:
       - .env
     networks:
       - iot_network
-  build-iot-common:
+  iot-common:
     restart: "no"
     build:
       context: ../iot-common
-    container_name: build-iot-common
+    container_name: iot-common
     entrypoint: ["./gradlew", "--no-daemon", "publish"]
     env_file:
       - .env
     networks:
       - iot_network
-  build-device-api:
+  device-api:
     restart: "no"
     build:
       context: ../device-api
-    container_name: build-device-api
+    container_name: device-api
     entrypoint: ["./gradlew", "--no-daemon", "publish"]
     env_file:
       - .env
@@ -31,4 +31,3 @@ services:
       - iot_network
 networks:
   iot_network:
-    external: true
