@@ -65,8 +65,13 @@ spring:
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
     template:
-      device-topic: ${SPRING_KAFKA_TEMPLATE_DEVICE_TOPIC:device}
-      dlt-device-topic: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_TOPIC:device.DLT}
+      template:
+        device:
+          topic: ${SPRING_KAFKA_TEMPLATE_DEVICE_TOPIC:device}
+          partition: ${SPRING_KAFKA_TEMPLATE_DEVICE_PARTITION:3}
+          replicas: ${SPRING_KAFKA_TEMPLATE_DEVICE_REPLICAS:1}
+          dlt: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_TOPIC:device.DLT}
+          dlt-partitions: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_PARTITION:1}
       observation-enabled: ${SPRING_KAFKA_TEMPLATE_OBSERVATION_ENABLED:true}
     producer:
       key-serializer: ${SPRING_KAFKA_PRODUCER_KEY_SERIALIZER:org.apache.kafka.common.serialization.StringSerializer}

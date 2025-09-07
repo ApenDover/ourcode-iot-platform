@@ -67,10 +67,6 @@ spring:
         replicas: ${SPRING_KAFKA_TEMPLATE_DEVICE_REPLICAS:1}
         dlt: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_TOPIC:device.DLT}
         dlt-partitions: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_PARTITION}
-      events-topic: ${SPRING_KAFKA_TEMPLATE_EVENTS_TOPIC:events}
-      dlt-events-topic: ${SPRING_KAFKA_TEMPLATE_DLT_EVENTS_TOPIC:events.DLT}
-      device-topic: ${SPRING_KAFKA_TEMPLATE_DEVICE_TOPIC:device}
-      dlt-device-topic: ${SPRING_KAFKA_TEMPLATE_DLT_DEVICE_TOPIC:device.DLT}
     producer:
       key-serializer: ${SPRING_KAFKA_PRODUCER_KEY_SERIALIZER:org.apache.kafka.common.serialization.StringSerializer}
       value-serializer: ${SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER:io.confluent.kafka.serializers.KafkaAvroSerializer}

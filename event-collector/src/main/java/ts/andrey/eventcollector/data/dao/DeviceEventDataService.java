@@ -12,7 +12,8 @@ import ts.andrey.eventcollector.data.entity.DeviceEventEntity;
 import ts.andrey.eventcollector.data.repository.DeviceEventReactRepository;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.metrics.CassandraMetrics;
-import ts.andrey.eventcollector.service.kafka.KafkaProducer;
+import ts.andrey.iotcommon.service.KafkaProducer;
+import ts.andrey.iotcommon.utils.MessageDltBuilder;
 
 import java.time.Duration;
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DeviceEventDataService {
 
-    private final KafkaProducer kafkaEventProducerImpl;
+    private final KafkaProducer kafkaDltProducerImpl;
     private final DeviceEventMapper deviceEventMapper;
     private final CassandraMetrics cassandraMetrics;
     private final DeviceEventReactRepository deviceEventReactRepository;
@@ -101,7 +102,10 @@ public class DeviceEventDataService {
                             event.getKey().getEventId(), inner);
 
                     Optional.ofNullable(eventMap.get(event.getKey().getEventId()))
-                            .ifPresent(original -> kafkaEventProducerImpl.sendDlt(List.of(original)));
+                            .ifPresent(original -> {
+                                final var errorMessage = MessageDltBuilder.getMessage(original, inner);
+                                kafkaDltProducerImpl.send(List.of(errorMessage));
+                            });
 
                     return Mono.empty();
                 })

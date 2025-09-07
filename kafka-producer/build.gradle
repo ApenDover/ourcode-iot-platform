@@ -44,7 +44,7 @@ repositories {
 
 dependencies {
 
-    implementation "ts.andrey:iot-common:latest.release"
+    implementation "ts.andrey:iot-common:1.0.0"
 
     implementation "org.springframework.boot:spring-boot-starter-web"
 

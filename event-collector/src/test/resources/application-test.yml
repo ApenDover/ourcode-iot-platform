@@ -2,10 +2,18 @@ spring:
   kafka:
     bootstrap-servers: ${kafka.bootstrap.servers}
     template:
-      events-topic: events
-      dlt-events-topic: events.DLT
-      device-topic: device
-      dlt-device-topic: device.DLT
+      events:
+        topic: events
+        partition: 3
+        replicas: 1
+        dlt: events.DLT
+        dlt-partitions: 1
+      device:
+        topic: device
+        partition: 3
+        replicas: 1
+        dlt: device.DLT
+        dlt-partitions: 1
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer

@@ -2,7 +2,6 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version "${springBootVersion}"
     id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
-    id "com.github.davidmc24.gradle.plugin.avro" version "${gradlePluginAvro}"
     id 'com.github.spotbugs' version "${spotbugsVersion}"
     id 'jacoco'
     id 'checkstyle'
@@ -16,11 +15,6 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of("${javaVersion}")
     }
-}
-
-avro {
-    fieldVisibility = "PRIVATE"
-    createSetters = false
 }
 
 configurations {
@@ -58,7 +52,7 @@ dependencies {
 
     implementation "org.springframework.boot:spring-boot-starter-data-cassandra"
 
-    implementation "ts.andrey:iot-common:latest.release"
+    implementation "ts.andrey:iot-common:1.0.0"
 
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 

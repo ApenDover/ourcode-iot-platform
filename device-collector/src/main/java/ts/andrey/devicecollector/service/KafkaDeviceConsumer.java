@@ -1,4 +1,4 @@
-package ts.andrey.devicecollector.service.kafka;
+package ts.andrey.devicecollector.service;
 
 import com.nashkod.avro.Device;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class KafkaDeviceConsumer {
             topics = "${spring.kafka.template.device-topic}",
             groupId = "${spring.kafka.consumer.group-id}",
             batch = "true",
-            containerFactory = "kafkaBatchListenerContainerFactory"
+            containerFactory = "kafkaBatchDeviceListenerContainerFactory"
     )
     public void handleEvents(ConsumerRecords<String, Device> records) {
         final var trace = TraceUtil.getTraceParentFromIterator(records.iterator().next().headers());
@@ -31,12 +31,7 @@ public class KafkaDeviceConsumer {
             records.forEach(message -> devices.add(message.value()));
             log.info("Получена пачка из [{}] девайсов", devices.size());
             log.debug("Получены девайсы: [{}]", devices);
-            try {
-                deviceService.createOrUpdateDevice(devices);
-            } catch (Exception e) {
-                log.error("Ошибка обработки пачки событий", e);
-                throw e;
-            }
+            deviceService.createOrUpdateDevice(devices);
         });
     }
 

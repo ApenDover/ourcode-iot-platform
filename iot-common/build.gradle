@@ -28,7 +28,6 @@ java {
 
 dependencies {
 
-    implementation "ts.andrey:iot-avro:1.0.0"
 
     implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
     implementation "org.springframework.boot:spring-boot-starter-actuator"
@@ -37,6 +36,7 @@ dependencies {
     compileOnly "org.projectlombok:lombok:${lombok}"
     annotationProcessor "org.projectlombok:lombok:${lombok}"
 
+    api "ts.andrey:iot-avro:1.0.0"
     api "org.springframework.kafka:spring-kafka"
     api "org.apache.commons:commons-lang3:${commonsLang3Version}"
     api "org.apache.commons:commons-collections4:${commonsCollections}"

@@ -2,7 +2,6 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version "${springBootVersion}"
 	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
-	id "com.github.davidmc24.gradle.plugin.avro" version "${gradlePluginAvro}"
 	id 'jacoco'
 	id 'checkstyle'
 }
@@ -23,14 +22,17 @@ configurations {
 	}
 }
 
-avro {
-	fieldVisibility = "PRIVATE"
-	createSetters = false
-}
-
 repositories {
 	mavenCentral()
 	maven { url "https://packages.confluent.io/maven/" }
+	maven {
+		url = uri("http://localhost:7777/repository/maven-releases/")
+		allowInsecureProtocol = true
+		credentials {
+			username = project.findProperty("nexusUser") ?: "admin"
+			password = project.findProperty("nexusPassword") ?: "admin123"
+		}
+	}
 }
 
 dependencies {
@@ -42,12 +44,11 @@ dependencies {
 	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
 	implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
 
+	implementation "ts.andrey:iot-avro:1.0.0"
+
 	implementation "org.springframework.kafka:spring-kafka"
 	implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
 	implementation "org.apache.commons:commons-collections4:${commonsCollections}"
-	implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
-	implementation "org.apache.avro:avro:${avroVersion}"
-	implementation "io.confluent:kafka-schema-registry-client:${confluentVersion}"
 	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-avro:${jackson}"
 	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson}"
 

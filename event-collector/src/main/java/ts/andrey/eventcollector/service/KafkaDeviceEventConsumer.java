@@ -1,4 +1,4 @@
-package ts.andrey.eventcollector.service.kafka.impl;
+package ts.andrey.eventcollector.service;
 
 import com.nashkod.avro.DeviceEvent;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +19,10 @@ public class KafkaDeviceEventConsumer {
     private final CollectorFacade collectorFacade;
 
     @KafkaListener(
-            topics = "${spring.kafka.template.events-topic}",
+            topics = "${spring.kafka.template.events.topic}",
             groupId = "${spring.kafka.consumer.group-id}",
             batch = "true",
-            containerFactory = "kafkaBatchListenerContainerFactory"
+            containerFactory = "kafkaBatchDeviceEventsListenerContainerFactory"
     )
     public void handleEvents(ConsumerRecords<String, DeviceEvent> records) {
         final var trace = TraceUtil.getTraceParentFromIterator(records.iterator().next().headers());

@@ -4,8 +4,8 @@ import com.nashkod.avro.Device;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ts.andrey.devicecollector.metrics.GlobalMetrics;
 import ts.andrey.devicecollector.data.dao.DeviceDataService;
+import ts.andrey.devicecollector.metrics.GlobalMetrics;
 import ts.andrey.devicecollector.service.DeviceService;
 
 import java.util.List;

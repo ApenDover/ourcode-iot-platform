@@ -19,7 +19,6 @@ import java.util.List;
 public class DeviceEventServiceImpl implements DeviceEventService {
 
     private final DeviceEventDataService deviceEventDataService;
-    private final DeviceEventMapper deviceEventMapper;
     private final SimpleCache simpleCache;
 
     @WithSpan("cassandra-save-events-and-cache")

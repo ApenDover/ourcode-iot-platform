@@ -81,8 +81,12 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     template:
-      device-topic: device
-      dlt-device-topic: device.DLT
+      device:
+        topic: device
+        partition: 3
+        replicas: 1
+        dlt: device.DLT
+        dlt-partitions: 1
       observation-enabled: true
     consumer:
       max-poll-records: 50000
