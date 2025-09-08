@@ -14,9 +14,3 @@ services:
   failed-events-processor:
     build:
       dockerfile: ../failed-events-processor/Dockerfile.local
-  build-iot-common:
-    build: false
-    image: "none"
-  build-iot-avro:
-    build: false
-    image: "none"

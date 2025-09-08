@@ -25,15 +25,21 @@ help: ## Показать список доступных команд
 	@echo "  \033[36mupdate-<service>\033[0m  		Пересобрать проект и развернуть контейнер"
 
 up:  ## Запустить контейнеры в фоне
-#	$(DC) up nexus -d
-#	@echo "⏳ Жду пока контейнер nexus станет healthy..."
-#	@until [ $$(docker inspect --format='{{.State.Health.Status}}' nexus) = "healthy" ]; do \
-#		sleep 2; \
-#	done
-#	@sleep 5;
-#	$(DCB) up -d iot-avro
-#	$(DCB) up -d iot-common
-#	$(DCB) up -d device-api
+	$(DC) up nexus -d
+	@echo "⏳ Жду пока контейнер nexus станет healthy..."
+	@until [ $$(docker inspect --format='{{.State.Health.Status}}' nexus) = "healthy" ]; do \
+		echo "жду.." & sleep 10; \
+	done
+	@sleep 5;
+	$(DCB) up -d iot-avro
+	@until curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-avro/1.0.0/iot-avro-1.0.0.pom >/dev/null 2>&1; do \
+		echo "жду публикацию iot-avro.." & sleep 5; \
+	done
+	$(DCB) up -d iot-common
+	$(DCB) up -d device-api
+	@until curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-common/1.0.0/iot-common-1.0.0.pom >/dev/null 2>&1; do \
+    	echo "жду публикацию iot-common.." & sleep 10; \
+    done
 	$(DC) up -d
 	@make keycloak-setup-users
 
@@ -90,12 +96,12 @@ boot: nexus-deploy  ## локально пересобрать образы
 	docker image rm infrastructure-event-collector -f
 	docker image rm infrastructure-kafka-producer -f
 	docker image rm infrastructure-failed-events-processor -f
-	cd event-collector && ./gradlew bootJar
-	cd event-collector && ./gradlew bootJar
-	cd device-collector && ./gradlew bootJar
-	cd device-service && ./gradlew bootJar
-	cd kafka-producer && ./gradlew bootJar
-	cd failed-events-processor && ./gradlew bootJar
+	cd event-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
+	cd event-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
+	cd device-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
+	cd device-service && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
+	cd kafka-producer && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
+	cd failed-events-processor && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 
 rebuild: nexus-deploy  ## локально пересобрать образы
 	cd event-collector && ./gradlew clean build
@@ -124,21 +130,21 @@ publish-nexus:
 		echo "device-api уже опубликован, пропускаем публикацию"; \
 	else \
 		echo "device-api не найден, выполняем публикацию Gradle..."; \
-		cd device-api && ./gradlew publish; \
+		cd device-api && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew publish; \
 	fi
 	@echo "Выгружаю avro"
 	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-avro/1.0.0/iot-avro-1.0.0.pom >/dev/null 2>&1; then \
 		echo "iot-avro уже опубликован, пропускаем публикацию"; \
 	else \
 		echo "iot-avro не найден, выполняем публикацию Gradle..."; \
-		cd iot-avro && ./gradlew publish; \
+		cd iot-avro && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew publish; \
 	fi
 	@echo "Выгружаю common"
 	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-common/1.0.0/iot-common-1.0.0.pom >/dev/null 2>&1; then \
 		echo "iot-common уже опубликован, пропускаем публикацию"; \
 	else \
 		echo "iot-common не найден, выполняем публикацию Gradle..."; \
-		cd iot-common && ./gradlew publish; \
+		cd iot-common && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew publish; \
 	fi
 
 keycloak-setup-users: wait-for-keycloak
