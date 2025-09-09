@@ -12,22 +12,25 @@ group = 'ts.andrey'
 version = "${appVersion}"
 description = 'device-service'
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of("${javaVersion}")
+def nexusUrl = System.getenv("NEXUS_URL") ?: project.findProperty("nexusUrl") ?: "http://localhost:7777/repository/maven-releases/"
+def nexusUser = System.getenv("NEXUS_USER") ?: project.findProperty("nexusUser") ?: "admin"
+def nexusPassword = System.getenv("NEXUS_PASSWORD") ?: project.findProperty("nexusPassword") ?: "admin123"
+
+repositories {
+	mavenCentral()
+	maven {
+		url = uri(nexusUrl)
+		allowInsecureProtocol = true
+		credentials {
+			username = nexusUser
+			password = nexusPassword
+		}
 	}
 }
 
-repositories {
-    mavenCentral()
-	maven {
-		name = "nexus"
-		allowInsecureProtocol = true
-		url = uri("http://localhost:7777/repository/maven-releases/")
-		credentials {
-			username = project.findProperty("nexusUser") ?: "admin"
-			password = project.findProperty("nexusPassword") ?: "admin123"
-		}
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of("${javaVersion}")
 	}
 }
 
@@ -40,6 +43,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+	implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
 
     implementation "org.postgresql:postgresql"
     implementation "org.springframework.boot:spring-boot-starter-jdbc"
@@ -78,7 +83,7 @@ dependencies {
 	testImplementation "org.testcontainers:junit-jupiter"
     testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-	testImplementation 'com.github.dasniko:testcontainers-keycloak:2.1.2'
+	testImplementation "com.github.dasniko:testcontainers-keycloak:${testContainerKeycloak}"
 	testImplementation 'org.testcontainers:postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testCompileOnly "org.projectlombok:lombok"

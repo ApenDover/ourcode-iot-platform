@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "DeviceError",
+  "namespace": "com.nashkod.avro",
+  "fields": [
+    {
+      "name": "failedEvent",
+      "type": "com.nashkod.avro.Device"
+    },
+    {
+      "name": "errorMeta",
+      "type": "com.nashkod.avro.ErrorMeta"
+    },
+    {
+      "name": "receivedAt",
+      "type": "long"
+    }
+  ]
+}

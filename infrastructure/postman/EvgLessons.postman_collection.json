@@ -418,6 +418,149 @@
 			]
 		},
 		{
+			"name": "Failed-events-service",
+			"item": [
+				{
+					"name": "addDeviceDltMessage",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"function generateUlid() {",
+									"    const ENCODING = \"0123456789ABCDEFGHJKMNPQRSTVWXYZ\"; // Crockford Base32",
+									"    const time = Date.now();",
+									"    let ulid = \"\";",
+									"",
+									"    // Первые 10 символов = время",
+									"    let modTime = time;",
+									"    let timeChars = [];",
+									"    for (let i = 0; i < 10; i++) {",
+									"        timeChars.push(ENCODING[modTime % 32]);",
+									"        modTime = Math.floor(modTime / 32);",
+									"    }",
+									"    ulid += timeChars.reverse().join(\"\");",
+									"",
+									"    // Остальные 16 символов = случайные",
+									"    for (let i = 0; i < 16; i++) {",
+									"        ulid += ENCODING[Math.floor(Math.random() * 32)];",
+									"    }",
+									"",
+									"    return ulid;",
+									"}",
+									"",
+									"pm.environment.set(\"ulid\", generateUlid());",
+									"pm.environment.set(\"random\", _.random(1, 20))",
+									"pm.environment.set(\"temp\", _.random(-30, 35))",
+									"pm.environment.set(\"currentTimestamp\", Date.now());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[{\n    \"failedEvent\": {\n        \"deviceId\": \"{{ulid}}\",\n        \"deviceType\": \"SENSOR\",\n        \"meta\": \"тут текст или json тогда и поле jsonb\",\n        \"createdAt\": 1692700000000\n    },\n    \"errorMeta\": {\n        \"errorSource\": \"DEVICE_COLLECTOR\",\n        \"reason\": \"Connection timeout\",\n        \"stackTrace\": \"java.net.SocketTimeoutException: Read timed out\\n\\tat com.example.DeviceClient.send(DeviceClient.java:42)\"\n    },\n    \"receivedAt\": \"{{currentTimestamp}}\"\n}]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8887/api/kafka/dlt/device/send",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8887",
+							"path": [
+								"api",
+								"kafka",
+								"dlt",
+								"device",
+								"send"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addEventsDltMessage",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"function generateUlid() {",
+									"    const ENCODING = \"0123456789ABCDEFGHJKMNPQRSTVWXYZ\"; // Crockford Base32",
+									"    const time = Date.now();",
+									"    let ulid = \"\";",
+									"",
+									"    // Первые 10 символов = время",
+									"    let modTime = time;",
+									"    let timeChars = [];",
+									"    for (let i = 0; i < 10; i++) {",
+									"        timeChars.push(ENCODING[modTime % 32]);",
+									"        modTime = Math.floor(modTime / 32);",
+									"    }",
+									"    ulid += timeChars.reverse().join(\"\");",
+									"",
+									"    // Остальные 16 символов = случайные",
+									"    for (let i = 0; i < 16; i++) {",
+									"        ulid += ENCODING[Math.floor(Math.random() * 32)];",
+									"    }",
+									"",
+									"    return ulid;",
+									"}",
+									"",
+									"pm.environment.set(\"ulid\", generateUlid());",
+									"pm.environment.set(\"random\", _.random(1, 20))",
+									"pm.environment.set(\"temp\", _.random(-30, 35))",
+									"pm.environment.set(\"currentTimestamp\", Date.now());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"failedEvent\": {\n            \"eventId\": \"{{$guid}}\",\n            \"timestamp\": {{$timestamp}},\n            \"type\": \"TEMPERATURE\",\n            \"payload\": \"{{temp}}\",\n            \"device\": {\n                \"deviceId\": \"{{ulid}}\",\n                \"deviceType\": \"SENSOR\",\n                \"meta\": \"тут текст или json тогда и поле jsonb\",\n                \"createdAt\": 1692700000000\n            }\n        },\n        \"errorMeta\": {\n            \"errorSource\": \"EVENT_COLLECTOR\",\n            \"reason\": \"Connection timeout\",\n            \"stackTrace\": \"java.net.SocketTimeoutException: Read timed out\\n\\tat com.example.DeviceClient.send(DeviceClient.java:42)\"\n        },\n        \"receivedAt\": \"{{currentTimestamp}}\"\n    }\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8887/api/kafka/dlt/events/send",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8887",
+							"path": [
+								"api",
+								"kafka",
+								"dlt",
+								"events",
+								"send"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Device-service",
 			"item": [
 				{

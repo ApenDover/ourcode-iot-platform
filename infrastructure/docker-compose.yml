@@ -1,27 +1,11 @@
 services:
-  nexus:
-    image: sonatype/nexus3:3.70.1
-    container_name: nexus
-    ports:
-      - "7777:8081"
-    env_file:
-      - .env
-    volumes:
-      - ${NEXUS_DATA_DIR:-nexus-data}:/nexus-data
-      - ./nexus-provisioning/create-user.sh:/opt/nexus-provisioning/create-user.sh
-    restart: unless-stopped
-    environment:
-      INSTALL4J_ADD_VM_PARAMS: "-Dnexus.scripts.allowCreation=true"
-      NEXUS_SECURITY_RANDOMPASSWORD: "false"
-    entrypoint: [ "/bin/bash", "/opt/nexus-provisioning/create-user.sh" ]
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "-u", "admin:admin123", "http://localhost:8081/service/rest/v1/status/check" ]
-      interval: 10s
-      retries: 12
-      timeout: 5s
-      start_period: 30s
   kafka-producer:
-    build: ../kafka-producer
+    build:
+      context: ../kafka-producer
+      args:
+        NEXUS_URL: ${NEXUS_URL}
+        NEXUS_USER: ${NEXUS_USER}
+        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
     container_name: kafka-producer
     env_file:
       - .env
@@ -42,13 +26,18 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8887/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
       interval: 3s
-      timeout: 2s
-      retries: 2
+      timeout: 5s
+      retries: 5
       start_period: 6s
     networks:
       - iot_network
   device-collector:
-    build: ../device-collector
+    build:
+      context: ../device-collector
+      args:
+        NEXUS_URL: ${NEXUS_URL}
+        NEXUS_USER: ${NEXUS_USER}
+        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
     container_name: device-collector
     env_file:
       - .env
@@ -70,16 +59,23 @@ services:
         condition: service_healthy
       event-collector:
         condition: service_healthy
+      failed-events-processor:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8889/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
       interval: 3s
-      timeout: 2s
-      retries: 2
+      timeout: 5s
+      retries: 5
       start_period: 6s
     networks:
       - iot_network
   device-service:
-    build: ../device-service
+    build:
+      context: ../device-service
+      args:
+        NEXUS_URL: ${NEXUS_URL}
+        NEXUS_USER: ${NEXUS_USER}
+        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
     container_name: device-service
     env_file:
       - .env
@@ -108,13 +104,18 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "wget -q -O - http://localhost:8886/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
       interval: 3s
-      timeout: 2s
-      retries: 2
+      timeout: 5s
+      retries: 5
       start_period: 6s
     networks:
       - iot_network
   event-collector:
-    build: ../event-collector
+    build:
+      context: ../event-collector
+      args:
+        NEXUS_URL: ${NEXUS_URL}
+        NEXUS_USER: ${NEXUS_USER}
+        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
     container_name: event-collector
     restart: unless-stopped
     ports:
@@ -140,12 +141,70 @@ services:
         condition: service_started
       grafana:
         condition: service_started
+      failed-events-processor:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8888/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
       interval: 6s
-      timeout: 4s
-      retries: 6
+      timeout: 5s
+      retries: 5
       start_period: 10s
+    networks:
+      - iot_network
+  failed-events-processor:
+    build:
+      context: ../failed-events-processor
+      dockerfile: Dockerfile
+      args:
+        NEXUS_URL: ${NEXUS_URL}
+        NEXUS_USER: ${NEXUS_USER}
+        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
+    container_name: failed-events-processor
+    env_file:
+      - .env
+    restart: unless-stopped
+    ports:
+      - 8880:8880
+    environment:
+      OTEL_SERVICE_NAME: failed-events-processor
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: none
+      OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
+    depends_on:
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q -O - http://localhost:8880/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 6s
+    networks:
+      - iot_network
+  nexus:
+    image: sonatype/nexus3:3.70.1
+    container_name: nexus
+    ports:
+      - "7777:8081"
+    env_file:
+      - .env
+    volumes:
+      - ${NEXUS_DATA_DIR:-nexus-data}:/nexus-data
+      - ./nexus-provisioning/create-user.sh:/opt/nexus-provisioning/create-user.sh
+    restart: unless-stopped
+    environment:
+      INSTALL4J_ADD_VM_PARAMS: "-Dnexus.scripts.allowCreation=true"
+      NEXUS_SECURITY_RANDOMPASSWORD: "false"
+    entrypoint: [ "/bin/bash", "/opt/nexus-provisioning/create-user.sh" ]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "-u", "admin:admin123", "http://localhost:8081/service/rest/v1/status/check" ]
+      interval: 10s
+      retries: 12
+      timeout: 5s
+      start_period: 30s
     networks:
       - iot_network
   zookeeper:
@@ -165,15 +224,13 @@ services:
     container_name: kafka
     restart: unless-stopped
     environment:
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       - ALLOW_PLAINTEXT_LISTENER=yes
     depends_on:
       - zookeeper
-    ports:
-      - "9092:9092"
     volumes:
       - kafka_data:/bitnami/kafka
     networks:
@@ -185,12 +242,12 @@ services:
       retries: 5
       start_period: 10s
   kafka-ui:
-    image: provectuslabs/kafka-ui:latest
+    image: provectuslabs/kafka-ui:v0.7.2
     container_name: kafka-ui
     restart: unless-stopped
     environment:
       - KAFKA_CLUSTERS_0_NAME=local-kafka
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
       - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
       - KAFKA_CLUSTERS_0_SCHEMAREGISTRY=http://schema-registry:8081
       - KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME=local-connect
@@ -212,26 +269,29 @@ services:
         condition: service_healthy
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
     volumes:
       - schema-registry-data:/var/lib/schema-registry
     networks:
       - iot_network
-#  minio:
-#    image: minio/minio:latest
-#    container_name: minio
-#    ports:
-#      - "9000:9000"
-#      - "9001:9001"
-#    restart: unless-stopped
-#    environment:
-#      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-#      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-#    command: server /data --console-address ":9001"
-#    healthcheck:
-#      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
-#      interval: 30s
-#      retries: 3
+  minio:
+    image: minio/minio:RELEASE.2025-07-23T15-54-02Z
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      retries: 3
+    networks:
+      - iot_network
 #  camunda:
 #    image: camunda/camunda-bpm-platform:latest
 #    container_name: camunda
@@ -381,8 +441,6 @@ services:
       - start-dev
       - --import-realm
     environment:
-#      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
-#      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_DB: postgres
       KC_DB_URL_HOST: postgres_keycloak
       KC_DB_URL_DATABASE: ${POSTGRES_KEYCLOAK_DB}
@@ -415,7 +473,7 @@ services:
     networks:
       - iot_network
   redis-insight:
-    image: redis/redisinsight:latest
+    image: redis/redisinsight:2.70
     container_name: proselyte-redisinsight
     restart: always
     depends_on:
@@ -490,9 +548,7 @@ services:
     image: danielqsj/kafka-exporter:latest
     container_name: kafka-exporter
     restart: unless-stopped
-    environment:
-      - KAFKA_URI=kafka:29092
-      - KAFKA_GROUP_FILTER=.*
+    command: ["--kafka.server=kafka:9092"]
     depends_on:
       kafka:
         condition: service_healthy
@@ -544,7 +600,7 @@ services:
     networks:
       - iot_network
   alloy:
-    image: grafana/alloy:latest
+    image: grafana/alloy:v1.10.2
     container_name: alloy
     user: root
     ports:

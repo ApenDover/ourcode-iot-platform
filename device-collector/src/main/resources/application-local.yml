@@ -34,6 +34,9 @@ management:
       endpoint: http://localhost:4318
       protocol: http/protobuf
 
+otel.traces.exporter: none
+otel.logs.exporter: none
+
 opentelemetry:
   instrumentation:
     logback-mdc:
@@ -81,8 +84,18 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     template:
-      device-topic: device
-      dlt-device-topic: device.DLT
+      events:
+        topic: events
+        partition: 3
+        replicas: 1
+        dlt: events.DLT
+        dlt-partitions: 1
+      device:
+        topic: device
+        partition: 3
+        replicas: 1
+        dlt: device.DLT
+        dlt-partitions: 1
       observation-enabled: true
     consumer:
       max-poll-records: 50000

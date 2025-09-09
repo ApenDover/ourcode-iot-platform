@@ -12,6 +12,23 @@ group = 'ts.andrey'
 version = "${appVersion}"
 description = 'kafka-producer'
 
+def nexusUrl = System.getenv("NEXUS_URL") ?: project.findProperty("nexusUrl") ?: "http://localhost:7777/repository/maven-releases/"
+def nexusUser = System.getenv("NEXUS_USER") ?: project.findProperty("nexusUser") ?: "admin"
+def nexusPassword = System.getenv("NEXUS_PASSWORD") ?: project.findProperty("nexusPassword") ?: "admin123"
+
+repositories {
+    mavenCentral()
+    maven { url "https://packages.confluent.io/maven/" }
+    maven {
+        url = uri(nexusUrl)
+        allowInsecureProtocol = true
+        credentials {
+            username = nexusUser
+            password = nexusPassword
+        }
+    }
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of("${javaVersion}")
@@ -29,12 +46,10 @@ configurations {
     }
 }
 
-repositories {
-    mavenCentral()
-    maven { url "https://packages.confluent.io/maven/" }
-}
-
 dependencies {
+
+    implementation "ts.andrey:iot-common:${iotCommon}"
+
     implementation "org.springframework.boot:spring-boot-starter-web"
 
     implementation "org.springframework.boot:spring-boot-starter-actuator"
@@ -42,12 +57,8 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
     implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
 
+    implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
 
-    implementation "org.springframework.kafka:spring-kafka"
-    implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
-    implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
-    implementation "org.apache.avro:avro:${avroVersion}"
-    implementation "io.confluent:kafka-schema-registry-client:${confluentVersion}"
     implementation "com.github.f4b6a3:ulid-creator:${ulidCreator}"
 
     compileOnly "org.projectlombok:lombok"

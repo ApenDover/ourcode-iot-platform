@@ -11,11 +11,9 @@ import ts.andrey.eventcollector.service.component.CollectorFacade;
 import ts.andrey.eventcollector.tdf.DummyTDF;
 
 import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,21 +30,6 @@ class CollectorFacadeTest {
 
     @InjectMocks
     CollectorFacade collectorService;
-
-    @Test
-    void collectShouldProcessOnlyValidEvents() {
-        // GIVEN
-        final var validEvent = DummyTDF.deviceEvent.getDefault();
-        final var invalidEvent = DummyTDF.deviceEvent.getInvalid();
-        final var events = List.of(validEvent, invalidEvent);
-
-        // WHEN
-        collectorService.collect(events);
-
-        // THEN
-        verify(deviceServiceImpl).sendUniqueDeviceids(List.of(validEvent));
-        verify(deviceEventServiceImpl).saveEvents(List.of(validEvent));
-    }
 
     @Test
     void collectShouldLogErrorWhenExceptionOccurs() {

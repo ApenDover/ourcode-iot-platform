@@ -11,12 +11,13 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import ts.andrey.devicecollector.data.repository.DeviceBatchRepository;
 import ts.andrey.devicecollector.mapper.DeviceMapper;
 import ts.andrey.devicecollector.metrics.GlobalMetrics;
 import ts.andrey.devicecollector.metrics.PostgresMetrics;
-import ts.andrey.devicecollector.data.repository.DeviceBatchRepository;
-import ts.andrey.devicecollector.service.kafka.KafkaProducer;
 import ts.andrey.devicecollector.utils.ShardUtil;
+import ts.andrey.iotcommon.service.KafkaProducer;
+import ts.andrey.iotcommon.utils.MessageDltBuilder;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,8 +35,8 @@ public class DeviceDataService {
 
     private final DeviceMapper deviceMapper;
     private final PostgresMetrics postgresMetrics;
-    private final GlobalMetrics globalMetrics;
-    private final KafkaProducer kafkaProducer;
+    private final GlobalMetrics globalKafkaMetrics;
+    private final KafkaProducer kafkaDltProducerImpl;
     private final DeviceBatchRepository deviceBatchRepository;
 
     @WithSpan
@@ -58,16 +59,14 @@ public class DeviceDataService {
     @Recover
     public void recover(DataAccessException e, List<Device> devices) {
         log.error("После нескольких попыток не удалось сохранить устройства в postgres, отправляем в DLT", e);
-        devices.forEach(device -> {
-            final var shard = ShardUtil.getShardNameByString(device.getDeviceId(), shardCount);
-            postgresMetrics.incrementError(shard);
-            globalMetrics.incrementDltMessage();
-        });
-        try {
-            kafkaProducer.sendDlt(devices);
-        } catch (Exception kafkaEx) {
-            log.error("Ошибка отправки в DLT devices [{}]", devices, kafkaEx);
-        }
+        final var errorMessages = devices.stream()
+                .map(device -> {
+                    final var shard = ShardUtil.getShardNameByString(device.getDeviceId(), shardCount);
+                    postgresMetrics.incrementError(shard);
+                    globalKafkaMetrics.incrementDltMessage();
+                    return MessageDltBuilder.getMessage(device, e);
+                }).toList();
+        kafkaDltProducerImpl.send(errorMessages);
     }
 
 }

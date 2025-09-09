@@ -1,10 +1,11 @@
 package ts.andrey.devicecollector.integration;
 
-import com.nashkod.avro.Device;
+import com.nashkod.avro.DeviceError;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -26,6 +27,15 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 class DeviceCollectorWithMockProcessingIT extends BaseIntegrationTest {
+
+    @Value("${spring.kafka.template.device.topic}")
+    String deviceTopic;
+
+    @Value("${spring.kafka.template.device.dlt}")
+    String deviceDlt;
+
+    @Value("${spring.kafka.bootstrap-servers}")
+    String group;
 
     JdbcTemplate templateDsTwo;
     JdbcTemplate templateDsOne;
@@ -65,17 +75,17 @@ class DeviceCollectorWithMockProcessingIT extends BaseIntegrationTest {
         // WHEN
         toSend.forEach(message ->
                 KafkaProducerUtil.sendMessage(
-                        kafka.getBootstrapServers(), "deviceOne",
+                        kafka.getBootstrapServers(), deviceTopic,
                         schemaRegistry.getFirstMappedPort(), message
                 )
         );
 
         // THEN
-        await().atMost(30, TimeUnit.SECONDS)
+        await().atMost(10, TimeUnit.SECONDS)
                 .pollInterval(1000, MILLISECONDS)
                 .untilAsserted(() -> {
-                    final var records = KafkaConsumerUtil.getMessages(kafka.getBootstrapServers(), "dltDeviceOne",
-                            "group", schemaRegistry.getFirstMappedPort(), Device.class);
+                    final var records = KafkaConsumerUtil.getMessages(kafka.getBootstrapServers(), deviceDlt,
+                            group, schemaRegistry.getFirstMappedPort(), DeviceError.class);
                     assertNotNull(records);
                     assertFalse(records.isEmpty());
                     assertTrue(records.count() > 0);

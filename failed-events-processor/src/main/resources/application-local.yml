@@ -1,0 +1,93 @@
+logging:
+  level:
+    ts.andrey: debug
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    tags:
+      application: event-collector
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    otlp:
+      endpoint: http://localhost:4318
+      protocol: http/protobuf
+
+opentelemetry:
+  instrumentation:
+    logback-mdc:
+      enabled: true
+  service:
+    name: ${spring.application.name}
+  exporter:
+    otlp:
+      endpoint: http://localhost:4318
+      protocol: http/protobuf
+      timeout: 10000
+      compression: gzip
+  traces:
+    exporter: otlp
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+  resource-attributes:
+    service.version: 1.0.0
+    deployment.environment: docker
+    service.name: ${spring.application.name}
+
+minio:
+  url: http://localhost:9000
+  access-key: minio_admin
+  secret-key: minio_pass
+  bucket-name: bucket
+  retry:
+    max-attempts: 2
+    initial-delay: 1000
+    multiplier: 5
+
+otel:
+  sdk:
+    disabled: true
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    template:
+      events:
+        topic: events
+        partition: 3
+        replicas: 1
+        dlt: events.DLT
+        dlt-partitions: 1
+      device:
+        topic: device
+        partition: 3
+        replicas: 1
+        dlt: device.DLT
+        dlt-partitions: 1
+    consumer:
+      max-poll-records: 100
+      fetch-max-wait: 500
+      fetch-min-size: 1024
+      enable-auto-commit: false
+      group-id: device-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        schema.registry.url: ${schema.registry.url}
+debug: true

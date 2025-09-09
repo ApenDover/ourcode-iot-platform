@@ -18,8 +18,8 @@ import org.testcontainers.utility.DockerImageName;
 import ts.andrey.eventcollector.data.dao.DeviceEventDataService;
 import ts.andrey.eventcollector.data.repository.DeviceEventRepository;
 import ts.andrey.eventcollector.service.component.SimpleCache;
-import ts.andrey.eventcollector.service.kafka.impl.KafkaDeviceEventConsumer;
-import ts.andrey.eventcollector.service.kafka.impl.KafkaEventProducerImpl;
+import ts.andrey.eventcollector.service.KafkaDeviceEventConsumer;
+import ts.andrey.iotcommon.service.KafkaProducer;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;
@@ -80,7 +80,7 @@ public abstract class BaseIntegrationTest {
             .withExposedPorts(9042);
 
     @Autowired
-    public KafkaEventProducerImpl producer;
+    public KafkaProducer kafkaProducerImpl;
 
     @Autowired
     public KafkaDeviceEventConsumer consumer;

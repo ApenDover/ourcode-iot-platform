@@ -8,8 +8,32 @@ group = "ts.andrey"
 version = "${appVersion}"
 description = 'device-api'
 
+def nexusUrl = System.getenv("NEXUS_URL") ?: project.findProperty("nexusUrl") ?: "http://localhost:7777/repository/maven-releases/"
+def nexusUser = System.getenv("NEXUS_USER") ?: project.findProperty("nexusUser") ?: "admin"
+def nexusPassword = System.getenv("NEXUS_PASSWORD") ?: project.findProperty("nexusPassword") ?: "admin123"
+
 repositories {
     mavenCentral()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = "device-api"
+        }
+    }
+    repositories {
+        maven {
+            name = "nexus"
+            url = uri(nexusUrl)
+            allowInsecureProtocol = true
+            credentials {
+                username = nexusUser
+                password = nexusPassword
+            }
+        }
+    }
 }
 
 dependencies {
@@ -48,22 +72,3 @@ sourceSets {
 }
 
 compileJava.dependsOn tasks.openApiGenerate
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            name = "nexus"
-            url = uri("http://localhost:7777/repository/maven-releases/")
-            allowInsecureProtocol = true
-            credentials {
-                username = project.findProperty("nexusUser") ?: "admin"
-                password = project.findProperty("nexusPassword") ?: "admin123"
-            }
-        }
-    }
-}

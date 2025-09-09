@@ -2,7 +2,6 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version "${springBootVersion}"
     id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
-    id "com.github.davidmc24.gradle.plugin.avro" version "${gradlePluginAvro}"
     id 'com.github.spotbugs' version "${spotbugsVersion}"
     id 'jacoco'
     id 'checkstyle'
@@ -12,26 +11,33 @@ group = 'ts.andrey'
 version = "${appVersion}"
 description = 'device-collector'
 
+def nexusUrl = System.getenv("NEXUS_URL") ?: project.findProperty("nexusUrl") ?: "http://localhost:7777/repository/maven-releases/"
+def nexusUser = System.getenv("NEXUS_USER") ?: project.findProperty("nexusUser") ?: "admin"
+def nexusPassword = System.getenv("NEXUS_PASSWORD") ?: project.findProperty("nexusPassword") ?: "admin123"
+
+repositories {
+    mavenCentral()
+    maven { url "https://packages.confluent.io/maven/" }
+    maven {
+        url = uri(nexusUrl)
+        allowInsecureProtocol = true
+        credentials {
+            username = nexusUser
+            password = nexusPassword
+        }
+    }
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of("${javaVersion}")
     }
 }
 
-avro {
-    fieldVisibility = "PRIVATE"
-    createSetters = false
-}
-
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-}
-
-repositories {
-    mavenCentral()
-    maven { url "https://packages.confluent.io/maven/" }
 }
 
 dependencies {
@@ -41,6 +47,8 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
     implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetrySpringBootVersion}"
 
+    implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
+
     implementation "org.flywaydb:flyway-core:${flyWay}"
     implementation "org.flywaydb:flyway-database-postgresql:${flyWay}"
 
@@ -49,13 +57,7 @@ dependencies {
     implementation "org.apache.shardingsphere:shardingsphere-jdbc:${shardingsphere}"
     implementation "org.springframework.boot:spring-boot-starter-data-jpa"
 
-    implementation "org.apache.commons:commons-collections4:${commonsCollections}"
-    implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
-
-    implementation "org.springframework.kafka:spring-kafka"
-    implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
-    implementation "org.apache.avro:avro:${avroVersion}"
-    implementation "io.confluent:kafka-schema-registry-client:${confluentVersion}"
+    implementation "ts.andrey:iot-common:${iotCommon}"
 
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 

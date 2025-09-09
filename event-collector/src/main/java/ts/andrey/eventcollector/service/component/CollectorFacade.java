@@ -9,7 +9,6 @@ import org.springframework.util.CollectionUtils;
 import ts.andrey.eventcollector.metrics.GlobalMetrics;
 import ts.andrey.eventcollector.service.DeviceEventService;
 import ts.andrey.eventcollector.service.DeviceService;
-import ts.andrey.eventcollector.validation.DeviceEventValidFilter;
 
 import java.util.List;
 
@@ -25,12 +24,11 @@ public class CollectorFacade {
     @WithSpan("event-collector-processing")
     public void collect(List<DeviceEvent> events) {
         try {
-            final var deviceEvents = DeviceEventValidFilter.getCorrect(events);
-            if (CollectionUtils.isEmpty(deviceEvents)) {
+            if (CollectionUtils.isEmpty(events)) {
                 return;
             }
-            deviceService.sendUniqueDeviceids(deviceEvents);
-            deviceEventService.saveEvents(deviceEvents);
+            deviceService.sendUniqueDeviceids(events);
+            deviceEventService.saveEvents(events);
             globalMetrics.incrementSuccess();
         } catch (Exception e) {
             globalMetrics.incrementError();

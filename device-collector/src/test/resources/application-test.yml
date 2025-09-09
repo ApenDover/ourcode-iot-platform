@@ -4,8 +4,18 @@ spring:
   kafka:
     bootstrap-servers: ${kafka.bootstrap.servers}
     template:
-      device-topic: deviceOne
-      dlt-device-topic: dltDeviceOne
+      events:
+        topic: events
+        partition: 3
+        replicas: 1
+        dlt: events.DLT
+        dlt-partitions: 1
+      device:
+        topic: device
+        partition: 3
+        replicas: 1
+        dlt: device.DLT
+        dlt-partitions: 1
     consumer:
       max-poll-records: 1
       properties:

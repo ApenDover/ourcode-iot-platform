@@ -43,7 +43,7 @@ class EventCollectorProcessingIT extends BaseIntegrationTest {
                 });
 
         //THEN CHECK PRODUCE DEVICE ID
-        final var kafkaRecords = KafkaConsumerUtil.getLastMessage(
+        final var kafkaRecords = KafkaConsumerUtil.getMessages(
                 kafka.getBootstrapServers(), "device", "device-group",
                 schemaRegistry.getFirstMappedPort(), Device.class
         );

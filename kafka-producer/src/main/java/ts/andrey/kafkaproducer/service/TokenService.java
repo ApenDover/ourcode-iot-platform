@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -60,7 +60,7 @@ public class TokenService {
             log.error(e.getMessage(), e);
             final var map = new HashMap<String, String>();
             map.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatusCode.valueOf(500)).body(map);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
         }
 
     }

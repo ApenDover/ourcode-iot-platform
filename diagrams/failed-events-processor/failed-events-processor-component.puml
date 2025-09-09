@@ -1,0 +1,26 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+AddElementTag("microservice", $bgColor="#E6F3F7", $fontColor="#333333", $borderColor="#3F668F")
+AddElementTag("storage", $bgColor="#F7E9E6", $fontColor="#333333", $borderColor="#8F3F3F")
+AddElementTag("queue", $bgColor="#E6F7E6", $fontColor="#333333", $borderColor="#3F8F5F")
+
+Container_Boundary(app, "failed-events-processor") {
+    Component(consumer, "Consumer", "Кафка-консьюмер", "class")
+    Component(error_handler_service, "ErrorProcessor", "Оркестратор процесса", "class")
+    Component(minio_uploader, "MinioUploader", "repository", "class")
+}
+
+System_Ext(kafka, "Apache Kafka", "Топик device-events", "queue")
+System_Ext(schema_reg, "Schema Registry", "Avro-схемы", "storage")
+System_Ext(minio, "Minio", "Постоянное хранилище", "storage")
+
+Rel(kafka, consumer, "Чтение сообщений", "Kafka")
+Rel(consumer, schema_reg, "Получение схемы", "HTTP")
+Rel(consumer, error_handler_service, "Передача сообщения", "Java-вызов")
+
+Rel(error_handler_service, minio_uploader, "Сохранение\Обновление", "Java-вызов")
+Rel(minio_uploader, minio, "Выгрузка json в minio", "storage")
+
+
+@enduml

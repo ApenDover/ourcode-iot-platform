@@ -1,0 +1,134 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version "${springBootVersion}"
+	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+	id 'jacoco'
+	id 'checkstyle'
+}
+
+group = 'ts.andrey'
+version = "${appVersion}"
+description = 'failed-events-processor'
+
+def nexusUrl = System.getenv("NEXUS_URL") ?: project.findProperty("nexusUrl") ?: "http://localhost:7777/repository/maven-releases/"
+def nexusUser = System.getenv("NEXUS_USER") ?: project.findProperty("nexusUser") ?: "admin"
+def nexusPassword = System.getenv("NEXUS_PASSWORD") ?: project.findProperty("nexusPassword") ?: "admin123"
+
+repositories {
+	mavenCentral()
+	maven { url "https://packages.confluent.io/maven/" }
+	maven {
+		url = uri(nexusUrl)
+		allowInsecureProtocol = true
+		credentials {
+			username = nexusUser
+			password = nexusPassword
+		}
+	}
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of("${javaVersion}")
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+dependencies {
+	implementation "org.springframework.boot:spring-boot-starter-actuator"
+	implementation "org.springframework.boot:spring-boot-starter-web"
+	implementation "org.springframework.boot:spring-boot-starter-aop"
+	implementation "io.micrometer:micrometer-tracing-bridge-brave"
+
+	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+	implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
+
+	implementation "ts.andrey:iot-common:${iotCommon}"
+
+	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-avro:${jackson}"
+	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson}"
+
+	implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
+
+	implementation "io.minio:minio:${minio}"
+
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+	compileOnly 'org.projectlombok:lombok'
+
+	compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugsToolVersion}"
+	testCompileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugsToolVersion}"
+	annotationProcessor "com.github.spotbugs:spotbugs-annotations:${spotbugsToolVersion}"
+	testAnnotationProcessor "com.github.spotbugs:spotbugs-annotations:${spotbugsToolVersion}"
+
+	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation "org.springframework.kafka:spring-kafka-test"
+	testImplementation "org.testcontainers:kafka"
+	testImplementation "org.awaitility:awaitility:${awaitilityVersion}"
+
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	testCompileOnly "org.projectlombok:lombok"
+	testAnnotationProcessor "org.projectlombok:lombok"
+	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+}
+
+checkstyle {
+	toolVersion = "${checkstyleToolVersion}"
+	configFile = file("$rootDir/config/checkstyle/checkstyle.xml")
+	configProperties = [
+			'checkstyle.suppressions.file': "$rootDir/config/checkstyle/exclude-filter.xml"
+	]
+	showViolations = true
+	ignoreFailures = false
+	maxWarnings = 0
+}
+
+jacoco {
+	toolVersion = "${jacocoToolVersion}"
+	reportsDirectory = layout.buildDirectory.dir('reports/jacoco')
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = false
+		html.required = true
+		csv.required = false
+	}
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'**/cassandra/**',
+					'**/configuration/**',
+					'**/controller/**',
+					'**/exception/**',
+					'**/*EventCollectorApplication*'
+			])
+		}))
+	}
+}
+
+configurations.configureEach {
+	exclude group: 'org.slf4j', module: 'slf4j-simple'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+bootJar {
+	archiveFileName = "app.jar"
+}

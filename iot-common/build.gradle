@@ -1,0 +1,76 @@
+plugins {
+    id "java-library"
+    id "org.openapi.generator" version "${openapiGenerator}"
+    id "maven-publish"
+}
+
+group = "ts.andrey"
+version = "${appVersion}"
+description = 'iot-common'
+
+def nexusUrl = System.getenv("NEXUS_URL") ?: project.findProperty("nexusUrl") ?: "http://localhost:7777/repository/maven-releases/"
+def nexusUser = System.getenv("NEXUS_USER") ?: project.findProperty("nexusUser") ?: "admin"
+def nexusPassword = System.getenv("NEXUS_PASSWORD") ?: project.findProperty("nexusPassword") ?: "admin123"
+
+repositories {
+    mavenCentral()
+    maven { url "https://packages.confluent.io/maven/" }
+    maven {
+        url = uri(nexusUrl)
+        allowInsecureProtocol = true
+        credentials {
+            username = nexusUser
+            password = nexusPassword
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = "iot-common"
+        }
+    }
+    repositories {
+        maven {
+            name = "nexus"
+            url = uri(nexusUrl)
+            allowInsecureProtocol = true
+            credentials {
+                username = nexusUser
+                password = nexusPassword
+            }
+        }
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of("${javaVersion}")
+    }
+}
+
+dependencies {
+
+
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "io.micrometer:micrometer-registry-prometheus"
+
+    compileOnly "org.projectlombok:lombok:${lombok}"
+    annotationProcessor "org.projectlombok:lombok:${lombok}"
+
+    api "ts.andrey:iot-avro:1.0.0"
+    api "org.springframework.kafka:spring-kafka"
+    api "org.apache.commons:commons-lang3:${commonsLang3Version}"
+    api "org.apache.commons:commons-collections4:${commonsCollections}"
+    api "io.confluent:kafka-avro-serializer:${confluentVersion}"
+    api "io.confluent:kafka-schema-registry-client:${confluentVersion}"
+
+
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ["-parameters"]
+}

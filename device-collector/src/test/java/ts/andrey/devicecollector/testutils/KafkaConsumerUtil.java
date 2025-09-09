@@ -1,6 +1,5 @@
 package ts.andrey.devicecollector.testutils;
 
-import com.nashkod.avro.Device;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import lombok.experimental.UtilityClass;
 import org.apache.avro.specific.SpecificRecord;
@@ -22,7 +21,7 @@ public class KafkaConsumerUtil {
     private static final String EARLIEST = "earliest";
     private static final String BASE_URL = "http://localhost:";
 
-    public <T extends SpecificRecord> ConsumerRecords<String, Device>
+    public <T extends SpecificRecord> ConsumerRecords<String, T>
     getMessages(String bootstrapServers, String topic,
                 String groupId, Integer schemaRegistryPort,
                 Class<T> avroClass) {
@@ -34,7 +33,7 @@ public class KafkaConsumerUtil {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
         props.put("schema.registry.url", BASE_URL + schemaRegistryPort);
         props.put("specific.avro.reader", "true");
-        try (Consumer<String, Device> consumer = new KafkaConsumer<>(props)) {
+        try (Consumer<String, T> consumer = new KafkaConsumer<>(props)) {
             consumer.subscribe(Collections.singleton(topic));
             final var records = consumer.poll(Duration.ofSeconds(5));
             if (records.isEmpty()) {

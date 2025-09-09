@@ -20,15 +20,15 @@ public class DeviceMetrics {
     private final MeterRegistry meterRegistry;
 
     public void getDeviceRedisSuccess() {
-        meterRegistry.counter("device.redis.getDevice").increment();
+        meterRegistry.counter("device.redis.get").increment();
     }
 
     public void saveDeviceRedisSuccess() {
-        meterRegistry.counter("device.redis.saveDevice").increment();
+        meterRegistry.counter("device.redis.save").increment();
     }
 
     public void deleteDeviceRedisSuccess() {
-        meterRegistry.counter("device.redis.deleteDevice").increment();
+        meterRegistry.counter("device.redis.delete").increment();
     }
 
     public void deviceRedisSuccess() {
@@ -40,19 +40,19 @@ public class DeviceMetrics {
     }
 
     public void getDeviceSuccess() {
-        meterRegistry.counter("device.database.getDevice").increment();
+        meterRegistry.counter("device.database.get").increment();
     }
 
     public void deleteDeviceSuccess() {
-        meterRegistry.counter("device.database.deleteDevice").increment();
+        meterRegistry.counter("device.database.delete").increment();
     }
 
     public void updateDeviceSuccess() {
-        meterRegistry.counter("device.database.updateDevice").increment();
+        meterRegistry.counter("device.database.update").increment();
     }
 
     public void createDeviceSuccess() {
-        meterRegistry.counter("device.database.createDevice").increment();
+        meterRegistry.counter("device.database.create").increment();
     }
 
     public void recordSuccess(String method, String uri, int status) {
