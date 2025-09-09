@@ -411,6 +411,26 @@ services:
       retries: 5
     networks:
       - iot_network
+  postgres_router_manager:
+    container_name: postgres_router_manager
+    image: postgres:15
+    restart: unless-stopped
+    ports:
+      - "5439:5432"
+    volumes:
+      - postgres_data_router_manager:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${APP_ROUTER_MANAGER_DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${APP_ROUTER_MANAGER_DATASOURCE_PASSWORD}
+      POSTGRES_DB: ${APP_ROUTER_MANAGER_DATASOURCE_DB}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${APP_ROUTER_MANAGER_DATASOURCE_USERNAME}", "-d", "${APP_ROUTER_MANAGER_DATASOURCE_URL}" ]
+      interval: 10s
+      retries: 5
+    networks:
+      - iot_network
   postgres_keycloak:
     container_name: postgres_keycloak
     image: postgres:15
@@ -636,6 +656,7 @@ volumes:
   nexus-data:
   schema-registry-data:
   zookeeper_data:
+  postgres_data_router_manager:
   postgres_keycloak_data:
   postgres_data1:
   postgres_data2:
