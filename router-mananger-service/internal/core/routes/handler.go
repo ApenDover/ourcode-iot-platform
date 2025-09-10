@@ -3,6 +3,7 @@ package routes
 import (
 	"net/http"
 	"router-mananger-service/internal/core/service"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -18,14 +19,14 @@ func RegisterRoutes(engine *gin.Engine, service *service.CommandService) {
 	api := engine.Group("/api/v1")
 	api.POST("/send-command", func(c *gin.Context) {
 		var request SendCommandRequest
-		if error := c.ShouldBindJSON(&request); error != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": error.Error()})
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 			return
 		}
 
 		cmd, err := service.SendCommand(request.RouterID, request.CommandType, request.Payload)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 			return
 		}
 
@@ -35,4 +36,73 @@ func RegisterRoutes(engine *gin.Engine, service *service.CommandService) {
 			"created_at": cmd.CreatedAt,
 		})
 	})
+
+	type PollCommandRequest struct {
+		RouterID uuid.UUID `json:"router_id" binding:"required"`
+	}
+
+	api.POST("/commands/poll", func(c *gin.Context) {
+		var request PollCommandRequest
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+			return
+		}
+
+		commands, err := service.GetCommands(request.RouterID)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+			return
+		}
+
+		if len(commands) == 0 {
+			c.JSON(http.StatusOK, []gin.H{})
+			return
+		}
+
+		now := time.Now()
+		for i := range commands {
+			commands[i].Status = "SENT"
+			commands[i].SentAt = &now
+		}
+
+		if err := service.UpdateCommandsStatus(request.RouterID); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		response := make([]gin.H, 0, len(commands))
+		for _, cmd := range commands {
+			response = append(response, gin.H{
+				"id":         cmd.ID,
+				"status":     cmd.Status,
+				"created_at": cmd.CreatedAt,
+			})
+		}
+		c.JSON(http.StatusOK, response)
+	})
+
+	type AckCommandRequest struct {
+		RouterID  uuid.UUID `json:"router_id" binding:"required"`
+		CommandID uuid.UUID `json:"command_id" binding:"required"`
+	}
+
+	api.POST("/commands/ack", func(c *gin.Context) {
+		var request AckCommandRequest
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+			return
+		}
+
+		if err := service.AckCommand(request.RouterID, request.CommandID); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status":     "ACKED",
+			"command_id": request.CommandID,
+		})
+	})
+
 }
