@@ -3,6 +3,7 @@ package routes
 import (
 	"net/http"
 	"router-mananger-service/internal/core/service"
+	"router-mananger-service/internal/domain"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,23 +18,35 @@ type SendCommandRequest struct {
 
 func RegisterRoutes(engine *gin.Engine, service *service.CommandService) {
 	api := engine.Group("/api/v1")
+
 	api.POST("/send-command", func(c *gin.Context) {
 		var request SendCommandRequest
 		if err := c.ShouldBindJSON(&request); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		cmd, err := service.SendCommand(request.RouterID, request.CommandType, request.Payload)
+		var commands []domain.Command
+		var err error
+
+		if request.RouterID != uuid.Nil {
+			var cmd domain.Command
+			cmd, err = service.SendCommand(request.RouterID, request.CommandType, request.Payload)
+			if err == nil {
+				commands = append(commands, cmd)
+			}
+		} else {
+			commands, err = service.SendCommandAll(request.CommandType, request.Payload)
+		}
+
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"id":         cmd.ID,
-			"status":     cmd.Status,
-			"created_at": cmd.CreatedAt,
+			"created": len(commands),
+			"ids":     getCommandIDs(commands),
 		})
 	})
 
@@ -104,5 +117,12 @@ func RegisterRoutes(engine *gin.Engine, service *service.CommandService) {
 			"command_id": request.CommandID,
 		})
 	})
+}
 
+func getCommandIDs(commands []domain.Command) []uuid.UUID {
+	ids := make([]uuid.UUID, len(commands))
+	for i, cmd := range commands {
+		ids[i] = cmd.ID
+	}
+	return ids
 }

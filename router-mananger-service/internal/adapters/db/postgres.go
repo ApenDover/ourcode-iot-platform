@@ -3,9 +3,11 @@ package db
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"router-mananger-service/internal/domain"
+	"strings"
 	"time"
 )
 
@@ -29,6 +31,37 @@ func (r *PostgresCommandRepository) Save(cmd domain.Command) error {
          VALUES ($1, $2, $3, $4, $5, $6)`,
 		cmd.ID, cmd.RouterID, cmd.CommandType, payloadBytes, cmd.Status, cmd.CreatedAt,
 	)
+	return err
+}
+
+func (r *PostgresCommandRepository) SaveAll(cmds []domain.Command) error {
+	if len(cmds) == 0 {
+		return nil
+	}
+
+	var values []interface{}
+	var placeholders []string
+
+	for i, cmd := range cmds {
+		// Сериализация payload в JSON
+		payloadBytes, err := json.Marshal(cmd.Payload)
+		if err != nil {
+			return err
+		}
+
+		values = append(values, cmd.ID, cmd.RouterID, cmd.CommandType, payloadBytes, cmd.Status, cmd.CreatedAt)
+
+		// Формируем плейсхолдеры для SQL ($1,$2,...)
+		base := i*6 + 1
+		placeholders = append(placeholders, fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d)", base, base+1, base+2, base+3, base+4, base+5))
+	}
+
+	query := fmt.Sprintf(`
+        INSERT INTO commands (id, router_id, command_type, payload, status, created_at)
+        VALUES %s
+    `, strings.Join(placeholders, ","))
+
+	_, err := r.pool.Exec(context.Background(), query, values...)
 	return err
 }
 
@@ -71,7 +104,7 @@ func (r *PostgresCommandRepository) GetByIdAndStatuses(uuid uuid.UUID, statuses 
 func (r *PostgresCommandRepository) UpdateStatusById(routerId uuid.UUID) error {
 	_, err := r.pool.Exec(
 		context.Background(),
-		"UPDATE commands SET status=$1, sent_at=$2 WHERE router_id=$3",
+		"UPDATE commands SET status=$1, sent_at=$2 WHERE router_id=$3 AND status='PENDING'",
 		"SENT", time.Now(), routerId,
 	)
 	return err
@@ -81,10 +114,27 @@ func (r *PostgresCommandRepository) UpdateStatusToAcked(routerID, commandID uuid
 	_, err := r.pool.Exec(
 		context.Background(),
 		`UPDATE commands
-		 SET status = $1,
-		     acked_at = $2
-		 WHERE id = $3 AND router_id = $4`,
+		 SET status = $1,acked_at = $2
+		 WHERE id = $3 AND router_id = $4 AND status='SENT'`,
 		"ACKED", time.Now(), commandID, routerID,
 	)
 	return err
+}
+
+func (r *PostgresCommandRepository) FindAllIDs() ([]uuid.UUID, error) {
+	rows, err := r.pool.Query(context.Background(), "SELECT id FROM routers")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ids []uuid.UUID
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, nil
 }
