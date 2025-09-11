@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package router_manager.v1;
+option go_package = "github.com/your-company/router-manager-service/pkg/pb;pb";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+message PollCommandsRequest {
+  string router_id = 1;
+}
+
+message Command {
+  string id = 1;
+  string command_type = 2;
+  google.protobuf.Struct payload = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message PollCommandsResponse {
+  repeated Command commands = 1;
+}
+
+message AckCommandRequest {
+  string router_id = 1;
+  string command_id = 2;
+}
+
+message AckCommandResponse {
+  string status = 1;
+}
+
+service CommandService {
+  rpc PollCommands(PollCommandsRequest) returns (PollCommandsResponse);
+  rpc AckCommand(AckCommandRequest) returns (AckCommandResponse);
+}

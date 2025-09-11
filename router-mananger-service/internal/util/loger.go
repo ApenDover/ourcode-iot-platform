@@ -3,12 +3,13 @@ package util
 import (
 	"log/slog"
 	"os"
+	"router-mananger-service/config"
 	"sync"
 )
 
 const (
 	envLocal = "local"
-	endProd  = "prod"
+	envProd  = "prod"
 )
 
 var (
@@ -16,22 +17,23 @@ var (
 	once   sync.Once
 )
 
-func SetupLogger(env string) *slog.Logger {
+func GetLogger() *slog.Logger {
+	once.Do(func() {
+		logger = setupLogger(config.LoadConfig().Profile)
+	})
+	return logger
+}
+
+func setupLogger(env string) *slog.Logger {
 	var log *slog.Logger
 	switch env {
 	case envLocal:
 		log = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	case endProd:
+	case envProd:
 		log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	default:
 		log = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	}
+	log.Info("Профиль выбран", slog.String("profile", env))
 	return log
-}
-
-func GetLogger() *slog.Logger {
-	once.Do(func() {
-		logger = SetupLogger(endProd)
-	})
-	return logger
 }
