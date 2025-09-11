@@ -11,8 +11,17 @@ type Command struct {
 	RouterID    uuid.UUID
 	CommandType string
 	Payload     map[string]any
-	Status      string
+	Status      CommandStatus
 	SentAt      *time.Time
 	AckedAt     *time.Time
 	CreatedAt   time.Time
 }
+
+type CommandStatus string
+
+const (
+	CommandStatusPending CommandStatus = "PENDING"
+	CommandStatusSent    CommandStatus = "SENT"
+	CommandStatusAcked   CommandStatus = "ACKED"
+	CommandStatusError   CommandStatus = "ERROR"
+)

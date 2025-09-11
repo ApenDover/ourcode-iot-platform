@@ -8,9 +8,9 @@ import (
 type CommandRepository interface {
 	Save(cmd domain.Command) error
 	SaveAll(cmd []domain.Command) error
-	GetByIdAndStatuses(uuid uuid.UUID, statuses []string) ([]domain.Command, error)
+	GetByIdAndStatuses(uuid uuid.UUID, statuses []domain.CommandStatus) ([]domain.Command, error)
 	GetAllByRouterId(routerId uuid.UUID) ([]domain.Command, error)
-	UpdateStatusById(uuid uuid.UUID) error
+	SetSentStatusForPendingByRouterId(uuid uuid.UUID) error
 	UpdateStatusToAcked(taskUuid uuid.UUID, commandUuid uuid.UUID) error
 	FindAllIDs() ([]uuid.UUID, error)
 }

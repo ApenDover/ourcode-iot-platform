@@ -43,7 +43,6 @@ func (r *PostgresCommandRepository) SaveAll(cmds []domain.Command) error {
 	var placeholders []string
 
 	for i, cmd := range cmds {
-		// Сериализация payload в JSON
 		payloadBytes, err := json.Marshal(cmd.Payload)
 		if err != nil {
 			return err
@@ -51,7 +50,6 @@ func (r *PostgresCommandRepository) SaveAll(cmds []domain.Command) error {
 
 		values = append(values, cmd.ID, cmd.RouterID, cmd.CommandType, payloadBytes, cmd.Status, cmd.CreatedAt)
 
-		// Формируем плейсхолдеры для SQL ($1,$2,...)
 		base := i*6 + 1
 		placeholders = append(placeholders, fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d)", base, base+1, base+2, base+3, base+4, base+5))
 	}
@@ -65,7 +63,7 @@ func (r *PostgresCommandRepository) SaveAll(cmds []domain.Command) error {
 	return err
 }
 
-func (r *PostgresCommandRepository) GetByIdAndStatuses(uuid uuid.UUID, statuses []string) ([]domain.Command, error) {
+func (r *PostgresCommandRepository) GetByIdAndStatuses(uuid uuid.UUID, statuses []domain.CommandStatus) ([]domain.Command, error) {
 
 	if len(statuses) == 0 {
 		return nil, nil
@@ -133,11 +131,11 @@ func (r *PostgresCommandRepository) GetAllByRouterId(routerId uuid.UUID) ([]doma
 	return commands, nil
 }
 
-func (r *PostgresCommandRepository) UpdateStatusById(routerId uuid.UUID) error {
+func (r *PostgresCommandRepository) SetSentStatusForPendingByRouterId(routerId uuid.UUID) error {
 	_, err := r.pool.Exec(
 		context.Background(),
-		"UPDATE commands SET status=$1, sent_at=$2 WHERE router_id=$3 AND status='PENDING'",
-		"SENT", time.Now(), routerId,
+		"UPDATE commands SET status=$1, sent_at=$2 WHERE router_id=$3 AND status=$4",
+		domain.CommandStatusSent, time.Now(), routerId, domain.CommandStatusPending,
 	)
 	return err
 }
@@ -148,7 +146,7 @@ func (r *PostgresCommandRepository) UpdateStatusToAcked(routerID, commandID uuid
 		`UPDATE commands
 		 SET status = $1,acked_at = $2
 		 WHERE id = $3 AND router_id = $4 AND status='SENT'`,
-		"ACKED", time.Now(), commandID, routerID,
+		domain.CommandStatusAcked, time.Now(), commandID, routerID,
 	)
 	return err
 }

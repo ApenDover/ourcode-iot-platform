@@ -1,9 +1,9 @@
 package main
 
 import (
-	"router-mananger-service/internal/configuration"
+	"router-mananger-service/internal/conf"
 )
 
 func main() {
-	_ = configuration.Init()
+	_ = conf.Init()
 }

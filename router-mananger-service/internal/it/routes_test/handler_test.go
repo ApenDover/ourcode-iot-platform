@@ -10,7 +10,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"router-mananger-service/internal/adapters/db"
-	"router-mananger-service/internal/core/routes"
+	"router-mananger-service/internal/adapters/routes"
+	"router-mananger-service/internal/conf"
 	"router-mananger-service/internal/util"
 	"testing"
 	"time"
@@ -82,7 +83,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 
 	firstSendCommand := sendCommand[0]
 	fmt.Printf("%+v\n", firstSendCommand)
-	assert.Equal(t, "PENDING", firstSendCommand.Status)
+	assert.Equal(t, "PENDING", string(firstSendCommand.Status))
 	assert.Equal(t, "TEST_SEND", firstSendCommand.CommandType)
 	assert.Nil(t, firstSendCommand.SentAt)
 	assert.NotNil(t, firstSendCommand.Payload)
@@ -123,7 +124,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 
 	firstPollCommand := pollCommand[0]
 	fmt.Printf("%+v\n", firstPollCommand)
-	assert.Equal(t, "SENT", firstPollCommand.Status)
+	assert.Equal(t, "SENT", string(firstPollCommand.Status))
 	assert.Equal(t, "TEST_SEND", firstPollCommand.CommandType)
 	assert.NotNil(t, firstPollCommand.SentAt)
 	assert.Nil(t, firstPollCommand.AckedAt)
@@ -162,7 +163,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 
 	firstAckCommand := ackCommand[0]
 	fmt.Printf("%+v\n", firstAckCommand)
-	assert.Equal(t, "ACKED", firstAckCommand.Status)
+	assert.Equal(t, "ACKED", string(firstAckCommand.Status))
 	assert.Equal(t, "TEST_SEND", firstAckCommand.CommandType)
 	assert.NotNil(t, firstPollCommand.SentAt)
 	assert.NotNil(t, firstAckCommand.AckedAt)
@@ -222,7 +223,7 @@ func setupPostgresContainerPool(t *testing.T) (*pgxpool.Pool, func(), error) {
 		}
 	}
 
-	err = db.RunMigrations(dsn, util.MigrationsPath())
+	err = conf.RunMigrations(dsn, util.MigrationsPath())
 	if err != nil {
 		terminate()
 		return nil, nil, fmt.Errorf("failed to run migrations: %w", err)

@@ -1,4 +1,4 @@
-package configuration
+package conf
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"router-mananger-service/config"
 	"router-mananger-service/internal/adapters/db"
-	"router-mananger-service/internal/core/routes"
+	"router-mananger-service/internal/adapters/routes"
 	"router-mananger-service/internal/core/service"
 	"router-mananger-service/internal/util"
 )
@@ -16,7 +16,7 @@ func Init() error {
 	log := util.SetupLogger(config.LoadConfig().Profile)
 
 	databasePath := util.DatabasePath()
-	err := db.RunMigrations(databasePath, util.MigrationsPath())
+	err := RunMigrations(databasePath, util.MigrationsPath())
 
 	if err != nil {
 		log.Error("unable to connect to database", slog.String("error", err.Error()))
