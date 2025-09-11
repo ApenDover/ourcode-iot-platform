@@ -101,6 +101,38 @@ func (r *PostgresCommandRepository) GetByIdAndStatuses(uuid uuid.UUID, statuses 
 	return commands, nil
 }
 
+func (r *PostgresCommandRepository) GetAllByRouterId(routerId uuid.UUID) ([]domain.Command, error) {
+
+	query := `
+		SELECT id, router_id, command_type, payload, status, created_at
+		FROM commands
+		WHERE router_id = $1
+	`
+
+	rows, err := r.pool.Query(context.Background(), query, routerId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var commands []domain.Command
+	for rows.Next() {
+		var cmd domain.Command
+		var payloadBytes []byte
+		if err := rows.Scan(&cmd.ID, &cmd.RouterID, &cmd.CommandType, &payloadBytes, &cmd.Status, &cmd.CreatedAt); err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal(payloadBytes, &cmd.Payload); err != nil {
+			return nil, err
+		}
+
+		commands = append(commands, cmd)
+	}
+
+	return commands, nil
+}
+
 func (r *PostgresCommandRepository) UpdateStatusById(routerId uuid.UUID) error {
 	_, err := r.pool.Exec(
 		context.Background(),

@@ -13,7 +13,7 @@ import (
 )
 
 func Init() error {
-	log := SetupLogger(config.LoadConfig().Profile)
+	log := util.SetupLogger(config.LoadConfig().Profile)
 
 	databasePath := util.DatabasePath()
 	err := db.RunMigrations(databasePath, util.MigrationsPath())

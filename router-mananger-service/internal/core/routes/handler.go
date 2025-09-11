@@ -79,7 +79,8 @@ func RegisterRoutes(engine *gin.Engine, service *service.CommandService) {
 			commands[i].SentAt = &now
 		}
 
-		if err := service.UpdateCommandsStatus(request.RouterID); err != nil {
+		err = service.UpdateCommandsStatus(request.RouterID)
+		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}

@@ -28,15 +28,14 @@ import (
 )
 
 func TestSendPollAckCommandsWithPool(t *testing.T) {
+	// SETUP
 	gin.SetMode(gin.TestMode)
 	ctx := context.Background()
 
-	// --- Поднимаем Postgres с контейнером ---
 	pool, terminate, err := setupPostgresContainerPool(t)
 	require.NoError(t, err)
 	defer terminate()
 
-	// --- Репозиторий и сервис ---
 	repo := db.NewPostgresCommandRepository(pool)
 	svc := service.NewCommandService(repo)
 	engine := gin.New()
@@ -44,6 +43,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 
 	// --- 1. SendCommand ---
 
+	// GIVEN
 	routerID := uuid.New()
 	payload := map[string]interface{}{"foo": "bar"}
 
@@ -56,11 +56,13 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 		"payload":      payload,
 	})
 
+	// WHEN
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/send-command", bytes.NewBuffer(sendReqBody))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	engine.ServeHTTP(w, req)
 
+	// THEN
 	if w.Code != http.StatusOK {
 		t.Fatalf("SendCommand failed: %d, body: %s", w.Code, w.Body.String())
 	}
@@ -70,15 +72,33 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, float64(1), sendResp["created"])
 
+	// THEN CHECK DATABASE
+	sendCommand, err := repo.GetAllByRouterId(routerID)
+	require.NoError(t, err)
+	require.NotEmpty(t, sendCommand)
+
+	firstSendCommand := sendCommand[0]
+	fmt.Printf("%+v\n", firstSendCommand)
+	assert.Equal(t, "PENDING", firstSendCommand.Status)
+	assert.Equal(t, "TEST_SEND", firstSendCommand.CommandType)
+	assert.Nil(t, firstSendCommand.SentAt)
+	assert.NotNil(t, firstSendCommand.Payload)
+	assert.NotNil(t, firstSendCommand.RouterID)
+	assert.NotNil(t, firstSendCommand.ID)
+
 	// --- 2. PollCommands ---
+	// GIVEN
 	pollReqBody, _ := json.Marshal(map[string]interface{}{
 		"router_id": routerID,
 	})
-	req = httptest.NewRequest(http.MethodPost, "/api/v1/commands/poll", bytes.NewBuffer(pollReqBody))
+
+	// WHEN
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/sendCommand/poll", bytes.NewBuffer(pollReqBody))
 	req.Header.Set("Content-Type", "application/json")
 	w = httptest.NewRecorder()
 	engine.ServeHTTP(w, req)
 
+	// THEN
 	if w.Code != http.StatusOK {
 		t.Fatalf("PollCommands failed: %d, body: %s", w.Code, w.Body.String())
 	}
@@ -93,12 +113,26 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	commandID, err := uuid.Parse(commandIDStr)
 	require.NoError(t, err)
 
+	// THEN CHECK DATABASE
+	pollCommand, err := repo.GetAllByRouterId(routerID)
+	require.NoError(t, err)
+	require.NotEmpty(t, pollCommand)
+
+	firstPollCommand := pollCommand[0]
+	fmt.Printf("%+v\n", firstPollCommand)
+	assert.Equal(t, "SENT", firstPollCommand.Status)
+	assert.Equal(t, "TEST_SEND", firstPollCommand.CommandType)
+	assert.NotNil(t, firstPollCommand.SentAt)
+	assert.NotNil(t, firstPollCommand.Payload)
+	assert.NotNil(t, firstPollCommand.RouterID)
+	assert.NotNil(t, firstPollCommand.ID)
+
 	// --- 3. AckCommands ---
 	ackReqBody, _ := json.Marshal(map[string]interface{}{
 		"router_id":  routerID,
 		"command_id": commandID,
 	})
-	req = httptest.NewRequest(http.MethodPost, "/api/v1/commands/ack", bytes.NewBuffer(ackReqBody))
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/sendCommand/ack", bytes.NewBuffer(ackReqBody))
 	req.Header.Set("Content-Type", "application/json")
 	w = httptest.NewRecorder()
 	engine.ServeHTTP(w, req)
@@ -113,7 +147,6 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.Equal(t, "ACKED", ackResp["status"])
 }
 
-// --- Setup Postgres + миграции ---
 func setupPostgresContainerPool(t *testing.T) (*pgxpool.Pool, func(), error) {
 	ctx := context.Background()
 
@@ -166,8 +199,8 @@ func setupPostgresContainerPool(t *testing.T) (*pgxpool.Pool, func(), error) {
 		}
 	}
 
-	// Прогон миграций
-	if err := db.RunMigrations(dsn, util.MigrationsPath()); err != nil {
+	err = db.RunMigrations(dsn, util.MigrationsPath())
+	if err != nil {
 		terminate()
 		return nil, nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
