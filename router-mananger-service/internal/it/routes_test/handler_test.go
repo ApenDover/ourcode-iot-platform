@@ -47,7 +47,10 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	routerID := uuid.New()
 	payload := map[string]interface{}{"foo": "bar"}
 
-	_, err = pool.Exec(ctx, `INSERT INTO routers (id, serial_number, ip_address, created_at) VALUES ($1, $2, $3, $4)`, routerID, routerID, "192.168.0.1", time.Now())
+	_, err = pool.Exec(ctx,
+		`INSERT INTO routers (id, serial_number, ip_address, created_at) 
+			VALUES ($1, $2, $3, $4)`, routerID, routerID, "192.168.0.1", time.Now(),
+	)
 	require.NoError(t, err)
 
 	sendReqBody, _ := json.Marshal(map[string]interface{}{
@@ -93,7 +96,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	})
 
 	// WHEN
-	req = httptest.NewRequest(http.MethodPost, "/api/v1/sendCommand/poll", bytes.NewBuffer(pollReqBody))
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/commands/poll", bytes.NewBuffer(pollReqBody))
 	req.Header.Set("Content-Type", "application/json")
 	w = httptest.NewRecorder()
 	engine.ServeHTTP(w, req)
@@ -123,20 +126,26 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.Equal(t, "SENT", firstPollCommand.Status)
 	assert.Equal(t, "TEST_SEND", firstPollCommand.CommandType)
 	assert.NotNil(t, firstPollCommand.SentAt)
+	assert.Nil(t, firstPollCommand.AckedAt)
 	assert.NotNil(t, firstPollCommand.Payload)
 	assert.NotNil(t, firstPollCommand.RouterID)
 	assert.NotNil(t, firstPollCommand.ID)
 
 	// --- 3. AckCommands ---
+
+	// GIVEN
 	ackReqBody, _ := json.Marshal(map[string]interface{}{
 		"router_id":  routerID,
 		"command_id": commandID,
 	})
-	req = httptest.NewRequest(http.MethodPost, "/api/v1/sendCommand/ack", bytes.NewBuffer(ackReqBody))
+
+	// WHEN
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/commands/ack", bytes.NewBuffer(ackReqBody))
 	req.Header.Set("Content-Type", "application/json")
 	w = httptest.NewRecorder()
 	engine.ServeHTTP(w, req)
 
+	// THEN
 	if w.Code != http.StatusOK {
 		t.Fatalf("AckCommands failed: %d, body: %s", w.Code, w.Body.String())
 	}
@@ -145,6 +154,21 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	err = json.Unmarshal(w.Body.Bytes(), &ackResp)
 	require.NoError(t, err)
 	assert.Equal(t, "ACKED", ackResp["status"])
+
+	// THEN CHECK DATABASE
+	ackCommand, err := repo.GetAllByRouterId(routerID)
+	require.NoError(t, err)
+	require.NotEmpty(t, ackCommand)
+
+	firstAckCommand := ackCommand[0]
+	fmt.Printf("%+v\n", firstAckCommand)
+	assert.Equal(t, "ACKED", firstAckCommand.Status)
+	assert.Equal(t, "TEST_SEND", firstAckCommand.CommandType)
+	assert.NotNil(t, firstPollCommand.SentAt)
+	assert.NotNil(t, firstAckCommand.AckedAt)
+	assert.NotNil(t, firstAckCommand.Payload)
+	assert.NotNil(t, firstAckCommand.RouterID)
+	assert.NotNil(t, firstAckCommand.ID)
 }
 
 func setupPostgresContainerPool(t *testing.T) (*pgxpool.Pool, func(), error) {
@@ -184,7 +208,6 @@ func setupPostgresContainerPool(t *testing.T) (*pgxpool.Pool, func(), error) {
 		return nil, nil, fmt.Errorf("failed to create pool: %w", err)
 	}
 
-	// Ждём пока база станет доступной
 	for i := 0; i < 30; i++ {
 		if err := pool.Ping(ctx); err == nil {
 			break

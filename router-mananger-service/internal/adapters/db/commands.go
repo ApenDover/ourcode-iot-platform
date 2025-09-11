@@ -104,7 +104,7 @@ func (r *PostgresCommandRepository) GetByIdAndStatuses(uuid uuid.UUID, statuses 
 func (r *PostgresCommandRepository) GetAllByRouterId(routerId uuid.UUID) ([]domain.Command, error) {
 
 	query := `
-		SELECT id, router_id, command_type, payload, status, created_at
+		SELECT id, router_id, command_type, payload, status, sent_at, acked_at, created_at
 		FROM commands
 		WHERE router_id = $1
 	`
@@ -119,7 +119,7 @@ func (r *PostgresCommandRepository) GetAllByRouterId(routerId uuid.UUID) ([]doma
 	for rows.Next() {
 		var cmd domain.Command
 		var payloadBytes []byte
-		if err := rows.Scan(&cmd.ID, &cmd.RouterID, &cmd.CommandType, &payloadBytes, &cmd.Status, &cmd.CreatedAt); err != nil {
+		if err := rows.Scan(&cmd.ID, &cmd.RouterID, &cmd.CommandType, &payloadBytes, &cmd.Status, &cmd.SentAt, &cmd.AckedAt, &cmd.CreatedAt); err != nil {
 			return nil, err
 		}
 
