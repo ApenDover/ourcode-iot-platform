@@ -31,7 +31,7 @@ import (
 func TestSendPollAckCommandsWithPool(t *testing.T) {
 	// SETUP
 	gin.SetMode(gin.TestMode)
-	ctx := context.Background()
+	//ctx := context.Background()
 
 	pool, terminate, err := setupPostgresContainerPool(t)
 	require.NoError(t, err)
@@ -48,11 +48,11 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	routerID := uuid.New()
 	payload := map[string]interface{}{"foo": "bar"}
 
-	_, err = pool.Exec(ctx,
-		`INSERT INTO routers (id, serial_number, ip_address, created_at) 
-			VALUES ($1, $2, $3, $4)`, routerID, routerID, "192.168.0.1", time.Now(),
-	)
-	require.NoError(t, err)
+	//_, err = pool.Exec(ctx,
+	//	`INSERT INTO routers (id, serial_number, ip_address, created_at)
+	//		VALUES ($1, $2, $3, $4)`, routerID, routerID, "192.168.0.1", time.Now(),
+	//)
+	//require.NoError(t, err)
 
 	sendReqBody, _ := json.Marshal(map[string]interface{}{
 		"router_id":    routerID,
@@ -191,22 +191,22 @@ func setupPostgresContainerPool(t *testing.T) (*pgxpool.Pool, func(), error) {
 		Started:          true,
 	})
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to start container: %w", err)
+		return nil, nil, fmt.Errorf("контейнер не захотел стартовать: %w", err)
 	}
 
 	host, err := pgContainer.Host(ctx)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get container host: %w", err)
+		return nil, nil, fmt.Errorf("контейнер не родился на заданном хосту: %w", err)
 	}
 	port, err := pgContainer.MappedPort(ctx, "5432")
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get mapped port: %w", err)
+		return nil, nil, fmt.Errorf("порт недоступен: %w", err)
 	}
 
 	dsn := fmt.Sprintf("postgres://test:test@%s:%s/testdb?sslmode=disable", host, port.Port())
 	pool, err := pgxpool.New(ctx, dsn)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create pool: %w", err)
+		return nil, nil, fmt.Errorf("pool не создался: %w", err)
 	}
 
 	for i := 0; i < 30; i++ {
@@ -219,14 +219,14 @@ func setupPostgresContainerPool(t *testing.T) (*pgxpool.Pool, func(), error) {
 	terminate := func() {
 		pool.Close()
 		if err := pgContainer.Terminate(ctx); err != nil {
-			t.Logf("failed to terminate container: %v", err)
+			t.Logf("контейнер не ликвдировался: %v", err)
 		}
 	}
 
 	err = conf.RunMigrations(dsn, util.MigrationsPath())
 	if err != nil {
 		terminate()
-		return nil, nil, fmt.Errorf("failed to run migrations: %w", err)
+		return nil, nil, fmt.Errorf("миграции не накатились: %w", err)
 	}
 
 	return pool, terminate, nil
