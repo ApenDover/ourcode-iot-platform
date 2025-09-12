@@ -11,8 +11,12 @@ DCB=docker compose -f $(COMPOSE_FILE_BUILD)
 DCL=docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_FILE_LOCAL)
 ACTUATOR_URL=http://localhost:
 LOGGER_NAME=ts.andrey
+PROJECT_ROOT := $(shell pwd)
+PROTO_DIR := $(PROJECT_ROOT)/router-mananger-service/protobuf
+GENPROTO_DIR := $(PROJECT_ROOT)/router-mananger-service/internal/ports/genproto
+PROTO_FILES := $(wildcard $(PROTO_DIR)/*.proto)
 
-.PHONY: up down downv restart logs help exec logs-
+.PHONY: up down downv restart logs help exec logs- proto-gen
 
 help: ## Показать список доступных команд
 	@echo "Usage: make <command>\n"
@@ -158,3 +162,18 @@ keycloak-setup-users: wait-for-keycloak
 nexus-deploy:
 	$(DC) up nexus -d
 	@make publish-nexus
+
+proto-gen:
+	@echo "Generating Go code from .proto files..."
+	@mkdir -p $(GENPROTO_DIR)
+	@docker run --rm \
+		-v $(PROTO_DIR):/protos \
+		-v $(GENPROTO_DIR):/gen \
+		rvolosatovs/protoc \
+		--proto_path=/protos \
+		--go_out=/gen \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=/gen \
+		--go-grpc_opt=paths=source_relative \
+		$(notdir $(PROTO_FILES))
+	@echo "Done!"
