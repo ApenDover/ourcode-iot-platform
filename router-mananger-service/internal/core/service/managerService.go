@@ -28,8 +28,16 @@ func (m *ManagerService) CreateCommandForAll(commandType string, payload map[str
 	return m.commandService.CreateCommandsForAll(ids, commandType, payload)
 }
 
-func (m *ManagerService) GetActualCommands(routerId uuid.UUID) []domain.Command {
+func (m *ManagerService) GetPendingCommandsAndMarkItSent(routerId uuid.UUID) []domain.Command {
 	pending := m.commandService.GetPendingCommands(routerId)
 	m.commandService.UpdateCommandsStatus(pending)
 	return pending
+}
+
+func (m *ManagerService) AckCommand(routerId uuid.UUID, commandId uuid.UUID) {
+	m.commandService.AckCommand(routerId, commandId)
+}
+
+func (m *ManagerService) MarkExpiredAsError() {
+	m.commandService.MarkExpiredAsError()
 }

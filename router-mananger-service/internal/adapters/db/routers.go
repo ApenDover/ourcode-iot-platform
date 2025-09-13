@@ -19,12 +19,13 @@ func NewPostgresRouterRepository(pool *pgxpool.Pool) *PostgresRouterRepository {
 }
 
 func (r *PostgresRouterRepository) Save(cmd domain.Router) error {
-
 	_, err := r.pool.Exec(
-		context.Background(),
-		`INSERT INTO routers (id, serial_number, ip_address, last_seen_at, created_at) 
-         VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING`,
-		cmd.ID, cmd.SerialNumber, cmd.IpAddress, cmd.LastSeenAt, cmd.CreatedAt,
+		context.Background(), `
+		INSERT INTO routers (id, serial_number, ip_address, last_seen_at, created_at) 
+        VALUES ($1, $2, $3, $4, $5) 
+        ON CONFLICT (id) 
+        DO UPDATE SET last_seen_at = EXCLUDED.last_seen_at
+        `, cmd.ID, cmd.SerialNumber, cmd.IpAddress, cmd.LastSeenAt, cmd.CreatedAt,
 	)
 	return err
 }
@@ -39,16 +40,16 @@ func (r *PostgresRouterRepository) SaveAll(cmds []domain.Router) error {
 
 	for i, cmd := range cmds {
 		values = append(values, cmd.ID, cmd.SerialNumber, cmd.IpAddress, cmd.LastSeenAt, cmd.CreatedAt)
-
 		base := i*5 + 1
 		placeholders = append(placeholders, fmt.Sprintf("($%d,$%d,$%d,$%d,$%d)", base, base+1, base+2, base+3, base+4))
 	}
 
 	query := fmt.Sprintf(`
-        INSERT INTO routers (id, serial_number, ip_address, last_seen_at, created_at)
-        VALUES %s
-        ON CONFLICT (id) DO NOTHING
-    `, strings.Join(placeholders, ","))
+			INSERT INTO routers (id, serial_number, ip_address, last_seen_at, created_at)
+        	VALUES %s
+        	ON CONFLICT (id) 
+        	DO UPDATE SET last_seen_at = EXCLUDED.last_seen_at
+        	`, strings.Join(placeholders, ","))
 
 	_, err := r.pool.Exec(context.Background(), query, values...)
 	return err
@@ -61,7 +62,7 @@ func (r *PostgresRouterRepository) GetById(id uuid.UUID) (domain.Router, error) 
 		SELECT id, serial_number, ip_address, last_seen_at, created_at
 		FROM routers
 		WHERE id = $1
-	`
+		`
 
 	row := r.pool.QueryRow(context.Background(), query, id)
 

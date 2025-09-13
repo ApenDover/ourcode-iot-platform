@@ -11,6 +11,7 @@ import (
 	"router-mananger-service/internal/adapters/innergrpc"
 	"router-mananger-service/internal/adapters/routes"
 	"router-mananger-service/internal/core/domainService"
+	"router-mananger-service/internal/core/service"
 	routermanager "router-mananger-service/internal/ports/genproto"
 	"router-mananger-service/internal/util"
 )
@@ -39,8 +40,10 @@ func InitHttp() error {
 	repoRouter := db.NewPostgresRouterRepository(pool)
 	routerService := domainService.NewRouterService(repoRouter)
 
+	ms := service.NewManagerService(commandService, routerService)
+
 	r := gin.Default()
-	routes.RegisterRoutes(r, commandService)
+	routes.RegisterRoutes(r, ms)
 	err = r.Run(":8080")
 	if err != nil {
 		log.Error("приложение не запустилось", slog.String("error", err.Error()))

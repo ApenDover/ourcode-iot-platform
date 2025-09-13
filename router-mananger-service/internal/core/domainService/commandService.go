@@ -2,6 +2,7 @@ package domainService
 
 import (
 	"log/slog"
+	"router-mananger-service/config"
 	"router-mananger-service/internal/util"
 	"strconv"
 	"time"
@@ -115,5 +116,14 @@ func (s *CommandService) AckCommand(routerID, commandID uuid.UUID) {
 			slog.String("routerId", routerID.String()),
 			slog.String("commandId", commandID.String()),
 			slog.String("error", err.Error()))
+	}
+}
+
+func (s *CommandService) MarkExpiredAsError() {
+	log.Info("CRON процесс MarkExpiredAsError начат..")
+	err := s.repo.MarkExpiredAsError(config.LoadConfig().TimeExpired)
+	if err != nil {
+		log.Error("не удалось проверить и пометить в ERROR просроченные команды", slog.String("error", err.Error()))
+		return
 	}
 }

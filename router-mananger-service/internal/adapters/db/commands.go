@@ -154,8 +154,8 @@ func (r *PostgresCommandRepository) SetSentStatusForPendingByCommandIds(cmds []d
 		batch.Queue(
 			`UPDATE commands
 			 SET status=$1, sent_at=$2
-			 WHERE id=$3 AND status=domain.CommandStatusPending`,
-			domain.CommandStatusSent, time.Now(), cmd.ID,
+			 WHERE id=$3 AND status=$4`,
+			domain.CommandStatusSent, time.Now(), cmd.ID, domain.CommandStatusPending,
 		)
 	}
 
@@ -178,8 +178,8 @@ func (r *PostgresCommandRepository) UpdateStatusToAcked(routerID, commandID uuid
 		context.Background(),
 		`UPDATE commands
 		 SET status = $1,acked_at = $2
-		 WHERE id = $3 AND router_id = $4 AND status='SENT'`,
-		domain.CommandStatusAcked, time.Now(), commandID, routerID,
+		 WHERE id = $3 AND router_id = $4 AND status=$5`,
+		domain.CommandStatusAcked, time.Now(), commandID, routerID, domain.CommandStatusSent,
 	)
 	return err
 }
@@ -200,4 +200,18 @@ func (r *PostgresCommandRepository) FindAllIDs() ([]uuid.UUID, error) {
 		ids = append(ids, id)
 	}
 	return ids, nil
+}
+
+func (r *PostgresCommandRepository) MarkExpiredAsError(timeout time.Duration) error {
+	_, err := r.pool.Exec(
+		context.Background(),
+		`UPDATE commands
+		 SET status = $1
+		 WHERE status = $2
+		   AND sent_at < now() - ($3::interval)`,
+		domain.CommandStatusError,
+		domain.CommandStatusSent,
+		timeout.Seconds(),
+	)
+	return err
 }

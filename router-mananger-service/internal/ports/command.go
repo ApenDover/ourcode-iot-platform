@@ -3,6 +3,7 @@ package ports
 import (
 	"github.com/google/uuid"
 	"router-mananger-service/internal/domain"
+	"time"
 )
 
 type CommandRepository interface {
@@ -13,4 +14,5 @@ type CommandRepository interface {
 	SetSentStatusForPendingByRouterId(uuid uuid.UUID) error
 	SetSentStatusForPendingByCommandIds(cmd []domain.Command) error
 	UpdateStatusToAcked(taskUuid uuid.UUID, commandUuid uuid.UUID) error
+	MarkExpiredAsError(timeout time.Duration) error
 }

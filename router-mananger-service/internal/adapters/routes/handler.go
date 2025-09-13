@@ -53,7 +53,7 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 			return
 		}
 
-		commands := service.GetActualCommands(request.RouterID)
+		commands := service.GetPendingCommandsAndMarkItSent(request.RouterID)
 
 		if len(commands) == 0 {
 			c.JSON(http.StatusOK, []gin.H{})
@@ -89,10 +89,7 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 			return
 		}
 
-		if err := service.AckCommand(request.RouterID, request.CommandID); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
-			return
-		}
+		service.AckCommand(request.RouterID, request.CommandID)
 
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ACKED",

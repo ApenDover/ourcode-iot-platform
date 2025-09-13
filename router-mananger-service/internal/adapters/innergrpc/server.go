@@ -4,7 +4,9 @@ import (
 	"context"
 	"log"
 	"net"
+	"router-mananger-service/config"
 	"router-mananger-service/internal/core/service"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -32,6 +34,15 @@ func NewServer(pool *pgxpool.Pool) *Server {
 	routerService := domainService.NewRouterService(repoRouter)
 
 	managerService := service.NewManagerService(commandService, routerService)
+
+	go func() {
+		ticker := time.NewTicker(config.LoadConfig().TimeExpired)
+		defer ticker.Stop()
+		for range ticker.C {
+			managerService.MarkExpiredAsError()
+		}
+	}()
+
 	return &Server{
 		commandService: commandService,
 		routerService:  routerService,
@@ -57,7 +68,7 @@ func (s *Server) SendCommand(_ context.Context, req *routermanager.SendCommandRe
 	// ШЕЛУХА: Валидация и преобразование gRPC запроса
 	payloadMap := req.Payload.AsMap()
 
-	if req.RouterId != "" {
+	if req.RouterId == "" {
 		routerID, err := uuid.Parse(req.RouterId)
 		if err != nil {
 			return nil, err
@@ -73,7 +84,7 @@ func (s *Server) SendCommand(_ context.Context, req *routermanager.SendCommandRe
 		}, nil
 	}
 
-	commandAll := s.managerService.SendCommandAll(req.CommandType, payloadMap)
+	commandAll := s.managerService.CreateCommandForAll(req.CommandType, payloadMap)
 
 	// ШЕЛУХА: Преобразуем результат в gRPC ответ
 	return &routermanager.SendCommandResponse{
