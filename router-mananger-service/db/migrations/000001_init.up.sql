@@ -1,11 +1,11 @@
--- CREATE TABLE routers
--- (
---     id            UUID PRIMARY KEY,
---     serial_number TEXT UNIQUE NOT NULL,
---     ip_address    INET,
---     last_seen_at  TIMESTAMP,
---     created_at    TIMESTAMP DEFAULT now()
--- );
+CREATE TABLE routers
+(
+    id            UUID PRIMARY KEY,
+    serial_number TEXT UNIQUE NOT NULL,
+    ip_address    INET,
+    last_seen_at  TIMESTAMP,
+    created_at    TIMESTAMP DEFAULT now()
+);
 
 CREATE TABLE commands
 (

@@ -8,5 +8,6 @@ import (
 func main() {
 	log := util.GetLogger()
 	log.Info("Запуск приложения..")
-	_ = conf.Init()
+	//_ = conf.InitHttp()
+	_ = conf.InitGrpc()
 }

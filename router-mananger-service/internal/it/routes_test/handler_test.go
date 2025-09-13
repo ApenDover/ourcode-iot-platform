@@ -24,7 +24,7 @@ import (
 
 	_ "github.com/lib/pq"
 	_ "router-mananger-service/internal/adapters/db"
-	"router-mananger-service/internal/core/service"
+	"router-mananger-service/internal/core/domainService"
 	_ "router-mananger-service/internal/domain"
 )
 
@@ -38,11 +38,11 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	defer terminate()
 
 	repo := db.NewPostgresCommandRepository(pool)
-	svc := service.NewCommandService(repo)
+	svc := domainService.NewCommandService(repo)
 	engine := gin.New()
 	routes.RegisterRoutes(engine, svc)
 
-	// --- 1. SendCommand ---
+	// --- 1. CreateCommand ---
 
 	// GIVEN
 	routerID := uuid.New()
@@ -68,7 +68,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 
 	// THEN
 	if w.Code != http.StatusOK {
-		t.Fatalf("SendCommand failed: %d, body: %s", w.Code, w.Body.String())
+		t.Fatalf("CreateCommand failed: %d, body: %s", w.Code, w.Body.String())
 	}
 
 	var sendResp map[string]interface{}

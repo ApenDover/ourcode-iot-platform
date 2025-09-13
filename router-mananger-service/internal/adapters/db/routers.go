@@ -10,26 +10,26 @@ import (
 	"time"
 )
 
-type PostgresRoutersRepository struct {
+type PostgresRouterRepository struct {
 	pool *pgxpool.Pool
 }
 
-func NewPostgresRoutersRepository(pool *pgxpool.Pool) *PostgresRoutersRepository {
-	return &PostgresRoutersRepository{pool: pool}
+func NewPostgresRouterRepository(pool *pgxpool.Pool) *PostgresRouterRepository {
+	return &PostgresRouterRepository{pool: pool}
 }
 
-func (r *PostgresRoutersRepository) Save(cmd domain.Router) error {
+func (r *PostgresRouterRepository) Save(cmd domain.Router) error {
 
 	_, err := r.pool.Exec(
 		context.Background(),
 		`INSERT INTO routers (id, serial_number, ip_address, last_seen_at, created_at) 
-         VALUES ($1, $2, $3, $4, $5)`,
+         VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING`,
 		cmd.ID, cmd.SerialNumber, cmd.IpAddress, cmd.LastSeenAt, cmd.CreatedAt,
 	)
 	return err
 }
 
-func (r *PostgresRoutersRepository) SaveAll(cmds []domain.Router) error {
+func (r *PostgresRouterRepository) SaveAll(cmds []domain.Router) error {
 	if len(cmds) == 0 {
 		return nil
 	}
@@ -38,23 +38,23 @@ func (r *PostgresRoutersRepository) SaveAll(cmds []domain.Router) error {
 	var placeholders []string
 
 	for i, cmd := range cmds {
-
 		values = append(values, cmd.ID, cmd.SerialNumber, cmd.IpAddress, cmd.LastSeenAt, cmd.CreatedAt)
 
-		base := i*6 + 1
+		base := i*5 + 1
 		placeholders = append(placeholders, fmt.Sprintf("($%d,$%d,$%d,$%d,$%d)", base, base+1, base+2, base+3, base+4))
 	}
 
 	query := fmt.Sprintf(`
-        INSERT INTO commands (id, serial_number, ip_address, last_seen_at, created_at)
+        INSERT INTO routers (id, serial_number, ip_address, last_seen_at, created_at)
         VALUES %s
+        ON CONFLICT (id) DO NOTHING
     `, strings.Join(placeholders, ","))
 
 	_, err := r.pool.Exec(context.Background(), query, values...)
 	return err
 }
 
-func (r *PostgresRoutersRepository) GetById(id uuid.UUID) (domain.Router, error) {
+func (r *PostgresRouterRepository) GetById(id uuid.UUID) (domain.Router, error) {
 	var router domain.Router
 
 	query := `
@@ -73,4 +73,22 @@ func (r *PostgresRoutersRepository) GetById(id uuid.UUID) (domain.Router, error)
 	router.LastSeenAt = lastSeen
 
 	return router, nil
+}
+
+func (r *PostgresRouterRepository) GetAllIds() ([]uuid.UUID, error) {
+	rows, err := r.pool.Query(context.Background(), "SELECT id FROM routers")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ids []uuid.UUID
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, nil
 }

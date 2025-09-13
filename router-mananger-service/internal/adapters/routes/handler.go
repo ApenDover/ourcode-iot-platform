@@ -16,7 +16,7 @@ type SendCommandRequest struct {
 	Payload     map[string]interface{} `json:"payload"`
 }
 
-func RegisterRoutes(engine *gin.Engine, service *service.CommandService) {
+func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 	api := engine.Group("/api/v1")
 
 	api.POST("/send-command", func(c *gin.Context) {
@@ -27,21 +27,13 @@ func RegisterRoutes(engine *gin.Engine, service *service.CommandService) {
 		}
 
 		var commands []domain.Command
-		var err error
 
 		if request.RouterID != uuid.Nil {
 			var cmd domain.Command
-			cmd, err = service.SendCommand(request.RouterID, request.CommandType, request.Payload)
-			if err == nil {
-				commands = append(commands, cmd)
-			}
+			cmd = service.CreateCommand(request.RouterID, request.CommandType, request.Payload)
+			commands = append(commands, cmd)
 		} else {
-			commands, err = service.SendCommandAll(request.CommandType, request.Payload)
-		}
-
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+			commands = service.CreateCommandForAll(request.CommandType, request.Payload)
 		}
 
 		c.JSON(http.StatusOK, gin.H{
@@ -61,12 +53,7 @@ func RegisterRoutes(engine *gin.Engine, service *service.CommandService) {
 			return
 		}
 
-		commands, err := service.GetCommands(request.RouterID)
-
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
-			return
-		}
+		commands := service.GetActualCommands(request.RouterID)
 
 		if len(commands) == 0 {
 			c.JSON(http.StatusOK, []gin.H{})
@@ -77,12 +64,6 @@ func RegisterRoutes(engine *gin.Engine, service *service.CommandService) {
 		for i := range commands {
 			commands[i].Status = "SENT"
 			commands[i].SentAt = &now
-		}
-
-		err = service.UpdateCommandsStatus(request.RouterID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
 		}
 
 		response := make([]gin.H, 0, len(commands))

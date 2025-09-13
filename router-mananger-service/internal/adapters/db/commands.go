@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"router-mananger-service/internal/domain"
 	"strings"
@@ -138,6 +139,38 @@ func (r *PostgresCommandRepository) SetSentStatusForPendingByRouterId(routerId u
 		domain.CommandStatusSent, time.Now(), routerId, domain.CommandStatusPending,
 	)
 	return err
+}
+
+func (r *PostgresCommandRepository) SetSentStatusForPendingByCommandIds(cmds []domain.Command) error {
+	if len(cmds) == 0 {
+		return nil
+	}
+
+	ctx := context.Background()
+	batch := &pgx.Batch{}
+
+	// Добавляем в батч обновления для каждой команды
+	for _, cmd := range cmds {
+		batch.Queue(
+			`UPDATE commands
+			 SET status=$1, sent_at=$2
+			 WHERE id=$3 AND status=domain.CommandStatusPending`,
+			domain.CommandStatusSent, time.Now(), cmd.ID,
+		)
+	}
+
+	// Отправляем батч и закрываем его
+	br := r.pool.SendBatch(ctx, batch)
+	defer br.Close()
+
+	// Проходим по результатам каждого запроса, чтобы убедиться, что ошибки не было
+	for range cmds {
+		_, err := br.Exec()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *PostgresCommandRepository) UpdateStatusToAcked(routerID, commandID uuid.UUID) error {

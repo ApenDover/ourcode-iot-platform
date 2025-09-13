@@ -1,4 +1,4 @@
-package service
+package domainService
 
 import (
 	"log/slog"
@@ -21,7 +21,7 @@ func NewCommandService(repo ports.CommandRepository) *CommandService {
 	return &CommandService{repo: repo}
 }
 
-func (s *CommandService) SendCommand(routerID uuid.UUID, commandType string, payload map[string]any) (domain.Command, error) {
+func (s *CommandService) CreateCommand(routerID uuid.UUID, commandType string, payload map[string]any) domain.Command {
 	cmd := domain.Command{
 		ID:          uuid.New(),
 		RouterID:    routerID,
@@ -35,21 +35,14 @@ func (s *CommandService) SendCommand(routerID uuid.UUID, commandType string, pay
 	if err != nil {
 		log.Error("не удалось сохранить команду", slog.String("routerId", routerID.String()), slog.String("error", err.Error()))
 	}
-	log.Debug("команды сохранена",
+	log.Debug("команда сохранена",
 		slog.String("routerId", routerID.String()))
-	return cmd, err
+	return cmd
 }
 
-func (s *CommandService) SendCommandAll(commandType string, payload map[string]any) ([]domain.Command, error) {
-	routerIDs, err := s.repo.FindAllIDs()
-	if err != nil {
-		log.Error("не удалось найти роутеры",
-			slog.String("error", err.Error()))
-		return nil, err
-	}
-
+func (s *CommandService) CreateCommandsForAll(routerIDs []uuid.UUID, commandType string, payload map[string]any) []domain.Command {
 	if len(routerIDs) == 0 {
-		return []domain.Command{}, nil
+		return []domain.Command{}
 	}
 
 	var commands []domain.Command
@@ -75,7 +68,7 @@ func (s *CommandService) SendCommandAll(commandType string, payload map[string]a
 				log.Error("не удалось сохранить команды",
 					slog.String("count", strconv.Itoa(len(batch))),
 					slog.String("error", err.Error()))
-				return commands, err
+				return commands
 			}
 			batch = batch[:0]
 		}
@@ -87,44 +80,40 @@ func (s *CommandService) SendCommandAll(commandType string, payload map[string]a
 			log.Error("не удалось сохранить команды",
 				slog.String("count", strconv.Itoa(len(batch))),
 				slog.String("error", err.Error()))
-			return commands, err
+			return commands
 		}
 	}
 
 	log.Debug("команды сохранены", slog.String("count", strconv.Itoa(len(commands))))
-	return commands, nil
+	return commands
 }
 
-func (s *CommandService) GetCommands(routerID uuid.UUID) ([]domain.Command, error) {
+func (s *CommandService) GetPendingCommands(routerID uuid.UUID) []domain.Command {
 	commands, err := s.repo.GetByIdAndStatuses(routerID, []domain.CommandStatus{domain.CommandStatusPending})
 	if err != nil {
 		log.Error("не удалось получить команды",
 			slog.String("routerId", routerID.String()),
 			slog.String("error", err.Error()))
-		return nil, err
+		return nil
 	}
-	return commands, nil
+	log.Debug("нашел команды", slog.String("count", strconv.Itoa(len(commands))))
+	return commands
 }
 
-func (s *CommandService) UpdateCommandsStatus(routerID uuid.UUID) error {
-	err := s.repo.SetSentStatusForPendingByRouterId(routerID)
+func (s *CommandService) UpdateCommandsStatus(commands []domain.Command) {
+	err := s.repo.SetSentStatusForPendingByCommandIds(commands)
 	if err != nil {
 		log.Error("не удалось обновить статус командам",
-			slog.String("routerId", routerID.String()),
 			slog.String("error", err.Error()))
-		return err
 	}
-	return nil
 }
 
-func (s *CommandService) AckCommand(routerID, commandID uuid.UUID) error {
+func (s *CommandService) AckCommand(routerID, commandID uuid.UUID) {
 	err := s.repo.UpdateStatusToAcked(routerID, commandID)
 	if err != nil {
 		log.Error("не удалось подтвердить команду",
 			slog.String("routerId", routerID.String()),
 			slog.String("commandId", commandID.String()),
 			slog.String("error", err.Error()))
-		return err
 	}
-	return nil
 }
