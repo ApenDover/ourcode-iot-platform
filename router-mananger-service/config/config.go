@@ -44,7 +44,7 @@ func getTimeOrDefault(key, defaultValue string) time.Duration {
 		}
 		return duration
 	}
-	duration, err := time.ParseDuration(os.Getenv(defaultValue))
+	duration, err := time.ParseDuration(defaultValue)
 	if err != nil {
 		log.Error("неверный формат TimeExpired в defaultValue, ENV SENT_EXPIRED отсутствует")
 	}

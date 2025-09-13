@@ -2,11 +2,13 @@ package conf
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 	"log/slog"
 	"net"
+	"router-mananger-service/config"
 	"router-mananger-service/internal/adapters/db"
 	"router-mananger-service/internal/adapters/innergrpc"
 	"router-mananger-service/internal/adapters/routes"
@@ -14,12 +16,13 @@ import (
 	"router-mananger-service/internal/core/service"
 	routermanager "router-mananger-service/internal/ports/genproto"
 	"router-mananger-service/internal/util"
+	"time"
 )
 
 func InitHttp() error {
 	log := util.GetLogger()
 
-	databasePath := util.DatabasePath()
+	databasePath := databasePath()
 	err := RunMigrations(databasePath, util.MigrationsPath())
 
 	if err != nil {
@@ -55,49 +58,61 @@ func InitHttp() error {
 func InitGrpc() error {
 	log := util.GetLogger()
 
-	// Подключаемся к БД и применяем миграции
-	databasePath := util.DatabasePath()
-	err := RunMigrations(databasePath, util.MigrationsPath())
-	if err != nil {
-		log.Error("Не смог применить миграции", slog.String("error", err.Error()))
-		return err
-	}
-
-	// Создаем пул подключений к БД
+	// Подключение к БД
+	databasePath := databasePath()
 	pool, err := pgxpool.New(context.Background(), databasePath)
 	if err != nil {
 		log.Error("Не смог подключиться к БД", slog.String("error", err.Error()))
 		return err
 	}
-	defer pool.Close()
 
-	// Создаем репозиторий и сервис (бизнес-логика)
-	repo := db.NewPostgresCommandRepository(pool)
-	_ = domainService.NewCommandService(repo)
+	// Репозитории и сервисы
+	repoCommand := db.NewPostgresCommandRepository(pool)
+	repoRouter := db.NewPostgresRouterRepository(pool)
+	commandService := domainService.NewCommandService(repoCommand)
+	routerService := domainService.NewRouterService(repoRouter)
+	managerService := service.NewManagerService(commandService, routerService)
 
-	// Создаем ЭКЗЕМПЛЯР нашего gRPC сервера (адаптера)
-	// Здесь вызываем конструктор из нашего пакета grpc!
-	ourGrpcServer := innergrpc.NewServer(pool) // Это наш собственный конструктор
+	// Создаём наш gRPC сервер
+	grpcServer := grpc.NewServer()
 
-	// Создаем listener
+	// Создаём адаптер сервера и регистрируем сервис
+	ourGrpcServer := &innergrpc.Server{
+		CommandService: commandService,
+		RouterService:  routerService,
+		ManagerService: managerService,
+	}
+
+	routermanager.RegisterRouterManagerServiceServer(grpcServer, ourGrpcServer)
+
+	// Запускаем тикер для перевода SENT -> ERROR
+	go func() {
+		ticker := time.NewTicker(config.LoadConfig().TimeExpired)
+		defer ticker.Stop()
+		for range ticker.C {
+			managerService.MarkExpiredAsError()
+		}
+	}()
+
+	// Listener
 	lis, err := net.Listen("tcp", ":9090")
 	if err != nil {
 		log.Error("Не смог создать listener", slog.String("error", err.Error()))
 		return err
 	}
 
-	// Создаем ТРАНСПОРТНЫЙ gRPC сервер (из google.golang.org/grpc)
-	grpcTransportServer := grpc.NewServer()
-
-	// Регистрируем НАШ сервер в gRPC транспорте
-	routermanager.RegisterRouterManagerServiceServer(grpcTransportServer, ourGrpcServer)
-
-	// Запускаем gRPC сервер
 	log.Info("Запуск gRPC сервера на порту :9090")
-	err = grpcTransportServer.Serve(lis)
-	if err != nil {
-		log.Error("gRPC сервер не запустился", slog.String("error", err.Error()))
-		return err
-	}
-	return nil
+	return grpcServer.Serve(lis)
+}
+
+func databasePath() string {
+	c := config.LoadConfig()
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		c.DBUser,
+		c.DBPassword,
+		c.DBHost,
+		c.DBPort,
+		c.DBName,
+	)
 }

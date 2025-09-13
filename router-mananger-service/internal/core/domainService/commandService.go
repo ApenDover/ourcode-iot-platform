@@ -12,13 +12,14 @@ import (
 	"router-mananger-service/internal/ports"
 )
 
-var log = util.GetLogger()
+var log *slog.Logger
 
 type CommandService struct {
 	repo ports.CommandRepository
 }
 
 func NewCommandService(repo ports.CommandRepository) *CommandService {
+	log = util.GetLogger()
 	return &CommandService{repo: repo}
 }
 
