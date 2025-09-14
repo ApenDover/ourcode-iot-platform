@@ -8,6 +8,7 @@ import (
 	"router-mananger-service/config"
 	"router-mananger-service/internal/adapters/innergrpc"
 	"router-mananger-service/internal/util"
+	"time"
 )
 
 func InitGrpc() {
@@ -21,27 +22,22 @@ func InitGrpc() {
 
 	RunMigrations(databasePath(), util.MigrationsPath())
 
-	// Репозитории и сервисы
 	managerService := innergrpc.NewServer(pool)
+
+	go func() {
+		ticker := time.NewTicker(config.LoadConfig().TimeExpired)
+		defer ticker.Stop()
+		for range ticker.C {
+			managerService.ManagerService.MarkExpiredAsError()
+		}
+	}()
+
+	// Репозитории и сервисы
 	err = managerService.Start("9090")
 	if err != nil {
 		log.Error("Не смог запустить сервер", slog.String("error", err.Error()))
 	}
 
-	//// Создаём наш gRPC сервер
-	//grpcServer := grpc.NewServer()
-	//
-	//routermanager.RegisterRouterManagerServiceServer(grpcServer, managerService)
-	//
-	//// Listener
-	//lis, err := net.Listen("tcp", ":9090")
-	//if err != nil {
-	//	log.Error("Не смог создать listener", slog.String("error", err.Error()))
-	//	return err
-	//}
-	//
-	//log.Info("Запуск gRPC сервера на порту :9090")
-	//return grpcServer.Serve(lis)
 }
 
 func databasePath() string {

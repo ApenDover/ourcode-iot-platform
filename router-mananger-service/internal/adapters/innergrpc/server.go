@@ -2,21 +2,18 @@ package innergrpc
 
 import (
 	"context"
-	"log"
-	"net"
-	"router-mananger-service/config"
-	"router-mananger-service/internal/adapters/db"
-	"router-mananger-service/internal/core/domainService"
-	"router-mananger-service/internal/core/service"
-	"router-mananger-service/internal/domain"
-	"router-mananger-service/internal/util"
-	"time"
-
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"log"
+	"net"
+	"router-mananger-service/internal/adapters/db"
+	"router-mananger-service/internal/core/domainService"
+	"router-mananger-service/internal/core/service"
+	"router-mananger-service/internal/domain"
+	"router-mananger-service/internal/util"
 
 	routermanager "router-mananger-service/internal/ports/genproto"
 )
@@ -32,15 +29,6 @@ func NewServer(pool *pgxpool.Pool) *Server {
 	commandService := domainService.NewCommandService(repoCommand)
 	routerService := domainService.NewRouterService(repoRouter)
 	managerService := service.NewManagerService(commandService, routerService)
-
-	// Запускаем периодическое обновление статусов SENT -> ERROR
-	go func() {
-		ticker := time.NewTicker(config.LoadConfig().TimeExpired)
-		defer ticker.Stop()
-		for range ticker.C {
-			managerService.MarkExpiredAsError()
-		}
-	}()
 
 	return &Server{
 		ManagerService: managerService,
