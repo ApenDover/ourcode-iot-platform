@@ -7,7 +7,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"log/slog"
 	"router-mananger-service/internal/domain"
+	"router-mananger-service/internal/util"
 	"strings"
 	"time"
 )
@@ -87,7 +89,7 @@ func (r *PostgresCommandRepository) GetBySerialAndStatuses(serial string, status
 	for rows.Next() {
 		var cmd domain.Command
 		var payloadBytes []byte
-		if err := rows.Scan(&cmd.ID, &cmd.RouterID, &cmd.CommandType, &payloadBytes, &cmd.Status, &cmd.CreatedAt); err != nil {
+		if err := rows.Scan(&cmd.ID, &cmd.RouterID, &cmd.CommandType, &payloadBytes, &cmd.Status, &cmd.SentAt, &cmd.AckedAt, &cmd.CreatedAt); err != nil {
 			return nil, err
 		}
 
@@ -186,15 +188,20 @@ func (r *PostgresCommandRepository) UpdateStatusToAcked(serial string, commandID
 }
 
 func (r *PostgresCommandRepository) MarkExpiredAsError(timeout time.Duration) error {
+	now := time.Now()
+	deadline := now.Add(-timeout)
+	util.GetLogger().Info("Проверка просроченных ответов",
+		slog.String("now", now.String()),
+		slog.String("deadline", deadline.String()))
 	_, err := r.pool.Exec(
 		context.Background(),
 		`UPDATE commands
 		 SET status = $1
 		 WHERE status = $2
-		   AND sent_at < now() - ($3::interval)`,
+		   AND sent_at < $3`,
 		domain.CommandStatusError,
 		domain.CommandStatusSent,
-		timeout.Seconds(),
+		deadline,
 	)
 	return err
 }

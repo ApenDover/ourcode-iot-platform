@@ -23,12 +23,17 @@ func InitGrpc() {
 	RunMigrations(databasePath(), util.MigrationsPath())
 
 	managerService := innergrpc.NewServer(pool)
+	period := config.LoadConfig().CheckExpiredInterval
+	expiredTime := config.LoadConfig().TimeExpired
+	log.Info("Параметры проверки на просроченные статусы",
+		slog.String("период запуска", period.String()),
+		slog.String("просрочка после", expiredTime.String()))
 
 	go func() {
-		ticker := time.NewTicker(config.LoadConfig().TimeExpired)
+		ticker := time.NewTicker(period)
 		defer ticker.Stop()
 		for range ticker.C {
-			managerService.ManagerService.MarkExpiredAsError()
+			managerService.ManagerService.MarkExpiredAsError(expiredTime)
 		}
 	}()
 

@@ -7,24 +7,26 @@ import (
 )
 
 type Config struct {
-	DBHost      string
-	DBPort      string
-	DBUser      string
-	DBPassword  string
-	DBName      string
-	Profile     string
-	TimeExpired time.Duration
+	DBHost               string
+	DBPort               string
+	DBUser               string
+	DBPassword           string
+	DBName               string
+	Profile              string
+	TimeExpired          time.Duration
+	CheckExpiredInterval time.Duration
 }
 
 func LoadConfig() *Config {
 	return &Config{
-		DBHost:      getEnvOrDefault("APP_ROUTER_MANAGER_DATASOURCE_HOST", "localhost"),
-		DBPort:      getEnvOrDefault("APP_ROUTER_MANAGER_DATASOURCE_PORT", "5439"),
-		DBUser:      getEnvOrDefault("APP_ROUTER_MANAGER_DATASOURCE_USERNAME", "user"),
-		DBPassword:  getEnvOrDefault("APP_ROUTER_MANAGER_DATASOURCE_PASSWORD", "password"),
-		DBName:      getEnvOrDefault("APP_ROUTER_MANAGER_DATASOURCE_DB", "router_db"),
-		Profile:     getEnvOrDefault("PROFILE", "local"),
-		TimeExpired: getTimeOrDefault("SENT_EXPIRED", "5m"),
+		DBHost:               getEnvOrDefault("APP_ROUTER_MANAGER_DATASOURCE_HOST", "localhost"),
+		DBPort:               getEnvOrDefault("APP_ROUTER_MANAGER_DATASOURCE_PORT", "5439"),
+		DBUser:               getEnvOrDefault("APP_ROUTER_MANAGER_DATASOURCE_USERNAME", "user"),
+		DBPassword:           getEnvOrDefault("APP_ROUTER_MANAGER_DATASOURCE_PASSWORD", "password"),
+		DBName:               getEnvOrDefault("APP_ROUTER_MANAGER_DATASOURCE_DB", "router_db"),
+		Profile:              getEnvOrDefault("PROFILE", "local"),
+		TimeExpired:          getTimeOrDefault("SENT_EXPIRED", "1m"),
+		CheckExpiredInterval: getTimeOrDefault("CHECK_EXPIRED_INTERVAL", "30s"),
 	}
 }
 

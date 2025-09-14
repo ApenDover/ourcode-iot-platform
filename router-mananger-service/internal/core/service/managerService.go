@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"router-mananger-service/internal/core/domainService"
 	"router-mananger-service/internal/domain"
+	"time"
 )
 
 type ManagerService struct {
@@ -89,6 +90,6 @@ func (m *ManagerService) AckCommand(serial string, commandId uuid.UUID) {
 	m.routerService.UpdateSeenAt([]string{serial})
 }
 
-func (m *ManagerService) MarkExpiredAsError() {
-	m.commandService.MarkExpiredAsError()
+func (m *ManagerService) MarkExpiredAsError(checkExpired time.Duration) {
+	m.commandService.MarkExpiredAsError(checkExpired)
 }

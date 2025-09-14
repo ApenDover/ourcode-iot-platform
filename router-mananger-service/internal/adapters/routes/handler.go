@@ -11,9 +11,9 @@ import (
 )
 
 type SendCommandRequest struct {
-	RouterID    uuid.UUID              `json:"router_id"`
-	CommandType string                 `json:"command_type" binding:"required"`
-	Payload     map[string]interface{} `json:"payload"`
+	SerialNumber string                 `json:"serial_number"`
+	CommandType  string                 `json:"command_type" binding:"required"`
+	Payload      map[string]interface{} `json:"payload"`
 }
 
 func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
@@ -26,11 +26,11 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 			return
 		}
 
-		var commands []domain.Command
+		var commands []domain.CommandOut
 
-		if request.RouterID != uuid.Nil {
-			var cmd domain.Command
-			cmd = service.CreateCommand(request.RouterID, request.CommandType, request.Payload)
+		if request.SerialNumber != "" {
+			var cmd domain.CommandOut
+			cmd = service.CreateCommand(request.SerialNumber, request.CommandType, request.Payload)
 			commands = append(commands, cmd)
 		} else {
 			commands = service.CreateCommandForAll(request.CommandType, request.Payload)
@@ -43,7 +43,7 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 	})
 
 	type PollCommandRequest struct {
-		routerId string `json:"router_id" binding:"required"`
+		SerialNumber string `json:"serial_number" binding:"required"`
 	}
 
 	api.POST("/commands/poll", func(c *gin.Context) {
@@ -53,7 +53,7 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 			return
 		}
 
-		commands := service.GetPendingCommandsAndMarkItSent(request.RouterID)
+		commands := service.GetPendingCommandsAndMarkItSent(request.SerialNumber)
 
 		if len(commands) == 0 {
 			c.JSON(http.StatusOK, []gin.H{})
@@ -78,8 +78,8 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 	})
 
 	type AckCommandRequest struct {
-		RouterID  uuid.UUID `json:"router_id" binding:"required"`
-		CommandID uuid.UUID `json:"command_id" binding:"required"`
+		SerialNumber string    `json:"serial_number" binding:"required"`
+		CommandID    uuid.UUID `json:"command_id" binding:"required"`
 	}
 
 	api.POST("/commands/ack", func(c *gin.Context) {
@@ -89,7 +89,7 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 			return
 		}
 
-		service.AckCommand(request.RouterID, request.CommandID)
+		service.AckCommand(request.SerialNumber, request.CommandID)
 
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ACKED",
@@ -98,7 +98,7 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 	})
 }
 
-func getCommandIDs(commands []domain.Command) []uuid.UUID {
+func getCommandIDs(commands []domain.CommandOut) []uuid.UUID {
 	ids := make([]uuid.UUID, len(commands))
 	for i, cmd := range commands {
 		ids[i] = cmd.ID
