@@ -28,7 +28,7 @@ help: ## Показать список доступных команд
 	@echo "  \033[36mset-log-<level>-<port>\033[0m  	Установить логирование (пример: make set-log-debug-8080)"
 	@echo "  \033[36mupdate-<service>\033[0m  		Пересобрать проект и развернуть контейнер"
 
-up:  ## Запустить контейнеры в фоне
+up: proto-gen  ## Запустить контейнеры в фоне
 	$(DC) up nexus -d
 	@echo "⏳ Жду пока контейнер nexus станет healthy..."
 	@until [ $$(docker inspect --format='{{.State.Health.Status}}' nexus) = "healthy" ]; do \
@@ -94,18 +94,20 @@ set-log-%:
 exec-%: ## Зайти в контейнер по имени
 	docker exec -it $* bash
 
-boot: nexus-deploy  ## локально пересобрать образы
+boot: nexus-deploy proto-gen  ## локально пересобрать образы
 	docker image rm infrastructure-device-collector -f
 	docker image rm infrastructure-device-service -f
 	docker image rm infrastructure-event-collector -f
 	docker image rm infrastructure-kafka-producer -f
 	docker image rm infrastructure-failed-events-processor -f
+	docker image rm infrastructure-router-mananger-service -f
 	cd event-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd event-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-service && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd kafka-producer && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd failed-events-processor && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
+	cd router-mananger-service && go build -o router-manager ./cmd/app
 
 rebuild: nexus-deploy  ## локально пересобрать образы
 	cd event-collector && ./gradlew clean build

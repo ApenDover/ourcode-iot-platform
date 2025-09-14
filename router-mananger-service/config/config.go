@@ -15,6 +15,7 @@ type Config struct {
 	Profile              string
 	TimeExpired          time.Duration
 	CheckExpiredInterval time.Duration
+	MigrationPath        string
 }
 
 func LoadConfig() *Config {
@@ -27,6 +28,7 @@ func LoadConfig() *Config {
 		Profile:              getEnvOrDefault("PROFILE", "local"),
 		TimeExpired:          getTimeOrDefault("SENT_EXPIRED", "1m"),
 		CheckExpiredInterval: getTimeOrDefault("CHECK_EXPIRED_INTERVAL", "30s"),
+		MigrationPath:        getMigrationPath(getEnvOrDefault("PROFILE", "local")),
 	}
 }
 
@@ -51,4 +53,11 @@ func getTimeOrDefault(key, defaultValue string) time.Duration {
 		log.Error("неверный формат TimeExpired в defaultValue, ENV SENT_EXPIRED отсутствует")
 	}
 	return duration
+}
+
+func getMigrationPath(env string) string {
+	if env == "local" {
+		return "../../db/migrations"
+	}
+	return "../../../app/db/migrations"
 }

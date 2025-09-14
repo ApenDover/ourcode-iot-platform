@@ -17,8 +17,9 @@ import (
 
 func InitGrpc(pool *pgxpool.Pool, databasePath string) {
 	log := util.GetLogger()
-
-	RunMigrations(databasePath, util.MigrationsPath())
+	flyWayPath := util.MigrationsPath(config.LoadConfig().MigrationPath)
+	log.Info("ищу миграции по адресу", slog.String("миграции", flyWayPath))
+	RunMigrations(databasePath, flyWayPath)
 
 	managerService := innergrpc.NewServer(pool)
 	period := config.LoadConfig().CheckExpiredInterval
@@ -45,7 +46,7 @@ func InitGrpc(pool *pgxpool.Pool, databasePath string) {
 func InitHttp(databasePath string) error {
 	log := util.GetLogger()
 
-	RunMigrations(databasePath, util.MigrationsPath())
+	RunMigrations(databasePath, util.MigrationsPath(config.LoadConfig().MigrationPath))
 
 	pool, err := pgxpool.New(context.Background(), databasePath)
 	if err != nil {

@@ -1,0 +1,100 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Router Manager Metrics",
+    "tags": ["go", "grpc", "postgres"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Commands Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(commands_sent_total[5m])",
+            "legendFormat": "SendCommand {{command_type}}"
+          },
+          {
+            "expr": "rate(commands_polled_total[5m])",
+            "legendFormat": "PollCommands"
+          },
+          {
+            "expr": "rate(commands_acked_total[5m])",
+            "legendFormat": "AckCommand"
+          }
+        ],
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}
+      },
+      {
+        "id": 2,
+        "title": "Method Latency",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(method_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95 {{method}}"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(method_duration_seconds_bucket[5m]))",
+            "legendFormat": "p99 {{method}}"
+          }
+        ],
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}
+      },
+      {
+        "id": 3,
+        "title": "Database Query Performance",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(database_duration_seconds_bucket[5m])) by (query_type)",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "gridPos": {"x": 0, "y": 8, "w": 8, "h": 6}
+      },
+      {
+        "id": 4,
+        "title": "Errors",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "rate(command_errors_total[5m]) + rate(router_errors_total[5m])",
+            "legendFormat": "{{method}} - {{error_type}}"
+          }
+        ],
+        "gridPos": {"x": 8, "y": 8, "w": 8, "h": 6}
+      },
+      {
+        "id": 5,
+        "title": "Go Runtime",
+        "type": "row",
+        "gridPos": {"x": 0, "y": 14, "w": 24, "h": 1}
+      },
+      {
+        "id": 6,
+        "title": "Goroutines",
+        "type": "graph",
+        "targets": [{"expr": "go_goroutines"}],
+        "gridPos": {"x": 0, "y": 15, "w": 6, "h": 6}
+      },
+      {
+        "id": 7,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [{"expr": "go_memstats_heap_alloc_bytes"}],
+        "gridPos": {"x": 6, "y": 15, "w": 6, "h": 6}
+      },
+      {
+        "id": 8,
+        "title": "GC Duration",
+        "type": "graph",
+        "targets": [{"expr": "rate(go_gc_duration_seconds_sum[5m])"}],
+        "gridPos": {"x": 12, "y": 15, "w": 6, "h": 6}
+      }
+    ],
+    "time": {"from": "now-6h", "to": "now"},
+    "refresh": "10s"
+  }
+}

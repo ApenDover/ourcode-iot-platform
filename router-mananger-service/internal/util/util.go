@@ -5,9 +5,9 @@ import (
 	"runtime"
 )
 
-func MigrationsPath() string {
+func MigrationsPath(migrationPath string) string {
 	_, b, _, _ := runtime.Caller(0)
 	basePath := filepath.Dir(b)
-	path := filepath.Join(basePath, "../../db/migrations")
+	path := filepath.Join(basePath, migrationPath)
 	return "file://" + path
 }

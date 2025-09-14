@@ -61,6 +61,8 @@ services:
         condition: service_healthy
       failed-events-processor:
         condition: service_healthy
+      router-mananger-service:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8889/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
       interval: 3s
@@ -409,6 +411,27 @@ services:
       test: [ "CMD", "pg_isready", "-U", "${APP_REPLICA_DATASOURCE_2_USERNAME}", "-d", "${APP_REPLICA_DATASOURCE_2_URL}" ]
       interval: 10s
       retries: 5
+    networks:
+      - iot_network
+  router-mananger-service:
+    build:
+      context: ../router-mananger-service
+    container_name: router-mananger-service
+    env_file:
+      - .env
+    ports:
+      - 8890:9090
+      - 8891:9091
+    restart: unless-stopped
+    depends_on:
+      postgres_router_manager:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q -O - http://localhost:9091/metrics || exit 1" ]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 3s
     networks:
       - iot_network
   postgres_router_manager:

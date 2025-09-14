@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
+	"router-mananger-service/config"
 	"router-mananger-service/internal/adapters/db"
 	"router-mananger-service/internal/adapters/routes"
 	"router-mananger-service/internal/conf"
@@ -249,7 +250,7 @@ func SetupPostgresContainerPool(t *testing.T) (*string, *pgxpool.Pool, func(), e
 		}
 	}
 
-	conf.RunMigrations(dsn, util.MigrationsPath())
+	conf.RunMigrations(dsn, util.MigrationsPath(config.LoadConfig().MigrationPath))
 
 	return &dsn, pool, terminate, nil
 }

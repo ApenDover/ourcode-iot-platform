@@ -14,3 +14,6 @@ services:
   failed-events-processor:
     build:
       dockerfile: ../failed-events-processor/Dockerfile.local
+  router-mananger-service:
+    build:
+      dockerfile: ../router-mananger-service/Dockerfile.local
