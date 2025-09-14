@@ -50,6 +50,10 @@ func (s *Server) Start(port string) error {
 	return grpcServer.Serve(lis)
 }
 
+func (s *Server) Stop() {
+	s.Stop()
+}
+
 // SendCommand - адаптер для создания команды
 func (s *Server) SendCommand(_ context.Context, req *routermanager.SendCommandRequest) (*routermanager.SendCommandResponse, error) {
 	util.GetLogger().Info("Получил запрос SendCommand")

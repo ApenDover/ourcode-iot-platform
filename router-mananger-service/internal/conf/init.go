@@ -2,7 +2,6 @@ package conf
 
 import (
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
@@ -16,22 +15,17 @@ import (
 	"time"
 )
 
-func InitGrpc() {
+func InitGrpc(pool *pgxpool.Pool, databasePath string) {
 	log := util.GetLogger()
 
-	pool, err := pgxpool.New(context.Background(), databasePath())
-	if err != nil {
-		log.Error("Не смог подключиться к БД", slog.String("error", err.Error()))
-	}
-
-	RunMigrations(databasePath(), util.MigrationsPath())
+	RunMigrations(databasePath, util.MigrationsPath())
 
 	managerService := innergrpc.NewServer(pool)
 	period := config.LoadConfig().CheckExpiredInterval
 	expiredTime := config.LoadConfig().TimeExpired
 	log.Info("Параметры проверки на просроченные статусы",
-		slog.String("период запуска", period.String()),
-		slog.String("просрочка после", expiredTime.String()))
+		slog.String("запускаю проверку каждые (период)", period.String()),
+		slog.String("проставляю ERROR для SENT после (период)", expiredTime.String()))
 
 	go func() {
 		ticker := time.NewTicker(period)
@@ -41,31 +35,19 @@ func InitGrpc() {
 		}
 	}()
 
-	err = managerService.Start("9090")
+	err := managerService.Start("9090")
 	if err != nil {
 		log.Error("Не смог запустить сервер", slog.String("error", err.Error()))
 	}
 
 }
 
-func databasePath() string {
-	c := config.LoadConfig()
-	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		c.DBUser,
-		c.DBPassword,
-		c.DBHost,
-		c.DBPort,
-		c.DBName,
-	)
-}
-
-func InitHttp() error {
+func InitHttp(databasePath string) error {
 	log := util.GetLogger()
 
-	RunMigrations(databasePath(), util.MigrationsPath())
+	RunMigrations(databasePath, util.MigrationsPath())
 
-	pool, err := pgxpool.New(context.Background(), databasePath())
+	pool, err := pgxpool.New(context.Background(), databasePath)
 	if err != nil {
 		log.Error("Не смог подключиться к БД", slog.String("error", err.Error()))
 		return err

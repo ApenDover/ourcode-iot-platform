@@ -2,38 +2,32 @@ package routes
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"router-mananger-service/internal/adapters/db"
 	"router-mananger-service/internal/adapters/routes"
 	"router-mananger-service/internal/conf"
-	"router-mananger-service/internal/core/service"
-	"router-mananger-service/internal/util"
-	"testing"
-	"time"
-
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
-	tc "github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
-
 	"router-mananger-service/internal/core/domainService"
+	"router-mananger-service/internal/core/service"
+	"testing"
 )
 
-func TestSendPollAckCommandsWithPool(t *testing.T) {
+func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	// SETUP
 	gin.SetMode(gin.TestMode)
-	//ctx := context.Background()
 
-	_, pool, terminate, err := SetupPostgresContainerPool(t)
+	dbPath, pool, terminate, err := SetupPostgresContainerPool(t)
 	require.NoError(t, err)
 	defer terminate()
+
+	go conf.InitGrpc(pool, *dbPath)
+
 	commandRepo := db.NewPostgresCommandRepository(pool)
 	routerRepo := db.NewPostgresRouterRepository(pool)
 	cs := domainService.NewCommandService(commandRepo)
@@ -43,7 +37,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	engine := gin.New()
 	routes.RegisterRoutes(engine, svc)
 
-	// --- 1. CreateCommand ---
+	// CreateCommand ---
 
 	// GIVEN
 	serial := uuid.New().String()
@@ -85,7 +79,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.NotNil(t, firstSendCommand.RouterID)
 	assert.NotNil(t, firstSendCommand.ID)
 
-	// THEN CHECK DATABASE CROUTER
+	// THEN CHECK DATABASE ROUTER
 	router, err := routerRepo.GetBySerial(serial)
 	require.NoError(t, err)
 	require.NotEmpty(t, router)
@@ -95,7 +89,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.Nil(t, router.LastSeenAt)
 	assert.NotNil(t, router.CreatedAt)
 
-	// --- 2. PollCommands ---
+	// PollCommands ---
 	// GIVEN
 	pollReqBody, _ := json.Marshal(map[string]interface{}{
 		"router_serial": serial,
@@ -137,7 +131,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.NotNil(t, firstPollCommand.RouterID)
 	assert.NotNil(t, firstPollCommand.ID)
 
-	// THEN CHECK DATABASE CROUTER
+	// THEN CHECK DATABASE ROUTER
 	routerPoll, err := routerRepo.GetBySerial(serial)
 	require.NoError(t, err)
 	require.NotEmpty(t, routerPoll)
@@ -147,7 +141,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.NotNil(t, routerPoll.LastSeenAt)
 	assert.NotNil(t, routerPoll.CreatedAt)
 
-	// --- 3. AckCommands ---
+	// AckCommands
 
 	// GIVEN
 	ackReqBody, _ := json.Marshal(map[string]interface{}{
@@ -186,7 +180,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.NotNil(t, firstAckCommand.RouterID)
 	assert.NotNil(t, firstAckCommand.ID)
 
-	// THEN CHECK DATABASE CROUTER
+	// THEN CHECK DATABASE ROUTER
 	routerAck, err := routerRepo.GetBySerial(serial)
 	require.NoError(t, err)
 	require.NotEmpty(t, routerAck)
@@ -196,60 +190,4 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.NotNil(t, routerAck.LastSeenAt)
 	assert.NotNil(t, routerAck.CreatedAt)
 	assert.NotEqual(t, routerPoll.LastSeenAt, routerAck.LastSeenAt)
-}
-
-func SetupPostgresContainerPool(t *testing.T) (*string, *pgxpool.Pool, func(), error) {
-	util.SetupLogger("local")
-	ctx := context.Background()
-	req := tc.ContainerRequest{
-		Image:        "postgres:16",
-		ExposedPorts: []string{"5432/tcp"},
-		Env: map[string]string{
-			"POSTGRES_USER":     "test",
-			"POSTGRES_PASSWORD": "test",
-			"POSTGRES_DB":       "testdb",
-		},
-		WaitingFor: wait.ForListeningPort("5432/tcp"),
-	}
-
-	pgContainer, err := tc.GenericContainer(ctx, tc.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("контейнер не захотел стартовать: %w", err)
-	}
-
-	host, err := pgContainer.Host(ctx)
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("контейнер не родился на заданном хосту: %w", err)
-	}
-	port, err := pgContainer.MappedPort(ctx, "5432")
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("порт недоступен: %w", err)
-	}
-
-	dsn := fmt.Sprintf("postgres://test:test@%s:%s/testdb?sslmode=disable", host, port.Port())
-	pool, err := pgxpool.New(ctx, dsn)
-	if err != nil {
-		return &dsn, nil, nil, fmt.Errorf("pool не создался: %w", err)
-	}
-
-	for i := 0; i < 30; i++ {
-		if err := pool.Ping(ctx); err == nil {
-			break
-		}
-		time.Sleep(time.Second)
-	}
-
-	terminate := func() {
-		pool.Close()
-		if err := pgContainer.Terminate(ctx); err != nil {
-			t.Logf("контейнер не ликвдировался: %v", err)
-		}
-	}
-
-	conf.RunMigrations(dsn, util.MigrationsPath())
-
-	return &dsn, pool, terminate, nil
 }
