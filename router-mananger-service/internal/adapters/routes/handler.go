@@ -11,7 +11,7 @@ import (
 )
 
 type SendCommandRequest struct {
-	SerialNumber string                 `json:"serial_number"`
+	SerialNumber string                 `json:"router_serial"`
 	CommandType  string                 `json:"command_type" binding:"required"`
 	Payload      map[string]interface{} `json:"payload"`
 }
@@ -43,7 +43,7 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 	})
 
 	type PollCommandRequest struct {
-		SerialNumber string `json:"serial_number" binding:"required"`
+		SerialNumber string `json:"router_serial" binding:"required"`
 	}
 
 	api.POST("/commands/poll", func(c *gin.Context) {
@@ -78,7 +78,7 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 	})
 
 	type AckCommandRequest struct {
-		SerialNumber string    `json:"serial_number" binding:"required"`
+		SerialNumber string    `json:"router_serial" binding:"required"`
 		CommandID    uuid.UUID `json:"command_id" binding:"required"`
 	}
 

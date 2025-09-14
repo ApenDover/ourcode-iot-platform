@@ -86,7 +86,8 @@ func (m *ManagerService) GetPendingCommandsAndMarkItSent(routerSerial string) []
 }
 
 func (m *ManagerService) AckCommand(serial string, commandId uuid.UUID) {
-	m.commandService.AckCommand(serial, commandId)
+	router := m.routerService.GetBySerial(serial)
+	m.commandService.AckCommand(router.ID, commandId)
 	m.routerService.UpdateSeenAt([]string{serial})
 }
 

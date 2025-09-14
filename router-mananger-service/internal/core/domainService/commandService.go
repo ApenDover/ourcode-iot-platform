@@ -109,11 +109,11 @@ func (s *CommandService) UpdateCommandsStatus(commands []domain.Command) {
 	}
 }
 
-func (s *CommandService) AckCommand(serial string, commandID uuid.UUID) {
-	err := s.repo.UpdateStatusToAcked(serial, commandID)
+func (s *CommandService) AckCommand(routerId, commandID uuid.UUID) {
+	err := s.repo.UpdateStatusToAcked(routerId, commandID)
 	if err != nil {
 		log.Error("не удалось подтвердить команду",
-			slog.String("serial", serial),
+			slog.String("routerId", routerId.String()),
 			slog.String("commandId", commandID.String()),
 			slog.String("error", err.Error()))
 	}

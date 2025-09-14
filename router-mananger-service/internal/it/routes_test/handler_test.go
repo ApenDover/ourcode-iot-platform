@@ -12,6 +12,7 @@ import (
 	"router-mananger-service/internal/adapters/db"
 	"router-mananger-service/internal/adapters/routes"
 	"router-mananger-service/internal/conf"
+	"router-mananger-service/internal/core/service"
 	"router-mananger-service/internal/util"
 	"testing"
 	"time"
@@ -36,28 +37,25 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	pool, terminate, err := setupPostgresContainerPool(t)
 	require.NoError(t, err)
 	defer terminate()
+	commandRepo := db.NewPostgresCommandRepository(pool)
+	routerRepo := db.NewPostgresRouterRepository(pool)
+	cs := domainService.NewCommandService(commandRepo)
+	rs := domainService.NewRouterService(routerRepo)
 
-	repo := db.NewPostgresCommandRepository(pool)
-	svc := domainService.NewCommandService(repo)
+	svc := service.NewManagerService(cs, rs)
 	engine := gin.New()
 	routes.RegisterRoutes(engine, svc)
 
 	// --- 1. CreateCommand ---
 
 	// GIVEN
-	routerId := uuid.New()
+	serial := uuid.New().String()
 	payload := map[string]interface{}{"foo": "bar"}
 
-	//_, err = pool.Exec(ctx,
-	//	`INSERT INTO routers (id, serial_number, ip_address, created_at)
-	//		VALUES ($1, $2, $3, $4)`, routerId, routerId, "192.168.0.1", time.Now(),
-	//)
-	//require.NoError(t, err)
-
 	sendReqBody, _ := json.Marshal(map[string]interface{}{
-		"router_id":    routerId,
-		"command_type": "TEST_SEND",
-		"payload":      payload,
+		"router_serial": serial,
+		"command_type":  "TEST_SEND",
+		"payload":       payload,
 	})
 
 	// WHEN
@@ -77,7 +75,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.Equal(t, float64(1), sendResp["created"])
 
 	// THEN CHECK DATABASE
-	sendCommand, err := repo.GetAllByRouterId(routerId)
+	sendCommand, err := commandRepo.GetAllByRouterSerial(serial)
 	require.NoError(t, err)
 	require.NotEmpty(t, sendCommand)
 
@@ -93,7 +91,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	// --- 2. PollCommands ---
 	// GIVEN
 	pollReqBody, _ := json.Marshal(map[string]interface{}{
-		"router_id": routerId,
+		"router_serial": serial,
 	})
 
 	// WHEN
@@ -118,7 +116,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	require.NoError(t, err)
 
 	// THEN CHECK DATABASE
-	pollCommand, err := repo.GetAllByRouterId(routerId)
+	pollCommand, err := commandRepo.GetAllByRouterSerial(serial)
 	require.NoError(t, err)
 	require.NotEmpty(t, pollCommand)
 
@@ -136,8 +134,8 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 
 	// GIVEN
 	ackReqBody, _ := json.Marshal(map[string]interface{}{
-		"router_id":  routerId,
-		"command_id": commandID,
+		"router_serial": serial,
+		"command_id":    commandID,
 	})
 
 	// WHEN
@@ -157,7 +155,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.Equal(t, "ACKED", ackResp["status"])
 
 	// THEN CHECK DATABASE
-	ackCommand, err := repo.GetAllByRouterId(routerId)
+	ackCommand, err := commandRepo.GetAllByRouterSerial(serial)
 	require.NoError(t, err)
 	require.NotEmpty(t, ackCommand)
 
@@ -173,8 +171,8 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 }
 
 func setupPostgresContainerPool(t *testing.T) (*pgxpool.Pool, func(), error) {
+	util.SetupLogger("local")
 	ctx := context.Background()
-
 	req := tc.ContainerRequest{
 		Image:        "postgres:16",
 		ExposedPorts: []string{"5432/tcp"},
@@ -223,11 +221,7 @@ func setupPostgresContainerPool(t *testing.T) (*pgxpool.Pool, func(), error) {
 		}
 	}
 
-	err = conf.RunMigrations(dsn, util.MigrationsPath())
-	if err != nil {
-		terminate()
-		return nil, nil, fmt.Errorf("миграции не накатились: %w", err)
-	}
+	conf.RunMigrations(dsn, util.MigrationsPath())
 
 	return pool, terminate, nil
 }

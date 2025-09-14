@@ -176,13 +176,13 @@ func (r *PostgresCommandRepository) SetSentStatusForPendingByCommandIds(cmds []d
 	return nil
 }
 
-func (r *PostgresCommandRepository) UpdateStatusToAcked(serial string, commandID uuid.UUID) error {
+func (r *PostgresCommandRepository) UpdateStatusToAcked(routerId, commandID uuid.UUID) error {
 	_, err := r.pool.Exec(
 		context.Background(),
 		`UPDATE commands
-		 SET status = $1, acked_at = $2, !
-		 WHERE id = $3 AND serial_number = $4 AND status=$5`,
-		domain.CommandStatusAcked, time.Now(), commandID, serial, domain.CommandStatusSent,
+		 SET status = $1, acked_at = $2
+		 WHERE id = $3 AND router_id = $4 AND status=$5`,
+		domain.CommandStatusAcked, time.Now(), commandID, routerId, domain.CommandStatusSent,
 	)
 	return err
 }

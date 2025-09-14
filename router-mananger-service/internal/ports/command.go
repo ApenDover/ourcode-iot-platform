@@ -13,6 +13,6 @@ type CommandRepository interface {
 	GetAllByRouterSerial(serial string) ([]domain.Command, error)
 	SetSentStatusForPendingByRouterSerial(serial string) error
 	SetSentStatusForPendingByCommandIds(cmd []domain.Command) error
-	UpdateStatusToAcked(serial string, commandUuid uuid.UUID) error
+	UpdateStatusToAcked(serial, commandUuid uuid.UUID) error
 	MarkExpiredAsError(timeout time.Duration) error
 }
