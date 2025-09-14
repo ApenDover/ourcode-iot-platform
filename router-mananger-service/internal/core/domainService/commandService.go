@@ -23,10 +23,10 @@ func NewCommandService(repo ports.CommandRepository) *CommandService {
 	return &CommandService{repo: repo}
 }
 
-func (s *CommandService) CreateCommand(routerID uuid.UUID, commandType string, payload map[string]any) domain.Command {
+func (s *CommandService) CreateCommand(routerId uuid.UUID, commandType string, payload map[string]any) domain.Command {
 	cmd := domain.Command{
 		ID:          uuid.New(),
-		RouterID:    routerID,
+		RouterID:    routerId,
 		CommandType: commandType,
 		Payload:     payload,
 		Status:      domain.CommandStatusPending,
@@ -35,15 +35,15 @@ func (s *CommandService) CreateCommand(routerID uuid.UUID, commandType string, p
 
 	err := s.repo.Save(cmd)
 	if err != nil {
-		log.Error("не удалось сохранить команду", slog.String("routerId", routerID.String()), slog.String("error", err.Error()))
+		log.Error("не удалось сохранить команду", slog.String("routerId", routerId.String()), slog.String("error", err.Error()))
 	}
 	log.Debug("команда сохранена",
-		slog.String("routerId", routerID.String()))
+		slog.String("routerId", routerId.String()))
 	return cmd
 }
 
-func (s *CommandService) CreateCommandsForAll(routerIDs []uuid.UUID, commandType string, payload map[string]any) []domain.Command {
-	if len(routerIDs) == 0 {
+func (s *CommandService) CreateCommandsForAll(routerIds []uuid.UUID, commandType string, payload map[string]any) []domain.Command {
+	if len(routerIds) == 0 {
 		return []domain.Command{}
 	}
 
@@ -51,7 +51,7 @@ func (s *CommandService) CreateCommandsForAll(routerIDs []uuid.UUID, commandType
 	batchSize := 1000
 	var batch []domain.Command
 
-	for _, rID := range routerIDs {
+	for _, rID := range routerIds {
 		cmd := domain.Command{
 			ID:          uuid.New(),
 			RouterID:    rID,
@@ -90,11 +90,11 @@ func (s *CommandService) CreateCommandsForAll(routerIDs []uuid.UUID, commandType
 	return commands
 }
 
-func (s *CommandService) GetPendingCommands(routerID uuid.UUID) []domain.Command {
-	commands, err := s.repo.GetByIdAndStatuses(routerID, []domain.CommandStatus{domain.CommandStatusPending})
+func (s *CommandService) GetPendingCommands(routerSerial string) []domain.Command {
+	commands, err := s.repo.GetBySerialAndStatuses(routerSerial, []domain.CommandStatus{domain.CommandStatusPending})
 	if err != nil {
 		log.Error("не удалось получить команды",
-			slog.String("routerId", routerID.String()),
+			slog.String("routerSerial", routerSerial),
 			slog.String("error", err.Error()))
 		return nil
 	}
@@ -110,11 +110,11 @@ func (s *CommandService) UpdateCommandsStatus(commands []domain.Command) {
 	}
 }
 
-func (s *CommandService) AckCommand(routerID, commandID uuid.UUID) {
-	err := s.repo.UpdateStatusToAcked(routerID, commandID)
+func (s *CommandService) AckCommand(serial string, commandID uuid.UUID) {
+	err := s.repo.UpdateStatusToAcked(serial, commandID)
 	if err != nil {
 		log.Error("не удалось подтвердить команду",
-			slog.String("routerId", routerID.String()),
+			slog.String("serial", serial),
 			slog.String("commandId", commandID.String()),
 			slog.String("error", err.Error()))
 	}

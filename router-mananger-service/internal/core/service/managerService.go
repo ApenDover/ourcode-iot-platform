@@ -18,24 +18,75 @@ func NewManagerService(commandService *domainService.CommandService, routerServi
 	}
 }
 
-func (m *ManagerService) CreateCommand(routerID uuid.UUID, commandType string, payload map[string]any) domain.Command {
-	m.routerService.Create(routerID)
-	return m.commandService.CreateCommand(routerID, commandType, payload)
+func (m *ManagerService) CreateCommand(serial string, commandType string, payload map[string]any) domain.CommandOut {
+	router := m.routerService.Create(serial)
+	command := m.commandService.CreateCommand(router.ID, commandType, payload)
+	return domain.CommandOut{
+		ID:           command.ID,
+		SerialNumber: serial,
+		CommandType:  command.CommandType,
+		Payload:      &command.Payload,
+		Status:       command.Status,
+		SentAt:       command.SentAt,
+		AckedAt:      command.AckedAt,
+		CreatedAt:    command.CreatedAt,
+	}
 }
 
-func (m *ManagerService) CreateCommandForAll(commandType string, payload map[string]any) []domain.Command {
-	ids := m.routerService.GetAllRouterIds()
-	return m.commandService.CreateCommandsForAll(ids, commandType, payload)
+func (m *ManagerService) CreateCommandForAll(commandType string, payload map[string]any) []domain.CommandOut {
+	routers := m.routerService.GetAllRouters()
+	ids := make([]uuid.UUID, len(routers))
+	for i, r := range routers {
+		ids[i] = r.ID
+	}
+	commands := m.commandService.CreateCommandsForAll(ids, commandType, payload)
+
+	routerMap := make(map[uuid.UUID]string, len(routers))
+	for _, r := range routers {
+		routerMap[r.ID] = r.SerialNumber
+	}
+
+	result := make([]domain.CommandOut, len(commands))
+	for i, cmd := range commands {
+		serial := routerMap[cmd.RouterID]
+		result[i] = domain.CommandOut{
+			ID:           cmd.ID,
+			SerialNumber: serial,
+			CommandType:  cmd.CommandType,
+			Payload:      &cmd.Payload,
+			Status:       cmd.Status,
+			SentAt:       cmd.SentAt,
+			AckedAt:      cmd.AckedAt,
+			CreatedAt:    cmd.CreatedAt,
+		}
+	}
+
+	return result
 }
 
-func (m *ManagerService) GetPendingCommandsAndMarkItSent(routerId uuid.UUID) []domain.Command {
-	pending := m.commandService.GetPendingCommands(routerId)
+func (m *ManagerService) GetPendingCommandsAndMarkItSent(routerSerial string) []domain.CommandOut {
+	pending := m.commandService.GetPendingCommands(routerSerial)
 	m.commandService.UpdateCommandsStatus(pending)
-	return pending
+	m.routerService.UpdateSeenAt([]string{routerSerial})
+	result := make([]domain.CommandOut, len(pending))
+	for i, cmd := range pending {
+		result[i] = domain.CommandOut{
+			ID:           cmd.ID,
+			SerialNumber: routerSerial,
+			CommandType:  cmd.CommandType,
+			Payload:      &cmd.Payload,
+			Status:       cmd.Status,
+			SentAt:       cmd.SentAt,
+			AckedAt:      cmd.AckedAt,
+			CreatedAt:    cmd.CreatedAt,
+		}
+	}
+	return result
 }
 
-func (m *ManagerService) AckCommand(routerId uuid.UUID, commandId uuid.UUID) {
-	m.commandService.AckCommand(routerId, commandId)
+func (m *ManagerService) AckCommand(serial string, commandId uuid.UUID) {
+	m.commandService.AckCommand(serial, commandId)
+	m.routerService.UpdateSeenAt([]string{serial})
 }
 
 func (m *ManagerService) MarkExpiredAsError() {

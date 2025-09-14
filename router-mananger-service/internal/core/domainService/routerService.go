@@ -2,7 +2,7 @@ package domainService
 
 import (
 	"log/slog"
-	"router-mananger-service/internal/util"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,19 +18,27 @@ func NewRouterService(repo ports.RouterRepository) *RouterService {
 	return &RouterService{repo: repo}
 }
 
-func (s *RouterService) Create(routerId string) domain.Router {
-	cmd := domain.Router{
+func (s *RouterService) Create(serial string) domain.Router {
+	router := domain.Router{
 		ID:           uuid.New(),
-		SerialNumber: &routerId,
+		SerialNumber: serial,
 		CreatedAt:    time.Now(),
 	}
-	err := s.repo.Save(cmd)
+	err := s.repo.Save(router)
 	if err != nil {
-		log.Error("не удалось сохранить роутер", slog.String("routerId", routerId), slog.String("error", err.Error()))
+		log.Error("не удалось сохранить роутер",
+			slog.String("serial", serial),
+			slog.String("error", err.Error()))
 	}
 	log.Debug("роутер сохранен",
-		slog.String("routerId", routerId))
-	return cmd
+		slog.String("serial", serial))
+	saved, err := s.repo.GetBySerial(serial)
+	if err != nil {
+		log.Error("не удалось найти роутер после сохранения",
+			slog.String("serial", serial),
+			slog.String("error", err.Error()))
+	}
+	return saved
 }
 
 func (s *RouterService) CreateAll(routerSerials []string) []domain.Router {
@@ -39,7 +47,7 @@ func (s *RouterService) CreateAll(routerSerials []string) []domain.Router {
 	for _, id := range routerSerials {
 		cmd := domain.Router{
 			ID:           uuid.New(),
-			SerialNumber: &id,
+			SerialNumber: id,
 			CreatedAt:    time.Now(),
 		}
 		batch = append(batch, cmd)
@@ -50,22 +58,34 @@ func (s *RouterService) CreateAll(routerSerials []string) []domain.Router {
 		log.Error("не удалось сохранить роутеры", slog.String("error", err.Error()))
 	}
 	log.Debug("все роутеры созданы")
-	return batch
+	routers, err := s.repo.GetAllRoutersBySerials(routerSerials)
+	if err != nil {
+		return nil
+	}
+	return routers
 }
 
-func (s *RouterService) GetAllRouterIds() []uuid.UUID {
-	ids, err := s.repo.GetAllIds()
+func (s *RouterService) GetAllRouters() []domain.Router {
+	ids, err := s.repo.GetAllRouters()
 	if err != nil {
-		log.Error("не удалось получить все id роутеров", slog.String("error", err.Error()))
+		log.Error("не удалось получить все роутеры", slog.String("error", err.Error()))
 	}
 	return ids
 }
 
-func (s *RouterService) UpdateSeenAt(routerIds []uuid.UUID) {
-	err := s.repo.UpdateSeenAt(routerIds)
+func (s *RouterService) GetBySerial(serial string) domain.Router {
+	router, err := s.repo.GetBySerial(serial)
+	if err != nil {
+		log.Error("не удалось получить все роутеры", slog.String("error", err.Error()))
+	}
+	return router
+}
+
+func (s *RouterService) UpdateSeenAt(serial []string) {
+	err := s.repo.UpdateSeenAt(serial)
 	if err != nil {
 		log.Error("не удалось обновить lastSeenAt для роутеров",
-			slog.String("routers", util.UUIDsToStrings(routerIds)),
+			slog.String("serial", strings.Join(serial, ", ")),
 			slog.String("error", err.Error()),
 		)
 	}

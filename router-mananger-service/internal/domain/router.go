@@ -8,7 +8,7 @@ import (
 
 type Router struct {
 	ID           uuid.UUID
-	SerialNumber *string
+	SerialNumber string
 	IpAddress    *string
 	LastSeenAt   *time.Time
 	CreatedAt    time.Time

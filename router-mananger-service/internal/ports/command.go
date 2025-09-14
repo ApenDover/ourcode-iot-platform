@@ -9,10 +9,10 @@ import (
 type CommandRepository interface {
 	Save(cmd domain.Command) error
 	SaveAll(cmd []domain.Command) error
-	GetByIdAndStatuses(uuid uuid.UUID, statuses []domain.CommandStatus) ([]domain.Command, error)
-	GetAllByRouterId(routerId uuid.UUID) ([]domain.Command, error)
-	SetSentStatusForPendingByRouterId(uuid uuid.UUID) error
+	GetBySerialAndStatuses(serial string, statuses []domain.CommandStatus) ([]domain.Command, error)
+	GetAllByRouterSerial(serial string) ([]domain.Command, error)
+	SetSentStatusForPendingByRouterSerial(serial string) error
 	SetSentStatusForPendingByCommandIds(cmd []domain.Command) error
-	UpdateStatusToAcked(taskUuid uuid.UUID, commandUuid uuid.UUID) error
+	UpdateStatusToAcked(serial string, commandUuid uuid.UUID) error
 	MarkExpiredAsError(timeout time.Duration) error
 }

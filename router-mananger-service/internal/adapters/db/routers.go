@@ -54,16 +54,16 @@ func (r *PostgresRouterRepository) SaveAll(cmds []domain.Router) error {
 	return err
 }
 
-func (r *PostgresRouterRepository) GetById(id uuid.UUID) (domain.Router, error) {
+func (r *PostgresRouterRepository) GetBySerial(serial string) (domain.Router, error) {
 	var router domain.Router
 
 	query := `
 		SELECT id, serial_number, ip_address, last_seen_at, created_at
 		FROM routers
-		WHERE id = $1
+		WHERE serial_number = $1
 		`
 
-	row := r.pool.QueryRow(context.Background(), query, id)
+	row := r.pool.QueryRow(context.Background(), query, serial)
 
 	var lastSeen *time.Time
 	err := row.Scan(&router.ID, &router.SerialNumber, &router.IpAddress, &lastSeen, &router.CreatedAt)
@@ -93,14 +93,79 @@ func (r *PostgresRouterRepository) GetAllIds() ([]uuid.UUID, error) {
 	return ids, nil
 }
 
-func (r *PostgresRouterRepository) UpdateSeenAt(routerIds []uuid.UUID) error {
-	if len(routerIds) == 0 {
+func (r *PostgresRouterRepository) GetAllRouters() ([]domain.Router, error) {
+	rows, err := r.pool.Query(context.Background(),
+		`SELECT id, serial_number, ip_address, last_seen_at, created_at FROM routers`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var routers []domain.Router
+	for rows.Next() {
+		var r domain.Router
+		var ipAddress *string
+		var lastSeenAt *time.Time
+
+		if err := rows.Scan(&r.ID, &r.SerialNumber, &ipAddress, &lastSeenAt, &r.CreatedAt); err != nil {
+			return nil, err
+		}
+
+		r.IpAddress = ipAddress
+		r.LastSeenAt = lastSeenAt
+
+		routers = append(routers, r)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return routers, nil
+}
+
+func (r *PostgresRouterRepository) GetAllRoutersBySerials(serials []string) ([]domain.Router, error) {
+	rows, err := r.pool.Query(context.Background(),
+		`SELECT id, serial_number, ip_address, last_seen_at, created_at 
+			 FROM routers
+			 WHERE serial_number = ANY(&1)
+			 `, serials)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var routers []domain.Router
+	for rows.Next() {
+		var router domain.Router
+		var ipAddress *string
+		var lastSeenAt *time.Time
+
+		if err := rows.Scan(&router.ID, &router.SerialNumber, &ipAddress, &lastSeenAt, &router.CreatedAt); err != nil {
+			return nil, err
+		}
+
+		router.IpAddress = ipAddress
+		router.LastSeenAt = lastSeenAt
+
+		routers = append(routers, router)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return routers, nil
+}
+
+func (r *PostgresRouterRepository) UpdateSeenAt(serials []string) error {
+	if len(serials) == 0 {
 		return nil
 	}
 
-	placeholders := make([]string, len(routerIds))
-	args := make([]any, len(routerIds))
-	for i, id := range routerIds {
+	placeholders := make([]string, len(serials))
+	args := make([]any, len(serials))
+	for i, id := range serials {
 		placeholders[i] = fmt.Sprintf("$%d", i+1)
 		args[i] = id
 	}
@@ -108,7 +173,7 @@ func (r *PostgresRouterRepository) UpdateSeenAt(routerIds []uuid.UUID) error {
 	query := fmt.Sprintf(`
 		UPDATE routers
 		SET last_seen_at = NOW()
-		WHERE id IN (%s)
+		WHERE serial_number IN (%s)
 	`, strings.Join(placeholders, ","))
 
 	_, err := r.pool.Exec(context.Background(), query, args...)

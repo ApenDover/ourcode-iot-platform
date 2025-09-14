@@ -9,6 +9,5 @@ import (
 func main() {
 	log := util.SetupLogger(config.LoadConfig().Profile)
 	log.Info("Запуск приложения..")
-	//_ = conf.InitHttp()
-	_ = conf.InitGrpc()
+	conf.InitGrpc()
 }

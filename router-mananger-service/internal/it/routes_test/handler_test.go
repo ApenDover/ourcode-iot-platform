@@ -45,17 +45,17 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	// --- 1. CreateCommand ---
 
 	// GIVEN
-	routerID := uuid.New()
+	routerId := uuid.New()
 	payload := map[string]interface{}{"foo": "bar"}
 
 	//_, err = pool.Exec(ctx,
 	//	`INSERT INTO routers (id, serial_number, ip_address, created_at)
-	//		VALUES ($1, $2, $3, $4)`, routerID, routerID, "192.168.0.1", time.Now(),
+	//		VALUES ($1, $2, $3, $4)`, routerId, routerId, "192.168.0.1", time.Now(),
 	//)
 	//require.NoError(t, err)
 
 	sendReqBody, _ := json.Marshal(map[string]interface{}{
-		"router_id":    routerID,
+		"router_id":    routerId,
 		"command_type": "TEST_SEND",
 		"payload":      payload,
 	})
@@ -77,7 +77,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.Equal(t, float64(1), sendResp["created"])
 
 	// THEN CHECK DATABASE
-	sendCommand, err := repo.GetAllByRouterId(routerID)
+	sendCommand, err := repo.GetAllByRouterId(routerId)
 	require.NoError(t, err)
 	require.NotEmpty(t, sendCommand)
 
@@ -93,7 +93,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	// --- 2. PollCommands ---
 	// GIVEN
 	pollReqBody, _ := json.Marshal(map[string]interface{}{
-		"router_id": routerID,
+		"router_id": routerId,
 	})
 
 	// WHEN
@@ -118,7 +118,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	require.NoError(t, err)
 
 	// THEN CHECK DATABASE
-	pollCommand, err := repo.GetAllByRouterId(routerID)
+	pollCommand, err := repo.GetAllByRouterId(routerId)
 	require.NoError(t, err)
 	require.NotEmpty(t, pollCommand)
 
@@ -136,7 +136,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 
 	// GIVEN
 	ackReqBody, _ := json.Marshal(map[string]interface{}{
-		"router_id":  routerID,
+		"router_id":  routerId,
 		"command_id": commandID,
 	})
 
@@ -157,7 +157,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.Equal(t, "ACKED", ackResp["status"])
 
 	// THEN CHECK DATABASE
-	ackCommand, err := repo.GetAllByRouterId(routerID)
+	ackCommand, err := repo.GetAllByRouterId(routerId)
 	require.NoError(t, err)
 	require.NotEmpty(t, ackCommand)
 

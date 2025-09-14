@@ -64,19 +64,20 @@ func (r *PostgresCommandRepository) SaveAll(cmds []domain.Command) error {
 	return err
 }
 
-func (r *PostgresCommandRepository) GetByIdAndStatuses(uuid uuid.UUID, statuses []domain.CommandStatus) ([]domain.Command, error) {
+func (r *PostgresCommandRepository) GetBySerialAndStatuses(serial string, statuses []domain.CommandStatus) ([]domain.Command, error) {
 
 	if len(statuses) == 0 {
 		return nil, nil
 	}
 
 	query := `
-		SELECT id, router_id, command_type, payload, status, created_at
-		FROM commands
-		WHERE router_id = $1 AND status = ANY($2)
+		SELECT c.id, c.router_id, c.command_type, c.payload, c.status, c.sent_at, c.acked_at, c.created_at
+		FROM commands c
+		INNER JOIN routers r ON c.router_id = r.id
+		WHERE r.serial_number = $1 AND status = ANY($2)
 	`
 
-	rows, err := r.pool.Query(context.Background(), query, uuid, statuses)
+	rows, err := r.pool.Query(context.Background(), query, serial, statuses)
 	if err != nil {
 		return nil, err
 	}
@@ -100,15 +101,16 @@ func (r *PostgresCommandRepository) GetByIdAndStatuses(uuid uuid.UUID, statuses 
 	return commands, nil
 }
 
-func (r *PostgresCommandRepository) GetAllByRouterId(routerId uuid.UUID) ([]domain.Command, error) {
+func (r *PostgresCommandRepository) GetAllByRouterSerial(serial string) ([]domain.Command, error) {
 
 	query := `
-		SELECT id, router_id, command_type, payload, status, sent_at, acked_at, created_at
-		FROM commands
-		WHERE router_id = $1
+		SELECT c.id, c.router_id, c.command_type, c.payload, c.status, c.sent_at, c.acked_at, c.created_at
+		FROM commands c
+		INNER JOIN routers r ON c.router_id = r.id
+		WHERE r.serial_number = $1
 	`
 
-	rows, err := r.pool.Query(context.Background(), query, routerId)
+	rows, err := r.pool.Query(context.Background(), query, serial)
 	if err != nil {
 		return nil, err
 	}
@@ -132,11 +134,11 @@ func (r *PostgresCommandRepository) GetAllByRouterId(routerId uuid.UUID) ([]doma
 	return commands, nil
 }
 
-func (r *PostgresCommandRepository) SetSentStatusForPendingByRouterId(routerId uuid.UUID) error {
+func (r *PostgresCommandRepository) SetSentStatusForPendingByRouterSerial(serial string) error {
 	_, err := r.pool.Exec(
 		context.Background(),
-		"UPDATE commands SET status=$1, sent_at=$2 WHERE router_id=$3 AND status=$4",
-		domain.CommandStatusSent, time.Now(), routerId, domain.CommandStatusPending,
+		"UPDATE commands SET status=$1, sent_at=$2 WHERE serial_number=$3 AND status=$4",
+		domain.CommandStatusSent, time.Now(), serial, domain.CommandStatusPending,
 	)
 	return err
 }
@@ -149,7 +151,6 @@ func (r *PostgresCommandRepository) SetSentStatusForPendingByCommandIds(cmds []d
 	ctx := context.Background()
 	batch := &pgx.Batch{}
 
-	// Добавляем в батч обновления для каждой команды
 	for _, cmd := range cmds {
 		batch.Queue(
 			`UPDATE commands
@@ -173,33 +174,15 @@ func (r *PostgresCommandRepository) SetSentStatusForPendingByCommandIds(cmds []d
 	return nil
 }
 
-func (r *PostgresCommandRepository) UpdateStatusToAcked(routerID, commandID uuid.UUID) error {
+func (r *PostgresCommandRepository) UpdateStatusToAcked(serial string, commandID uuid.UUID) error {
 	_, err := r.pool.Exec(
 		context.Background(),
 		`UPDATE commands
-		 SET status = $1,acked_at = $2
-		 WHERE id = $3 AND router_id = $4 AND status=$5`,
-		domain.CommandStatusAcked, time.Now(), commandID, routerID, domain.CommandStatusSent,
+		 SET status = $1, acked_at = $2, !
+		 WHERE id = $3 AND serial_number = $4 AND status=$5`,
+		domain.CommandStatusAcked, time.Now(), commandID, serial, domain.CommandStatusSent,
 	)
 	return err
-}
-
-func (r *PostgresCommandRepository) FindAllIDs() ([]uuid.UUID, error) {
-	rows, err := r.pool.Query(context.Background(), "SELECT id FROM routers")
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var ids []uuid.UUID
-	for rows.Next() {
-		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	return ids, nil
 }
 
 func (r *PostgresCommandRepository) MarkExpiredAsError(timeout time.Duration) error {

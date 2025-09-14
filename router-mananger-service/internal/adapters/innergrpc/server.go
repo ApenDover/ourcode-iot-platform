@@ -23,8 +23,6 @@ import (
 
 type Server struct {
 	routermanager.UnimplementedRouterManagerServiceServer
-	CommandService *domainService.CommandService
-	RouterService  *domainService.RouterService
 	ManagerService *service.ManagerService
 }
 
@@ -45,13 +43,10 @@ func NewServer(pool *pgxpool.Pool) *Server {
 	}()
 
 	return &Server{
-		CommandService: commandService,
-		RouterService:  routerService,
 		ManagerService: managerService,
 	}
 }
 
-// mustEmbedUnimplementedRouterManagerServiceServer реализует требование интерфейса
 func (s *Server) mustEmbedUnimplementedRouterManagerServiceServer() {}
 
 func (s *Server) Start(port string) error {
@@ -72,12 +67,8 @@ func (s *Server) SendCommand(_ context.Context, req *routermanager.SendCommandRe
 	util.GetLogger().Info("Получил запрос SendCommand")
 	payloadMap := req.Payload.AsMap()
 
-	if req.RouterId != "" {
-		routerID, err := uuid.Parse(req.RouterId)
-		if err != nil {
-			return nil, err
-		}
-		_ = s.CommandService.CreateCommand(routerID, req.CommandType, payloadMap)
+	if req.RouterSerial != "" {
+		_ = s.ManagerService.CreateCommand(req.RouterSerial, req.CommandType, payloadMap)
 		return &routermanager.SendCommandResponse{Created: 1}, nil
 	}
 
@@ -85,15 +76,10 @@ func (s *Server) SendCommand(_ context.Context, req *routermanager.SendCommandRe
 	return &routermanager.SendCommandResponse{Created: int32(len(commandAll))}, nil
 }
 
-// PollCommands - адаптер для получения команд роутера
 func (s *Server) PollCommands(ctx context.Context, req *routermanager.PollCommandsRequest) (*routermanager.PollCommandsResponse, error) {
 	util.GetLogger().Info("Получил запрос PollCommands")
-	routerID, err := uuid.Parse(req.RouterId)
-	if err != nil {
-		return nil, err
-	}
 
-	commands := s.CommandService.GetPendingCommands(routerID)
+	commands := s.ManagerService.GetPendingCommandsAndMarkItSent(req.RouterSerial)
 	var pbCommands []*routermanager.Command
 	for _, cmd := range commands {
 		pbCommand, err := s.commandToProto(cmd)
@@ -108,23 +94,19 @@ func (s *Server) PollCommands(ctx context.Context, req *routermanager.PollComman
 
 // AckCommand - адаптер для подтверждения команды
 func (s *Server) AckCommand(ctx context.Context, req *routermanager.AckCommandRequest) (*routermanager.AckCommandResponse, error) {
-	routerID, err := uuid.Parse(req.RouterId)
-	if err != nil {
-		return nil, err
-	}
 
 	commandID, err := uuid.Parse(req.CommandId)
 	if err != nil {
 		return nil, err
 	}
 
-	s.CommandService.AckCommand(commandID, routerID)
+	s.ManagerService.AckCommand(req.RouterSerial, commandID)
 	return &routermanager.AckCommandResponse{Status: "ACKED"}, nil
 }
 
 // commandToProto - преобразование доменной команды в protobuf
-func (s *Server) commandToProto(cmd domain.Command) (*routermanager.Command, error) {
-	payload, err := structpb.NewStruct(cmd.Payload)
+func (s *Server) commandToProto(cmd domain.CommandOut) (*routermanager.Command, error) {
+	payload, err := structpb.NewStruct(*cmd.Payload)
 	if err != nil {
 		return nil, err
 	}
@@ -138,13 +120,13 @@ func (s *Server) commandToProto(cmd domain.Command) (*routermanager.Command, err
 	}
 
 	return &routermanager.Command{
-		Id:          cmd.ID.String(),
-		RouterId:    cmd.RouterID.String(),
-		CommandType: cmd.CommandType,
-		Payload:     payload,
-		Status:      string(cmd.Status),
-		CreatedAt:   timestamppb.New(cmd.CreatedAt),
-		SentAt:      sentAt,
-		AckedAt:     ackedAt,
+		Id:           cmd.ID.String(),
+		RouterSerial: cmd.SerialNumber,
+		CommandType:  cmd.CommandType,
+		Payload:      payload,
+		Status:       string(cmd.Status),
+		CreatedAt:    timestamppb.New(cmd.CreatedAt),
+		SentAt:       sentAt,
+		AckedAt:      ackedAt,
 	}, nil
 }

@@ -43,7 +43,7 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 	})
 
 	type PollCommandRequest struct {
-		RouterID uuid.UUID `json:"router_id" binding:"required"`
+		routerId string `json:"router_id" binding:"required"`
 	}
 
 	api.POST("/commands/poll", func(c *gin.Context) {

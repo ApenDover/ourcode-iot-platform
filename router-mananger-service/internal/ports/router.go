@@ -8,7 +8,9 @@ import (
 type RouterRepository interface {
 	Save(cmd domain.Router) error
 	SaveAll(cmd []domain.Router) error
-	GetById(uuid uuid.UUID) (domain.Router, error)
+	GetBySerial(serial string) (domain.Router, error)
 	GetAllIds() ([]uuid.UUID, error)
-	UpdateSeenAt(uuid []uuid.UUID) error
+	GetAllRouters() ([]domain.Router, error)
+	GetAllRoutersBySerials(serials []string) ([]domain.Router, error)
+	UpdateSeenAt(serials []string) error
 }
