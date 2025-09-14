@@ -7,17 +7,17 @@ import (
 
 var (
 	CommandsSent = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "router_commands_sent_total",
+		Name: "commands_sent_total",
 		Help: "Total number of commands sent",
 	}, []string{"command_type"})
 
 	CommandsPolled = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "router_commands_polled_total",
+		Name: "commands_polled_total",
 		Help: "Total number of commands polled",
 	})
 
 	CommandsAcked = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "router_commands_acked_total",
+		Name: "commands_acked_total",
 		Help: "Total number of commands acknowledged",
 	})
 
@@ -34,7 +34,12 @@ var (
 	}, []string{"query_type"})
 
 	CommandErrors = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "router_command_errors_total",
+		Name: "command_errors_total",
+		Help: "Total number of command errors",
+	}, []string{"method", "error_type"})
+
+	RouterErrors = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "router_errors_total",
 		Help: "Total number of command errors",
 	}, []string{"method", "error_type"})
 )

@@ -2,6 +2,7 @@ package domainService
 
 import (
 	"log/slog"
+	"router-mananger-service/internal/metrics"
 	"strings"
 	"time"
 
@@ -26,6 +27,7 @@ func (s *RouterService) Create(serial string) domain.Router {
 	}
 	err := s.repo.Save(router)
 	if err != nil {
+		metrics.RouterErrors.WithLabelValues("create").Inc()
 		log.Error("не удалось сохранить роутер",
 			slog.String("serial", serial),
 			slog.String("error", err.Error()))
@@ -34,6 +36,7 @@ func (s *RouterService) Create(serial string) domain.Router {
 		slog.String("serial", serial))
 	saved, err := s.repo.GetBySerial(serial)
 	if err != nil {
+		metrics.RouterErrors.WithLabelValues("create").Inc()
 		log.Error("не удалось найти роутер после сохранения",
 			slog.String("serial", serial),
 			slog.String("error", err.Error()))
@@ -55,11 +58,13 @@ func (s *RouterService) CreateAll(routerSerials []string) []domain.Router {
 
 	err := s.repo.SaveAll(batch)
 	if err != nil {
+		metrics.RouterErrors.WithLabelValues("create-all").Inc()
 		log.Error("не удалось сохранить роутеры", slog.String("error", err.Error()))
 	}
 	log.Debug("все роутеры созданы")
 	routers, err := s.repo.GetAllRoutersBySerials(routerSerials)
 	if err != nil {
+		metrics.RouterErrors.WithLabelValues("create-all").Inc()
 		return nil
 	}
 	return routers
@@ -68,6 +73,7 @@ func (s *RouterService) CreateAll(routerSerials []string) []domain.Router {
 func (s *RouterService) GetAllRouters() []domain.Router {
 	ids, err := s.repo.GetAllRouters()
 	if err != nil {
+		metrics.RouterErrors.WithLabelValues("get-all-routers").Inc()
 		log.Error("не удалось получить все роутеры", slog.String("error", err.Error()))
 	}
 	return ids
@@ -76,6 +82,7 @@ func (s *RouterService) GetAllRouters() []domain.Router {
 func (s *RouterService) GetBySerial(serial string) domain.Router {
 	router, err := s.repo.GetBySerial(serial)
 	if err != nil {
+		metrics.RouterErrors.WithLabelValues("get-by-serial").Inc()
 		log.Error("не удалось получить все роутеры", slog.String("error", err.Error()))
 	}
 	return router
@@ -84,6 +91,7 @@ func (s *RouterService) GetBySerial(serial string) domain.Router {
 func (s *RouterService) UpdateSeenAt(serial []string) {
 	err := s.repo.UpdateSeenAt(serial)
 	if err != nil {
+		metrics.RouterErrors.WithLabelValues("update-seen-at").Inc()
 		log.Error("не удалось обновить lastSeenAt для роутеров",
 			slog.String("serial", strings.Join(serial, ", ")),
 			slog.String("error", err.Error()),
