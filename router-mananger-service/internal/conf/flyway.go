@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"fmt"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -10,7 +9,7 @@ import (
 	"strings"
 )
 
-func RunMigrations(dbURL string, migrationSource string) error {
+func RunMigrations(dbURL string, migrationSource string) {
 	log := util.GetLogger()
 
 	if !strings.HasPrefix(migrationSource, "file://") {
@@ -23,15 +22,11 @@ func RunMigrations(dbURL string, migrationSource string) error {
 	)
 	if err != nil {
 		log.Error("Ошибка подключения к БД", slog.String("error", err.Error()))
-		return fmt.Errorf("Ошибка подключения к БД: %w", err)
 	}
 
 	err = m.Up()
 	if err != nil && err != migrate.ErrNoChange {
 		log.Error("ошибка выполнения миграций", slog.String("error", err.Error()))
-		return fmt.Errorf("ошибка выполнения миграций: %w", err)
 	}
 	log.Info("миграции применены к базе", slog.String("databaseUrl", dbURL))
-
-	return nil
 }

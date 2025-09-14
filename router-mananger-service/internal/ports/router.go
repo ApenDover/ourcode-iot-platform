@@ -10,4 +10,5 @@ type RouterRepository interface {
 	SaveAll(cmd []domain.Router) error
 	GetById(uuid uuid.UUID) (domain.Router, error)
 	GetAllIds() ([]uuid.UUID, error)
+	UpdateSeenAt(uuid []uuid.UUID) error
 }

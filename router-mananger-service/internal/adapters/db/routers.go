@@ -23,8 +23,7 @@ func (r *PostgresRouterRepository) Save(cmd domain.Router) error {
 		context.Background(), `
 		INSERT INTO routers (id, serial_number, ip_address, last_seen_at, created_at) 
         VALUES ($1, $2, $3, $4, $5) 
-        ON CONFLICT (id) 
-        DO UPDATE SET last_seen_at = EXCLUDED.last_seen_at
+        ON CONFLICT (serial_number) DO NOTHING
         `, cmd.ID, cmd.SerialNumber, cmd.IpAddress, cmd.LastSeenAt, cmd.CreatedAt,
 	)
 	return err
@@ -47,8 +46,8 @@ func (r *PostgresRouterRepository) SaveAll(cmds []domain.Router) error {
 	query := fmt.Sprintf(`
 			INSERT INTO routers (id, serial_number, ip_address, last_seen_at, created_at)
         	VALUES %s
-        	ON CONFLICT (id) 
-        	DO UPDATE SET last_seen_at = EXCLUDED.last_seen_at
+        	ON CONFLICT (serial_number) 
+        	DO NOTHING
         	`, strings.Join(placeholders, ","))
 
 	_, err := r.pool.Exec(context.Background(), query, values...)
@@ -92,4 +91,26 @@ func (r *PostgresRouterRepository) GetAllIds() ([]uuid.UUID, error) {
 		ids = append(ids, id)
 	}
 	return ids, nil
+}
+
+func (r *PostgresRouterRepository) UpdateSeenAt(routerIds []uuid.UUID) error {
+	if len(routerIds) == 0 {
+		return nil
+	}
+
+	placeholders := make([]string, len(routerIds))
+	args := make([]any, len(routerIds))
+	for i, id := range routerIds {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+		args[i] = id
+	}
+
+	query := fmt.Sprintf(`
+		UPDATE routers
+		SET last_seen_at = NOW()
+		WHERE id IN (%s)
+	`, strings.Join(placeholders, ","))
+
+	_, err := r.pool.Exec(context.Background(), query, args...)
+	return err
 }

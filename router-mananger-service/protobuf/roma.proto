@@ -16,7 +16,7 @@ service RouterManagerService {
 }
 
 message SendCommandRequest {
-  string router_id = 1;
+  string router_serial = 1;
   string command_type = 2;
   google.protobuf.Struct payload = 3;
 }
@@ -26,12 +26,12 @@ message SendCommandResponse {
 }
 
 message PollCommandsRequest {
-  string router_id = 1;
+  string router_serial = 1;
 }
 
 message Command {
   string id = 1;
-  string router_id = 2;
+  string router_serial = 2;
   string command_type = 3;
   google.protobuf.Struct payload = 4;
   string status = 5;
@@ -45,7 +45,7 @@ message PollCommandsResponse {
 }
 
 message AckCommandRequest {
-  string router_id = 1;
+  string router_serial = 1;
   string command_id = 2;
 }
 

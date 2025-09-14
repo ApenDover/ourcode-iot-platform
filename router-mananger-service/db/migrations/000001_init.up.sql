@@ -10,7 +10,7 @@ CREATE TABLE routers
 CREATE TABLE commands
 (
     id           UUID PRIMARY KEY,
-    router_id    UUID, -- REFERENCES routers (id),
+    router_id    UUID REFERENCES routers (id),
     command_type TEXT NOT NULL,
     payload      JSONB,
     status       TEXT NOT NULL DEFAULT 'PENDING',
