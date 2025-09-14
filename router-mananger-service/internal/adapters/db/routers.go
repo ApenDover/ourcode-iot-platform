@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/prometheus/client_golang/prometheus"
 	"router-mananger-service/internal/domain"
+	"router-mananger-service/internal/metrics"
 	"strings"
 	"time"
 )
@@ -19,6 +21,9 @@ func NewPostgresRouterRepository(pool *pgxpool.Pool) *PostgresRouterRepository {
 }
 
 func (r *PostgresRouterRepository) Save(cmd domain.Router) error {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("router_save"))
+	defer timer.ObserveDuration()
+
 	_, err := r.pool.Exec(
 		context.Background(), `
 		INSERT INTO routers (id, serial_number, ip_address, last_seen_at, created_at) 
@@ -30,6 +35,9 @@ func (r *PostgresRouterRepository) Save(cmd domain.Router) error {
 }
 
 func (r *PostgresRouterRepository) SaveAll(cmds []domain.Router) error {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("router_save_all"))
+	defer timer.ObserveDuration()
+
 	if len(cmds) == 0 {
 		return nil
 	}
@@ -55,6 +63,9 @@ func (r *PostgresRouterRepository) SaveAll(cmds []domain.Router) error {
 }
 
 func (r *PostgresRouterRepository) GetBySerial(serial string) (domain.Router, error) {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("router_get_by_serial"))
+	defer timer.ObserveDuration()
+
 	var router domain.Router
 
 	query := `
@@ -76,6 +87,9 @@ func (r *PostgresRouterRepository) GetBySerial(serial string) (domain.Router, er
 }
 
 func (r *PostgresRouterRepository) GetAllIds() ([]uuid.UUID, error) {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("router_get_all_ids"))
+	defer timer.ObserveDuration()
+
 	rows, err := r.pool.Query(context.Background(), "SELECT id FROM routers")
 	if err != nil {
 		return nil, err
@@ -94,6 +108,9 @@ func (r *PostgresRouterRepository) GetAllIds() ([]uuid.UUID, error) {
 }
 
 func (r *PostgresRouterRepository) GetAllRouters() ([]domain.Router, error) {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("router_get_all_routers"))
+	defer timer.ObserveDuration()
+
 	query := `
 			SELECT id, serial_number, ip_address, last_seen_at, created_at 
 			FROM routers
@@ -129,6 +146,9 @@ func (r *PostgresRouterRepository) GetAllRouters() ([]domain.Router, error) {
 }
 
 func (r *PostgresRouterRepository) GetAllRoutersBySerials(serials []string) ([]domain.Router, error) {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("router_get_all_routers_by_serial"))
+	defer timer.ObserveDuration()
+
 	query := `SELECT id, serial_number, ip_address, last_seen_at, created_at 
 			 FROM routers
 			 WHERE serial_number = ANY(&1)
@@ -164,6 +184,9 @@ func (r *PostgresRouterRepository) GetAllRoutersBySerials(serials []string) ([]d
 }
 
 func (r *PostgresRouterRepository) UpdateSeenAt(serials []string) error {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("router_update_seen_at"))
+	defer timer.ObserveDuration()
+
 	if len(serials) == 0 {
 		return nil
 	}

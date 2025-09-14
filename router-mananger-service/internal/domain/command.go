@@ -17,6 +17,17 @@ type Command struct {
 	CreatedAt   time.Time
 }
 
+type CommandOut struct {
+	ID           uuid.UUID
+	SerialNumber string
+	CommandType  string
+	Payload      *map[string]any
+	Status       CommandStatus
+	SentAt       *time.Time
+	AckedAt      *time.Time
+	CreatedAt    time.Time
+}
+
 type CommandStatus string
 
 const (

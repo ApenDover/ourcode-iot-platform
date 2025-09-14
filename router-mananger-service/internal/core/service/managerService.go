@@ -2,8 +2,10 @@ package service
 
 import (
 	"github.com/google/uuid"
+	"github.com/prometheus/client_golang/prometheus"
 	"router-mananger-service/internal/core/domainService"
 	"router-mananger-service/internal/domain"
+	"router-mananger-service/internal/metrics"
 	"time"
 )
 
@@ -20,6 +22,10 @@ func NewManagerService(commandService *domainService.CommandService, routerServi
 }
 
 func (m *ManagerService) CreateCommand(serial string, commandType string, payload map[string]any) domain.CommandOut {
+	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("CreateCommand"))
+	defer timer.ObserveDuration()
+	metrics.CommandsSent.WithLabelValues("CreateCommand").Inc()
+
 	router := m.routerService.Create(serial)
 	command := m.commandService.CreateCommand(router.ID, commandType, payload)
 	return domain.CommandOut{
@@ -35,6 +41,10 @@ func (m *ManagerService) CreateCommand(serial string, commandType string, payloa
 }
 
 func (m *ManagerService) CreateCommandForAll(commandType string, payload map[string]any) []domain.CommandOut {
+	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("CreateCommandForAll"))
+	defer timer.ObserveDuration()
+	metrics.CommandsSent.WithLabelValues("CreateCommandForAll").Inc()
+
 	routers := m.routerService.GetAllRouters()
 	ids := make([]uuid.UUID, len(routers))
 	for i, r := range routers {
@@ -66,6 +76,10 @@ func (m *ManagerService) CreateCommandForAll(commandType string, payload map[str
 }
 
 func (m *ManagerService) GetPendingCommandsAndMarkItSent(routerSerial string) []domain.CommandOut {
+	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("PollCommand"))
+	defer timer.ObserveDuration()
+	metrics.CommandsPolled.Inc()
+
 	pending := m.commandService.GetPendingCommands(routerSerial)
 	m.commandService.UpdateCommandsStatus(pending)
 	m.routerService.UpdateSeenAt([]string{routerSerial})
@@ -86,6 +100,10 @@ func (m *ManagerService) GetPendingCommandsAndMarkItSent(routerSerial string) []
 }
 
 func (m *ManagerService) AckCommand(serial string, commandId uuid.UUID) {
+	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("AckCommand"))
+	defer timer.ObserveDuration()
+	metrics.CommandsAcked.Inc()
+
 	router := m.routerService.GetBySerial(serial)
 	m.commandService.AckCommand(router.ID, commandId)
 	m.routerService.UpdateSeenAt([]string{serial})

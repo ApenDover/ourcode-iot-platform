@@ -7,8 +7,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/prometheus/client_golang/prometheus"
 	"log/slog"
 	"router-mananger-service/internal/domain"
+	"router-mananger-service/internal/metrics"
 	"router-mananger-service/internal/util"
 	"strings"
 	"time"
@@ -23,6 +25,9 @@ func NewPostgresCommandRepository(pool *pgxpool.Pool) *PostgresCommandRepository
 }
 
 func (r *PostgresCommandRepository) Save(cmd domain.Command) error {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_save"))
+	defer timer.ObserveDuration()
+
 	payloadBytes, err := json.Marshal(cmd.Payload)
 	if err != nil {
 		return err
@@ -39,6 +44,9 @@ func (r *PostgresCommandRepository) Save(cmd domain.Command) error {
 }
 
 func (r *PostgresCommandRepository) SaveAll(cmds []domain.Command) error {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_save_all"))
+	defer timer.ObserveDuration()
+
 	if len(cmds) == 0 {
 		return nil
 	}
@@ -68,6 +76,8 @@ func (r *PostgresCommandRepository) SaveAll(cmds []domain.Command) error {
 }
 
 func (r *PostgresCommandRepository) GetBySerialAndStatuses(serial string, statuses []domain.CommandStatus) ([]domain.Command, error) {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_get_by_serial_and_statuses"))
+	defer timer.ObserveDuration()
 
 	if len(statuses) == 0 {
 		return nil, nil
@@ -105,6 +115,8 @@ func (r *PostgresCommandRepository) GetBySerialAndStatuses(serial string, status
 }
 
 func (r *PostgresCommandRepository) GetAllByRouterSerial(serial string) ([]domain.Command, error) {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_get_all_router_serial"))
+	defer timer.ObserveDuration()
 
 	query := `
 		SELECT c.id, c.router_id, c.command_type, c.payload, c.status, c.sent_at, c.acked_at, c.created_at
@@ -138,6 +150,9 @@ func (r *PostgresCommandRepository) GetAllByRouterSerial(serial string) ([]domai
 }
 
 func (r *PostgresCommandRepository) SetSentStatusForPendingByRouterSerial(serial string) error {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_set_sent_status_for_pending_by_router_serial"))
+	defer timer.ObserveDuration()
+
 	query := `
 		UPDATE commands SET status=$1, sent_at=$2 
 		                WHERE serial_number=$3 
@@ -153,6 +168,9 @@ func (r *PostgresCommandRepository) SetSentStatusForPendingByRouterSerial(serial
 }
 
 func (r *PostgresCommandRepository) SetSentStatusForPendingByCommandIds(cmds []domain.Command) error {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_set_sent_status_for_pending_by_command_ids"))
+	defer timer.ObserveDuration()
+
 	if len(cmds) == 0 {
 		return nil
 	}
@@ -184,6 +202,9 @@ func (r *PostgresCommandRepository) SetSentStatusForPendingByCommandIds(cmds []d
 }
 
 func (r *PostgresCommandRepository) UpdateStatusToAcked(routerId, commandID uuid.UUID) error {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_update_status_to_acked"))
+	defer timer.ObserveDuration()
+
 	query := `
 		 UPDATE commands
 		 SET status = $1, acked_at = $2
@@ -197,6 +218,9 @@ func (r *PostgresCommandRepository) UpdateStatusToAcked(routerId, commandID uuid
 }
 
 func (r *PostgresCommandRepository) MarkExpiredAsError(timeout time.Duration) error {
+	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_mark_expired_as_error"))
+	defer timer.ObserveDuration()
+
 	query := `
 		 UPDATE commands
 		 SET status = $1

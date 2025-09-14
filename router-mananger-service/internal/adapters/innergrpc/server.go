@@ -54,7 +54,6 @@ func (s *Server) Stop() {
 	s.Stop()
 }
 
-// SendCommand - адаптер для создания команды
 func (s *Server) SendCommand(_ context.Context, req *routermanager.SendCommandRequest) (*routermanager.SendCommandResponse, error) {
 	util.GetLogger().Info("Получил запрос SendCommand")
 	payloadMap := req.Payload.AsMap()
@@ -70,7 +69,6 @@ func (s *Server) SendCommand(_ context.Context, req *routermanager.SendCommandRe
 
 func (s *Server) PollCommands(ctx context.Context, req *routermanager.PollCommandsRequest) (*routermanager.PollCommandsResponse, error) {
 	util.GetLogger().Info("Получил запрос PollCommands")
-
 	commands := s.ManagerService.GetPendingCommandsAndMarkItSent(req.RouterSerial)
 	var pbCommands []*routermanager.Command
 	for _, cmd := range commands {
@@ -84,7 +82,6 @@ func (s *Server) PollCommands(ctx context.Context, req *routermanager.PollComman
 	return &routermanager.PollCommandsResponse{Commands: pbCommands}, nil
 }
 
-// AckCommand - адаптер для подтверждения команды
 func (s *Server) AckCommand(ctx context.Context, req *routermanager.AckCommandRequest) (*routermanager.AckCommandResponse, error) {
 
 	commandID, err := uuid.Parse(req.CommandId)
@@ -96,7 +93,6 @@ func (s *Server) AckCommand(ctx context.Context, req *routermanager.AckCommandRe
 	return &routermanager.AckCommandResponse{Status: "ACKED"}, nil
 }
 
-// commandToProto - преобразование доменной команды в protobuf
 func (s *Server) commandToProto(cmd domain.CommandOut) (*routermanager.Command, error) {
 	payload, err := structpb.NewStruct(*cmd.Payload)
 	if err != nil {
