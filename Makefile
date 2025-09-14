@@ -12,8 +12,8 @@ DCL=docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_FILE_LOCAL)
 ACTUATOR_URL=http://localhost:
 LOGGER_NAME=ts.andrey
 PROJECT_ROOT := $(shell pwd)
-PROTO_DIR := $(PROJECT_ROOT)/router-mananger-service/protobuf
-GENPROTO_DIR := $(PROJECT_ROOT)/router-mananger-service/internal/ports/genproto
+PROTO_DIR := $(PROJECT_ROOT)/router-manager-service/protobuf
+GENPROTO_DIR := $(PROJECT_ROOT)/router-manager-service/internal/ports/genproto
 PROTO_FILES := $(wildcard $(PROTO_DIR)/*.proto)
 
 .PHONY: up down downv restart logs help exec logs- proto-gen
@@ -100,14 +100,14 @@ boot: nexus-deploy proto-gen  ## локально пересобрать обр�
 	docker image rm infrastructure-event-collector -f
 	docker image rm infrastructure-kafka-producer -f
 	docker image rm infrastructure-failed-events-processor -f
-	docker image rm infrastructure-router-mananger-service -f
+	docker image rm infrastructure-router-manager-service -f
 	cd event-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd event-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-service && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd kafka-producer && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd failed-events-processor && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
-	cd router-mananger-service && go build -o router-manager ./cmd/app
+	cd router-manager-service && go build -o router-manager ./cmd/app
 
 rebuild: nexus-deploy  ## локально пересобрать образы
 	cd event-collector && ./gradlew clean build
