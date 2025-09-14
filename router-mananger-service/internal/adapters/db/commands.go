@@ -30,9 +30,10 @@ func (r *PostgresCommandRepository) Save(cmd domain.Command) error {
 
 	_, err = r.pool.Exec(
 		context.Background(),
-		`INSERT INTO commands (id, router_id, command_type, payload, status, created_at) 
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-		cmd.ID, cmd.RouterID, cmd.CommandType, payloadBytes, cmd.Status, cmd.CreatedAt,
+		`
+		 INSERT INTO commands (id, router_id, command_type, payload, status, created_at) 
+         VALUES ($1, $2, $3, $4, $5, $6)
+         `, cmd.ID, cmd.RouterID, cmd.CommandType, payloadBytes, cmd.Status, cmd.CreatedAt,
 	)
 	return err
 }
@@ -137,10 +138,16 @@ func (r *PostgresCommandRepository) GetAllByRouterSerial(serial string) ([]domai
 }
 
 func (r *PostgresCommandRepository) SetSentStatusForPendingByRouterSerial(serial string) error {
+	query := `
+		UPDATE commands SET status=$1, sent_at=$2 
+		                WHERE serial_number=$3 
+		                  AND status=$4
+		`
+
 	_, err := r.pool.Exec(
-		context.Background(),
-		"UPDATE commands SET status=$1, sent_at=$2 WHERE serial_number=$3 AND status=$4",
-		domain.CommandStatusSent, time.Now(), serial, domain.CommandStatusPending,
+		context.Background(), query,
+		domain.CommandStatusSent, time.Now(),
+		serial, domain.CommandStatusPending,
 	)
 	return err
 }
@@ -153,20 +160,20 @@ func (r *PostgresCommandRepository) SetSentStatusForPendingByCommandIds(cmds []d
 	ctx := context.Background()
 	batch := &pgx.Batch{}
 
-	for _, cmd := range cmds {
-		batch.Queue(
-			`UPDATE commands
+	query := `
+			 UPDATE commands
 			 SET status=$1, sent_at=$2
-			 WHERE id=$3 AND status=$4`,
-			domain.CommandStatusSent, time.Now(), cmd.ID, domain.CommandStatusPending,
-		)
+			 WHERE id=$3 
+			   AND status=$4
+			 `
+
+	for _, cmd := range cmds {
+		batch.Queue(query, domain.CommandStatusSent, time.Now(), cmd.ID, domain.CommandStatusPending)
 	}
 
-	// Отправляем батч и закрываем его
 	br := r.pool.SendBatch(ctx, batch)
 	defer br.Close()
 
-	// Проходим по результатам каждого запроса, чтобы убедиться, что ошибки не было
 	for range cmds {
 		_, err := br.Exec()
 		if err != nil {
@@ -177,31 +184,33 @@ func (r *PostgresCommandRepository) SetSentStatusForPendingByCommandIds(cmds []d
 }
 
 func (r *PostgresCommandRepository) UpdateStatusToAcked(routerId, commandID uuid.UUID) error {
-	_, err := r.pool.Exec(
-		context.Background(),
-		`UPDATE commands
+	query := `
+		 UPDATE commands
 		 SET status = $1, acked_at = $2
-		 WHERE id = $3 AND router_id = $4 AND status=$5`,
-		domain.CommandStatusAcked, time.Now(), commandID, routerId, domain.CommandStatusSent,
+		 WHERE id = $3 AND router_id = $4 AND status=$5
+		 `
+
+	_, err := r.pool.Exec(
+		context.Background(), query, domain.CommandStatusAcked, time.Now(), commandID, routerId, domain.CommandStatusSent,
 	)
 	return err
 }
 
 func (r *PostgresCommandRepository) MarkExpiredAsError(timeout time.Duration) error {
+	query := `
+		 UPDATE commands
+		 SET status = $1
+		 WHERE status = $2
+		 AND sent_at < $3
+		`
+
 	now := time.Now()
 	deadline := now.Add(-timeout)
 	util.GetLogger().Info("Проверка просроченных ответов",
 		slog.String("now", now.String()),
 		slog.String("deadline", deadline.String()))
 	_, err := r.pool.Exec(
-		context.Background(),
-		`UPDATE commands
-		 SET status = $1
-		 WHERE status = $2
-		   AND sent_at < $3`,
-		domain.CommandStatusError,
-		domain.CommandStatusSent,
-		deadline,
+		context.Background(), query, domain.CommandStatusError, domain.CommandStatusSent, deadline,
 	)
 	return err
 }

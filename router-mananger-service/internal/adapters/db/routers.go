@@ -94,8 +94,12 @@ func (r *PostgresRouterRepository) GetAllIds() ([]uuid.UUID, error) {
 }
 
 func (r *PostgresRouterRepository) GetAllRouters() ([]domain.Router, error) {
-	rows, err := r.pool.Query(context.Background(),
-		`SELECT id, serial_number, ip_address, last_seen_at, created_at FROM routers`)
+	query := `
+			SELECT id, serial_number, ip_address, last_seen_at, created_at 
+			FROM routers
+			`
+
+	rows, err := r.pool.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
 	}
@@ -125,11 +129,12 @@ func (r *PostgresRouterRepository) GetAllRouters() ([]domain.Router, error) {
 }
 
 func (r *PostgresRouterRepository) GetAllRoutersBySerials(serials []string) ([]domain.Router, error) {
-	rows, err := r.pool.Query(context.Background(),
-		`SELECT id, serial_number, ip_address, last_seen_at, created_at 
+	query := `SELECT id, serial_number, ip_address, last_seen_at, created_at 
 			 FROM routers
 			 WHERE serial_number = ANY(&1)
-			 `, serials)
+			 `
+
+	rows, err := r.pool.Query(context.Background(), query, serials)
 	if err != nil {
 		return nil, err
 	}

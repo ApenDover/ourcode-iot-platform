@@ -74,7 +74,7 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, float64(1), sendResp["created"])
 
-	// THEN CHECK DATABASE
+	// THEN CHECK DATABASE COMMAND
 	sendCommand, err := commandRepo.GetAllByRouterSerial(serial)
 	require.NoError(t, err)
 	require.NotEmpty(t, sendCommand)
@@ -87,6 +87,16 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.NotNil(t, firstSendCommand.Payload)
 	assert.NotNil(t, firstSendCommand.RouterID)
 	assert.NotNil(t, firstSendCommand.ID)
+
+	// THEN CHECK DATABASE CROUTER
+	router, err := routerRepo.GetBySerial(serial)
+	require.NoError(t, err)
+	require.NotEmpty(t, router)
+	fmt.Printf("%+v\n", router)
+
+	assert.Equal(t, router.SerialNumber, serial)
+	assert.Nil(t, router.LastSeenAt)
+	assert.NotNil(t, router.CreatedAt)
 
 	// --- 2. PollCommands ---
 	// GIVEN
@@ -130,6 +140,16 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.NotNil(t, firstPollCommand.RouterID)
 	assert.NotNil(t, firstPollCommand.ID)
 
+	// THEN CHECK DATABASE CROUTER
+	routerPoll, err := routerRepo.GetBySerial(serial)
+	require.NoError(t, err)
+	require.NotEmpty(t, routerPoll)
+	fmt.Printf("%+v\n", routerPoll)
+
+	assert.Equal(t, routerPoll.SerialNumber, serial)
+	assert.NotNil(t, routerPoll.LastSeenAt)
+	assert.NotNil(t, routerPoll.CreatedAt)
+
 	// --- 3. AckCommands ---
 
 	// GIVEN
@@ -168,6 +188,17 @@ func TestSendPollAckCommandsWithPool(t *testing.T) {
 	assert.NotNil(t, firstAckCommand.Payload)
 	assert.NotNil(t, firstAckCommand.RouterID)
 	assert.NotNil(t, firstAckCommand.ID)
+
+	// THEN CHECK DATABASE CROUTER
+	routerAck, err := routerRepo.GetBySerial(serial)
+	require.NoError(t, err)
+	require.NotEmpty(t, routerAck)
+	fmt.Printf("%+v\n", routerAck)
+
+	assert.Equal(t, routerAck.SerialNumber, serial)
+	assert.NotNil(t, routerAck.LastSeenAt)
+	assert.NotNil(t, routerAck.CreatedAt)
+	assert.NotEqual(t, routerPoll.LastSeenAt, routerAck.LastSeenAt)
 }
 
 func setupPostgresContainerPool(t *testing.T) (*pgxpool.Pool, func(), error) {

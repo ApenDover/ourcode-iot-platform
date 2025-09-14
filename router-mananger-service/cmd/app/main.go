@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-	log := util.SetupLogger(config.LoadConfig().Profile)
-	log.Info("Запуск приложения..")
+	util.SetupLogger(config.LoadConfig().Profile)
 	conf.InitGrpc()
 }
