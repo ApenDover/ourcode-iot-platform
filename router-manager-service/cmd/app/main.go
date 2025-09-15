@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	log := util.SetupLogger(config.LoadConfig().Profile)
+	log := util.GetLogger(context.Background())
 	alloyEndPoint := config.LoadConfig().AlloyUrl
 	tp, err := conf.InitTracer(alloyEndPoint)
 	if err != nil {

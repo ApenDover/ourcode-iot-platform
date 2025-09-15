@@ -16,6 +16,7 @@ import (
 	"router-manager-service/internal/core/domainService"
 	"router-manager-service/internal/core/service"
 	"router-manager-service/internal/util"
+	"strings"
 	"time"
 )
 
@@ -40,7 +41,7 @@ func InitGrpc(pool *pgxpool.Pool, databasePath string) {
 		}
 	}()
 
-	err := managerService.Start("9090")
+	err := managerService.Start("9092")
 	if err != nil {
 		log.Error("Не смог запустить сервер", slog.String("error", err.Error()))
 	}
@@ -79,6 +80,8 @@ func InitHttp(databasePath string) error {
 
 func InitTracer(endpoint string) (*sdktrace.TracerProvider, error) {
 	ctx := context.Background()
+	endpoint = strings.TrimPrefix(endpoint, "http://")
+	endpoint = strings.TrimPrefix(endpoint, "https://")
 	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithEndpoint(endpoint), otlptracegrpc.WithInsecure())
 	if err != nil {
 		return nil, err

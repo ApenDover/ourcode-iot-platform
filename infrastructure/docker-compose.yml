@@ -416,7 +416,7 @@ services:
     env_file:
       - .env
     ports:
-      - 8890:9090
+      - 8890:9092
       - 8891:9091
     restart: unless-stopped
     depends_on:

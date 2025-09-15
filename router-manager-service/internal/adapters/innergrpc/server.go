@@ -58,7 +58,7 @@ func (s *Server) Start(port string) error {
 		span := trace.SpanFromContext(ctx)
 		sc := span.SpanContext()
 
-		log.Info("Incoming gRPC request",
+		log.Info(">>>> gRPC request",
 			slog.String("method", info.FullMethod),
 			slog.String("request", fmt.Sprintf("%+v", req)),
 			slog.String("trace_id", sc.TraceID().String()),
@@ -67,7 +67,7 @@ func (s *Server) Start(port string) error {
 
 		resp, err := handler(ctx, req)
 
-		log.Info("Outgoing gRPC response",
+		log.Info("<<<< gRPC response",
 			slog.String("method", info.FullMethod),
 			slog.String("response", fmt.Sprintf("%+v", resp)),
 			slog.String("error", fmt.Sprintf("%v", err)),
