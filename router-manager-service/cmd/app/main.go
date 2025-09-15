@@ -14,6 +14,17 @@ import (
 
 func main() {
 	log := util.SetupLogger(config.LoadConfig().Profile)
+
+	alloyEndPoint := config.LoadConfig().AlloyUrl
+	tp, err := conf.InitTracer(alloyEndPoint)
+	if err != nil {
+		log.Error("не удалось инициализировать TracerProvider", slog.String("error", err.Error()))
+		return
+	}
+	defer func() {
+		_ = tp.Shutdown(context.Background())
+	}()
+
 	dbPath := databasePath()
 	pool, err := pgxpool.New(context.Background(), dbPath)
 	if err != nil {

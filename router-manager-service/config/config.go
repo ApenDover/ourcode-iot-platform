@@ -16,6 +16,7 @@ type Config struct {
 	TimeExpired          time.Duration
 	CheckExpiredInterval time.Duration
 	MigrationPath        string
+	AlloyUrl             string
 }
 
 func LoadConfig() *Config {
@@ -29,6 +30,7 @@ func LoadConfig() *Config {
 		TimeExpired:          getTimeOrDefault("SENT_EXPIRED", "1m"),
 		CheckExpiredInterval: getTimeOrDefault("CHECK_EXPIRED_INTERVAL", "30s"),
 		MigrationPath:        getMigrationPath(getEnvOrDefault("PROFILE", "local")),
+		AlloyUrl:             getEnvOrDefault("FAILED_PROCESSOR_MANAGEMENT_TRACING_OTLP_ENDPOINT", "http://localhost:4318"),
 	}
 }
 

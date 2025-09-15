@@ -4,6 +4,10 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"log/slog"
 	"router-manager-service/config"
 	"router-manager-service/internal/adapters/db"
@@ -71,4 +75,19 @@ func InitHttp(databasePath string) error {
 		return err
 	}
 	return nil
+}
+
+func InitTracer(endpoint string) (*sdktrace.TracerProvider, error) {
+	ctx := context.Background()
+	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithEndpoint(endpoint), otlptracegrpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(resource.Default()),
+	)
+	otel.SetTracerProvider(tp)
+	return tp, nil
 }

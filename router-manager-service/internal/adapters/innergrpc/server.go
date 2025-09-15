@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -39,7 +41,6 @@ func NewServer(pool *pgxpool.Pool) *Server {
 func (s *Server) mustEmbedUnimplementedRouterManagerServiceServer() {}
 
 func (s *Server) Start(port string) error {
-	log := util.GetLogger()
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		return err
@@ -51,9 +52,17 @@ func (s *Server) Start(port string) error {
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (interface{}, error) {
+		log := util.GetLogger()
+
+		// Получаем span из ctx
+		span := trace.SpanFromContext(ctx)
+		sc := span.SpanContext()
+
 		log.Info("Incoming gRPC request",
 			slog.String("method", info.FullMethod),
 			slog.String("request", fmt.Sprintf("%+v", req)),
+			slog.String("trace_id", sc.TraceID().String()),
+			slog.String("span_id", sc.SpanID().String()),
 		)
 
 		resp, err := handler(ctx, req)
@@ -62,11 +71,14 @@ func (s *Server) Start(port string) error {
 			slog.String("method", info.FullMethod),
 			slog.String("response", fmt.Sprintf("%+v", resp)),
 			slog.String("error", fmt.Sprintf("%v", err)),
+			slog.String("trace_id", sc.TraceID().String()),
+			slog.String("span_id", sc.SpanID().String()),
 		)
 		return resp, err
 	}
 
 	grpcServer := grpc.NewServer(
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.UnaryInterceptor(loggingInterceptor),
 	)
 
