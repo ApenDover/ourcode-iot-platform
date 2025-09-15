@@ -70,6 +70,7 @@ postman коллекция тут: [postman](infrastructure/postman)
 | `postgres2`               | База данных PostgreSQL master 2                  | `5432`         |
 | `postgres1r`              | База данных PostgreSQL replica 1                 | `5433`         |
 | `postgres2r`              | База данных PostgreSQL replica 2                 | `5434`         |
+| `postgres_router_manager` | База данных PostgreSQL router-manager-service    | `5439`         |
 | `postgres-keycloak`       | База данных PostgreSQL для keycloak              | `5430`         |
 | `keycloak`                | IAM-платформа, авторизация                       | `8080`         |
 | `redis`                   | In-memory кэш с паролем                          | `6379`         |

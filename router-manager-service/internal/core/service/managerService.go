@@ -51,6 +51,7 @@ func (m *ManagerService) CreateCommandForAll(ctx context.Context, commandType st
 	for i, r := range routers {
 		ids[i] = r.ID
 	}
+
 	commands := m.commandService.CreateCommandsForAll(ctx, ids, commandType, payload)
 
 	routerMap := make(map[uuid.UUID]string, len(routers))
