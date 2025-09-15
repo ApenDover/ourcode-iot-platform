@@ -2,12 +2,13 @@ package innergrpc
 
 import (
 	"context"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"log"
+	"log/slog"
 	"net"
 	"router-manager-service/internal/adapters/db"
 	"router-manager-service/internal/core/domainService"
@@ -38,20 +39,39 @@ func NewServer(pool *pgxpool.Pool) *Server {
 func (s *Server) mustEmbedUnimplementedRouterManagerServiceServer() {}
 
 func (s *Server) Start(port string) error {
+	log := util.GetLogger()
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		return err
 	}
 
-	grpcServer := grpc.NewServer()
+	loggingInterceptor := func(
+		ctx context.Context,
+		req interface{},
+		info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (interface{}, error) {
+		log.Info("Incoming gRPC request",
+			slog.String("method", info.FullMethod),
+			slog.String("request", fmt.Sprintf("%+v", req)),
+		)
+
+		resp, err := handler(ctx, req)
+
+		log.Info("Outgoing gRPC response",
+			slog.String("method", info.FullMethod),
+			slog.String("response", fmt.Sprintf("%+v", resp)),
+			slog.String("error", fmt.Sprintf("%v", err)),
+		)
+		return resp, err
+	}
+
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(loggingInterceptor),
+	)
+
 	routermanager.RegisterRouterManagerServiceServer(grpcServer, s)
-
-	log.Printf("gRPC server starting on port %s", port)
 	return grpcServer.Serve(lis)
-}
-
-func (s *Server) Stop() {
-	s.Stop()
 }
 
 func (s *Server) SendCommand(_ context.Context, req *routermanager.SendCommandRequest) (*routermanager.SendCommandResponse, error) {

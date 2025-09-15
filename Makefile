@@ -28,7 +28,7 @@ help: ## Показать список доступных команд
 	@echo "  \033[36mset-log-<level>-<port>\033[0m  	Установить логирование (пример: make set-log-debug-8080)"
 	@echo "  \033[36mupdate-<service>\033[0m  		Пересобрать проект и развернуть контейнер"
 
-up: proto-gen  ## Запустить контейнеры в фоне
+up: proto-gen clear  ## Запустить контейнеры в фоне
 	$(DC) up nexus -d
 	@echo "⏳ Жду пока контейнер nexus станет healthy..."
 	@until [ $$(docker inspect --format='{{.State.Health.Status}}' nexus) = "healthy" ]; do \
@@ -47,7 +47,7 @@ up: proto-gen  ## Запустить контейнеры в фоне
 	$(DC) up -d
 	@make keycloak-setup-users
 
-up-local: ## Запустить все контейнеры в фоне
+up-local: clear ## Запустить все контейнеры в фоне
 	$(DCL) up -d
 	@make keycloak-setup-users
 
@@ -179,3 +179,6 @@ proto-gen:
 		--go-grpc_opt=paths=source_relative \
 		$(notdir $(PROTO_FILES))
 	@echo "Done!"
+
+clear:
+	docker rm -f device-api iot-common iot-avro
