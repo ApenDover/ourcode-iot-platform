@@ -41,6 +41,7 @@ up: proto-gen clear  ## Запустить контейнеры в фоне
 	done
 	$(DCB) up -d iot-common
 	$(DCB) up -d device-api
+	$(DCB) up -d router-manager-proto-client
 	@until curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-common/1.0.0/iot-common-1.0.0.pom >/dev/null 2>&1; do \
     	echo "жду публикацию iot-common.." & sleep 10; \
     done
@@ -104,6 +105,7 @@ boot: nexus-deploy proto-gen  ## локально пересобрать обр�
 	docker image rm infrastructure-device-api -f
 	docker image rm infrastructure-iot-avro -f
 	docker image rm infrastructure-iot-common -f
+	docker image rm infrastructure-router-manager-proto-client -f
 	cd event-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-service && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
@@ -154,6 +156,14 @@ publish-nexus:
 		echo "iot-common не найден, выполняем публикацию Gradle..."; \
 		cd iot-common && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
 	fi
+	@echo "Выгружаю proto"
+	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/router-manager-proto-client/1.0.0/router-manager-proto-client-1.0.0.pom >/dev/null 2>&1; then \
+		echo "router-manager-proto-client уже опубликован, пропускаем публикацию"; \
+	else \
+		echo "router-manager-proto-client не найден, выполняем публикацию Gradle..."; \
+		cd router-manager-proto-client && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
+	fi
+	@echo "Выгружаю proto"
 
 keycloak-setup-users: wait-for-keycloak
 	@chmod +x ./infrastructure/keycloak/create-admin.sh
@@ -183,4 +193,4 @@ proto-gen:
 	@echo "Done!"
 
 clear:
-	docker rm -f device-api iot-common iot-avro
+	docker rm -f device-api iot-common iot-avro router-manager-proto-client

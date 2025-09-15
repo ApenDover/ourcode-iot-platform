@@ -4,7 +4,7 @@ services:
     build:
       context: ../iot-avro
     container_name: iot-avro
-    entrypoint: ["./gradlew", "--no-daemon", "publish"]
+    entrypoint: [ "./gradlew", "--no-daemon", "clean", "build", "publish" ]
     env_file:
       - .env
     networks:
@@ -14,7 +14,7 @@ services:
     build:
       context: ../iot-common
     container_name: iot-common
-    entrypoint: ["./gradlew", "--no-daemon", "clean", "publish"]
+    entrypoint: [ "./gradlew", "--no-daemon", "clean", "build", "publish" ]
     env_file:
       - .env
     networks:
@@ -24,7 +24,17 @@ services:
     build:
       context: ../device-api
     container_name: device-api
-    entrypoint: ["./gradlew", "--no-daemon", "publish"]
+    entrypoint: [ "./gradlew", "--no-daemon", "clean", "build", "publish" ]
+    env_file:
+      - .env
+    networks:
+      - infrastructure_iot_network
+  router-manager-proto-client:
+    restart: "no"
+    build:
+      context: ../router-manager-proto-client
+    container_name: router-manager-proto-client
+    entrypoint: [ "./gradlew", "--no-daemon", "clean", "build", "publish" ]
     env_file:
       - .env
     networks:

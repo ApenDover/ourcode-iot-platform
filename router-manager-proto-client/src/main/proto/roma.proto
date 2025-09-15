@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package router_manager;
+
+option go_package = ".;router_manager";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+service RouterManagerService {
+  rpc SendCommand(SendCommandRequest) returns (SendCommandResponse);
+
+  rpc PollCommands(PollCommandsRequest) returns (PollCommandsResponse);
+
+  rpc AckCommand(AckCommandRequest) returns (AckCommandResponse);
+}
+
+message SendCommandRequest {
+  string router_serial = 1;
+  string command_type = 2;
+  google.protobuf.Struct payload = 3;
+}
+
+message SendCommandResponse {
+  int32 created = 1;
+}
+
+message PollCommandsRequest {
+  string router_serial = 1;
+}
+
+message Command {
+  string id = 1;
+  string router_serial = 2;
+  string command_type = 3;
+  google.protobuf.Struct payload = 4;
+  string status = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp sent_at = 7;
+  google.protobuf.Timestamp acked_at = 8;
+}
+
+message PollCommandsResponse {
+  repeated Command commands = 1;
+}
+
+message AckCommandRequest {
+  string router_serial = 1;
+  string command_id = 2;
+}
+
+message AckCommandResponse {
+  string status = 1;
+}
