@@ -56,6 +56,7 @@ postman коллекция тут: [postman](infrastructure/postman)
 | Сервис                    | Описание                                         | Порт(ы) хоста  |
 |---------------------------|--------------------------------------------------|----------------|
 | `kafka-producer`          | SpringBoot service для тестирования              | `8887`         |
+| `router-manager-service`  | GO service для работы с устройствами             | `8890`, `8891` |
 | `failed-events-processor` | SpringBoot service для обработки сообщений в DLT | `8880`         |
 | `event-collector`         | SpringBoot service сбор метрик в cassandra       | `8888`         |
 | `device-collector`        | SpringBoot service сбор device в postgress       | `8889`         |
@@ -136,6 +137,16 @@ postman коллекция тут: [postman](infrastructure/postman)
 <summary>device-service-metrics</summary>
 
 ![device-service-metrics.png](pics/device-service-metrics.png)
+
+</details>
+
+<details>
+<summary>router-manager-service</summary>
+
+![failed-events-processor.png](pics/router-manager-service-common.png)
+
+![failed-events-processor-custom.png](pics/router-manager-service-custom.png)
+
 
 </details>
 
@@ -298,3 +309,37 @@ OpenAPI спецификация: [DeviceV1Api.pdf](infrastructure/api/DeviceV1A
 - Хранилище: Minio
 - Тестирование и окружение: Testcontainers (Kafka, Minio)
 - Система сборки: Gradle
+
+## router-manager-service
+
+gRPC API на Go:
+
+- Позволяет отправлять команды одному или всем роутерам.
+- Сохраняет команды и статус их обработки в PostgreSQL.
+- Отдаёт роутерам команды по их router_id по запросу.
+- Принимает подтверждение выполнения команд от роутеров
+
+<details>
+
+<summary>Компоненты сервиса</summary>
+
+![router-manager-service-component.png](diagrams/router-manager-service/router-manager-service-component.png)[router-manager-service-component.puml](diagrams/router-manager-service/router-manager-service-component.puml)
+
+</details>
+
+<details>
+
+<summary>Логическая последовательность</summary>
+
+![router-manager-service-sequence.png](diagrams/router-manager-service/router-manager-service-sequence.png)
+
+</details>
+
+### Технологии:
+
+- Язык программирования: Go 1.25
+- gRPC API с namespace /api/v1
+- Хранилище: PostgreSQL (подключение через pgx)
+- Тестирование и окружение: Testcontainers (PostgreSQL)
+
+proto можно найти тут [roma.proto](router-manager-service/protobuf/roma.proto)

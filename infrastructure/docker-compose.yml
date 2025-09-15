@@ -511,18 +511,6 @@ services:
       - redis_data:/data
     networks:
       - iot_network
-  redis-insight:
-    image: redis/redisinsight:2.70
-    container_name: proselyte-redisinsight
-    restart: always
-    depends_on:
-      - redis
-    ports:
-      - "5540:5540"
-    volumes:
-      - redis-insight:/data
-    networks:
-      - iot_network
   cassandra:
     image: cassandra:4.1
     ports:
