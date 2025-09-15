@@ -621,7 +621,7 @@ services:
     container_name: postgres-exporter-rms
     restart: unless-stopped
     environment:
-      DATA_SOURCE_NAME: "postgresql://${APP_ROUTER_MANAGER_DATASOURCE_USERNAME}:${APP_ROUTER_MANAGER_DATASOURCE_PASSWORD}@postgres_router_manager:5432/${POSTGRES_DB}?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://${APP_ROUTER_MANAGER_DATASOURCE_USERNAME}:${APP_ROUTER_MANAGER_DATASOURCE_PASSWORD}@postgres_router_manager:5432/${APP_ROUTER_MANAGER_DATASOURCE_DB}?sslmode=disable"
     depends_on:
       postgres_router_manager:
         condition: service_healthy

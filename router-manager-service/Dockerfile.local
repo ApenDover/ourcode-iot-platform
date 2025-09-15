@@ -1,5 +1,0 @@
-FROM alpine:3.22
-WORKDIR /app
-COPY router-manager .
-EXPOSE 9090 9091
-ENTRYPOINT ["./router-manager"]
