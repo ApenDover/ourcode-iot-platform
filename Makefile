@@ -101,7 +101,9 @@ boot: nexus-deploy proto-gen  ## локально пересобрать обр�
 	docker image rm infrastructure-kafka-producer -f
 	docker image rm infrastructure-failed-events-processor -f
 	docker image rm infrastructure-router-manager-service -f
-	cd event-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
+	docker image rm infrastructure-device-api -f
+	docker image rm infrastructure-iot-avro -f
+	docker image rm infrastructure-iot-common -f
 	cd event-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-service && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar

@@ -14,7 +14,7 @@ services:
     build:
       context: ../iot-common
     container_name: iot-common
-    entrypoint: ["./gradlew", "--no-daemon", "publish"]
+    entrypoint: ["./gradlew", "--no-daemon", "clean", "publish"]
     env_file:
       - .env
     networks:

@@ -60,7 +60,7 @@ services:
       event-collector:
         condition: service_healthy
       failed-events-processor:
-        condition: service_healthy
+        condition: service_started
       router-manager-service:
         condition: service_started
     healthcheck:
@@ -144,7 +144,7 @@ services:
       grafana:
         condition: service_started
       failed-events-processor:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8888/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
       interval: 6s
@@ -176,6 +176,10 @@ services:
       OTEL_LOGS_EXPORTER: none
       OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
     depends_on:
+      postgres1:
+        condition: service_healthy
+      postgres2:
+        condition: service_healthy
       minio:
         condition: service_healthy
     healthcheck:
