@@ -20,7 +20,7 @@ import (
 )
 
 func InitGrpc(pool *pgxpool.Pool, databasePath string) {
-	log := util.GetLogger()
+	log := util.GetLogger(context.Background())
 	flyWayPath := util.MigrationsPath(config.LoadConfig().MigrationPath)
 	log.Info("ищу миграции по адресу", slog.String("миграции", flyWayPath))
 	RunMigrations(databasePath, flyWayPath)
@@ -36,7 +36,7 @@ func InitGrpc(pool *pgxpool.Pool, databasePath string) {
 		ticker := time.NewTicker(period)
 		defer ticker.Stop()
 		for range ticker.C {
-			managerService.ManagerService.MarkExpiredAsError(expiredTime)
+			managerService.ManagerService.MarkExpiredAsError(context.Background(), expiredTime)
 		}
 	}()
 
@@ -48,7 +48,7 @@ func InitGrpc(pool *pgxpool.Pool, databasePath string) {
 }
 
 func InitHttp(databasePath string) error {
-	log := util.GetLogger()
+	log := util.GetLogger(context.Background())
 
 	RunMigrations(databasePath, util.MigrationsPath(config.LoadConfig().MigrationPath))
 

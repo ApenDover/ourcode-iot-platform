@@ -8,10 +8,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prometheus/client_golang/prometheus"
-	"log/slog"
 	"router-manager-service/internal/domain"
 	"router-manager-service/internal/metrics"
-	"router-manager-service/internal/util"
 	"strings"
 	"time"
 )
@@ -230,9 +228,6 @@ func (r *PostgresCommandRepository) MarkExpiredAsError(timeout time.Duration) er
 
 	now := time.Now()
 	deadline := now.Add(-timeout)
-	util.GetLogger().Info("Проверка просроченных ответов",
-		slog.String("now", now.String()),
-		slog.String("deadline", deadline.String()))
 	_, err := r.pool.Exec(
 		context.Background(), query, domain.CommandStatusError, domain.CommandStatusSent, deadline,
 	)

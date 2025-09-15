@@ -1,6 +1,7 @@
 package domainService
 
 import (
+	"context"
 	"log/slog"
 	"router-manager-service/internal/metrics"
 	"router-manager-service/internal/util"
@@ -12,18 +13,16 @@ import (
 	"router-manager-service/internal/ports"
 )
 
-var log *slog.Logger
-
 type CommandService struct {
 	repo ports.CommandRepository
 }
 
 func NewCommandService(repo ports.CommandRepository) *CommandService {
-	log = util.GetLogger()
 	return &CommandService{repo: repo}
 }
 
-func (s *CommandService) CreateCommand(routerId uuid.UUID, commandType string, payload map[string]any) domain.Command {
+func (s *CommandService) CreateCommand(ctx context.Context, routerId uuid.UUID, commandType string, payload map[string]any) domain.Command {
+	log := util.GetLogger(ctx)
 	cmd := domain.Command{
 		ID:          uuid.New(),
 		RouterID:    routerId,
@@ -43,7 +42,8 @@ func (s *CommandService) CreateCommand(routerId uuid.UUID, commandType string, p
 	return cmd
 }
 
-func (s *CommandService) CreateCommandsForAll(routerIds []uuid.UUID, commandType string, payload map[string]any) []domain.Command {
+func (s *CommandService) CreateCommandsForAll(ctx context.Context, routerIds []uuid.UUID, commandType string, payload map[string]any) []domain.Command {
+	log := util.GetLogger(ctx)
 	if len(routerIds) == 0 {
 		return []domain.Command{}
 	}
@@ -93,7 +93,8 @@ func (s *CommandService) CreateCommandsForAll(routerIds []uuid.UUID, commandType
 	return commands
 }
 
-func (s *CommandService) GetPendingCommands(routerSerial string) []domain.Command {
+func (s *CommandService) GetPendingCommands(ctx context.Context, routerSerial string) []domain.Command {
+	log := util.GetLogger(ctx)
 	commands, err := s.repo.GetBySerialAndStatuses(routerSerial, []domain.CommandStatus{domain.CommandStatusPending})
 	if err != nil {
 		metrics.CommandErrors.WithLabelValues("get-pending-commands").Inc()
@@ -106,7 +107,8 @@ func (s *CommandService) GetPendingCommands(routerSerial string) []domain.Comman
 	return commands
 }
 
-func (s *CommandService) UpdateCommandsStatus(commands []domain.Command) {
+func (s *CommandService) UpdateCommandsStatus(ctx context.Context, commands []domain.Command) {
+	log := util.GetLogger(ctx)
 	err := s.repo.SetSentStatusForPendingByCommandIds(commands)
 	if err != nil {
 		metrics.CommandErrors.WithLabelValues("update-commands-status").Inc()
@@ -115,7 +117,8 @@ func (s *CommandService) UpdateCommandsStatus(commands []domain.Command) {
 	}
 }
 
-func (s *CommandService) AckCommand(routerId, commandID uuid.UUID) {
+func (s *CommandService) AckCommand(ctx context.Context, routerId, commandID uuid.UUID) {
+	log := util.GetLogger(ctx)
 	err := s.repo.UpdateStatusToAcked(routerId, commandID)
 	if err != nil {
 		metrics.CommandErrors.WithLabelValues("ack-command").Inc()
@@ -126,7 +129,9 @@ func (s *CommandService) AckCommand(routerId, commandID uuid.UUID) {
 	}
 }
 
-func (s *CommandService) MarkExpiredAsError(checkExpired time.Duration) {
+func (s *CommandService) MarkExpiredAsError(ctx context.Context, checkExpired time.Duration) {
+	log := util.GetLogger(ctx)
+	util.GetLogger(ctx).Info("Проверка просроченных ответов..")
 	err := s.repo.MarkExpiredAsError(checkExpired)
 	if err != nil {
 		metrics.CommandErrors.WithLabelValues("mark-expired-as-error").Inc()

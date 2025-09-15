@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus"
 	"router-manager-service/internal/core/domainService"
@@ -21,13 +22,13 @@ func NewManagerService(commandService *domainService.CommandService, routerServi
 	}
 }
 
-func (m *ManagerService) CreateCommand(serial string, commandType string, payload map[string]any) domain.CommandOut {
+func (m *ManagerService) CreateCommand(ctx context.Context, serial string, commandType string, payload map[string]any) domain.CommandOut {
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("CreateCommand"))
 	defer timer.ObserveDuration()
 	metrics.CommandsSent.WithLabelValues("CreateCommand").Inc()
 
-	router := m.routerService.Create(serial)
-	command := m.commandService.CreateCommand(router.ID, commandType, payload)
+	router := m.routerService.Create(ctx, serial)
+	command := m.commandService.CreateCommand(ctx, router.ID, commandType, payload)
 	return domain.CommandOut{
 		ID:           command.ID,
 		SerialNumber: serial,
@@ -40,17 +41,17 @@ func (m *ManagerService) CreateCommand(serial string, commandType string, payloa
 	}
 }
 
-func (m *ManagerService) CreateCommandForAll(commandType string, payload map[string]any) []domain.CommandOut {
+func (m *ManagerService) CreateCommandForAll(ctx context.Context, commandType string, payload map[string]any) []domain.CommandOut {
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("CreateCommandForAll"))
 	defer timer.ObserveDuration()
 	metrics.CommandsSent.WithLabelValues("CreateCommandForAll").Inc()
 
-	routers := m.routerService.GetAllRouters()
+	routers := m.routerService.GetAllRouters(ctx)
 	ids := make([]uuid.UUID, len(routers))
 	for i, r := range routers {
 		ids[i] = r.ID
 	}
-	commands := m.commandService.CreateCommandsForAll(ids, commandType, payload)
+	commands := m.commandService.CreateCommandsForAll(ctx, ids, commandType, payload)
 
 	routerMap := make(map[uuid.UUID]string, len(routers))
 	for _, r := range routers {
@@ -75,14 +76,14 @@ func (m *ManagerService) CreateCommandForAll(commandType string, payload map[str
 	return result
 }
 
-func (m *ManagerService) GetPendingCommandsAndMarkItSent(routerSerial string) []domain.CommandOut {
+func (m *ManagerService) GetPendingCommandsAndMarkItSent(ctx context.Context, routerSerial string) []domain.CommandOut {
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("PollCommand"))
 	defer timer.ObserveDuration()
 	metrics.CommandsPolled.Inc()
 
-	pending := m.commandService.GetPendingCommands(routerSerial)
-	m.commandService.UpdateCommandsStatus(pending)
-	m.routerService.UpdateSeenAt([]string{routerSerial})
+	pending := m.commandService.GetPendingCommands(ctx, routerSerial)
+	m.commandService.UpdateCommandsStatus(ctx, pending)
+	m.routerService.UpdateSeenAt(ctx, []string{routerSerial})
 	result := make([]domain.CommandOut, len(pending))
 	for i, cmd := range pending {
 		result[i] = domain.CommandOut{
@@ -99,16 +100,16 @@ func (m *ManagerService) GetPendingCommandsAndMarkItSent(routerSerial string) []
 	return result
 }
 
-func (m *ManagerService) AckCommand(serial string, commandId uuid.UUID) {
+func (m *ManagerService) AckCommand(ctx context.Context, serial string, commandId uuid.UUID) {
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("AckCommand"))
 	defer timer.ObserveDuration()
 	metrics.CommandsAcked.Inc()
 
-	router := m.routerService.GetBySerial(serial)
-	m.commandService.AckCommand(router.ID, commandId)
-	m.routerService.UpdateSeenAt([]string{serial})
+	router := m.routerService.GetBySerial(ctx, serial)
+	m.commandService.AckCommand(ctx, router.ID, commandId)
+	m.routerService.UpdateSeenAt(ctx, []string{serial})
 }
 
-func (m *ManagerService) MarkExpiredAsError(checkExpired time.Duration) {
-	m.commandService.MarkExpiredAsError(checkExpired)
+func (m *ManagerService) MarkExpiredAsError(ctx context.Context, checkExpired time.Duration) {
+	m.commandService.MarkExpiredAsError(ctx, checkExpired)
 }

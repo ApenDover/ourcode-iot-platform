@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"context"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -10,7 +11,7 @@ import (
 )
 
 func RunMigrations(dbURL string, migrationSource string) {
-	log := util.GetLogger()
+	log := util.GetLogger(context.Background())
 
 	if !strings.HasPrefix(migrationSource, "file://") {
 		migrationSource = "file://" + migrationSource

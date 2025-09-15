@@ -30,10 +30,10 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 
 		if request.SerialNumber != "" {
 			var cmd domain.CommandOut
-			cmd = service.CreateCommand(request.SerialNumber, request.CommandType, request.Payload)
+			cmd = service.CreateCommand(c, request.SerialNumber, request.CommandType, request.Payload)
 			commands = append(commands, cmd)
 		} else {
-			commands = service.CreateCommandForAll(request.CommandType, request.Payload)
+			commands = service.CreateCommandForAll(c, request.CommandType, request.Payload)
 		}
 
 		c.JSON(http.StatusOK, gin.H{
@@ -53,7 +53,7 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 			return
 		}
 
-		commands := service.GetPendingCommandsAndMarkItSent(request.SerialNumber)
+		commands := service.GetPendingCommandsAndMarkItSent(c, request.SerialNumber)
 
 		if len(commands) == 0 {
 			c.JSON(http.StatusOK, []gin.H{})
@@ -89,7 +89,7 @@ func RegisterRoutes(engine *gin.Engine, service *service.ManagerService) {
 			return
 		}
 
-		service.AckCommand(request.SerialNumber, request.CommandID)
+		service.AckCommand(c, request.SerialNumber, request.CommandID)
 
 		c.JSON(http.StatusOK, gin.H{
 			"status":     "ACKED",

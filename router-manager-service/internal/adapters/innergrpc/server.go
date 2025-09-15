@@ -52,7 +52,7 @@ func (s *Server) Start(port string) error {
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (interface{}, error) {
-		log := util.GetLogger()
+		log := util.GetLogger(context.Background())
 
 		// Получаем span из ctx
 		span := trace.SpanFromContext(ctx)
@@ -86,22 +86,22 @@ func (s *Server) Start(port string) error {
 	return grpcServer.Serve(lis)
 }
 
-func (s *Server) SendCommand(_ context.Context, req *routermanager.SendCommandRequest) (*routermanager.SendCommandResponse, error) {
-	util.GetLogger().Info("Получил запрос SendCommand")
+func (s *Server) SendCommand(ctx context.Context, req *routermanager.SendCommandRequest) (*routermanager.SendCommandResponse, error) {
+	util.GetLogger(ctx).Info("Получил запрос SendCommand")
 	payloadMap := req.Payload.AsMap()
 
 	if req.RouterSerial != "" {
-		_ = s.ManagerService.CreateCommand(req.RouterSerial, req.CommandType, payloadMap)
+		_ = s.ManagerService.CreateCommand(ctx, req.RouterSerial, req.CommandType, payloadMap)
 		return &routermanager.SendCommandResponse{Created: 1}, nil
 	}
 
-	commandAll := s.ManagerService.CreateCommandForAll(req.CommandType, payloadMap)
+	commandAll := s.ManagerService.CreateCommandForAll(ctx, req.CommandType, payloadMap)
 	return &routermanager.SendCommandResponse{Created: int32(len(commandAll))}, nil
 }
 
 func (s *Server) PollCommands(ctx context.Context, req *routermanager.PollCommandsRequest) (*routermanager.PollCommandsResponse, error) {
-	util.GetLogger().Info("Получил запрос PollCommands")
-	commands := s.ManagerService.GetPendingCommandsAndMarkItSent(req.RouterSerial)
+	util.GetLogger(ctx).Info("Получил запрос PollCommands")
+	commands := s.ManagerService.GetPendingCommandsAndMarkItSent(ctx, req.RouterSerial)
 	var pbCommands []*routermanager.Command
 	for _, cmd := range commands {
 		pbCommand, err := s.commandToProto(cmd)
@@ -121,7 +121,7 @@ func (s *Server) AckCommand(ctx context.Context, req *routermanager.AckCommandRe
 		return nil, err
 	}
 
-	s.ManagerService.AckCommand(req.RouterSerial, commandID)
+	s.ManagerService.AckCommand(ctx, req.RouterSerial, commandID)
 	return &routermanager.AckCommandResponse{Status: "ACKED"}, nil
 }
 

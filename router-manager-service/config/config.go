@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"os"
 	"router-manager-service/internal/util"
 	"time"
@@ -42,7 +43,7 @@ func getEnvOrDefault(key, defaultValue string) string {
 }
 
 func getTimeOrDefault(key, defaultValue string) time.Duration {
-	log := util.GetLogger()
+	log := util.GetLogger(context.Background())
 	if value := os.Getenv(key); value != "" {
 		duration, err := time.ParseDuration(os.Getenv(key))
 		if err != nil {

@@ -14,7 +14,6 @@ import (
 
 func main() {
 	log := util.SetupLogger(config.LoadConfig().Profile)
-
 	alloyEndPoint := config.LoadConfig().AlloyUrl
 	tp, err := conf.InitTracer(alloyEndPoint)
 	if err != nil {
@@ -38,7 +37,6 @@ func main() {
 			return
 		}
 	}()
-
 	conf.InitGrpc(pool, dbPath)
 }
 

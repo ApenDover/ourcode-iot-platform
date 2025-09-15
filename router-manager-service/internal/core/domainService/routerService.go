@@ -1,8 +1,10 @@
 package domainService
 
 import (
+	"context"
 	"log/slog"
 	"router-manager-service/internal/metrics"
+	"router-manager-service/internal/util"
 	"strings"
 	"time"
 
@@ -19,7 +21,8 @@ func NewRouterService(repo ports.RouterRepository) *RouterService {
 	return &RouterService{repo: repo}
 }
 
-func (s *RouterService) Create(serial string) domain.Router {
+func (s *RouterService) Create(ctx context.Context, serial string) domain.Router {
+	log := util.GetLogger(ctx)
 	router := domain.Router{
 		ID:           uuid.New(),
 		SerialNumber: serial,
@@ -44,7 +47,8 @@ func (s *RouterService) Create(serial string) domain.Router {
 	return saved
 }
 
-func (s *RouterService) CreateAll(routerSerials []string) []domain.Router {
+func (s *RouterService) CreateAll(ctx context.Context, routerSerials []string) []domain.Router {
+	log := util.GetLogger(ctx)
 	var batch []domain.Router
 
 	for _, id := range routerSerials {
@@ -70,7 +74,8 @@ func (s *RouterService) CreateAll(routerSerials []string) []domain.Router {
 	return routers
 }
 
-func (s *RouterService) GetAllRouters() []domain.Router {
+func (s *RouterService) GetAllRouters(ctx context.Context) []domain.Router {
+	log := util.GetLogger(ctx)
 	ids, err := s.repo.GetAllRouters()
 	if err != nil {
 		metrics.RouterErrors.WithLabelValues("get-all-routers").Inc()
@@ -79,7 +84,8 @@ func (s *RouterService) GetAllRouters() []domain.Router {
 	return ids
 }
 
-func (s *RouterService) GetBySerial(serial string) domain.Router {
+func (s *RouterService) GetBySerial(ctx context.Context, serial string) domain.Router {
+	log := util.GetLogger(ctx)
 	router, err := s.repo.GetBySerial(serial)
 	if err != nil {
 		metrics.RouterErrors.WithLabelValues("get-by-serial").Inc()
@@ -88,7 +94,8 @@ func (s *RouterService) GetBySerial(serial string) domain.Router {
 	return router
 }
 
-func (s *RouterService) UpdateSeenAt(serial []string) {
+func (s *RouterService) UpdateSeenAt(ctx context.Context, serial []string) {
+	log := util.GetLogger(ctx)
 	err := s.repo.UpdateSeenAt(serial)
 	if err != nil {
 		metrics.RouterErrors.WithLabelValues("update-seen-at").Inc()
