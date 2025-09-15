@@ -445,7 +445,7 @@ services:
       POSTGRES_PASSWORD: ${APP_ROUTER_MANAGER_DATASOURCE_PASSWORD}
       POSTGRES_DB: ${APP_ROUTER_MANAGER_DATASOURCE_DB}
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${APP_ROUTER_MANAGER_DATASOURCE_USERNAME}", "-d", "${APP_ROUTER_MANAGER_DATASOURCE_URL}" ]
+      test: [ "CMD", "pg_isready", "-U", "${APP_ROUTER_MANAGER_DATASOURCE_USERNAME}", "-d", "${APP_ROUTER_MANAGER_DATASOURCE_DB}" ]
       interval: 10s
       retries: 5
     networks:
