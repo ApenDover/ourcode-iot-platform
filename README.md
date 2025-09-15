@@ -343,3 +343,5 @@ gRPC API на Go:
 - Тестирование и окружение: Testcontainers (PostgreSQL)
 
 proto можно найти тут [roma.proto](router-manager-service/protobuf/roma.proto)
+
+jmeter .JMX брать тут: [router-manager-service.jmx](infrastructure/jmeter/router-manager-service.jmx)
