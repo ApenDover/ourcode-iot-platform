@@ -138,21 +138,21 @@ publish-nexus:
 		echo "device-api уже опубликован, пропускаем публикацию"; \
 	else \
 		echo "device-api не найден, выполняем публикацию Gradle..."; \
-		cd device-api && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew publish; \
+		cd device-api && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
 	fi
 	@echo "Выгружаю avro"
 	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-avro/1.0.0/iot-avro-1.0.0.pom >/dev/null 2>&1; then \
 		echo "iot-avro уже опубликован, пропускаем публикацию"; \
 	else \
 		echo "iot-avro не найден, выполняем публикацию Gradle..."; \
-		cd iot-avro && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew publish; \
+		cd iot-avro && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
 	fi
 	@echo "Выгружаю common"
 	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-common/1.0.0/iot-common-1.0.0.pom >/dev/null 2>&1; then \
 		echo "iot-common уже опубликован, пропускаем публикацию"; \
 	else \
 		echo "iot-common не найден, выполняем публикацию Gradle..."; \
-		cd iot-common && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew publish; \
+		cd iot-common && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
 	fi
 
 keycloak-setup-users: wait-for-keycloak
