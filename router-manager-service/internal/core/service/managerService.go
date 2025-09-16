@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus"
 	"router-manager-service/internal/core/domainService"
+	"router-manager-service/internal/core/redisDomainService"
 	"router-manager-service/internal/domain"
 	"router-manager-service/internal/metrics"
 	"time"
@@ -13,12 +14,17 @@ import (
 type ManagerService struct {
 	commandService *domainService.CommandService
 	routerService  *domainService.RouterService
+	redisCommands  *redisDomainService.RedisCommandRepository
+	redisRouters   *redisDomainService.RedisRouterRepository
 }
 
-func NewManagerService(commandService *domainService.CommandService, routerService *domainService.RouterService) *ManagerService {
+func NewManagerService(commandService *domainService.CommandService, routerService *domainService.RouterService,
+	redisCommands *redisDomainService.RedisCommandRepository, redisRouters *redisDomainService.RedisRouterRepository) *ManagerService {
 	return &ManagerService{
 		commandService: commandService,
 		routerService:  routerService,
+		redisCommands:  redisCommands,
+		redisRouters:   redisRouters,
 	}
 }
 
@@ -26,6 +32,8 @@ func (m *ManagerService) CreateCommand(ctx context.Context, serial string, comma
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("CreateCommand"))
 	defer timer.ObserveDuration()
 	metrics.CommandsSent.WithLabelValues("CreateCommand").Inc()
+
+	//redisRouter := redisRouters
 
 	router := m.routerService.Create(ctx, serial)
 	command := m.commandService.CreateCommand(ctx, router.ID, commandType, payload)

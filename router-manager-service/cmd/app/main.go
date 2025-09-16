@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"router-manager-service/config"
+	"router-manager-service/internal/adapters/rediscli"
 	"router-manager-service/internal/conf"
 	"router-manager-service/internal/util"
 )
@@ -37,7 +38,10 @@ func main() {
 			return
 		}
 	}()
-	conf.InitGrpc(pool, dbPath)
+
+	redisClient := rediscli.NewRedisClient(config.LoadConfig().RedisUrl, config.LoadConfig().RedisPort, config.LoadConfig().RedisPassword)
+
+	conf.InitGrpc(pool, dbPath, redisClient)
 }
 
 func databasePath() string {

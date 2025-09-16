@@ -18,6 +18,9 @@ type Config struct {
 	CheckExpiredInterval time.Duration
 	MigrationPath        string
 	AlloyUrl             string
+	RedisUrl             string
+	RedisPort            string
+	RedisPassword        string
 }
 
 func LoadConfig() *Config {
@@ -32,6 +35,9 @@ func LoadConfig() *Config {
 		CheckExpiredInterval: getTimeOrDefault("CHECK_EXPIRED_INTERVAL", "30s"),
 		MigrationPath:        getMigrationPath(getEnvOrDefault("PROFILE", "local")),
 		AlloyUrl:             getEnvOrDefault("FAILED_PROCESSOR_MANAGEMENT_TRACING_OTLP_ENDPOINT_GRPC", "http://localhost:4317"),
+		RedisUrl:             getEnvOrDefault("REDIS_HOST", "localhost"),
+		RedisPort:            getEnvOrDefault("REDIS_PORT", "6379"),
+		RedisPassword:        getEnvOrDefault("REDIS_PASSWORD", "redis_pass"),
 	}
 }
 

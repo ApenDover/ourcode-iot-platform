@@ -13,7 +13,9 @@ import (
 	"log/slog"
 	"net"
 	"router-manager-service/internal/adapters/db"
+	"router-manager-service/internal/adapters/rediscli"
 	"router-manager-service/internal/core/domainService"
+	"router-manager-service/internal/core/redisDomainService"
 	"router-manager-service/internal/core/service"
 	"router-manager-service/internal/domain"
 	"router-manager-service/internal/util"
@@ -24,17 +26,22 @@ import (
 type Server struct {
 	routermanager.UnimplementedRouterManagerServiceServer
 	ManagerService *service.ManagerService
+	RedisCli       *rediscli.Client
 }
 
-func NewServer(pool *pgxpool.Pool) *Server {
+func NewServer(pool *pgxpool.Pool, redisClient *rediscli.Client) *Server {
 	repoCommand := db.NewPostgresCommandRepository(pool)
 	repoRouter := db.NewPostgresRouterRepository(pool)
 	commandService := domainService.NewCommandService(repoCommand)
 	routerService := domainService.NewRouterService(repoRouter)
-	managerService := service.NewManagerService(commandService, routerService)
+	redisCommand := redisDomainService.NewRedisCommandRepository(redisClient)
+	redisRouter := redisDomainService.NewRedisRouterRepository(redisClient)
+	managerService := service.NewManagerService(commandService, routerService, redisCommand, redisRouter)
+	redisCli := redisClient
 
 	return &Server{
 		ManagerService: managerService,
+		RedisCli:       redisCli,
 	}
 }
 
