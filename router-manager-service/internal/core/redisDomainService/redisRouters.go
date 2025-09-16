@@ -3,6 +3,7 @@ package redisDomainService
 import (
 	"context"
 	"encoding/json"
+	"github.com/redis/go-redis/v9"
 	"log/slog"
 	"router-manager-service/internal/adapters/rediscli"
 	"router-manager-service/internal/domain"
@@ -68,11 +69,16 @@ func (r *RedisRouterRepository) SaveAll(ctx context.Context, routers []domain.Ro
 		slog.Int("count", len(kvMap)))
 }
 
-func (r *RedisRouterRepository) GetBySerial(ctx context.Context, serial string) domain.Router {
+func (r *RedisRouterRepository) GetBySerial(ctx context.Context, serial string) *domain.Router {
 	log := util.GetLogger(ctx)
 	routerJson, err := r.client.Get(ctx, serial)
 	if err != nil {
-		log.Info("не смог получить роутер из redis по serial", slog.String("serial", serial))
+		if err == redis.Nil {
+			log.Debug("роутер не найден в redis", slog.String("serial", serial))
+			return nil // ключа нет
+		}
+		log.Error("не смог получить роутер из redis по serial", slog.String("serial", serial))
+		return nil
 	}
 
 	var router domain.Router
@@ -80,8 +86,9 @@ func (r *RedisRouterRepository) GetBySerial(ctx context.Context, serial string) 
 		log.Error("ошибка при десериализации роутера из redis",
 			slog.String("serial", serial),
 			slog.String("error", err.Error()))
+		return nil
 	}
-	return router
+	return &router
 }
 
 func (r *RedisRouterRepository) GetBySerials(ctx context.Context, serials []string) ([]domain.Router, error) {

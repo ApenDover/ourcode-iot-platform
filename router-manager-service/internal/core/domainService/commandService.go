@@ -21,7 +21,7 @@ func NewCommandService(repo ports.CommandRepository) *CommandService {
 	return &CommandService{repo: repo}
 }
 
-func (s *CommandService) CreateCommand(ctx context.Context, routerId uuid.UUID, commandType string, payload map[string]any) domain.Command {
+func (s *CommandService) CreateCommand(ctx context.Context, routerId uuid.UUID, commandType string, payload map[string]any) *domain.Command {
 	log := util.GetLogger(ctx)
 	cmd := domain.Command{
 		ID:          uuid.New(),
@@ -36,10 +36,11 @@ func (s *CommandService) CreateCommand(ctx context.Context, routerId uuid.UUID, 
 	if err != nil {
 		metrics.CommandErrors.WithLabelValues("save").Inc()
 		log.Error("не удалось сохранить команду", slog.String("routerId", routerId.String()), slog.String("error", err.Error()))
+		return nil
 	}
 	log.Debug("команда сохранена",
 		slog.String("routerId", routerId.String()))
-	return cmd
+	return &cmd
 }
 
 func (s *CommandService) CreateCommandsForAll(ctx context.Context, routerIds []uuid.UUID, commandType string, payload map[string]any) []domain.Command {

@@ -33,10 +33,17 @@ func (m *ManagerService) CreateCommand(ctx context.Context, serial string, comma
 	defer timer.ObserveDuration()
 	metrics.CommandsSent.WithLabelValues("CreateCommand").Inc()
 
-	//redisRouter := redisRouters
+	router := m.redisRouters.GetBySerial(ctx, serial)
+	if router == nil {
+		newRouter := m.routerService.Create(ctx, serial)
+		m.redisRouters.Save(ctx, newRouter)
+		router = &newRouter
+	}
 
-	router := m.routerService.Create(ctx, serial)
 	command := m.commandService.CreateCommand(ctx, router.ID, commandType, payload)
+	if command != nil {
+		m.redisCommands.Save(ctx, *command)
+	}
 	return domain.CommandOut{
 		ID:           command.ID,
 		SerialNumber: serial,
@@ -55,12 +62,16 @@ func (m *ManagerService) CreateCommandForAll(ctx context.Context, commandType st
 	metrics.CommandsSent.WithLabelValues("CreateCommandForAll").Inc()
 
 	routers := m.routerService.GetAllRouters(ctx)
+
 	ids := make([]uuid.UUID, len(routers))
 	for i, r := range routers {
 		ids[i] = r.ID
 	}
 
 	commands := m.commandService.CreateCommandsForAll(ctx, ids, commandType, payload)
+	if len(commands) > 0 {
+		m.redisCommands.SaveAll(ctx, commands)
+	}
 
 	routerMap := make(map[uuid.UUID]string, len(routers))
 	for _, r := range routers {
@@ -91,6 +102,7 @@ func (m *ManagerService) GetPendingCommandsAndMarkItSent(ctx context.Context, ro
 	metrics.CommandsPolled.Inc()
 
 	pending := m.commandService.GetPendingCommands(ctx, routerSerial)
+
 	m.commandService.UpdateCommandsStatus(ctx, pending)
 	m.routerService.UpdateSeenAt(ctx, []string{routerSerial})
 	result := make([]domain.CommandOut, len(pending))
