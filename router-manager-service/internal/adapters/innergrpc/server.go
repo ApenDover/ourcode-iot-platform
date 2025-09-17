@@ -5,52 +5,45 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"log/slog"
 	"net"
+	"router-manager-service/internal/adapters/cache"
 	"router-manager-service/internal/adapters/db"
-	"router-manager-service/internal/adapters/rediscli"
-	"router-manager-service/internal/core/domainService"
-	"router-manager-service/internal/core/redisDomainService"
+	"router-manager-service/internal/conf/util"
+	"router-manager-service/internal/core/domain"
 	"router-manager-service/internal/core/service"
-	"router-manager-service/internal/domain"
-	"router-manager-service/internal/util"
-
 	routermanager "router-manager-service/internal/ports/genproto"
 )
 
 type Server struct {
 	routermanager.UnimplementedRouterManagerServiceServer
 	ManagerService *service.ManagerService
-	RedisCli       *rediscli.Client
 }
 
-func NewServer(pool *pgxpool.Pool, redisClient *rediscli.Client) *Server {
-	repoCommand := db.NewPostgresCommandRepository(pool)
-	repoRouter := db.NewPostgresRouterRepository(pool)
-	commandService := domainService.NewCommandService(repoCommand)
-	routerService := domainService.NewRouterService(repoRouter)
-	redisCommand := redisDomainService.NewRedisCommandRepository(redisClient)
-	redisRouter := redisDomainService.NewRedisRouterRepository(redisClient)
-	managerService := service.NewManagerService(commandService, routerService, redisCommand, redisRouter)
-	redisCli := redisClient
-
+func NewServer(pool *pgxpool.Pool, redisClient *redis.Client) *Server {
+	pgc := db.NewPostgresCommonAdapter(pool)
+	pra := db.NewPostgresRouterAdapter(pool)
+	ca := cache.NewRedisClient(redisClient)
+	managerService := service.NewManagerService(pgc, pra, ca)
 	return &Server{
 		ManagerService: managerService,
-		RedisCli:       redisCli,
 	}
 }
 
 func (s *Server) mustEmbedUnimplementedRouterManagerServiceServer() {}
 
-func (s *Server) Start(port string) error {
+func (s *Server) Start(port string) (*grpc.Server, error) {
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("не могу прослушат порт %s: %w", port, err)
 	}
 
 	loggingInterceptor := func(
@@ -59,12 +52,10 @@ func (s *Server) Start(port string) error {
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (interface{}, error) {
-		log := util.GetLogger(context.Background())
+		log := util.GetLogger(ctx)
 
-		// Получаем span из ctx
 		span := trace.SpanFromContext(ctx)
 		sc := span.SpanContext()
-
 		log.Info(">>>> gRPC request",
 			slog.String("method", info.FullMethod),
 			slog.String("request", fmt.Sprintf("%+v", req)),
@@ -84,36 +75,54 @@ func (s *Server) Start(port string) error {
 		return resp, err
 	}
 
+	util.GetLogger(context.Background()).Info("Запуск gRPC сервера на порту " + port)
+
 	grpcServer := grpc.NewServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.UnaryInterceptor(loggingInterceptor),
 	)
 
 	routermanager.RegisterRouterManagerServiceServer(grpcServer, s)
-	return grpcServer.Serve(lis)
+
+	go func() {
+		if serveErr := grpcServer.Serve(lis); serveErr != nil {
+			util.GetLogger(context.Background()).Error("gRPC server failed", slog.String("error", serveErr.Error()))
+		}
+	}()
+
+	return grpcServer, nil
 }
 
 func (s *Server) SendCommand(ctx context.Context, req *routermanager.SendCommandRequest) (*routermanager.SendCommandResponse, error) {
-	util.GetLogger(ctx).Info("Получил запрос SendCommand")
+	log := util.GetLogger(ctx)
 	payloadMap := req.Payload.AsMap()
 
 	if req.RouterSerial != "" {
-		_ = s.ManagerService.CreateCommand(ctx, req.RouterSerial, req.CommandType, payloadMap)
+		_, err := s.ManagerService.CreateCommand(ctx, req.RouterSerial, req.CommandType, payloadMap)
+		if err != nil {
+			log.Error("Ошибка SendCommand", slog.String("error", err.Error()))
+			return nil, status.Error(codes.Internal, "не удалось сохранить команды")
+		}
 		return &routermanager.SendCommandResponse{Created: 1}, nil
 	}
 
-	commandAll := s.ManagerService.CreateCommandForAll(ctx, req.CommandType, payloadMap)
+	commandAll, _ := s.ManagerService.CreateCommandForAll(ctx, req.CommandType, payloadMap)
 	return &routermanager.SendCommandResponse{Created: int32(len(commandAll))}, nil
 }
 
 func (s *Server) PollCommands(ctx context.Context, req *routermanager.PollCommandsRequest) (*routermanager.PollCommandsResponse, error) {
-	util.GetLogger(ctx).Info("Получил запрос PollCommands")
-	commands := s.ManagerService.GetPendingCommandsAndMarkItSent(ctx, req.RouterSerial)
+	log := util.GetLogger(ctx)
+	commands, errPoll := s.ManagerService.GetPendingCommandsAndMarkItSent(ctx, req.RouterSerial)
+	if errPoll != nil {
+		log.Error("Ошибка PollCommands", slog.String("error", errPoll.Error()))
+		return nil, status.Error(codes.Internal, "не удалось получить команды")
+	}
 	var pbCommands []*routermanager.Command
 	for _, cmd := range commands {
 		pbCommand, err := s.commandToProto(cmd)
 		if err != nil {
-			return nil, err
+			log.Error("Ошибка десерилизации", slog.String("error", err.Error()))
+			return nil, status.Error(codes.Internal, "не удалось получить команды")
 		}
 		pbCommands = append(pbCommands, pbCommand)
 	}
@@ -122,13 +131,18 @@ func (s *Server) PollCommands(ctx context.Context, req *routermanager.PollComman
 }
 
 func (s *Server) AckCommand(ctx context.Context, req *routermanager.AckCommandRequest) (*routermanager.AckCommandResponse, error) {
-
+	log := util.GetLogger(ctx)
 	commandID, err := uuid.Parse(req.CommandId)
 	if err != nil {
-		return nil, err
+		log.Error("req.CommandId не UUID", slog.String("error", err.Error()))
+		return nil, status.Error(codes.Internal, "command_id должен быть UUID")
 	}
 
-	s.ManagerService.AckCommand(ctx, req.RouterSerial, commandID)
+	errAck := s.ManagerService.AckCommand(ctx, req.RouterSerial, commandID)
+	if err != nil {
+		log.Error("Ошибка AckCommand", slog.String("error", errAck.Error()))
+		return nil, status.Error(codes.Internal, "не удалось подтвердить команды")
+	}
 	return &routermanager.AckCommandResponse{Status: "ACKED"}, nil
 }
 

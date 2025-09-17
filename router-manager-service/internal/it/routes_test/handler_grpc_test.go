@@ -1,41 +1,63 @@
 package routes
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/types/known/structpb"
+	"router-manager-service/internal/conf/util"
+	"testing"
+	"time"
+
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
+	tc "github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"router-manager-service/config"
 	"router-manager-service/internal/adapters/db"
-	"router-manager-service/internal/adapters/routes"
 	"router-manager-service/internal/conf"
-	"router-manager-service/internal/core/domainService"
-	"router-manager-service/internal/core/service"
-	"testing"
+	routermanager "router-manager-service/internal/ports/genproto"
 )
 
 func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	// SETUP
-	gin.SetMode(gin.TestMode)
+	ctx := context.Background()
 
-	dbPath, pool, terminate, err := SetupPostgresContainerPool(t)
+	_, pool, terminate, err := SetupPostgresContainerPool(t)
 	require.NoError(t, err)
 	defer terminate()
 
-	go conf.InitGrpc(pool, *dbPath)
+	cfg := config.LoadConfig()
 
-	commandRepo := db.NewPostgresCommandRepository(pool)
-	routerRepo := db.NewPostgresRouterRepository(pool)
-	cs := domainService.NewCommandService(commandRepo)
-	rs := domainService.NewRouterService(routerRepo)
+	rc := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", cfg.RedisUrl, cfg.RedisPort),
+		Password: cfg.RedisPassword,
+		DB:       0,
+	})
+	defer rc.Close()
 
-	svc := service.NewManagerService(cs, rs)
-	engine := gin.New()
-	routes.RegisterRoutes(engine, svc)
+	// Запускаем gRPC сервер
+	grpcServer := conf.InitGrpc(pool, rc)
+	defer grpcServer.GracefulStop()
+
+	// Создаем gRPC клиент
+	conn, err := grpc.Dial("localhost:9092",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	require.NoError(t, err)
+	defer conn.Close()
+
+	client := routermanager.NewRouterManagerServiceClient(conn)
+
+	// Инициализируем репозитории для проверки БД
+	commandRepo := db.NewPostgresCommandsAdapter(pool)
+	routerRepo := db.NewPostgresRouterAdapter(pool)
 
 	// CreateCommand ---
 
@@ -43,30 +65,23 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	serial := uuid.New().String()
 	payload := map[string]interface{}{"foo": "bar"}
 
-	sendReqBody, _ := json.Marshal(map[string]interface{}{
-		"router_serial": serial,
-		"command_type":  "TEST_SEND",
-		"payload":       payload,
-	})
+	// Конвертируем payload в structpb
+	pbPayload, err := structpb.NewStruct(payload)
+	require.NoError(t, err)
 
 	// WHEN
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/send-command", bytes.NewBuffer(sendReqBody))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	engine.ServeHTTP(w, req)
+	sendResp, err := client.SendCommand(ctx, &routermanager.SendCommandRequest{
+		RouterSerial: serial,
+		CommandType:  "TEST_SEND",
+		Payload:      pbPayload,
+	})
 
 	// THEN
-	if w.Code != http.StatusOK {
-		t.Fatalf("CreateCommand failed: %d, body: %s", w.Code, w.Body.String())
-	}
-
-	var sendResp map[string]interface{}
-	err = json.Unmarshal(w.Body.Bytes(), &sendResp)
 	require.NoError(t, err)
-	assert.Equal(t, float64(1), sendResp["created"])
+	assert.Equal(t, int32(1), sendResp.Created)
 
 	// THEN CHECK DATABASE COMMAND
-	sendCommand, err := commandRepo.GetAllByRouterSerial(serial)
+	sendCommand, err := commandRepo.GetAll(ctx)
 	require.NoError(t, err)
 	require.NotEmpty(t, sendCommand)
 
@@ -80,9 +95,9 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	assert.NotNil(t, firstSendCommand.ID)
 
 	// THEN CHECK DATABASE ROUTER
-	router, err := routerRepo.GetBySerial(serial)
+	router, err := routerRepo.GetBySerial(ctx, serial)
 	require.NoError(t, err)
-	require.NotEmpty(t, router)
+	require.NotNil(t, router)
 	fmt.Printf("%+v\n", router)
 
 	assert.Equal(t, router.SerialNumber, serial)
@@ -91,33 +106,23 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 
 	// PollCommands ---
 	// GIVEN
-	pollReqBody, _ := json.Marshal(map[string]interface{}{
-		"router_serial": serial,
-	})
 
 	// WHEN
-	req = httptest.NewRequest(http.MethodPost, "/api/v1/commands/poll", bytes.NewBuffer(pollReqBody))
-	req.Header.Set("Content-Type", "application/json")
-	w = httptest.NewRecorder()
-	engine.ServeHTTP(w, req)
+	pollResp, err := client.PollCommands(ctx, &routermanager.PollCommandsRequest{
+		RouterSerial: serial,
+	})
 
 	// THEN
-	if w.Code != http.StatusOK {
-		t.Fatalf("PollCommands failed: %d, body: %s", w.Code, w.Body.String())
-	}
-
-	var pollResp []map[string]interface{}
-	err = json.Unmarshal(w.Body.Bytes(), &pollResp)
 	require.NoError(t, err)
-	require.Equal(t, 1, len(pollResp))
-	assert.Equal(t, "SENT", pollResp[0]["status"])
+	require.Equal(t, 1, len(pollResp.Commands))
+	assert.Equal(t, "SENT", pollResp.Commands[0].Status)
 
-	commandIDStr := pollResp[0]["id"].(string)
+	commandIDStr := pollResp.Commands[0].Id
 	commandID, err := uuid.Parse(commandIDStr)
 	require.NoError(t, err)
 
 	// THEN CHECK DATABASE
-	pollCommand, err := commandRepo.GetAllByRouterSerial(serial)
+	pollCommand, err := commandRepo.GetAll(ctx)
 	require.NoError(t, err)
 	require.NotEmpty(t, pollCommand)
 
@@ -132,9 +137,9 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	assert.NotNil(t, firstPollCommand.ID)
 
 	// THEN CHECK DATABASE ROUTER
-	routerPoll, err := routerRepo.GetBySerial(serial)
+	routerPoll, err := routerRepo.GetBySerial(ctx, serial)
 	require.NoError(t, err)
-	require.NotEmpty(t, routerPoll)
+	require.NotNil(t, routerPoll)
 	fmt.Printf("%+v\n", routerPoll)
 
 	assert.Equal(t, routerPoll.SerialNumber, serial)
@@ -144,29 +149,19 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	// AckCommands
 
 	// GIVEN
-	ackReqBody, _ := json.Marshal(map[string]interface{}{
-		"router_serial": serial,
-		"command_id":    commandID,
-	})
 
 	// WHEN
-	req = httptest.NewRequest(http.MethodPost, "/api/v1/commands/ack", bytes.NewBuffer(ackReqBody))
-	req.Header.Set("Content-Type", "application/json")
-	w = httptest.NewRecorder()
-	engine.ServeHTTP(w, req)
+	ackResp, err := client.AckCommand(ctx, &routermanager.AckCommandRequest{
+		RouterSerial: serial,
+		CommandId:    commandID.String(),
+	})
 
 	// THEN
-	if w.Code != http.StatusOK {
-		t.Fatalf("AckCommands failed: %d, body: %s", w.Code, w.Body.String())
-	}
-
-	var ackResp map[string]interface{}
-	err = json.Unmarshal(w.Body.Bytes(), &ackResp)
 	require.NoError(t, err)
-	assert.Equal(t, "ACKED", ackResp["status"])
+	assert.Equal(t, "ACKED", ackResp.Status)
 
 	// THEN CHECK DATABASE
-	ackCommand, err := commandRepo.GetAllByRouterSerial(serial)
+	ackCommand, err := commandRepo.GetAll(ctx)
 	require.NoError(t, err)
 	require.NotEmpty(t, ackCommand)
 
@@ -181,13 +176,57 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	assert.NotNil(t, firstAckCommand.ID)
 
 	// THEN CHECK DATABASE ROUTER
-	routerAck, err := routerRepo.GetBySerial(serial)
+	routerAck, err := routerRepo.GetBySerial(ctx, serial)
 	require.NoError(t, err)
-	require.NotEmpty(t, routerAck)
+	require.NotNil(t, routerAck)
 	fmt.Printf("%+v\n", routerAck)
 
 	assert.Equal(t, routerAck.SerialNumber, serial)
 	assert.NotNil(t, routerAck.LastSeenAt)
 	assert.NotNil(t, routerAck.CreatedAt)
 	assert.NotEqual(t, routerPoll.LastSeenAt, routerAck.LastSeenAt)
+}
+
+func SetupPostgresContainerPool(t *testing.T) (*string, *pgxpool.Pool, func(), error) {
+	ctx := context.Background()
+	req := tc.ContainerRequest{
+		Image:        "postgres:16",
+		ExposedPorts: []string{"5432/tcp"},
+		Env: map[string]string{
+			"POSTGRES_USER":     "test",
+			"POSTGRES_PASSWORD": "test",
+			"POSTGRES_DB":       "testdb",
+		},
+		WaitingFor: wait.ForListeningPort("5432/tcp"),
+	}
+
+	pgContainer, err := tc.GenericContainer(ctx, tc.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+	require.NoError(t, err)
+
+	host, _ := pgContainer.Host(ctx)
+	port, _ := pgContainer.MappedPort(ctx, "5432")
+
+	dsn := fmt.Sprintf("postgres://test:test@%s:%s/testdb?sslmode=disable", host, port.Port())
+	pool, err := pgxpool.New(ctx, dsn)
+	require.NoError(t, err)
+
+	// Ждём доступности
+	for i := 0; i < 30; i++ {
+		if err := pool.Ping(ctx); err == nil {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+
+	conf.RunMigrations(dsn, util.MigrationsPath(config.LoadConfig().MigrationPath))
+
+	terminate := func() {
+		pool.Close()
+		_ = pgContainer.Terminate(ctx)
+	}
+
+	return &dsn, pool, terminate, nil
 }

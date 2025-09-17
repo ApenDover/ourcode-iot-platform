@@ -140,7 +140,7 @@ class DeviceDataServiceImplTest {
     void updateDeviceShouldReturnCurrentDeviceWhenNoFieldsProvided() {
         // GIVEN
         String deviceId = "deviceId";
-        var emptyRequest = new DeviceUpdateRequest(); // ничего не задано
+        var emptyRequest = new DeviceUpdateRequest();
         var entity = DummyTDF.deviceEntity.getDefault();
         var mapped = DummyTDF.device.getDefault();
         when(deviceDbService.getDeviceByDeviceId(deviceId)).thenReturn(entity);

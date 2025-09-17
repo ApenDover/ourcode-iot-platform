@@ -3,7 +3,7 @@ package config
 import (
 	"context"
 	"os"
-	"router-manager-service/internal/util"
+	"router-manager-service/internal/conf/util"
 	"time"
 )
 
@@ -35,9 +35,9 @@ func LoadConfig() *Config {
 		CheckExpiredInterval: getTimeOrDefault("CHECK_EXPIRED_INTERVAL", "30s"),
 		MigrationPath:        getMigrationPath(getEnvOrDefault("PROFILE", "local")),
 		AlloyUrl:             getEnvOrDefault("FAILED_PROCESSOR_MANAGEMENT_TRACING_OTLP_ENDPOINT_GRPC", "http://localhost:4317"),
-		RedisUrl:             getEnvOrDefault("REDIS_HOST", "localhost"),
-		RedisPort:            getEnvOrDefault("REDIS_PORT", "6379"),
-		RedisPassword:        getEnvOrDefault("REDIS_PASSWORD", "redis_pass"),
+		RedisUrl:             getEnvOrDefault("REDIS_HOST_RMS", "localhost"),
+		RedisPort:            getEnvOrDefault("REDIS_PORT_RMS", "6379"),
+		RedisPassword:        getEnvOrDefault("REDIS_PASSWORD_RMS", "redis_pass"),
 	}
 }
 
@@ -66,7 +66,7 @@ func getTimeOrDefault(key, defaultValue string) time.Duration {
 
 func getMigrationPath(env string) string {
 	if env == "local" {
-		return "../../db/migrations"
+		return "../../../db/migrations"
 	}
-	return "../../../app/db/migrations"
+	return "../../../../app/db/migrations"
 }

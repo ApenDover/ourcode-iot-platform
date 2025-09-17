@@ -5,7 +5,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"log/slog"
 	"os"
-	"router-manager-service/internal/logutil"
+	"router-manager-service/internal/conf/logutil"
 )
 
 const (

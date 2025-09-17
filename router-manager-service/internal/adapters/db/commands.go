@@ -2,234 +2,98 @@ package db
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"router-manager-service/internal/core/domain"
+	"router-manager-service/internal/ports"
+
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/prometheus/client_golang/prometheus"
-	"router-manager-service/internal/domain"
-	"router-manager-service/internal/metrics"
-	"strings"
-	"time"
 )
 
-type PostgresCommandRepository struct {
+type PostgresCommandsRepository struct {
 	pool *pgxpool.Pool
 }
 
-func NewPostgresCommandRepository(pool *pgxpool.Pool) *PostgresCommandRepository {
-	return &PostgresCommandRepository{pool: pool}
+func NewPostgresCommandsAdapter(pool *pgxpool.Pool) *PostgresCommandsRepository {
+	return &PostgresCommandsRepository{pool: pool}
 }
 
-func (r *PostgresCommandRepository) Save(cmd domain.Command) error {
-	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_save"))
-	defer timer.ObserveDuration()
+type Command struct {
+	ID   int64
+	Name string
+}
 
-	payloadBytes, err := json.Marshal(cmd.Payload)
+var _ ports.CommandPort = (*PostgresCommandsRepository)(nil)
+
+func (r *PostgresCommandsRepository) GetAll(ctx context.Context) ([]domain.Command, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT id, router_id, command_type, payload, status, sent_at, acked_at, created_at
+		FROM commands
+		ORDER BY created_at DESC
+	`)
 	if err != nil {
-		return err
-	}
-
-	_, err = r.pool.Exec(
-		context.Background(),
-		`
-		 INSERT INTO commands (id, router_id, command_type, payload, status, created_at) 
-         VALUES ($1, $2, $3, $4, $5, $6)
-         `, cmd.ID, cmd.RouterID, cmd.CommandType, payloadBytes, cmd.Status, cmd.CreatedAt,
-	)
-	return err
-}
-
-func (r *PostgresCommandRepository) SaveAll(cmds []domain.Command) error {
-	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_save_all"))
-	defer timer.ObserveDuration()
-
-	if len(cmds) == 0 {
-		return nil
-	}
-
-	var values []interface{}
-	var placeholders []string
-
-	for i, cmd := range cmds {
-		payloadBytes, err := json.Marshal(cmd.Payload)
-		if err != nil {
-			return err
-		}
-
-		values = append(values, cmd.ID, cmd.RouterID, cmd.CommandType, payloadBytes, cmd.Status, cmd.CreatedAt)
-
-		base := i*6 + 1
-		placeholders = append(placeholders, fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d)", base, base+1, base+2, base+3, base+4, base+5))
-	}
-
-	query := fmt.Sprintf(`
-        INSERT INTO commands (id, router_id, command_type, payload, status, created_at)
-        VALUES %s
-    `, strings.Join(placeholders, ","))
-
-	_, err := r.pool.Exec(context.Background(), query, values...)
-	return err
-}
-
-func (r *PostgresCommandRepository) GetBySerialAndStatuses(serial string, statuses []domain.CommandStatus) ([]domain.Command, error) {
-	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_get_by_serial_and_statuses"))
-	defer timer.ObserveDuration()
-
-	if len(statuses) == 0 {
-		return nil, nil
-	}
-
-	query := `
-		SELECT c.id, c.router_id, c.command_type, c.payload, c.status, c.sent_at, c.acked_at, c.created_at
-		FROM commands c
-		INNER JOIN routers r ON c.router_id = r.id
-		WHERE r.serial_number = $1 AND status = ANY($2)
-	`
-
-	rows, err := r.pool.Query(context.Background(), query, serial, statuses)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query failed: %w", err)
 	}
 	defer rows.Close()
 
 	var commands []domain.Command
 	for rows.Next() {
-		var cmd domain.Command
-		var payloadBytes []byte
-		if err := rows.Scan(&cmd.ID, &cmd.RouterID, &cmd.CommandType, &payloadBytes, &cmd.Status, &cmd.SentAt, &cmd.AckedAt, &cmd.CreatedAt); err != nil {
-			return nil, err
+		var c domain.Command
+		if err := rows.Scan(
+			&c.ID,
+			&c.RouterID,
+			&c.CommandType,
+			&c.Payload,
+			&c.Status,
+			&c.SentAt,
+			&c.AckedAt,
+			&c.CreatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("scan failed: %w", err)
 		}
+		commands = append(commands, c)
+	}
 
-		if err := json.Unmarshal(payloadBytes, &cmd.Payload); err != nil {
-			return nil, err
-		}
-
-		commands = append(commands, cmd)
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
 	}
 
 	return commands, nil
 }
 
-func (r *PostgresCommandRepository) GetAllByRouterSerial(serial string) ([]domain.Command, error) {
-	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_get_all_router_serial"))
-	defer timer.ObserveDuration()
+func (r *PostgresCommandsRepository) GetAllByRouterId(ctx context.Context, routerId uuid.UUID) ([]domain.Command, error) {
 
-	query := `
-		SELECT c.id, c.router_id, c.command_type, c.payload, c.status, c.sent_at, c.acked_at, c.created_at
-		FROM commands c
-		INNER JOIN routers r ON c.router_id = r.id
-		WHERE r.serial_number = $1
-	`
-
-	rows, err := r.pool.Query(context.Background(), query, serial)
+	rows, err := r.pool.Query(ctx, `
+		SELECT id, router_id, command_type, payload, status, sent_at, acked_at, created_at
+		FROM commands
+		WHERE router_id = $1
+	`, routerId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query failed: %w", err)
 	}
 	defer rows.Close()
 
 	var commands []domain.Command
 	for rows.Next() {
-		var cmd domain.Command
-		var payloadBytes []byte
-		if err := rows.Scan(&cmd.ID, &cmd.RouterID, &cmd.CommandType, &payloadBytes, &cmd.Status, &cmd.SentAt, &cmd.AckedAt, &cmd.CreatedAt); err != nil {
-			return nil, err
+		var c domain.Command
+		if err := rows.Scan(
+			&c.ID,
+			&c.RouterID,
+			&c.CommandType,
+			&c.Payload,
+			&c.Status,
+			&c.SentAt,
+			&c.AckedAt,
+			&c.CreatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("scan failed: %w", err)
 		}
+		commands = append(commands, c)
+	}
 
-		if err := json.Unmarshal(payloadBytes, &cmd.Payload); err != nil {
-			return nil, err
-		}
-
-		commands = append(commands, cmd)
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
 	}
 
 	return commands, nil
-}
-
-func (r *PostgresCommandRepository) SetSentStatusForPendingByRouterSerial(serial string) error {
-	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_set_sent_status_for_pending_by_router_serial"))
-	defer timer.ObserveDuration()
-
-	query := `
-		UPDATE commands SET status=$1, sent_at=$2 
-		                WHERE serial_number=$3 
-		                  AND status=$4
-		`
-
-	_, err := r.pool.Exec(
-		context.Background(), query,
-		domain.CommandStatusSent, time.Now(),
-		serial, domain.CommandStatusPending,
-	)
-	return err
-}
-
-func (r *PostgresCommandRepository) SetSentStatusForPendingByCommandIds(cmds []domain.Command) error {
-	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_set_sent_status_for_pending_by_command_ids"))
-	defer timer.ObserveDuration()
-
-	if len(cmds) == 0 {
-		return nil
-	}
-
-	ctx := context.Background()
-	batch := &pgx.Batch{}
-
-	query := `
-			 UPDATE commands
-			 SET status=$1, sent_at=$2
-			 WHERE id=$3 
-			   AND status=$4
-			 `
-
-	for _, cmd := range cmds {
-		batch.Queue(query, domain.CommandStatusSent, time.Now(), cmd.ID, domain.CommandStatusPending)
-	}
-
-	br := r.pool.SendBatch(ctx, batch)
-	defer br.Close()
-
-	for range cmds {
-		_, err := br.Exec()
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (r *PostgresCommandRepository) UpdateStatusToAcked(routerId, commandID uuid.UUID) error {
-	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_update_status_to_acked"))
-	defer timer.ObserveDuration()
-
-	query := `
-		 UPDATE commands
-		 SET status = $1, acked_at = $2
-		 WHERE id = $3 AND router_id = $4 AND status=$5
-		 `
-
-	_, err := r.pool.Exec(
-		context.Background(), query, domain.CommandStatusAcked, time.Now(), commandID, routerId, domain.CommandStatusSent,
-	)
-	return err
-}
-
-func (r *PostgresCommandRepository) MarkExpiredAsError(timeout time.Duration) error {
-	timer := prometheus.NewTimer(metrics.DatabaseDuration.WithLabelValues("command_mark_expired_as_error"))
-	defer timer.ObserveDuration()
-
-	query := `
-		 UPDATE commands
-		 SET status = $1
-		 WHERE status = $2
-		 AND sent_at < $3
-		`
-
-	now := time.Now()
-	deadline := now.Add(-timeout)
-	_, err := r.pool.Exec(
-		context.Background(), query, domain.CommandStatusError, domain.CommandStatusSent, deadline,
-	)
-	return err
 }

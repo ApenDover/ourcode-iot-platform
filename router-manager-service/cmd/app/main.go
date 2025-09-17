@@ -1,57 +1,109 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"golang.org/x/net/context"
+	"github.com/redis/go-redis/v9"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
 	"router-manager-service/config"
-	"router-manager-service/internal/adapters/rediscli"
 	"router-manager-service/internal/conf"
-	"router-manager-service/internal/util"
+	"router-manager-service/internal/conf/logutil"
+	"router-manager-service/internal/conf/util"
+	"syscall"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
-	log := util.GetLogger(context.Background())
-	alloyEndPoint := config.LoadConfig().AlloyUrl
-	tp, err := conf.InitTracer(alloyEndPoint)
-	if err != nil {
-		log.Error("не удалось инициализировать TracerProvider", slog.String("error", err.Error()))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	log := util.GetLogger(ctx)
+	cfg := config.LoadConfig()
+	logCfg := logutil.LoadConfig()
+	log.Info("Конфигурация загружена", slog.String("profile", logCfg.Profile), slog.String("log_level", logCfg.Level))
+
+	tp, errTraceInit := conf.InitTracer(ctx, cfg.AlloyUrl)
+	if errTraceInit != nil {
+		log.Error("не удалось инициализировать TracerProvider", slog.String("error", errTraceInit.Error()))
 		return
 	}
 	defer func() {
-		_ = tp.Shutdown(context.Background())
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer shutdownCancel()
+		_ = tp.Shutdown(shutdownCtx)
 	}()
 
-	dbPath := databasePath()
-	pool, err := pgxpool.New(context.Background(), dbPath)
-	if err != nil {
-		log.Error("ошибка подключения к БД", slog.String("error", err.Error()))
+	dbPath := databasePath(cfg)
+	pool, pgxErr := pgxpool.New(ctx, dbPath)
+	if pgxErr != nil {
+		log.Error("ошибка подключения к БД", slog.String("error", pgxErr.Error()))
+		return
 	}
+	flyWayPath := util.MigrationsPath(cfg.MigrationPath)
+	log.Info("ищу миграции по адресу", slog.String("миграции", flyWayPath))
+	conf.RunMigrations(dbPath, flyWayPath)
+	defer pool.Close()
+
+	if errPoolPing := pool.Ping(ctx); errPoolPing != nil {
+		log.Error("не удалось проверить соединение с БД", slog.String("error", errPoolPing.Error()))
+		return
+	}
+
+	metricsServer := &http.Server{
+		Addr:    ":9091",
+		Handler: promhttp.Handler(),
+	}
+
 	go func() {
-		http.Handle("/metrics", promhttp.Handler())
-		err := http.ListenAndServe(":9091", nil)
-		if err != nil {
-			log.Error("не смог запустить экспорт метрик", slog.String("error", err.Error()))
-			return
+		log.Info("Запуск сервера метрик на порту: 9091")
+		if errMetrics := metricsServer.ListenAndServe(); errMetrics != nil && !errors.Is(errMetrics, http.ErrServerClosed) {
+			log.Error("не смог запустить экспорт метрик", slog.String("error", errMetrics.Error()))
 		}
 	}()
 
-	redisClient := rediscli.NewRedisClient(config.LoadConfig().RedisUrl, config.LoadConfig().RedisPort, config.LoadConfig().RedisPassword)
+	rc := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", cfg.RedisUrl, cfg.RedisPort),
+		Password: cfg.RedisPassword,
+		DB:       0,
+	})
+	defer rc.Close()
 
-	conf.InitGrpc(pool, dbPath, redisClient)
+	grpcServer := conf.InitGrpc(pool, rc)
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	<-sigChan
+	log.Info("Получен сигнал завершения")
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
+
+	if grpcServer != nil {
+		grpcServer.GracefulStop()
+	}
+
+	if err := metricsServer.Shutdown(shutdownCtx); err != nil {
+		log.Error("ошибка при остановке сервера метрик", slog.String("error", err.Error()))
+	}
+
+	log.Info("Приложение корректно завершено")
 }
 
-func databasePath() string {
-	c := config.LoadConfig()
+func databasePath(cfg *config.Config) string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		c.DBUser,
-		c.DBPassword,
-		c.DBHost,
-		c.DBPort,
-		c.DBName,
+		cfg.DBUser,
+		cfg.DBPassword,
+		cfg.DBHost,
+		cfg.DBPort,
+		cfg.DBName,
 	)
 }
