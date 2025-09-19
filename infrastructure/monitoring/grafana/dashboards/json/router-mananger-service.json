@@ -195,7 +195,7 @@
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 1
               }
             ]
           },
@@ -230,7 +230,9 @@
       "pluginVersion": "12.2.0-16979757807",
       "targets": [
         {
-          "expr": "sum(command_errors_total) + sum(router_errors_total)",
+          "editorMode": "code",
+          "expr": "(sum(command_errors_total) or vector(0)) + (sum(router_errors_total) or vector(0))",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -410,10 +412,6 @@
               {
                 "color": "green",
                 "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
@@ -448,7 +446,9 @@
       "pluginVersion": "12.2.0-16979757807",
       "targets": [
         {
-          "expr": "100 * (sum(rate(command_errors_total[1m])) + sum(rate(router_errors_total[1m]))) / clamp_min(sum(rate(commands_sent_total[1m])), 1e-9)",
+          "editorMode": "code",
+          "expr": "100 * (\n  (sum(rate(command_errors_total[1m])) or vector(0)) +\n  (sum(rate(router_errors_total[1m])) or vector(0))\n)\n/\nclamp_min((sum(rate(commands_sent_total[1m])) or vector(0)), 1e-9)",
+          "range": true,
           "refId": "A"
         }
       ],
