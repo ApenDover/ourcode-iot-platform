@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"fmt"
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/types/known/structpb"
 	"router-manager-service/internal/conf/util"
 	"testing"
@@ -24,7 +25,8 @@ import (
 
 func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	// SETUP
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	_, pool, terminate, err := SetupPostgresContainerPool(t)
 	require.NoError(t, err)
@@ -42,10 +44,8 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	grpcServer := conf.InitGrpc(pool, rc)
 	defer grpcServer.GracefulStop()
 
-	conn, err := grpc.Dial("localhost:9092",
+	conn, err := grpc.NewClient("localhost:9092",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
 	)
 	require.NoError(t, err)
 	defer conn.Close()
