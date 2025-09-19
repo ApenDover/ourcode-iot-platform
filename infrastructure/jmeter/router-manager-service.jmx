@@ -10,17 +10,17 @@
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="SendCommand Load">
-        <intProp name="ThreadGroup.num_threads">1</intProp>
-        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <intProp name="ThreadGroup.num_threads">50</intProp>
+        <intProp name="ThreadGroup.ramp_time">10</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
-          <stringProp name="LoopController.loops">1</stringProp>
+          <intProp name="LoopController.loops">-1</intProp>
           <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="SendCommand" enabled="true">
+        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="SendCommand">
           <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf</stringProp>
           <stringProp name="GRPCSampler.host">localhost</stringProp>
           <stringProp name="GRPCSampler.port">8890</stringProp>
@@ -45,6 +45,10 @@
 import groovy.json.JsonOutput
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+
+// 8354d1bd-ea67-494f-90fc-4b88bd874e95 router
+// 9354d1bd-ea67-494f-90fc-4b88bd874e95 command
+
 
 int MAX_ROUTERS = 1000
 
@@ -75,7 +79,7 @@ if (Math.random() &lt; 0.7) {
         routerCounter++
         props.put(&quot;router_counter&quot;, routerCounter)
         routerCommands[routerUuid] = new ConcurrentLinkedQueue()
-        log.info(&quot;SendCommand: создан новый роутер UUID=${routerUuid}&quot;)
+//        log.info(&quot;SendCommand: создан новый роутер UUID=${routerUuid}&quot;)
     } else {
         // Лимит достигнут - используем случайный существующий
         def existingUuids = routerCommands.keySet().toArray()
@@ -84,20 +88,20 @@ if (Math.random() &lt; 0.7) {
     
     (routerCommands[routerUuid] as ConcurrentLinkedQueue).add(commandId)
     body.routerSerial = routerUuid // Используем UUID, не строковый ID!
-    log.info(&quot;SendCommand: команда для роутера UUID=${routerUuid} (всего роутеров: ${routerCounter})&quot;)
+//    log.info(&quot;SendCommand: команда для роутера UUID=${routerUuid} (всего роутеров: ${routerCounter})&quot;)
     
 } else {
     // 30% - команды на все роутеры
     routerCommands.each { routerUuid, queue -&gt;
         (queue as ConcurrentLinkedQueue).add(commandId)
     }
-    log.info(&quot;SendCommand: broadcast команда для всех ${routerCounter} роутеров&quot;)
+//    log.info(&quot;SendCommand: broadcast команда для всех ${routerCounter} роутеров&quot;)
 }
 
 vars.put(&quot;requestBody&quot;, JsonOutput.toJson(body))</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
-          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
+          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -134,7 +138,7 @@ vars.put(&quot;requestBody&quot;, JsonOutput.toJson(body))</stringProp>
             <stringProp name="filename"></stringProp>
           </ResultCollector>
           <hashTree/>
-          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
+          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -173,18 +177,18 @@ vars.put(&quot;requestBody&quot;, JsonOutput.toJson(body))</stringProp>
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="PollCommands Load">
-        <intProp name="ThreadGroup.num_threads">1</intProp>
-        <intProp name="ThreadGroup.ramp_time">1</intProp>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="PollCommands Load" enabled="true">
+        <intProp name="ThreadGroup.num_threads">200</intProp>
+        <intProp name="ThreadGroup.ramp_time">5</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
-          <stringProp name="LoopController.loops">1</stringProp>
+          <intProp name="LoopController.loops">-1</intProp>
           <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="PollCommands" enabled="true">
+        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="PollCommands">
           <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf</stringProp>
           <stringProp name="GRPCSampler.host">localhost</stringProp>
           <stringProp name="GRPCSampler.port">8890</stringProp>
@@ -218,16 +222,16 @@ String selectedRouterUuid = null
 if (!routerCommands.isEmpty()) {
     def routerUuids = routerCommands.keySet().toArray()
     selectedRouterUuid = routerUuids[(Math.random() * routerUuids.size()) as int] as String
-    log.info(&quot;PollCommands: выбран router_serial=${selectedRouterUuid}&quot;)
+//    log.info(&quot;PollCommands: выбран router_serial=${selectedRouterUuid}&quot;)
 } else {
     selectedRouterUuid = &quot;8354d1bd-ea67-494f-90fc-4b88bd874e95&quot;
-    log.warn(&quot;PollCommands: нет роутеров, использую fallback&quot;)
+//    log.warn(&quot;PollCommands: нет роутеров, использую fallback&quot;)
 }
 
 vars.put(&quot;random_router_serial&quot;, selectedRouterUuid)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="filename"></stringProp>
@@ -303,7 +307,7 @@ try {
             <stringProp name="filename"></stringProp>
           </ResultCollector>
           <hashTree/>
-          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -342,18 +346,18 @@ try {
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="AckCommands Load">
-        <intProp name="ThreadGroup.num_threads">1</intProp>
-        <intProp name="ThreadGroup.ramp_time">1</intProp>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="AckCommands Load" enabled="true">
+        <intProp name="ThreadGroup.num_threads">200</intProp>
+        <intProp name="ThreadGroup.ramp_time">5</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
-          <stringProp name="LoopController.loops">1</stringProp>
+          <intProp name="LoopController.loops">-1</intProp>
           <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="AckCommands" enabled="true">
+        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="AckCommands">
           <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf</stringProp>
           <stringProp name="GRPCSampler.host">localhost</stringProp>
           <stringProp name="GRPCSampler.port">8890</stringProp>
@@ -372,7 +376,7 @@ try {
           <stringProp name="GRPCSampler.maxInboundMetadataSize">8192</stringProp>
         </vn.zalopay.benchmark.GRPCSampler>
         <hashTree>
-          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -440,7 +444,7 @@ if (commandToAck) {
 } else {
     routerUuid = &quot;8354d1bd-ea67-494f-90fc-4b88bd874e95&quot;
     commandId = &quot;9354d1bd-ea67-494f-90fc-4b88bd874e95&quot;
-    log.warn(&quot;AckCommands: нет команд для подтверждения в acknowledged_commands&quot;)
+//    log.warn(&quot;AckCommands: нет команд для подтверждения в acknowledged_commands&quot;)
 }
 
 vars.put(&quot;random_router_serial&quot;, routerUuid)
@@ -467,13 +471,12 @@ if (prev.isSuccessful()) {
         
         // Удаляем подтвержденную команду
         ackCommands.remove(commandKey)
-        log.info(&quot;AckCommands: команда ${commandKey} успешно подтверждена и удалена&quot;)
+//        log.info(&quot;AckCommands: команда ${commandKey} успешно подтверждена и удалена&quot;)
     } else {
-        log.info(&quot;AckCommands: подтверждена fallback команда, ничего не удаляю&quot;)
+//        log.info(&quot;AckCommands: подтверждена fallback команда, ничего не удаляю&quot;)
     }
 } else {
     log.warn(&quot;AckCommands: запрос не удался, команда остается в очереди на подтверждение&quot;)
-    
     def commandKey = vars.get(&quot;ack_command_key&quot;)
     if (commandKey) {
         def ackCommands = props.get(&quot;acknowledged_commands&quot;) as ConcurrentHashMap
@@ -484,7 +487,7 @@ if (prev.isSuccessful()) {
 vars.remove(&quot;ack_command_key&quot;)</stringProp>
           </JSR223PostProcessor>
           <hashTree/>
-          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
+          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -521,7 +524,7 @@ vars.remove(&quot;ack_command_key&quot;)</stringProp>
             <stringProp name="filename"></stringProp>
           </ResultCollector>
           <hashTree/>
-          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
+          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -560,7 +563,7 @@ vars.remove(&quot;ack_command_key&quot;)</stringProp>
           <hashTree/>
         </hashTree>
       </hashTree>
-      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown Thread Group">
+      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown Thread Group" enabled="true">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -571,7 +574,7 @@ vars.remove(&quot;ack_command_key&quot;)</stringProp>
         </elementProp>
       </PostThreadGroup>
       <hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
