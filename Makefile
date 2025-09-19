@@ -195,5 +195,25 @@ proto-gen:
 clear:
 	docker rm -f device-api iot-common iot-avro router-manager-proto-client
 
-jmeter:
+jmeter: j-prepare
 	JVM_ARGS="-Xms512m -Xmx2g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/router-manager-service.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o ./report
+
+j-prepare:
+	@docker exec -i -e PGPASSWORD=$(APP_ROUTER_MANAGER_DATASOURCE_PASSWORD) postgres_router_manager \
+    		psql -U $(APP_ROUTER_MANAGER_DATASOURCE_USERNAME) -d $(APP_ROUTER_MANAGER_DATASOURCE_DB) \
+    		-c "TRUNCATE TABLE routers CASCADE;"
+
+	@docker exec -i -e PGPASSWORD=$(APP_ROUTER_MANAGER_DATASOURCE_PASSWORD) postgres_router_manager \
+    		psql -U $(APP_ROUTER_MANAGER_DATASOURCE_USERNAME) -d $(APP_ROUTER_MANAGER_DATASOURCE_DB) \
+    		-c "INSERT INTO public.routers (id, serial_number, ip_address, last_seen_at, created_at) \
+    			VALUES ('581811df-8b37-44fd-84ce-9b7791b0e4c0', '8354d1bd-ea67-494f-90fc-4b88bd874e95', null, null, '2025-09-19 19:56:18.389983')\
+    			ON CONFLICT DO NOTHING;"
+
+	@docker exec -i -e PGPASSWORD=$(APP_ROUTER_MANAGER_DATASOURCE_PASSWORD) postgres_router_manager \
+    		psql -U $(APP_ROUTER_MANAGER_DATASOURCE_USERNAME) -d $(APP_ROUTER_MANAGER_DATASOURCE_DB) \
+    		-c "INSERT INTO public.commands (id, router_id, command_type, payload, status, sent_at, acked_at, created_at) \
+    			VALUES ('9354d1bd-ea67-494f-90fc-4b88bd874e95', '581811df-8b37-44fd-84ce-9b7791b0e4c0', 'FALLBACK', '{}', 'PENDING', null, null, '2025-09-19 19:56:18.410128')\
+    			ON CONFLICT DO NOTHING;"
+
+	@docker exec -i redis redis-cli -a $(REDIS_PASSWORD) FLUSHALL
+	@docker exec -i redis-rms redis-cli -a $(REDIS_PASSWORD_RMS) FLUSHALL

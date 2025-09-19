@@ -5,6 +5,8 @@
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments"/>
       </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="SendCommand Load">
@@ -44,24 +46,25 @@ import groovy.json.JsonOutput
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 
-// 8354d1bd-ea67-494f-90fc-4b88bd874e95 router
-// 9354d1bd-ea67-494f-90fc-4b88bd874e95 command
+int MAX_ROUTERS = 100
+int MAX_QUEUE_SIZE = 100
 
-int MAX_ROUTERS = 1000
-int MAX_QUEUE_SIZE = 100  // максимальное количество команд на роутер
-
-if (!(props.get(&quot;router_commands&quot;) instanceof ConcurrentHashMap)) {
-    props.put(&quot;router_commands&quot;, new ConcurrentHashMap())
+if (!(props.get(&quot;router_commands&quot;) instanceof java.util.concurrent.ConcurrentHashMap)) {
+    props.put(&quot;router_commands&quot;, new java.util.concurrent.ConcurrentHashMap())
 }
 if (props.get(&quot;router_counter&quot;) == null) {
     props.put(&quot;router_counter&quot;, 0)
 }
 
-def routerCommands = props.get(&quot;router_commands&quot;) as ConcurrentHashMap
+def routerCommands = props.get(&quot;router_commands&quot;) as java.util.concurrent.ConcurrentHashMap
 int routerCounter = props.get(&quot;router_counter&quot;) as Integer
 
-def body = [commandType: &quot;TEST_LOAD&quot;]
-String commandId = UUID.randomUUID().toString()
+def body = [
+    command_type: &quot;TEST_LOAD&quot;,
+    payload: [
+        foo: &quot;bar&quot;
+    ]
+]
 
 if (Math.random() &lt; 0.7) {
     // 70% - команда для конкретного роутера
@@ -74,26 +77,27 @@ if (Math.random() &lt; 0.7) {
         routerUuid = UUID.randomUUID().toString()
         routerCounter++
         props.put(&quot;router_counter&quot;, routerCounter)
-        routerCommands[routerUuid] = new ConcurrentLinkedQueue()
+        routerCommands[routerUuid] = new java.util.concurrent.ConcurrentLinkedQueue()
     } else {
         def existingUuids = routerCommands.keySet().toArray()
         routerUuid = existingUuids[(Math.random() * existingUuids.size()) as int] as String
     }
     
-    def queue = routerCommands[routerUuid] as ConcurrentLinkedQueue
-    queue.add(commandId)
-    // Ограничиваем очередь до 100 команд
-    while (queue.size() &gt; MAX_QUEUE_SIZE) {
-        queue.poll()
+    def queue = routerCommands[routerUuid] as java.util.concurrent.ConcurrentLinkedQueue
+    if (queue.size() &lt; MAX_QUEUE_SIZE) {
+        queue.add(&quot;pending&quot;)
     }
-
-    body.routerSerial = routerUuid
+    
+    body.router_serial = routerUuid // Для конкретного роутера
+    
 } else {
-    // 30% - broadcast на все роутеры
+    // 30% - по всем роутерам команды
+    body.router_serial = &quot;&quot;
+    
     routerCommands.each { routerUuid, queue -&gt;
-        queue.add(commandId)
-        while (queue.size() &gt; MAX_QUEUE_SIZE) {
-            queue.poll()
+        def q = queue as java.util.concurrent.ConcurrentLinkedQueue
+        if (q.size() &lt; MAX_QUEUE_SIZE) {
+            q.add(&quot;pending&quot;)
         }
     }
 }
@@ -177,7 +181,7 @@ vars.put(&quot;requestBody&quot;, JsonOutput.toJson(body))</stringProp>
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="PollCommands Load">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="PollCommands Load" enabled="true">
         <intProp name="ThreadGroup.num_threads">50</intProp>
         <intProp name="ThreadGroup.ramp_time">5</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
@@ -211,21 +215,19 @@ vars.put(&quot;requestBody&quot;, JsonOutput.toJson(body))</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script">import java.util.concurrent.ConcurrentHashMap
 
-if (!(props.get(&quot;router_commands&quot;) instanceof ConcurrentHashMap)) {
-    props.put(&quot;router_commands&quot;, new ConcurrentHashMap())
+if (!(props.get(&quot;router_commands&quot;) instanceof java.util.concurrent.ConcurrentHashMap)) {
+    props.put(&quot;router_commands&quot;, new java.util.concurrent.ConcurrentHashMap())
 }
 
-def routerCommands = props.get(&quot;router_commands&quot;) as ConcurrentHashMap
+def routerCommands = props.get(&quot;router_commands&quot;) as java.util.concurrent.ConcurrentHashMap
 
 String selectedRouterUuid = null
 
 if (!routerCommands.isEmpty()) {
     def routerUuids = routerCommands.keySet().toArray()
     selectedRouterUuid = routerUuids[(Math.random() * routerUuids.size()) as int] as String
-//    log.info(&quot;PollCommands: выбран router_serial=${selectedRouterUuid}&quot;)
 } else {
     selectedRouterUuid = &quot;8354d1bd-ea67-494f-90fc-4b88bd874e95&quot;
-//    log.warn(&quot;PollCommands: нет роутеров, использую fallback&quot;)
 }
 
 vars.put(&quot;random_router_serial&quot;, selectedRouterUuid)</stringProp>
@@ -239,14 +241,20 @@ vars.put(&quot;random_router_serial&quot;, selectedRouterUuid)</stringProp>
             <stringProp name="script">import groovy.json.JsonSlurper
 import java.util.concurrent.ConcurrentHashMap
 
-if (!(props.get(&quot;acknowledged_commands&quot;) instanceof ConcurrentHashMap)) {
-    props.put(&quot;acknowledged_commands&quot;, new ConcurrentHashMap())
+// Защита от выполнения до sampler&apos;а
+if (prev == null) {
+    log.warn(&quot;PollCommands PostProcessor: prev is null, skipping&quot;)
+    return
 }
-def ackCommands = props.get(&quot;acknowledged_commands&quot;) as ConcurrentHashMap
+
+if (!(props.get(&quot;acknowledged_commands&quot;) instanceof java.util.concurrent.ConcurrentHashMap)) {
+    props.put(&quot;acknowledged_commands&quot;, new java.util.concurrent.ConcurrentHashMap())
+}
+def ackCommands = props.get(&quot;acknowledged_commands&quot;) as java.util.concurrent.ConcurrentHashMap
 
 def response = prev.getResponseDataAsString()
 if (!response?.trim()?.startsWith(&apos;{&apos;)) {
-    log.warn(&quot;PollCommands: некорректный формат ответа&quot;)
+    log.warn(&quot;PollCommands: пустой или некорректный ответ&quot;)
     return
 }
 
@@ -254,19 +262,28 @@ try {
     def json = new JsonSlurper().parseText(response)
     def requestedRouter = vars.get(&quot;random_router_serial&quot;)
     
-    def commandCount = json.commands?.size() ?: 0
-    log.info(&quot;PollCommands: для роутера ${requestedRouter} получено ${commandCount} команд&quot;)
-    
-    json.commands?.eachWithIndex { cmd, index -&gt;
-        if (cmd?.router_serial &amp;&amp; cmd?.id) {
-            def commandKey = &quot;${cmd.router_serial}:${cmd.id}&quot;
-            ackCommands[commandKey] = true
-            log.info(&quot;PollCommands: команда ${index+1}: ${commandKey} (добавлена для подтверждения)&quot;)
+    if (json.commands) {
+        json.commands.each { cmd -&gt;
+            if (cmd?.id &amp;&amp; cmd?.command_type) {
+                def routerSerial = cmd.router_serial ?: requestedRouter
+                def commandKey = &quot;${routerSerial}:${cmd.id}&quot;
+                
+                if (!ackCommands.containsKey(commandKey)) {
+                    ackCommands[commandKey] = true
+                    // log.info(&quot;PollCommands: добавлена команда ${commandKey}&quot;)
+                }
+                
+                def routerCommands = props.get(&quot;router_commands&quot;) as java.util.concurrent.ConcurrentHashMap ?: [:]
+                def queue = routerCommands[routerSerial] as java.util.concurrent.ConcurrentLinkedQueue
+                if (queue != null &amp;&amp; !queue.isEmpty()) {
+                    queue.poll()
+                }
+            }
         }
     }
     
 } catch (Exception e) {
-    log.error(&quot;PollCommands: ошибка обработки ответа&quot;, e)
+    log.error(&quot;PollCommands: ошибка обработки ответа: ${e.message}&quot;)
 }</stringProp>
           </JSR223PostProcessor>
           <hashTree/>
@@ -346,8 +363,8 @@ try {
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="AckCommands Load">
-        <intProp name="ThreadGroup.num_threads">50</intProp>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="AckCommands Load" enabled="true">
+        <intProp name="ThreadGroup.num_threads">100</intProp>
         <intProp name="ThreadGroup.ramp_time">5</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
@@ -357,7 +374,7 @@ try {
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="AckCommands">
+        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="AckCommands" enabled="true">
           <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf</stringProp>
           <stringProp name="GRPCSampler.host">localhost</stringProp>
           <stringProp name="GRPCSampler.port">8890</stringProp>
@@ -376,38 +393,44 @@ try {
           <stringProp name="GRPCSampler.maxInboundMetadataSize">8192</stringProp>
         </vn.zalopay.benchmark.GRPCSampler>
         <hashTree>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor">
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script">import java.util.concurrent.ConcurrentHashMap
 
-if (!(props.get(&quot;acknowledged_commands&quot;) instanceof ConcurrentHashMap)) {
-    props.put(&quot;acknowledged_commands&quot;, new ConcurrentHashMap())
+if (!(props.get(&quot;acknowledged_commands&quot;) instanceof java.util.concurrent.ConcurrentHashMap)) {
+    props.put(&quot;acknowledged_commands&quot;, new java.util.concurrent.ConcurrentHashMap())
 }
-def ackCommands = props.get(&quot;acknowledged_commands&quot;) as ConcurrentHashMap
+def ackCommands = props.get(&quot;acknowledged_commands&quot;) as java.util.concurrent.ConcurrentHashMap
 
 String routerUuid = null
 String commandId = null
 
-def commandToAck = ackCommands.find { commandKey, needsAck -&gt; 
-    needsAck == true
+// Ищем команду для подтверждения (только со статусом true)
+def commandToAck = ackCommands.find { commandKey, status -&gt; 
+    status == true
 }
 
 if (commandToAck) {
     def commandKey = commandToAck.key as String
-    def parts = commandKey.split(&quot;:&quot;)
-    routerUuid = parts[0]
-    commandId = parts[1]
-    
-    ackCommands[commandKey] = &quot;in_progress&quot;
-    
-    log.info(&quot;AckCommands: готовлю подтверждение для ${commandKey}&quot;)
-} else {
+    if (commandKey &amp;&amp; commandKey.contains(&quot;:&quot;)) {
+        def parts = commandKey.split(&quot;:&quot;)
+        if (parts.length == 2) {
+            routerUuid = parts[0]
+            commandId = parts[1]
+            // Помечаем как &quot;в процессе&quot;, чтобы другие потоки не брали эту же команду
+            ackCommands[commandKey] = &quot;in_progress&quot;
+        }
+    }
+}
+
+// Fallback только если совсем нет команд
+if (!routerUuid || !commandId) {
     routerUuid = &quot;8354d1bd-ea67-494f-90fc-4b88bd874e95&quot;
     commandId = &quot;9354d1bd-ea67-494f-90fc-4b88bd874e95&quot;
-//    log.warn(&quot;AckCommands: нет команд для подтверждения в acknowledged_commands&quot;)
+    log.warn(&quot;AckCommands: нет команд для подтверждения, использую fallback&quot;)
 }
 
 vars.put(&quot;random_router_serial&quot;, routerUuid)
@@ -415,35 +438,24 @@ vars.put(&quot;command_id&quot;, commandId)
 vars.put(&quot;ack_command_key&quot;, &quot;${routerUuid}:${commandId}&quot;)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script">import java.util.concurrent.ConcurrentHashMap
 
-if (prev.isSuccessful()) {
-    def commandKey = vars.get(&quot;ack_command_key&quot;)
+def commandKey = vars.get(&quot;ack_command_key&quot;)
+
+if (commandKey &amp;&amp; commandKey != &quot;8354d1bd-ea67-494f-90fc-4b88bd874e95:9354d1bd-ea67-494f-90fc-4b88bd874e95&quot;) {
     
-    if (commandKey &amp;&amp; commandKey != &quot;8354d1bd-ea67-494f-90fc-4b88bd874e95:9354d1bd-ea67-494f-90fc-4b88bd874e95&quot;) {
-        if (!(props.get(&quot;acknowledged_commands&quot;) instanceof ConcurrentHashMap)) {
-            props.put(&quot;acknowledged_commands&quot;, new ConcurrentHashMap())
+    if (commandKey.contains(&quot;:&quot;)) {
+        def ackCommands = props.get(&quot;acknowledged_commands&quot;) as java.util.concurrent.ConcurrentHashMap ?: new java.util.concurrent.ConcurrentHashMap()
+        if (prev.isSuccessful()) {
+            ackCommands.remove(commandKey)
+        } else {
+            ackCommands[commandKey] = true
         }
-        
-        def ackCommands = props.get(&quot;acknowledged_commands&quot;) as ConcurrentHashMap
-        
-        // Удаляем подтвержденную команду
-        ackCommands.remove(commandKey)
-//        log.info(&quot;AckCommands: команда ${commandKey} успешно подтверждена и удалена&quot;)
-    } else {
-//        log.info(&quot;AckCommands: подтверждена fallback команда, ничего не удаляю&quot;)
-    }
-} else {
-    log.warn(&quot;AckCommands: запрос не удался, команда остается в очереди на подтверждение&quot;)
-    def commandKey = vars.get(&quot;ack_command_key&quot;)
-    if (commandKey) {
-        def ackCommands = props.get(&quot;acknowledged_commands&quot;) as ConcurrentHashMap
-        ackCommands[commandKey] = true
     }
 }
 
@@ -526,7 +538,7 @@ vars.remove(&quot;ack_command_key&quot;)</stringProp>
           <hashTree/>
         </hashTree>
       </hashTree>
-      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown Thread Group">
+      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown" enabled="true">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -547,6 +559,41 @@ props.remove(&quot;acknowledged_commands&quot;)
 log.info(&quot;Все коллекции и счетчики удалены в финальном шаге&quot;)</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223Sampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="LookAtProps" enabled="false">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">props.keySet()
+     .findAll { it == &quot;router_commands&quot; || it == &quot;router_counter&quot; || it == &quot;acknowledged_commands&quot;}
+     .each { key -&gt;
+         log.info(&quot;${key} = ${props[key]}&quot;)
+     }</stringProp>
+        </JSR223PostProcessor>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="true">
+          <stringProp name="HTTPSampler.path">http://localhost:3000/</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
         <hashTree/>
       </hashTree>
     </hashTree>

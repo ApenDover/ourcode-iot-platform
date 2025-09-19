@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"router-manager-service/internal/conf/util"
-	domain "router-manager-service/internal/core/domain"
+	"router-manager-service/internal/core/domain"
 	"time"
 
 	"github.com/google/uuid"
@@ -31,7 +31,6 @@ func (m *ManagerService) CreateCommand(ctx context.Context, serial string, comma
 	log := util.GetLogger(ctx)
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("CreateCommand"))
 	defer timer.ObserveDuration()
-	metrics.CommandsSent.WithLabelValues("CreateCommand").Inc()
 
 	log.Debug("создание команд")
 
@@ -53,9 +52,11 @@ func (m *ManagerService) CreateCommand(ctx context.Context, serial string, comma
 	}
 
 	if errCreateCommand := m.dataPort.CreateCommands(ctx, []domain.Command{cmd}); errCreateCommand != nil {
+		metrics.CommandErrors.WithLabelValues("CreateCommands").Inc()
 		return domain.CommandOut{}, errCreateCommand
 	}
 
+	metrics.CommandsSent.WithLabelValues("CreateCommand").Inc()
 	return domain.CommandOut{
 		ID:           cmd.ID,
 		SerialNumber: serial,
