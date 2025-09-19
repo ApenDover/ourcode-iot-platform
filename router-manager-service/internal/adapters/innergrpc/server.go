@@ -95,9 +95,11 @@ func (s *Server) Start(port string) (*grpc.Server, error) {
 
 func (s *Server) SendCommand(ctx context.Context, req *routermanager.SendCommandRequest) (*routermanager.SendCommandResponse, error) {
 	log := util.GetLogger(ctx)
+	log.Debug("Получаю запрос на создение команд", slog.String("req", fmt.Sprintf("%+v", req)))
 	payloadMap := req.Payload.AsMap()
 
 	if req.RouterSerial != "" {
+		log.Debug("CreateCommand для одного")
 		_, err := s.ManagerService.CreateCommand(ctx, req.RouterSerial, req.CommandType, payloadMap)
 		if err != nil {
 			log.Error("Ошибка SendCommand", slog.String("error", err.Error()))
@@ -106,11 +108,13 @@ func (s *Server) SendCommand(ctx context.Context, req *routermanager.SendCommand
 		return &routermanager.SendCommandResponse{Created: 1}, nil
 	}
 
+	log.Debug("CreateCommand для всех")
 	commandAll, err := s.ManagerService.CreateCommandForAll(ctx, req.CommandType, payloadMap)
 	if err != nil {
 		log.Error("Ошибка SendCommand", slog.String("error", err.Error()))
 		return nil, status.Error(codes.Internal, "не удалось сохранить команды")
 	}
+	log.Debug("успешно создал")
 	return &routermanager.SendCommandResponse{Created: int32(len(commandAll))}, nil
 }
 
@@ -143,7 +147,7 @@ func (s *Server) AckCommand(ctx context.Context, req *routermanager.AckCommandRe
 	}
 
 	errAck := s.ManagerService.AckCommand(ctx, req.RouterSerial, commandID)
-	if err != nil {
+	if errAck != nil {
 		log.Error("Ошибка AckCommand", slog.String("error", errAck.Error()))
 		return nil, status.Error(codes.Internal, "не удалось подтвердить команды")
 	}

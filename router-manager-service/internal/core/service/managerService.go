@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"router-manager-service/internal/conf/util"
-	domain2 "router-manager-service/internal/core/domain"
+	domain "router-manager-service/internal/core/domain"
 	"time"
 
 	"github.com/google/uuid"
@@ -27,30 +27,36 @@ func NewManagerService(dataPort ports.DataPort, routerPort ports.RouterPort, cac
 	}
 }
 
-func (m *ManagerService) CreateCommand(ctx context.Context, serial string, commandType string, payload map[string]any) (domain2.CommandOut, error) {
+func (m *ManagerService) CreateCommand(ctx context.Context, serial string, commandType string, payload map[string]any) (domain.CommandOut, error) {
+	log := util.GetLogger(ctx)
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("CreateCommand"))
 	defer timer.ObserveDuration()
 	metrics.CommandsSent.WithLabelValues("CreateCommand").Inc()
 
+	log.Debug("создание команд")
+
 	router, errRedis := m.redisRouters.GetRouter(ctx, serial)
 	if router == nil || errRedis != nil {
+		log.Debug("сохранение роутера в БД")
 		router = m.saveRouter(ctx, serial)
+	} else {
+		log.Debug("нашел роутер в redis")
 	}
 
-	cmd := domain2.Command{
+	cmd := domain.Command{
 		ID:          uuid.New(),
 		RouterID:    router.ID,
 		CommandType: commandType,
 		Payload:     payload,
-		Status:      domain2.CommandStatusPending,
+		Status:      domain.CommandStatusPending,
 		CreatedAt:   time.Now(),
 	}
 
-	if errCreateCommand := m.dataPort.CreateCommands(ctx, []string{serial}, cmd); errCreateCommand != nil {
-		return domain2.CommandOut{}, errCreateCommand
+	if errCreateCommand := m.dataPort.CreateCommands(ctx, []domain.Command{cmd}); errCreateCommand != nil {
+		return domain.CommandOut{}, errCreateCommand
 	}
 
-	return domain2.CommandOut{
+	return domain.CommandOut{
 		ID:           cmd.ID,
 		SerialNumber: serial,
 		CommandType:  cmd.CommandType,
@@ -60,7 +66,7 @@ func (m *ManagerService) CreateCommand(ctx context.Context, serial string, comma
 	}, nil
 }
 
-func (m *ManagerService) CreateCommandForAll(ctx context.Context, commandType string, payload map[string]any) ([]domain2.CommandOut, error) {
+func (m *ManagerService) CreateCommandForAll(ctx context.Context, commandType string, payload map[string]any) ([]domain.CommandOut, error) {
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("CreateCommandForAll"))
 	defer timer.ObserveDuration()
 
@@ -69,22 +75,22 @@ func (m *ManagerService) CreateCommandForAll(ctx context.Context, commandType st
 		return nil, errGetAll
 	}
 
-	results := make([]domain2.CommandOut, 0, len(routers))
+	results := make([]domain.CommandOut, 0, len(routers))
 	for _, r := range routers {
-		cmd := domain2.Command{
+		cmd := domain.Command{
 			ID:          uuid.New(),
 			RouterID:    r.ID,
 			CommandType: commandType,
 			Payload:     payload,
-			Status:      domain2.CommandStatusPending,
+			Status:      domain.CommandStatusPending,
 			CreatedAt:   time.Now(),
 		}
-		if err := m.dataPort.CreateCommands(ctx, []string{r.SerialNumber}, cmd); err != nil {
+		if err := m.dataPort.CreateCommands(ctx, []domain.Command{cmd}); err != nil {
 			metrics.CommandErrors.WithLabelValues("CreateCommands").Inc()
 			return nil, err
 		}
 
-		results = append(results, domain2.CommandOut{
+		results = append(results, domain.CommandOut{
 			ID:           cmd.ID,
 			SerialNumber: r.SerialNumber,
 			CommandType:  cmd.CommandType,
@@ -98,7 +104,7 @@ func (m *ManagerService) CreateCommandForAll(ctx context.Context, commandType st
 	return results, nil
 }
 
-func (m *ManagerService) GetPendingCommandsAndMarkItSent(ctx context.Context, serial string) ([]domain2.CommandOut, error) {
+func (m *ManagerService) GetPendingCommandsAndMarkItSent(ctx context.Context, serial string) ([]domain.CommandOut, error) {
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("PollCommand"))
 	defer timer.ObserveDuration()
 
@@ -108,15 +114,15 @@ func (m *ManagerService) GetPendingCommandsAndMarkItSent(ctx context.Context, se
 		return nil, err
 	}
 
-	results := make([]domain2.CommandOut, len(pending))
+	results := make([]domain.CommandOut, len(pending))
 	now := time.Now()
 	for i, cmd := range pending {
-		results[i] = domain2.CommandOut{
+		results[i] = domain.CommandOut{
 			ID:           cmd.ID,
 			SerialNumber: serial,
 			CommandType:  cmd.CommandType,
 			Payload:      &cmd.Payload,
-			Status:       domain2.CommandStatusSent,
+			Status:       domain.CommandStatusSent,
 			CreatedAt:    cmd.CreatedAt,
 			SentAt:       &now,
 		}
@@ -141,11 +147,11 @@ func (m *ManagerService) MarkExpiredAsError(ctx context.Context, timeout time.Du
 	return m.dataPort.MarkExpiredAsError(ctx, timeout)
 }
 
-func (m *ManagerService) saveRouter(ctx context.Context, serial string) *domain2.Router {
+func (m *ManagerService) saveRouter(ctx context.Context, serial string) *domain.Router {
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("SaveRouter"))
 	defer timer.ObserveDuration()
 	log := util.GetLogger(ctx)
-	newRouter := domain2.Router{
+	newRouter := domain.Router{
 		ID:           uuid.New(),
 		SerialNumber: serial,
 		CreatedAt:    time.Now(),

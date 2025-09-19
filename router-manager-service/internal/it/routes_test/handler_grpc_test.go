@@ -40,11 +40,9 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	})
 	defer rc.Close()
 
-	// Запускаем gRPC сервер
 	grpcServer := conf.InitGrpc(pool, rc)
 	defer grpcServer.GracefulStop()
 
-	// Создаем gRPC клиент
 	conn, err := grpc.Dial("localhost:9092",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock(),
@@ -55,7 +53,6 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 
 	client := routermanager.NewRouterManagerServiceClient(conn)
 
-	// Инициализируем репозитории для проверки БД
 	commandRepo := db.NewPostgresCommandsAdapter(pool)
 	routerRepo := db.NewPostgresRouterAdapter(pool)
 
@@ -65,7 +62,6 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	serial := uuid.New().String()
 	payload := map[string]interface{}{"foo": "bar"}
 
-	// Конвертируем payload в structpb
 	pbPayload, err := structpb.NewStruct(payload)
 	require.NoError(t, err)
 

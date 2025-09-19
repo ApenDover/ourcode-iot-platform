@@ -10,6 +10,7 @@ import (
 	"router-manager-service/internal/conf/util"
 	"router-manager-service/internal/core/domain"
 	"router-manager-service/internal/ports"
+	"strings"
 	"time"
 )
 
@@ -23,32 +24,58 @@ func NewPostgresCommonAdapter(pool *pgxpool.Pool) ports.DataPort {
 
 var _ ports.DataPort = (*PostgresDataAdapter)(nil)
 
-func (a *PostgresDataAdapter) CreateCommands(ctx context.Context, routerSerials []string, cmd domain.Command) error {
-	tx, err := a.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	payloadBytes, err := json.Marshal(cmd.Payload)
-	if err != nil {
-		return err
+func (a *PostgresDataAdapter) CreateCommands(ctx context.Context, cmds []domain.Command) error {
+	fmt.Sprintf("Вставка партии из %d команд", len(cmds))
+	if len(cmds) == 0 {
+		return nil
 	}
 
-	now := time.Now()
-	for _, serial := range routerSerials {
-		_, err := tx.Exec(ctx, `
-			INSERT INTO commands (id, router_id, command_type, payload, status, created_at)
-			SELECT $1, r.id, $2, $3, $4, $5
-			FROM routers r
-			WHERE r.serial_number = $6
-		`, cmd.ID, cmd.CommandType, payloadBytes, domain.CommandStatusPending, now, serial)
-		if err != nil {
-			return err
+	const maxBatchSize = 1000
+	var err error
+
+	for i := 0; i < len(cmds); i += maxBatchSize {
+		end := i + maxBatchSize
+		if end > len(cmds) {
+			end = len(cmds)
+		}
+
+		batch := cmds[i:end]
+		if err = a.insertBatch(ctx, batch); err != nil {
+			return fmt.Errorf("batch insert failed at offset %d: %w", i, err)
 		}
 	}
 
-	return tx.Commit(ctx)
+	return nil
+}
+
+func (a *PostgresDataAdapter) insertBatch(ctx context.Context, batch []domain.Command) error {
+	fmt.Sprintf("Вставка партии из %d команд", len(batch))
+	if len(batch) == 0 {
+		return nil
+	}
+
+	var values []interface{}
+	var placeholders []string
+
+	for i, cmd := range batch {
+		payloadBytes, err := json.Marshal(cmd.Payload)
+		if err != nil {
+			return err
+		}
+
+		values = append(values, cmd.ID, cmd.RouterID, cmd.CommandType, payloadBytes, cmd.Status, cmd.CreatedAt)
+
+		base := i*6 + 1
+		placeholders = append(placeholders, fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d)", base, base+1, base+2, base+3, base+4, base+5))
+	}
+
+	query := fmt.Sprintf(`
+        INSERT INTO commands (id, router_id, command_type, payload, status, created_at)
+        VALUES %s
+    `, strings.Join(placeholders, ","))
+
+	_, err := a.pool.Exec(context.Background(), query, values...)
+	return err
 }
 
 func (a *PostgresDataAdapter) PollCommands(ctx context.Context, routerSerial string) ([]domain.Command, error) {
@@ -166,6 +193,7 @@ func (a *PostgresDataAdapter) AckCommand(ctx context.Context, routerSerial strin
 	if errExec != nil {
 		return errExec
 	}
+	fmt.Sprintf("RowsAffected: %d", tag.RowsAffected())
 	if tag.RowsAffected() == 0 {
 		return fmt.Errorf("ack failed: no matching command with id=%s and router_serial=%s in SENT status", commandID, routerSerial)
 	}

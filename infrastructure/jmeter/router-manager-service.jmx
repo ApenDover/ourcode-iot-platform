@@ -12,9 +12,7 @@
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="SendCommand Load">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
-        <longProp name="ThreadGroup.duration">1</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
-        <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
           <stringProp name="LoopController.loops">1</stringProp>
@@ -22,12 +20,12 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="SendCommand">
-          <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf/roma.proto</stringProp>
+        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="SendCommand" enabled="true">
+          <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf</stringProp>
           <stringProp name="GRPCSampler.host">localhost</stringProp>
           <stringProp name="GRPCSampler.port">8890</stringProp>
           <stringProp name="GRPCSampler.fullMethod">router_manager.RouterManagerService/SendCommand</stringProp>
-          <stringProp name="GRPCSampler.deadline">1000</stringProp>
+          <stringProp name="GRPCSampler.deadline">5000</stringProp>
           <boolProp name="GRPCSampler.tls">false</boolProp>
           <stringProp name="GRPCSampler.requestJson">${requestBody}</stringProp>
           <stringProp name="GRPCSampler.libFolder"></stringProp>
@@ -43,53 +41,63 @@
             <stringProp name="parameters"></stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script">import java.util.Set
-import java.util.HashSet
-import java.util.List
-import java.util.UUID
-import java.util.Random
+            <stringProp name="script">import java.util.UUID
 import groovy.json.JsonOutput
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 
-props.remove(&quot;router_serials&quot;)
-Object obj = props.get(&quot;router_serials&quot;)
+int MAX_ROUTERS = 1000
 
-
-Set serials = new HashSet()
-if (obj instanceof Set) {
-    serials.addAll((Set)obj)
-} else if (obj instanceof List) {
-    serials.addAll((List)obj)
+if (!(props.get(&quot;router_commands&quot;) instanceof ConcurrentHashMap)) {
+    props.put(&quot;router_commands&quot;, new ConcurrentHashMap())
+}
+if (props.get(&quot;router_counter&quot;) == null) {
+    props.put(&quot;router_counter&quot;, 0)
 }
 
-String newSerial = UUID.randomUUID().toString()
-serials.add(newSerial)
+def routerCommands = props.get(&quot;router_commands&quot;) as ConcurrentHashMap
+int routerCounter = props.get(&quot;router_counter&quot;) as Integer
 
-props.put(&quot;router_serials&quot;, serials)
-
-//log.info(&quot;Создан router_serial: &quot; + newSerial)
-//log.info(&quot;Текущий список router_serials: &quot; + serials)
-
-def randomSerial = &quot;fallback_serial&quot;
-if (!serials.isEmpty()) {
-    def idx = new Random().nextInt(serials.size())
-    randomSerial = serials.toArray()[idx]
-}
-
-vars.put(&quot;random_router_serial&quot;, randomSerial)
-//log.info(&quot;Выбран router_serial для потока: &quot; + randomSerial)
-
-
-def body = [ commandType: &quot;TEST_LOAD&quot; ]
+def body = [commandType: &quot;TEST_LOAD&quot;]
+String commandId = UUID.randomUUID().toString()
 
 if (Math.random() &lt; 0.7) {
-    body.routerSerial = randomSerial
+    // 70% - команда для конкретного роутера
+    String routerUuid
+    
+    if (!routerCommands.isEmpty() &amp;&amp; Math.random() &lt; 0.8) {
+        // 80% шанс использовать существующий роутер
+        def existingUuids = routerCommands.keySet().toArray()
+        routerUuid = existingUuids[(Math.random() * existingUuids.size()) as int] as String
+    } else if (routerCounter &lt; MAX_ROUTERS) {
+        // 20% шанс создать новый роутер с UUID
+        routerUuid = UUID.randomUUID().toString()
+        routerCounter++
+        props.put(&quot;router_counter&quot;, routerCounter)
+        routerCommands[routerUuid] = new ConcurrentLinkedQueue()
+        log.info(&quot;SendCommand: создан новый роутер UUID=${routerUuid}&quot;)
+    } else {
+        // Лимит достигнут - используем случайный существующий
+        def existingUuids = routerCommands.keySet().toArray()
+        routerUuid = existingUuids[(Math.random() * existingUuids.size()) as int] as String
+    }
+    
+    (routerCommands[routerUuid] as ConcurrentLinkedQueue).add(commandId)
+    body.routerSerial = routerUuid // Используем UUID, не строковый ID!
+    log.info(&quot;SendCommand: команда для роутера UUID=${routerUuid} (всего роутеров: ${routerCounter})&quot;)
+    
+} else {
+    // 30% - команды на все роутеры
+    routerCommands.each { routerUuid, queue -&gt;
+        (queue as ConcurrentLinkedQueue).add(commandId)
+    }
+    log.info(&quot;SendCommand: broadcast команда для всех ${routerCounter} роутеров&quot;)
 }
-
 
 vars.put(&quot;requestBody&quot;, JsonOutput.toJson(body))</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
-          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="false">
+          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -166,25 +174,22 @@ vars.put(&quot;requestBody&quot;, JsonOutput.toJson(body))</stringProp>
         </hashTree>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="PollCommands Load">
-        <intProp name="ThreadGroup.num_threads">300</intProp>
-        <intProp name="ThreadGroup.ramp_time">60</intProp>
-        <longProp name="ThreadGroup.duration">120</longProp>
-        <longProp name="ThreadGroup.delay">0</longProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
-        <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
-          <intProp name="LoopController.loops">-1</intProp>
+          <stringProp name="LoopController.loops">1</stringProp>
           <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="PollCommands">
-          <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf/roma.proto</stringProp>
+        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="PollCommands" enabled="true">
+          <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf</stringProp>
           <stringProp name="GRPCSampler.host">localhost</stringProp>
           <stringProp name="GRPCSampler.port">8890</stringProp>
           <stringProp name="GRPCSampler.fullMethod">router_manager.RouterManagerService/PollCommands</stringProp>
-          <stringProp name="GRPCSampler.deadline">1000</stringProp>
+          <stringProp name="GRPCSampler.deadline">5000</stringProp>
           <stringProp name="GRPCSampler.requestJson">{&quot;router_serial&quot;: &quot;${random_router_serial}&quot;}</stringProp>
           <stringProp name="GRPCSampler.libFolder"></stringProp>
           <stringProp name="GRPCSampler.metadata"></stringProp>
@@ -200,21 +205,26 @@ vars.put(&quot;requestBody&quot;, JsonOutput.toJson(body))</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script">import java.util.Random
+            <stringProp name="script">import java.util.concurrent.ConcurrentHashMap
 
-def serials = props.get(&quot;router_serials&quot;) as Set&lt;String&gt;
-
-def randomSerial = &quot;save&quot;
-//log.info(&quot;Текущий список router_serials: &quot; + serials)
-
-if (serials &amp;&amp; !serials.isEmpty()) {
-    def idx = new Random().nextInt(serials.size())
-    randomSerial = serials.toArray()[idx]
+if (!(props.get(&quot;router_commands&quot;) instanceof ConcurrentHashMap)) {
+    props.put(&quot;router_commands&quot;, new ConcurrentHashMap())
 }
 
-vars.put(&quot;random_router_serial&quot;, randomSerial)
+def routerCommands = props.get(&quot;router_commands&quot;) as ConcurrentHashMap
 
-//log.info(&quot;Выбран router_serial для PollCommands: ${randomSerial}&quot;)</stringProp>
+String selectedRouterUuid = null
+
+if (!routerCommands.isEmpty()) {
+    def routerUuids = routerCommands.keySet().toArray()
+    selectedRouterUuid = routerUuids[(Math.random() * routerUuids.size()) as int] as String
+    log.info(&quot;PollCommands: выбран router_serial=${selectedRouterUuid}&quot;)
+} else {
+    selectedRouterUuid = &quot;8354d1bd-ea67-494f-90fc-4b88bd874e95&quot;
+    log.warn(&quot;PollCommands: нет роутеров, использую fallback&quot;)
+}
+
+vars.put(&quot;random_router_serial&quot;, selectedRouterUuid)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
           <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
@@ -223,40 +233,40 @@ vars.put(&quot;random_router_serial&quot;, randomSerial)
             <stringProp name="filename"></stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script">import groovy.json.JsonSlurper
-import java.util.Collections
+import java.util.concurrent.ConcurrentHashMap
+
+if (!(props.get(&quot;acknowledged_commands&quot;) instanceof ConcurrentHashMap)) {
+    props.put(&quot;acknowledged_commands&quot;, new ConcurrentHashMap())
+}
+def ackCommands = props.get(&quot;acknowledged_commands&quot;) as ConcurrentHashMap
 
 def response = prev.getResponseDataAsString()
-
-if (!response || !response.trim().startsWith(&apos;{&apos;)) {
-    log.warn(&quot;Ответ Poll не JSON: &apos;${response}&apos;&quot;)
+if (!response?.trim()?.startsWith(&apos;{&apos;)) {
+    log.warn(&quot;PollCommands: некорректный формат ответа&quot;)
     return
 }
 
-def json = new JsonSlurper().parseText(response)
-
-synchronized(props) {
-    def pairs = props.get(&quot;poll_pairs&quot;) 
-
-    if (!(pairs instanceof List)) {
-        pairs = Collections.synchronizedList([])
-    }
-
-    // Добавляем новые пары, проверяя на null
-    json.commands?.each { cmd -&gt;
+try {
+    def json = new JsonSlurper().parseText(response)
+    def requestedRouter = vars.get(&quot;random_router_serial&quot;)
+    
+    def commandCount = json.commands?.size() ?: 0
+    log.info(&quot;PollCommands: для роутера ${requestedRouter} получено ${commandCount} команд&quot;)
+    
+    json.commands?.eachWithIndex { cmd, index -&gt;
         if (cmd?.router_serial &amp;&amp; cmd?.id) {
-            def pair = &quot;${cmd.router_serial}:${cmd.id}&quot;
-            pairs.add(pair)
-        } else {
-            log.warn(&quot;Пропущена команда с null полями: ${cmd}&quot;)
+            def commandKey = &quot;${cmd.router_serial}:${cmd.id}&quot;
+            ackCommands[commandKey] = true
+            log.info(&quot;PollCommands: команда ${index+1}: ${commandKey} (добавлена для подтверждения)&quot;)
         }
     }
-
-    props.put(&quot;poll_pairs&quot;, pairs)
-//    log.info(&quot;Сохранены пары из Poll: ${pairs}&quot;)
+    
+} catch (Exception e) {
+    log.error(&quot;PollCommands: ошибка обработки ответа&quot;, e)
 }</stringProp>
           </JSR223PostProcessor>
           <hashTree/>
-          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="false">
+          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -333,25 +343,22 @@ synchronized(props) {
         </hashTree>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="AckCommands Load">
-        <intProp name="ThreadGroup.num_threads">300</intProp>
-        <intProp name="ThreadGroup.ramp_time">60</intProp>
-        <longProp name="ThreadGroup.duration">120</longProp>
-        <longProp name="ThreadGroup.delay">1</longProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
-        <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
-          <intProp name="LoopController.loops">-1</intProp>
+          <stringProp name="LoopController.loops">1</stringProp>
           <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
         <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="AckCommands" enabled="true">
-          <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf/roma.proto</stringProp>
+          <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf</stringProp>
           <stringProp name="GRPCSampler.host">localhost</stringProp>
           <stringProp name="GRPCSampler.port">8890</stringProp>
           <stringProp name="GRPCSampler.fullMethod">router_manager.RouterManagerService/AckCommand</stringProp>
-          <stringProp name="GRPCSampler.deadline">1000</stringProp>
+          <stringProp name="GRPCSampler.deadline">5000</stringProp>
           <stringProp name="GRPCSampler.requestJson">{
   &quot;router_serial&quot;: &quot;${random_router_serial}&quot;,
   &quot;command_id&quot;: &quot;${command_id}&quot;
@@ -402,116 +409,158 @@ synchronized(props) {
             <stringProp name="filename"></stringProp>
           </ResultCollector>
           <hashTree/>
-        </hashTree>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor">
-          <stringProp name="scriptLanguage">groovy</stringProp>
-          <stringProp name="parameters"></stringProp>
-          <stringProp name="filename"></stringProp>
-          <stringProp name="cacheKey">true</stringProp>
-          <stringProp name="script">synchronized(props) {
-    def pairs = props.get(&quot;poll_pairs&quot;)
-    if (!(pairs instanceof List)) {
-        pairs = []
-        props.put(&quot;poll_pairs&quot;, pairs)
-    }
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.util.concurrent.ConcurrentHashMap
 
-    // Фильтруем null или некорректные пары
-    pairs = pairs.findAll { it != null &amp;&amp; it.contains(&apos;:&apos;) }
+if (!(props.get(&quot;acknowledged_commands&quot;) instanceof ConcurrentHashMap)) {
+    props.put(&quot;acknowledged_commands&quot;, new ConcurrentHashMap())
+}
+def ackCommands = props.get(&quot;acknowledged_commands&quot;) as ConcurrentHashMap
 
-    if (!pairs.isEmpty()) {
-        def idx = new Random().nextInt(pairs.size())
-        def selected = pairs[idx]
+String routerUuid = null
+String commandId = null
 
-        def (routerSerial, commandId) = selected.split(&apos;:&apos;)
-        vars.put(&quot;random_router_serial&quot;, routerSerial)
-        vars.put(&quot;command_id&quot;, commandId)
+def commandToAck = ackCommands.find { commandKey, needsAck -&gt; 
+    needsAck == true
+}
 
-        pairs.remove(idx)
-        props.put(&quot;poll_pairs&quot;, pairs)
+if (commandToAck) {
+    def commandKey = commandToAck.key as String
+    def parts = commandKey.split(&quot;:&quot;)
+    routerUuid = parts[0]
+    commandId = parts[1]
+    
+    ackCommands[commandKey] = &quot;in_progress&quot;
+    
+    log.info(&quot;AckCommands: готовлю подтверждение для ${commandKey}&quot;)
+} else {
+    routerUuid = &quot;8354d1bd-ea67-494f-90fc-4b88bd874e95&quot;
+    commandId = &quot;9354d1bd-ea67-494f-90fc-4b88bd874e95&quot;
+    log.warn(&quot;AckCommands: нет команд для подтверждения в acknowledged_commands&quot;)
+}
 
-        log.info(&quot;Выбрана пара для ACK: router_serial=${routerSerial}, command_id=${commandId}&quot;)
+vars.put(&quot;random_router_serial&quot;, routerUuid)
+vars.put(&quot;command_id&quot;, commandId)
+vars.put(&quot;ack_command_key&quot;, &quot;${routerUuid}:${commandId}&quot;)</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.util.concurrent.ConcurrentHashMap
+
+if (prev.isSuccessful()) {
+    def commandKey = vars.get(&quot;ack_command_key&quot;)
+    
+    if (commandKey &amp;&amp; commandKey != &quot;8354d1bd-ea67-494f-90fc-4b88bd874e95:9354d1bd-ea67-494f-90fc-4b88bd874e95&quot;) {
+        if (!(props.get(&quot;acknowledged_commands&quot;) instanceof ConcurrentHashMap)) {
+            props.put(&quot;acknowledged_commands&quot;, new ConcurrentHashMap())
+        }
+        
+        def ackCommands = props.get(&quot;acknowledged_commands&quot;) as ConcurrentHashMap
+        
+        // Удаляем подтвержденную команду
+        ackCommands.remove(commandKey)
+        log.info(&quot;AckCommands: команда ${commandKey} успешно подтверждена и удалена&quot;)
     } else {
-        log.warn(&quot;Нет доступных пар для ACK&quot;)
+        log.info(&quot;AckCommands: подтверждена fallback команда, ничего не удаляю&quot;)
     }
-}</stringProp>
-        </JSR223PreProcessor>
-        <hashTree/>
-        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="false">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
-          <objProp>
-            <name>saveConfig</name>
-            <value class="SampleSaveConfiguration">
-              <time>true</time>
-              <latency>true</latency>
-              <timestamp>true</timestamp>
-              <success>true</success>
-              <label>true</label>
-              <code>true</code>
-              <message>true</message>
-              <threadName>true</threadName>
-              <dataType>true</dataType>
-              <encoding>false</encoding>
-              <assertions>true</assertions>
-              <subresults>true</subresults>
-              <responseData>false</responseData>
-              <samplerData>false</samplerData>
-              <xml>false</xml>
-              <fieldNames>true</fieldNames>
-              <responseHeaders>false</responseHeaders>
-              <requestHeaders>false</requestHeaders>
-              <responseDataOnError>false</responseDataOnError>
-              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
-              <assertionsResultsToSave>0</assertionsResultsToSave>
-              <bytes>true</bytes>
-              <sentBytes>true</sentBytes>
-              <url>true</url>
-              <threadCounts>true</threadCounts>
-              <idleTime>true</idleTime>
-              <connectTime>true</connectTime>
-            </value>
-          </objProp>
-          <stringProp name="filename"></stringProp>
-        </ResultCollector>
-        <hashTree/>
-        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
-          <objProp>
-            <name>saveConfig</name>
-            <value class="SampleSaveConfiguration">
-              <time>true</time>
-              <latency>true</latency>
-              <timestamp>true</timestamp>
-              <success>true</success>
-              <label>true</label>
-              <code>true</code>
-              <message>true</message>
-              <threadName>true</threadName>
-              <dataType>true</dataType>
-              <encoding>false</encoding>
-              <assertions>true</assertions>
-              <subresults>true</subresults>
-              <responseData>false</responseData>
-              <samplerData>false</samplerData>
-              <xml>false</xml>
-              <fieldNames>true</fieldNames>
-              <responseHeaders>false</responseHeaders>
-              <requestHeaders>false</requestHeaders>
-              <responseDataOnError>false</responseDataOnError>
-              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
-              <assertionsResultsToSave>0</assertionsResultsToSave>
-              <bytes>true</bytes>
-              <sentBytes>true</sentBytes>
-              <url>true</url>
-              <threadCounts>true</threadCounts>
-              <idleTime>true</idleTime>
-              <connectTime>true</connectTime>
-            </value>
-          </objProp>
-          <stringProp name="filename"></stringProp>
-        </ResultCollector>
-        <hashTree/>
+} else {
+    log.warn(&quot;AckCommands: запрос не удался, команда остается в очереди на подтверждение&quot;)
+    
+    def commandKey = vars.get(&quot;ack_command_key&quot;)
+    if (commandKey) {
+        def ackCommands = props.get(&quot;acknowledged_commands&quot;) as ConcurrentHashMap
+        ackCommands[commandKey] = true
+    }
+}
+
+vars.remove(&quot;ack_command_key&quot;)</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
+          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>false</responseData>
+                <samplerData>false</samplerData>
+                <xml>false</xml>
+                <fieldNames>true</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+                <sentBytes>true</sentBytes>
+                <url>true</url>
+                <threadCounts>true</threadCounts>
+                <idleTime>true</idleTime>
+                <connectTime>true</connectTime>
+              </value>
+            </objProp>
+            <stringProp name="filename"></stringProp>
+          </ResultCollector>
+          <hashTree/>
+          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>false</responseData>
+                <samplerData>false</samplerData>
+                <xml>false</xml>
+                <fieldNames>true</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+                <sentBytes>true</sentBytes>
+                <url>true</url>
+                <threadCounts>true</threadCounts>
+                <idleTime>true</idleTime>
+                <connectTime>true</connectTime>
+              </value>
+            </objProp>
+            <stringProp name="filename"></stringProp>
+          </ResultCollector>
+          <hashTree/>
+        </hashTree>
       </hashTree>
-      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown Thread Group" enabled="true">
+      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown Thread Group">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -522,12 +571,14 @@ synchronized(props) {
         </elementProp>
       </PostThreadGroup>
       <hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
-          <stringProp name="script">props.remove(&quot;router_serials&quot;)
-log.info(&quot;Все router_serials удалены в финальном шаге&quot;)</stringProp>
+          <stringProp name="script">props.remove(&quot;router_commands&quot;)
+props.remove(&quot;router_counter&quot;)
+props.remove(&quot;acknowledged_commands&quot;)
+log.info(&quot;Все коллекции и счетчики удалены в финальном шаге&quot;)</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223Sampler>
         <hashTree/>
