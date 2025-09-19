@@ -5,13 +5,11 @@
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments"/>
       </elementProp>
-      <boolProp name="TestPlan.functional_mode">false</boolProp>
-      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="SendCommand Load">
         <intProp name="ThreadGroup.num_threads">50</intProp>
-        <intProp name="ThreadGroup.ramp_time">10</intProp>
+        <intProp name="ThreadGroup.ramp_time">5</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
@@ -49,8 +47,8 @@ import java.util.concurrent.ConcurrentLinkedQueue
 // 8354d1bd-ea67-494f-90fc-4b88bd874e95 router
 // 9354d1bd-ea67-494f-90fc-4b88bd874e95 command
 
-
 int MAX_ROUTERS = 1000
+int MAX_QUEUE_SIZE = 100  // максимальное количество команд на роутер
 
 if (!(props.get(&quot;router_commands&quot;) instanceof ConcurrentHashMap)) {
     props.put(&quot;router_commands&quot;, new ConcurrentHashMap())
@@ -70,38 +68,40 @@ if (Math.random() &lt; 0.7) {
     String routerUuid
     
     if (!routerCommands.isEmpty() &amp;&amp; Math.random() &lt; 0.8) {
-        // 80% шанс использовать существующий роутер
         def existingUuids = routerCommands.keySet().toArray()
         routerUuid = existingUuids[(Math.random() * existingUuids.size()) as int] as String
     } else if (routerCounter &lt; MAX_ROUTERS) {
-        // 20% шанс создать новый роутер с UUID
         routerUuid = UUID.randomUUID().toString()
         routerCounter++
         props.put(&quot;router_counter&quot;, routerCounter)
         routerCommands[routerUuid] = new ConcurrentLinkedQueue()
-//        log.info(&quot;SendCommand: создан новый роутер UUID=${routerUuid}&quot;)
     } else {
-        // Лимит достигнут - используем случайный существующий
         def existingUuids = routerCommands.keySet().toArray()
         routerUuid = existingUuids[(Math.random() * existingUuids.size()) as int] as String
     }
     
-    (routerCommands[routerUuid] as ConcurrentLinkedQueue).add(commandId)
-    body.routerSerial = routerUuid // Используем UUID, не строковый ID!
-//    log.info(&quot;SendCommand: команда для роутера UUID=${routerUuid} (всего роутеров: ${routerCounter})&quot;)
-    
-} else {
-    // 30% - команды на все роутеры
-    routerCommands.each { routerUuid, queue -&gt;
-        (queue as ConcurrentLinkedQueue).add(commandId)
+    def queue = routerCommands[routerUuid] as ConcurrentLinkedQueue
+    queue.add(commandId)
+    // Ограничиваем очередь до 100 команд
+    while (queue.size() &gt; MAX_QUEUE_SIZE) {
+        queue.poll()
     }
-//    log.info(&quot;SendCommand: broadcast команда для всех ${routerCounter} роутеров&quot;)
+
+    body.routerSerial = routerUuid
+} else {
+    // 30% - broadcast на все роутеры
+    routerCommands.each { routerUuid, queue -&gt;
+        queue.add(commandId)
+        while (queue.size() &gt; MAX_QUEUE_SIZE) {
+            queue.poll()
+        }
+    }
 }
 
 vars.put(&quot;requestBody&quot;, JsonOutput.toJson(body))</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
-          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="false">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -138,7 +138,7 @@ vars.put(&quot;requestBody&quot;, JsonOutput.toJson(body))</stringProp>
             <stringProp name="filename"></stringProp>
           </ResultCollector>
           <hashTree/>
-          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="false">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -177,8 +177,8 @@ vars.put(&quot;requestBody&quot;, JsonOutput.toJson(body))</stringProp>
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="PollCommands Load" enabled="true">
-        <intProp name="ThreadGroup.num_threads">200</intProp>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="PollCommands Load">
+        <intProp name="ThreadGroup.num_threads">50</intProp>
         <intProp name="ThreadGroup.ramp_time">5</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
@@ -231,7 +231,7 @@ if (!routerCommands.isEmpty()) {
 vars.put(&quot;random_router_serial&quot;, selectedRouterUuid)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="filename"></stringProp>
@@ -270,7 +270,7 @@ try {
 }</stringProp>
           </JSR223PostProcessor>
           <hashTree/>
-          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
+          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="false">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -307,7 +307,7 @@ try {
             <stringProp name="filename"></stringProp>
           </ResultCollector>
           <hashTree/>
-          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
+          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="false">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -346,8 +346,8 @@ try {
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="AckCommands Load" enabled="true">
-        <intProp name="ThreadGroup.num_threads">200</intProp>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="AckCommands Load">
+        <intProp name="ThreadGroup.num_threads">50</intProp>
         <intProp name="ThreadGroup.ramp_time">5</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
@@ -376,44 +376,7 @@ try {
           <stringProp name="GRPCSampler.maxInboundMetadataSize">8192</stringProp>
         </vn.zalopay.benchmark.GRPCSampler>
         <hashTree>
-          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
-            <boolProp name="ResultCollector.error_logging">false</boolProp>
-            <objProp>
-              <name>saveConfig</name>
-              <value class="SampleSaveConfiguration">
-                <time>true</time>
-                <latency>true</latency>
-                <timestamp>true</timestamp>
-                <success>true</success>
-                <label>true</label>
-                <code>true</code>
-                <message>true</message>
-                <threadName>true</threadName>
-                <dataType>true</dataType>
-                <encoding>false</encoding>
-                <assertions>true</assertions>
-                <subresults>true</subresults>
-                <responseData>false</responseData>
-                <samplerData>false</samplerData>
-                <xml>false</xml>
-                <fieldNames>true</fieldNames>
-                <responseHeaders>false</responseHeaders>
-                <requestHeaders>false</requestHeaders>
-                <responseDataOnError>false</responseDataOnError>
-                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
-                <assertionsResultsToSave>0</assertionsResultsToSave>
-                <bytes>true</bytes>
-                <sentBytes>true</sentBytes>
-                <url>true</url>
-                <threadCounts>true</threadCounts>
-                <idleTime>true</idleTime>
-                <connectTime>true</connectTime>
-              </value>
-            </objProp>
-            <stringProp name="filename"></stringProp>
-          </ResultCollector>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="filename"></stringProp>
@@ -452,7 +415,7 @@ vars.put(&quot;command_id&quot;, commandId)
 vars.put(&quot;ack_command_key&quot;, &quot;${routerUuid}:${commandId}&quot;)</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="filename"></stringProp>
@@ -487,7 +450,7 @@ if (prev.isSuccessful()) {
 vars.remove(&quot;ack_command_key&quot;)</stringProp>
           </JSR223PostProcessor>
           <hashTree/>
-          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="false">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -524,7 +487,7 @@ vars.remove(&quot;ack_command_key&quot;)</stringProp>
             <stringProp name="filename"></stringProp>
           </ResultCollector>
           <hashTree/>
-          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="false">
             <boolProp name="ResultCollector.error_logging">false</boolProp>
             <objProp>
               <name>saveConfig</name>
@@ -563,7 +526,7 @@ vars.remove(&quot;ack_command_key&quot;)</stringProp>
           <hashTree/>
         </hashTree>
       </hashTree>
-      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown Thread Group" enabled="true">
+      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown Thread Group">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>

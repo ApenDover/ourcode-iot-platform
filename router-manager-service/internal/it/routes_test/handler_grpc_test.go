@@ -10,7 +10,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	tc "github.com/testcontainers/testcontainers-go"
@@ -209,7 +208,6 @@ func SetupPostgresContainerPool(t *testing.T) (*string, *pgxpool.Pool, func(), e
 	pool, err := pgxpool.New(ctx, dsn)
 	require.NoError(t, err)
 
-	// Ждём доступности
 	for i := 0; i < 30; i++ {
 		if err := pool.Ping(ctx); err == nil {
 			break

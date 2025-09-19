@@ -194,3 +194,6 @@ proto-gen:
 
 clear:
 	docker rm -f device-api iot-common iot-avro router-manager-proto-client
+
+jmeter:
+	JVM_ARGS="-Xms512m -Xmx2g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/router-manager-service.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o ./report
