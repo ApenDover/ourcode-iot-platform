@@ -36,10 +36,10 @@ var (
 	CommandErrors = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "command_errors_total",
 		Help: "Total number of command errors",
-	}, []string{"method", "error_type"})
+	}, []string{"method"})
 
 	RouterErrors = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "router_errors_total",
 		Help: "Total number of command errors",
-	}, []string{"method", "error_type"})
+	}, []string{"method"})
 )

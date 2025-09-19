@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -150,20 +151,23 @@ func (a *PostgresDataAdapter) PollCommands(ctx context.Context, routerSerial str
 }
 
 func (a *PostgresDataAdapter) AckCommand(ctx context.Context, routerSerial string, commandID uuid.UUID) error {
-	tx, err := a.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return err
+	tx, errPool := a.pool.BeginTx(ctx, pgx.TxOptions{})
+	if errPool != nil {
+		return errPool
 	}
 	defer tx.Rollback(ctx)
 
-	_, err = tx.Exec(ctx, `
+	tag, errExec := tx.Exec(ctx, `
 		UPDATE commands c
 		SET status=$1, acked_at=$2
 		FROM routers r
 		WHERE c.id=$3 AND c.router_id=r.id AND r.serial_number=$4 AND c.status=$5
 	`, domain.CommandStatusAcked, time.Now(), commandID, routerSerial, domain.CommandStatusSent)
-	if err != nil {
-		return err
+	if errExec != nil {
+		return errExec
+	}
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("ack failed: no matching command with id=%s and router_serial=%s in SENT status", commandID, routerSerial)
 	}
 
 	if _, err := tx.Exec(ctx, `

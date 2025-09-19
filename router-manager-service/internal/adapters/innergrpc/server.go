@@ -106,7 +106,11 @@ func (s *Server) SendCommand(ctx context.Context, req *routermanager.SendCommand
 		return &routermanager.SendCommandResponse{Created: 1}, nil
 	}
 
-	commandAll, _ := s.ManagerService.CreateCommandForAll(ctx, req.CommandType, payloadMap)
+	commandAll, err := s.ManagerService.CreateCommandForAll(ctx, req.CommandType, payloadMap)
+	if err != nil {
+		log.Error("Ошибка SendCommand", slog.String("error", err.Error()))
+		return nil, status.Error(codes.Internal, "не удалось сохранить команды")
+	}
 	return &routermanager.SendCommandResponse{Created: int32(len(commandAll))}, nil
 }
 

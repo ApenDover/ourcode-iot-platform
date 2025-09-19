@@ -63,9 +63,11 @@ func (m *ManagerService) CreateCommand(ctx context.Context, serial string, comma
 func (m *ManagerService) CreateCommandForAll(ctx context.Context, commandType string, payload map[string]any) ([]domain2.CommandOut, error) {
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("CreateCommandForAll"))
 	defer timer.ObserveDuration()
-	metrics.CommandsSent.WithLabelValues("CreateCommandForAll").Inc()
 
-	routers, _ := m.routerRepository.GetAllRouters(ctx)
+	routers, errGetAll := m.routerRepository.GetAllRouters(ctx)
+	if errGetAll != nil {
+		return nil, errGetAll
+	}
 
 	results := make([]domain2.CommandOut, 0, len(routers))
 	for _, r := range routers {
@@ -78,6 +80,7 @@ func (m *ManagerService) CreateCommandForAll(ctx context.Context, commandType st
 			CreatedAt:   time.Now(),
 		}
 		if err := m.dataPort.CreateCommands(ctx, []string{r.SerialNumber}, cmd); err != nil {
+			metrics.CommandErrors.WithLabelValues("CreateCommands").Inc()
 			return nil, err
 		}
 
@@ -91,16 +94,17 @@ func (m *ManagerService) CreateCommandForAll(ctx context.Context, commandType st
 		})
 	}
 
+	metrics.CommandsSent.WithLabelValues("CreateCommandForAll").Inc()
 	return results, nil
 }
 
 func (m *ManagerService) GetPendingCommandsAndMarkItSent(ctx context.Context, serial string) ([]domain2.CommandOut, error) {
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("PollCommand"))
 	defer timer.ObserveDuration()
-	metrics.CommandsPolled.Inc()
 
 	pending, err := m.dataPort.PollCommands(ctx, serial)
 	if err != nil {
+		metrics.CommandErrors.WithLabelValues("PollCommands").Inc()
 		return nil, err
 	}
 
@@ -117,18 +121,19 @@ func (m *ManagerService) GetPendingCommandsAndMarkItSent(ctx context.Context, se
 			SentAt:       &now,
 		}
 	}
+	metrics.CommandsPolled.Inc()
 	return results, nil
 }
 
 func (m *ManagerService) AckCommand(ctx context.Context, serial string, commandId uuid.UUID) error {
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("AckCommand"))
 	defer timer.ObserveDuration()
-	metrics.CommandsAcked.Inc()
 
 	if err := m.dataPort.AckCommand(ctx, serial, commandId); err != nil {
+		metrics.CommandErrors.WithLabelValues("AckCommand").Inc()
 		return err
 	}
-
+	metrics.CommandsAcked.Inc()
 	return nil
 }
 
@@ -147,11 +152,13 @@ func (m *ManagerService) saveRouter(ctx context.Context, serial string) *domain2
 	}
 	err := m.routerRepository.Save(ctx, newRouter)
 	if err != nil {
+		metrics.RouterErrors.WithLabelValues("save-database").Inc()
 		log.Error("Ошибка сохранения роутера в базу данных", slog.String("error", err.Error()), slog.String("router_serial", serial))
 		return nil
 	}
 	errRedis := m.redisRouters.SetRouter(ctx, newRouter, 0)
 	if errRedis != nil {
+		metrics.RouterErrors.WithLabelValues("save-redis").Inc()
 		log.Error("Ошибка сохранения роутера в редис", slog.String("error", errRedis.Error()), slog.String("router_serial", serial))
 	}
 	return &newRouter
