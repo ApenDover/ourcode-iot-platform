@@ -59,10 +59,10 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8889/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
-      interval: 3s
+      interval: 5s
       timeout: 5s
       retries: 5
-      start_period: 6s
+      start_period: 10s
     networks:
       - iot_network
   device-service:

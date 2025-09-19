@@ -67,7 +67,9 @@
       "pluginVersion": "12.2.0-16979757807",
       "targets": [
         {
-          "expr": "sum(commands_sent_total)",
+          "editorMode": "code",
+          "expr": "sum(increase(commands_sent_total[$__range]))",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -120,7 +122,9 @@
       "pluginVersion": "12.2.0-16979757807",
       "targets": [
         {
-          "expr": "sum(commands_polled_total)",
+          "editorMode": "code",
+          "expr": "sum(increase(commands_polled_total[$__range]))",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -173,7 +177,9 @@
       "pluginVersion": "12.2.0-16979757807",
       "targets": [
         {
-          "expr": "sum(commands_acked_total)",
+          "editorMode": "code",
+          "expr": "sum(increase(commands_acked_total[$__range]))",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -231,7 +237,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "(sum(command_errors_total) or vector(0)) + (sum(router_errors_total) or vector(0))",
+          "expr": "(sum(increase(command_errors_total[$__range])) or vector(0)) + (sum(increase(router_errors_total[$__range])) or vector(0))",
           "range": true,
           "refId": "A"
         }
