@@ -19,5 +19,15 @@ CREATE TABLE commands
     created_at   TIMESTAMP     DEFAULT now()
 );
 
--- INSERT INTO routers (id, serial_number, ip_address)
--- VALUES ('550e8400-e29b-41d4-a716-446655440000', 'SN-12345', '192.168.1.1');
+CREATE INDEX idx_commands_status ON commands(status);
+
+CREATE INDEX idx_commands_id_status ON commands(id, status);
+
+CREATE INDEX idx_commands_status_sent_at ON commands(status, sent_at);
+
+CREATE INDEX idx_commands_status_router ON commands(status, router_id)
+    INCLUDE (command_type, payload, created_at);
+
+CREATE INDEX idx_commands_router_status ON commands(router_id, status);
+
+

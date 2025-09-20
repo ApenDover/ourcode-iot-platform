@@ -41,7 +41,13 @@ func main() {
 	}()
 
 	dbPath := databasePath(cfg)
-	pool, pgxErr := pgxpool.New(ctx, dbPath)
+	dbConfig, err := pgxpool.ParseConfig(dbPath)
+	if err != nil {
+		fmt.Errorf("не удалось распарсить конфиг: %w", err)
+	}
+
+	pool, pgxErr := createPool(ctx, dbConfig)
+	pool.Config()
 	if pgxErr != nil {
 		log.Error("ошибка подключения к БД", slog.String("error", pgxErr.Error()))
 		return
@@ -106,4 +112,24 @@ func databasePath(cfg *config.Config) string {
 		cfg.DBPort,
 		cfg.DBName,
 	)
+}
+
+func createPool(ctx context.Context, conf *pgxpool.Config) (*pgxpool.Pool, error) {
+	c := config.LoadConfig()
+
+	conf.MaxConns = util.StringToInt(c.DbMaxConns)
+	conf.MinConns = util.StringToInt(c.DbMinConns)
+	conf.MaxConnLifetime = time.Duration(util.StringToInt(c.DbMaxConnsLifeTime)) * time.Second
+	conf.MaxConnIdleTime = time.Duration(util.StringToInt(c.DbMaxConnsIdleTime)) * time.Second
+	conf.HealthCheckPeriod = time.Duration(util.StringToInt(c.DbHealthCheckPeriod)) * time.Second
+
+	conf.ConnConfig.RuntimeParams["statement_timeout"] = c.DbStatementTimeout
+	conf.ConnConfig.RuntimeParams["idle_in_transaction_session_timeout"] = c.DbIdleTransSessTimeout
+
+	pool, err := pgxpool.NewWithConfig(ctx, conf)
+	if err != nil {
+		return nil, fmt.Errorf("не получилось создать pool: %w", err)
+	}
+
+	return pool, nil
 }
