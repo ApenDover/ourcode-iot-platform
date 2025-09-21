@@ -1,0 +1,117 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version "${springBootVersion}"
+	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+	id 'com.github.spotbugs' version "${spotbugsVersion}"
+	id 'jacoco'
+	id 'checkstyle'
+}
+
+group = 'ts.andrey'
+version = "${appVersion}"
+description = 'event-service'
+
+
+def nexusUrl = System.getenv("NEXUS_URL") ?: project.findProperty("nexusUrl") ?: "http://localhost:7777/repository/maven-releases/"
+def nexusUser = System.getenv("NEXUS_USER") ?: project.findProperty("nexusUser") ?: "admin"
+def nexusPassword = System.getenv("NEXUS_PASSWORD") ?: project.findProperty("nexusPassword") ?: "admin123"
+
+repositories {
+	mavenCentral()
+	maven { url "https://packages.confluent.io/maven/" }
+	maven {
+		url = uri(nexusUrl)
+		allowInsecureProtocol = true
+		credentials {
+			username = nexusUser
+			password = nexusPassword
+		}
+	}
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(24)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'io.micrometer:micrometer-registry-otlp'
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:cassandra'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+checkstyle {
+	toolVersion = "${checkstyleToolVersion}"
+	configFile = file("$rootDir/config/checkstyle/checkstyle.xml")
+	configProperties = [
+			'checkstyle.suppressions.file': "$rootDir/config/checkstyle/exclude-filter.xml"
+	]
+	showViolations = true
+	ignoreFailures = false
+	maxWarnings = 0
+}
+
+spotbugs {
+	toolVersion = "${spotbugsToolVersion}"
+	ignoreFailures = true
+	showProgress = true
+	effort = 'max'
+	reportLevel = 'low'
+	excludeFilter = file("$rootDir/config/spotbugs/exclude-filter.xml")
+}
+
+
+jacoco {
+	toolVersion = "${jacocoToolVersion}"
+	reportsDirectory = layout.buildDirectory.dir('reports/jacoco')
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = false
+		html.required = true
+		csv.required = false
+	}
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'**/cassandra/**',
+					'**/configuration/**',
+					'**/controller/**',
+					'**/exception/**',
+					'**/*EventCollectorApplication*'
+			])
+		}))
+	}
+}
+
+configurations.configureEach {
+	exclude group: 'org.slf4j', module: 'slf4j-simple'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+bootJar {
+	archiveFileName = "app.jar"
+}

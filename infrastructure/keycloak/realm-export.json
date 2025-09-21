@@ -1468,7 +1468,7 @@
       },
       "protocolMappers": [
         {
-          "id": "a03de737-c88c-4f24-8335-5e0f54a520b7",
+          "id": "a03de737-c88c-4f24-83.5.6e0f54a520b7",
           "name": "email",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-attribute-mapper",
