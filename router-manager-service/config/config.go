@@ -23,9 +23,9 @@ type Config struct {
 	RedisPassword          string
 	DbMaxConns             string
 	DbMinConns             string
-	DbMaxConnsLifeTime     string
-	DbMaxConnsIdleTime     string
-	DbHealthCheckPeriod    string
+	DbMaxConnsLifeTime     time.Duration
+	DbMaxConnsIdleTime     time.Duration
+	DbHealthCheckPeriod    time.Duration
 	DbStatementTimeout     string
 	DbIdleTransSessTimeout string
 	DbConnectionTimeout    string
@@ -48,9 +48,9 @@ func LoadConfig() *Config {
 		RedisPassword:          getEnvOrDefault("APP_ROUTER_MANAGER_REDIS_PASSWORD", "redis_pass"),
 		DbMaxConns:             getEnvOrDefault("APP_ROUTER_MANAGER_MAXCONNS", "50"),
 		DbMinConns:             getEnvOrDefault("APP_ROUTER_MANAGER_MINCONNS", "10"),
-		DbMaxConnsLifeTime:     getEnvOrDefault("APP_ROUTER_MANAGER_MAXCONN_LIFETIME", "10"),
-		DbMaxConnsIdleTime:     getEnvOrDefault("APP_ROUTER_MANAGER_MAXCONN_IDLETIME", "5"),
-		DbHealthCheckPeriod:    getEnvOrDefault("APP_ROUTER_MANAGER_HEALTHCHECK_PERIOD", "1"),
+		DbMaxConnsLifeTime:     getTimeOrDefault("APP_ROUTER_MANAGER_MAXCONN_LIFETIME", "10s"),
+		DbMaxConnsIdleTime:     getTimeOrDefault("APP_ROUTER_MANAGER_MAXCONN_IDLETIME", "5s"),
+		DbHealthCheckPeriod:    getTimeOrDefault("APP_ROUTER_MANAGER_HEALTHCHECK_PERIOD", "1s"),
 		DbStatementTimeout:     getEnvOrDefault("APP_ROUTER_MANAGER_STATEMENT_TIMEOUT", "30000"),
 		DbIdleTransSessTimeout: getEnvOrDefault("APP_ROUTER_MANAGER_IDLE_IN_TRANSACTION_SESSION_TIMEOUT", "10000"),
 		DbConnectionTimeout:    getEnvOrDefault("APP_ROUTER_MANAGER_CONNECTION_TIMEOUT", "5"),

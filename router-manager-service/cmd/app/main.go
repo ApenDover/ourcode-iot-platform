@@ -119,9 +119,9 @@ func createPool(ctx context.Context, conf *pgxpool.Config) (*pgxpool.Pool, error
 
 	conf.MaxConns = util.StringToInt(c.DbMaxConns)
 	conf.MinConns = util.StringToInt(c.DbMinConns)
-	conf.MaxConnLifetime = time.Duration(util.StringToInt(c.DbMaxConnsLifeTime)) * time.Second
-	conf.MaxConnIdleTime = time.Duration(util.StringToInt(c.DbMaxConnsIdleTime)) * time.Second
-	conf.HealthCheckPeriod = time.Duration(util.StringToInt(c.DbHealthCheckPeriod)) * time.Second
+	conf.MaxConnLifetime = c.DbMaxConnsLifeTime
+	conf.MaxConnIdleTime = c.DbMaxConnsIdleTime
+	conf.HealthCheckPeriod = c.DbHealthCheckPeriod
 
 	conf.ConnConfig.RuntimeParams["statement_timeout"] = c.DbStatementTimeout
 	conf.ConnConfig.RuntimeParams["idle_in_transaction_session_timeout"] = c.DbIdleTransSessTimeout
