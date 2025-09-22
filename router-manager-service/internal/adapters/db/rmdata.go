@@ -88,19 +88,32 @@ func (a *PostgresDataAdapter) PollCommands(ctx context.Context, routerSerial str
 	}()
 
 	rows, err := tx.Query(ctx, `
-		SELECT c.id, c.router_id, c.command_type, c.payload, c.status, 
-		       c.created_at, c.sent_at, c.acked_at
-		FROM commands c
-		INNER JOIN routers r ON c.router_id = r.id
-		WHERE r.serial_number = $1 AND c.status = $2
-	`, routerSerial, domain.CommandStatusPending)
+        WITH updated_commands AS (
+            UPDATE commands 
+            SET status = $1, sent_at = $2
+            WHERE router_id = (
+                SELECT id FROM routers WHERE serial_number = $3
+            ) 
+            AND status = $4
+            RETURNING 
+                id,
+                router_id,
+                command_type,
+                payload,
+                status,
+                created_at,
+                sent_at,
+                acked_at
+        )
+        SELECT * FROM updated_commands
+    `, domain.CommandStatusSent, time.Now(), routerSerial, domain.CommandStatusPending)
+
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	var commands []domain.Command
-	var commandIDs []uuid.UUID
 
 	for rows.Next() {
 		var cmd domain.Command
@@ -123,56 +136,28 @@ func (a *PostgresDataAdapter) PollCommands(ctx context.Context, routerSerial str
 		}
 
 		commands = append(commands, cmd)
-		commandIDs = append(commandIDs, cmd.ID)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	if len(commandIDs) == 0 {
-		util.GetLogger(ctx).Info("Команды не найдены")
-		if _, err := tx.Exec(ctx, `
-			UPDATE routers
-			SET last_seen_at=$1
-			WHERE serial_number=$2
-		`, time.Now(), routerSerial); err != nil {
-			return nil, err
-		}
-		return commands, tx.Commit(ctx)
-	}
-
-	batch := &pgx.Batch{}
-	for _, id := range commandIDs {
-		batch.Queue(`
-			UPDATE commands
-			SET status=$1, sent_at=$2
-			WHERE id=$3 AND status=$4
-		`, domain.CommandStatusSent, time.Now(), id, domain.CommandStatusPending)
-	}
-
-	br := tx.SendBatch(ctx, batch)
-	for range commandIDs {
-		if _, err := br.Exec(); err != nil {
-			_ = br.Close()
-			return nil, err
-		}
-	}
-	if err := br.Close(); err != nil {
-		return nil, err
-	}
-
 	if _, err := tx.Exec(ctx, `
-		UPDATE routers
-		SET last_seen_at=$1
-		WHERE serial_number=$2
-	`, time.Now(), routerSerial); err != nil {
+        UPDATE routers
+        SET last_seen_at = $1
+        WHERE serial_number = $2
+    `, time.Now(), routerSerial); err != nil {
 		return nil, err
 	}
 
 	if err := tx.Commit(ctx); err != nil {
 		return nil, err
 	}
+
+	util.GetLogger(ctx).Info("Атомарная выборка команд с обновлением статуса",
+		"router_serial", routerSerial,
+		"command_count", len(commands),
+		"status", "sent")
 
 	return commands, nil
 }

@@ -75,8 +75,6 @@ func (s *Server) Start(port string) (*grpc.Server, error) {
 		return resp, err
 	}
 
-	util.GetLogger(context.Background()).Info("Запуск gRPC сервера на порту " + port)
-
 	grpcServer := grpc.NewServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.UnaryInterceptor(loggingInterceptor),

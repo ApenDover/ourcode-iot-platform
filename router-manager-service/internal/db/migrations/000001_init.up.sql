@@ -19,15 +19,7 @@ CREATE TABLE commands
     created_at   TIMESTAMP     DEFAULT now()
 );
 
-CREATE INDEX idx_commands_status ON commands(status);
-
-CREATE INDEX idx_commands_id_status ON commands(id, status);
-
-CREATE INDEX idx_commands_status_sent_at ON commands(status, sent_at);
-
-CREATE INDEX idx_commands_status_router ON commands(status, router_id)
-    INCLUDE (command_type, payload, created_at);
-
-CREATE INDEX idx_commands_router_status ON commands(router_id, status);
+CREATE INDEX idx_commands_router_status_created
+    ON commands(router_id, status);
 
 

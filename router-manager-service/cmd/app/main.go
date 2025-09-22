@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
 	"log/slog"
 	"net/http"
 	"os"
@@ -13,6 +14,8 @@ import (
 	"router-manager-service/internal/conf"
 	"router-manager-service/internal/conf/logutil"
 	"router-manager-service/internal/conf/util"
+	"router-manager-service/internal/db"
+	"sync"
 	"syscall"
 	"time"
 
@@ -20,9 +23,22 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+type App struct {
+	ctx           context.Context
+	cancel        context.CancelFunc
+	wg            sync.WaitGroup
+	grpcServer    *grpc.Server
+	metricsServer *http.Server
+}
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	app := &App{
+		ctx:    ctx,
+		cancel: cancel,
+	}
 
 	log := util.GetLogger(ctx)
 	cfg := config.LoadConfig()
@@ -43,33 +59,46 @@ func main() {
 	dbPath := databasePath(cfg)
 	dbConfig, err := pgxpool.ParseConfig(dbPath)
 	if err != nil {
-		fmt.Errorf("не удалось распарсить конфиг: %w", err)
+		log.Error("не удалось распарсить конфиг", slog.String("error", err.Error()))
+		return
 	}
 
 	pool, pgxErr := createPool(ctx, dbConfig)
-	pool.Config()
 	if pgxErr != nil {
 		log.Error("ошибка подключения к БД", slog.String("error", pgxErr.Error()))
 		return
 	}
-	flyWayPath := util.MigrationsPath(cfg.MigrationPath)
-	log.Info("ищу миграции по адресу", slog.String("миграции", flyWayPath))
-	conf.RunMigrations(dbPath, flyWayPath)
 	defer pool.Close()
+
+	migrator, err := db.NewMigrator(dbPath)
+	if err != nil {
+		log.Error("не удалось создать мигратор", slog.String("error", err.Error()))
+		return
+	}
+	defer migrator.Close()
+
+	if err := migrator.Up(); err != nil {
+		log.Error("ошибка выполнения миграций", slog.String("error", err.Error()))
+		return
+	} else {
+		log.Info("миграции применены к базе", slog.String("databaseUrl", dbPath))
+	}
 
 	if errPoolPing := pool.Ping(ctx); errPoolPing != nil {
 		log.Error("не удалось проверить соединение с БД", slog.String("error", errPoolPing.Error()))
 		return
 	}
 
-	metricsServer := &http.Server{
+	app.metricsServer = &http.Server{
 		Addr:    ":9091",
 		Handler: promhttp.Handler(),
 	}
 
+	app.wg.Add(1)
 	go func() {
+		defer app.wg.Done()
 		log.Info("Запуск сервера метрик на порту: 9091")
-		if errMetrics := metricsServer.ListenAndServe(); errMetrics != nil && !errors.Is(errMetrics, http.ErrServerClosed) {
+		if errMetrics := app.metricsServer.ListenAndServe(); errMetrics != nil && !errors.Is(errMetrics, http.ErrServerClosed) {
 			log.Error("не смог запустить экспорт метрик", slog.String("error", errMetrics.Error()))
 		}
 	}()
@@ -81,7 +110,7 @@ func main() {
 	})
 	defer rc.Close()
 
-	grpcServer := conf.InitGrpc(pool, rc)
+	app.grpcServer = conf.InitGrpc(ctx, pool, rc, &app.wg)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
@@ -89,18 +118,65 @@ func main() {
 	<-sigChan
 	log.Info("Получен сигнал завершения")
 
-	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer shutdownCancel()
-
-	if grpcServer != nil {
-		grpcServer.GracefulStop()
-	}
-
-	if err := metricsServer.Shutdown(shutdownCtx); err != nil {
-		log.Error("ошибка при остановке сервера метрик", slog.String("error", err.Error()))
-	}
-
+	app.shutdown()
 	log.Info("Приложение корректно завершено")
+}
+
+func (a *App) shutdown() {
+	log := util.GetLogger(a.ctx)
+
+	log.Info("Начало graceful shutdown...")
+
+	a.cancel()
+	log.Info("Контекст приложения отменен")
+
+	if a.grpcServer != nil {
+		log.Info("Остановка gRPC сервера...")
+		grpcShutdownCtx, grpcCancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer grpcCancel()
+
+		done := make(chan struct{})
+		go func() {
+			a.grpcServer.GracefulStop()
+			close(done)
+		}()
+
+		select {
+		case <-done:
+			log.Info("gRPC сервер остановлен")
+		case <-grpcShutdownCtx.Done():
+			log.Warn("Таймаут остановки gRPC сервера, принудительная остановка")
+			a.grpcServer.Stop()
+		}
+	}
+
+	if a.metricsServer != nil {
+		log.Info("Остановка сервера метрик...")
+		metricsShutdownCtx, metricsCancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer metricsCancel()
+
+		if err := a.metricsServer.Shutdown(metricsShutdownCtx); err != nil {
+			log.Error("Ошибка при остановке сервера метрик", slog.String("error", err.Error()))
+		} else {
+			log.Info("Сервер метрик остановлен")
+		}
+	}
+
+	log.Info("Ожидание завершения фоновых горутин...")
+	done := make(chan struct{})
+	go func() {
+		a.wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		log.Info("Все горутины завершены")
+	case <-time.After(15 * time.Second):
+		log.Warn("Таймаут graceful shutdown - принудительное завершение")
+	}
+
+	log.Info("Graceful shutdown завершен")
 }
 
 func databasePath(cfg *config.Config) string {
