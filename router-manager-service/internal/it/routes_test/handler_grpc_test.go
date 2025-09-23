@@ -53,7 +53,7 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 		},
 	}
 
-	application, err := app.New(ctx, deps)
+	application := app.New(ctx, deps)
 	require.NoError(t, err)
 
 	err = application.Start()

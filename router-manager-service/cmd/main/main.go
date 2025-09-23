@@ -22,95 +22,110 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	log := util.GetLogger(ctx)
 	cfg := config.LoadConfig()
 	logCfg := logutil.LoadConfig()
-	log.Info("Конфигурация загружена",
+
+	log := util.GetLogger(ctx)
+	log.Info("запуск..",
 		slog.String("profile", logCfg.Profile),
-		slog.String("log_level", logCfg.Level),
+		slog.String("version", "1.0.0"),
 	)
 
-	// Инициализация трассировки
-	tp, err := initTracer(ctx, cfg)
+	deps, cleanup, err := initializeDependencies(ctx, cfg, log)
 	if err != nil {
-		log.Error("Ошибка инициализации трассировки", slog.String("error", err.Error()))
-		return
+		log.Error("Не смог создать все зависимости", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
-	defer shutdownTracer(tp)
+	defer cleanup()
 
-	// Инициализация БД
-	pool, err := initDatabase(ctx, cfg)
+	application := app.New(ctx, deps)
+
+	if err := application.Start(); err != nil {
+		log.Error("ошибка запуска приложения", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
+	log.Info("приложение запущенно")
+
+	waitForShutdownSignal(application, log)
+	log.Info("приложение завершено")
+}
+
+func initializeDependencies(ctx context.Context, cfg *config.Config, log *slog.Logger) (*app.Dependencies, func(), error) {
+	cleanupFuncs := make([]func(), 0)
+	cleanup := func() {
+		for i := len(cleanupFuncs) - 1; i >= 0; i-- {
+			cleanupFuncs[i]()
+		}
+	}
+
+	tracerProvider, err := app.InitTracer(ctx, cfg.AlloyUrl)
 	if err != nil {
-		log.Error("Ошибка инициализации БД", slog.String("error", err.Error()))
-		return
+		return nil, cleanup, fmt.Errorf("ошибка создания tracer: %w", err)
 	}
-	defer pool.Close()
+	cleanupFuncs = append(cleanupFuncs, func() {
+		shutdownTracer(tracerProvider, log)
+	})
 
-	// Миграции БД
-	if err := runMigrations(cfg); err != nil {
-		log.Error("Ошибка миграций", slog.String("error", err.Error()))
-		return
+	dbPool, err := initDatabase(ctx, cfg, log)
+	if err != nil {
+		return nil, cleanup, fmt.Errorf("ошибка создания подключения к БД: %w", err)
+	}
+	cleanupFuncs = append(cleanupFuncs, func() {
+		dbPool.Close()
+		log.Info("соединение с БД закрыто")
+	})
+
+	if err := runMigrations(cfg, log); err != nil {
+		return nil, cleanup, fmt.Errorf("Ошибка миграций: %w", err)
 	}
 
-	// Инициализация Redis
-	redisClient := initRedis(cfg)
-	defer redisClient.Close()
+	redisClient := initRedis(cfg, log)
+	cleanupFuncs = append(cleanupFuncs, func() {
+		if err := redisClient.Close(); err != nil {
+			log.Error("не получилось закрыть соединение с Redis", slog.String("error", err.Error()))
+		} else {
+			log.Info("соединение с Redis закрыто")
+		}
+	})
 
-	// Создание зависимостей приложения
 	deps := &app.Dependencies{
-		DBPool:      pool,
+		DBPool:      dbPool,
 		RedisClient: redisClient,
 		Config:      cfg,
 	}
 
-	// Создание и запуск приложения
-	application, err := app.New(ctx, deps)
-	if err != nil {
-		log.Error("Ошибка создания приложения", slog.String("error", err.Error()))
-		return
-	}
-
-	if err := application.Start(); err != nil {
-		log.Error("Ошибка запуска приложения", slog.String("error", err.Error()))
-		return
-	}
-
-	log.Info("Приложение успешно запущено")
-
-	// Ожидание сигналов завершения
-	waitForShutdownSignal(application, log)
+	return deps, cleanup, nil
 }
 
-// Вспомогательные функции
-func initTracer(ctx context.Context, cfg *config.Config) (interface{}, error) {
-	// Ваша существующая логика инициализации трассировки
-	return app.InitTracer(ctx, cfg.AlloyUrl)
-}
-
-func shutdownTracer(tp interface{}) {
-	// Ваша существующая логика остановки трассировки
-	if sh, ok := tp.(interface{ Shutdown(context.Context) error }); ok {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		_ = sh.Shutdown(ctx)
-	}
-}
-
-func initDatabase(ctx context.Context, cfg *config.Config) (*pgxpool.Pool, error) {
-	dbPath := fmt.Sprintf(
+func initDatabase(ctx context.Context, cfg *config.Config, log *slog.Logger) (*pgxpool.Pool, error) {
+	connString := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName,
 	)
 
-	dbConfig, err := pgxpool.ParseConfig(dbPath)
+	dbConfig, err := pgxpool.ParseConfig(connString)
 	if err != nil {
-		return nil, fmt.Errorf("parse config: %w", err)
+		return nil, fmt.Errorf("читаю config: %w", err)
 	}
 
-	// Конфигурация пула (ваша существующая логика)
 	configurePool(dbConfig, cfg)
 
-	return pgxpool.NewWithConfig(ctx, dbConfig)
+	log.Info("подключаюсь к базе данных",
+		slog.String("host", cfg.DBHost),
+		slog.String("database", cfg.DBName),
+	)
+
+	pool, err := pgxpool.NewWithConfig(ctx, dbConfig)
+	if err != nil {
+		return nil, fmt.Errorf("создаю connection pool для БД: %w", err)
+	}
+
+	if err := pool.Ping(ctx); err != nil {
+		return nil, fmt.Errorf("не получилось получит ответ на пинг БД: %w", err)
+	}
+
+	return pool, nil
 }
 
 func configurePool(conf *pgxpool.Config, cfg *config.Config) {
@@ -124,36 +139,72 @@ func configurePool(conf *pgxpool.Config, cfg *config.Config) {
 	conf.ConnConfig.RuntimeParams["idle_in_transaction_session_timeout"] = cfg.DbIdleTransSessTimeout
 }
 
-func runMigrations(cfg *config.Config) error {
-	dbPath := fmt.Sprintf(
+func runMigrations(cfg *config.Config, log *slog.Logger) error {
+	connString := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName,
 	)
 
-	migrator, err := database.NewMigrator(dbPath)
+	log.Info("запускаю миграции базы данных")
+
+	migrator, err := database.NewMigrator(connString)
 	if err != nil {
-		return err
+		return fmt.Errorf("создаю migrator: %w", err)
 	}
 	defer migrator.Close()
 
-	return migrator.Up()
+	if err := migrator.Up(); err != nil {
+		return fmt.Errorf("применю миграции: %w", err)
+	}
+
+	return nil
 }
 
-func initRedis(cfg *config.Config) *redis.Client {
-	return redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", cfg.RedisUrl, cfg.RedisPort),
-		Password: cfg.RedisPassword,
-		DB:       0,
+func initRedis(cfg *config.Config, log *slog.Logger) *redis.Client {
+	log.Info("создание соединения Redis",
+		slog.String("host", cfg.RedisUrl),
+		slog.String("port", cfg.RedisPort),
+	)
+
+	client := redis.NewClient(&redis.Options{
+		Addr:         fmt.Sprintf("%s:%s", cfg.RedisUrl, cfg.RedisPort),
+		Password:     cfg.RedisPassword,
+		DB:           0,
+		DialTimeout:  5 * time.Second,
+		ReadTimeout:  3 * time.Second,
+		WriteTimeout: 3 * time.Second,
+		PoolSize:     10,
+		MinIdleConns: 2,
 	})
+
+	if err := client.Ping(context.Background()).Err(); err != nil {
+		log.Error("тест соединения Redis провален", slog.String("error", err.Error()))
+	} else {
+		log.Info("Redis успешно подключен")
+	}
+
+	return client
+}
+
+func shutdownTracer(tp interface{}, log *slog.Logger) {
+	if sh, ok := tp.(interface{ Shutdown(context.Context) error }); ok {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := sh.Shutdown(ctx); err != nil {
+			log.Error("Не смог завершить tracer", slog.String("error", err.Error()))
+		} else {
+			log.Info("Tracer успешно завершен")
+		}
+	}
 }
 
 func waitForShutdownSignal(application *app.App, log *slog.Logger) {
 	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 
 	sig := <-sigChan
-	log.Info("Получен сигнал завершения", slog.String("signal", sig.String()))
+	log.Info("Услышал сигнал завершения процесса", slog.String("signal", sig.String()))
 
 	application.Stop()
-	log.Info("Приложение корректно завершено")
 }

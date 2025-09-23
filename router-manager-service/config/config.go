@@ -43,7 +43,6 @@ func LoadConfig() *Config {
 		Profile:                getEnvOrDefault("PROFILE", "local"),
 		TimeExpired:            getTimeOrDefault("APP_ROUTER_MANAGER_SENT_EXPIRED", "1m"),
 		CheckExpiredInterval:   getTimeOrDefault("APP_ROUTER_MANAGER_CHECK_EXPIRED_INTERVAL", "30s"),
-		MigrationPath:          getMigrationPath(getEnvOrDefault("PROFILE", "local")),
 		AlloyUrl:               getEnvOrDefault("FAILED_PROCESSOR_MANAGEMENT_TRACING_OTLP_ENDPOINT_GRPC", "http://localhost:4317"),
 		RedisUrl:               getEnvOrDefault("APP_ROUTER_MANAGER_REDIS_HOST", "localhost"),
 		RedisPort:              getEnvOrDefault("APP_ROUTER_MANAGER_REDIS_PORT", "6379"),
@@ -56,8 +55,8 @@ func LoadConfig() *Config {
 		DbStatementTimeout:     getEnvOrDefault("APP_ROUTER_MANAGER_STATEMENT_TIMEOUT", "30000"),
 		DbIdleTransSessTimeout: getEnvOrDefault("APP_ROUTER_MANAGER_IDLE_IN_TRANSACTION_SESSION_TIMEOUT", "10000"),
 		DbConnectionTimeout:    getEnvOrDefault("APP_ROUTER_MANAGER_CONNECTION_TIMEOUT", "5"),
-		MetricsPort:            getEnvOrDefault("APP_ROUTER_MANAGER_METRICS_PORT", "9082"),
-		GRPCPort:               getEnvOrDefault("APP_ROUTER_MANAGER_GRPC_PORT", "9081"),
+		MetricsPort:            getEnvOrDefault("APP_ROUTER_MANAGER_METRICS_PORT", "9091"),
+		GRPCPort:               getEnvOrDefault("APP_ROUTER_MANAGER_GRPC_PORT", "9092"),
 	}
 }
 
@@ -82,11 +81,4 @@ func getTimeOrDefault(key, defaultValue string) time.Duration {
 		log.Error("неверный формат TimeExpired в defaultValue, ENV APP_ROUTER_MANAGER_SENT_EXPIRED отсутствует")
 	}
 	return duration
-}
-
-func getMigrationPath(env string) string {
-	if env == "local" {
-		return "../../../db/migrations"
-	}
-	return "../../../../app/db/migrations"
 }
