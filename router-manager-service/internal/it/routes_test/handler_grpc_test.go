@@ -29,18 +29,15 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second) // увеличиваем таймаут
 	defer cancel()
 
-	// Поднимаем тестовые контейнеры
 	_, pool, terminate, err := SetupPostgresContainerPool(t)
 	require.NoError(t, err)
 	defer terminate()
 
 	cfg := config.LoadConfig()
 
-	// Используем тестовый Redis (можно также поднять через testcontainers)
 	rc := createTestRedisClient(cfg)
 	defer rc.Close()
 
-	// Создаем зависимости приложения
 	deps := &app.Dependencies{
 		DBPool:      pool,
 		RedisClient: rc,
@@ -60,10 +57,21 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	require.NoError(t, err)
 	defer application.Stop()
 
-	// Даем серверу время запуститься
-	time.Sleep(500 * time.Millisecond)
+	require.Eventually(t, func() bool {
+		conn, err := grpc.DialContext(
+			context.Background(),
+			application.GetGRPCAddress(),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithBlock(),
+			grpc.WithTimeout(1*time.Second), // короткий таймаут для проверки
+		)
+		if err != nil {
+			return false
+		}
+		defer conn.Close()
+		return true
+	}, 10*time.Second, 100*time.Millisecond, "gRPC server failed to become ready")
 
-	// Создаем gRPC клиент
 	conn, err := grpc.DialContext(
 		ctx,
 		application.GetGRPCAddress(),

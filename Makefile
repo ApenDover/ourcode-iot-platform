@@ -217,3 +217,6 @@ j-prepare:
 
 	@docker exec -i redis redis-cli -a $(REDIS_PASSWORD) FLUSHALL
 	@docker exec -i redis-rms redis-cli -a $(APP_ROUTER_MANAGER_REDIS_PASSWORD) FLUSHALL
+
+gotest:
+	cd router-manager-service && go test ./internal/it/routes_test

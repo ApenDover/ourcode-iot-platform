@@ -25,13 +25,18 @@ func NewPostgresCommonAdapter(pool *pgxpool.Pool) ports.DataPort {
 var _ ports.DataPort = (*PostgresDataAdapter)(nil)
 
 func (a *PostgresDataAdapter) CreateCommands(ctx context.Context, cmds []domain.Command) error {
-	fmt.Sprintf("Вставка партии из %d команд", len(cmds))
 	if len(cmds) == 0 {
 		return nil
 	}
+	const copyThreshold = 50
+	if len(cmds) > copyThreshold {
+		return a.createCommandsWithCOPY(ctx, cmds)
+	}
+	return a.createCommandsWithMultiInsert(ctx, cmds)
+}
 
+func (a *PostgresDataAdapter) createCommandsWithCOPY(ctx context.Context, cmds []domain.Command) error {
 	const maxBatchSize = 1000
-	var err error
 
 	for i := 0; i < len(cmds); i += maxBatchSize {
 		end := i + maxBatchSize
@@ -40,41 +45,65 @@ func (a *PostgresDataAdapter) CreateCommands(ctx context.Context, cmds []domain.
 		}
 
 		batch := cmds[i:end]
-		if err = a.insertBatch(ctx, batch); err != nil {
-			return fmt.Errorf("batch insert failed at offset %d: %w", i, err)
+		copySource := pgx.CopyFromSlice(len(batch), func(i int) ([]interface{}, error) {
+			cmd := batch[i]
+
+			payloadBytes, err := json.Marshal(cmd.Payload)
+			if err != nil {
+				return nil, err
+			}
+
+			return []interface{}{
+				cmd.ID,
+				cmd.RouterID,
+				cmd.CommandType,
+				payloadBytes,
+				cmd.Status,
+				cmd.CreatedAt,
+			}, nil
+		})
+
+		_, err := a.pool.CopyFrom(
+			ctx,
+			pgx.Identifier{"commands"},
+			[]string{"id", "router_id", "command_type", "payload", "status", "created_at"},
+			copySource,
+		)
+
+		if err != nil {
+			return fmt.Errorf("COPY batch failed at offset %d: %w", i, err)
 		}
 	}
 
 	return nil
 }
 
-func (a *PostgresDataAdapter) insertBatch(ctx context.Context, batch []domain.Command) error {
-	fmt.Sprintf("Вставка партии из %d команд", len(batch))
-	if len(batch) == 0 {
-		return nil
-	}
+func (a *PostgresDataAdapter) createCommandsWithMultiInsert(ctx context.Context, cmds []domain.Command) error {
+	var valueArgs []interface{}
+	valueStrings := make([]string, 0, len(cmds))
 
-	var values []interface{}
-	var placeholders []string
-
-	for i, cmd := range batch {
+	for i, cmd := range cmds {
 		payloadBytes, err := json.Marshal(cmd.Payload)
 		if err != nil {
 			return err
 		}
 
-		values = append(values, cmd.ID, cmd.RouterID, cmd.CommandType, payloadBytes, cmd.Status, cmd.CreatedAt)
+		start := i*6 + 1
+		placeholder := fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d)",
+			start, start+1, start+2, start+3, start+4, start+5)
 
-		base := i*6 + 1
-		placeholders = append(placeholders, fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d)", base, base+1, base+2, base+3, base+4, base+5))
+		valueStrings = append(valueStrings, placeholder)
+
+		valueArgs = append(valueArgs,
+			cmd.ID, cmd.RouterID, cmd.CommandType, payloadBytes, cmd.Status, cmd.CreatedAt)
 	}
 
 	query := fmt.Sprintf(`
-        INSERT INTO commands (id, router_id, command_type, payload, status, created_at)
-        VALUES %s
-    `, strings.Join(placeholders, ","))
+		INSERT INTO commands (id, router_id, command_type, payload, status, created_at)
+		VALUES %s`,
+		strings.Join(valueStrings, ","))
 
-	_, err := a.pool.Exec(context.Background(), query, values...)
+	_, err := a.pool.Exec(ctx, query, valueArgs...)
 	return err
 }
 
