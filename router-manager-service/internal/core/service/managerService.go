@@ -48,7 +48,6 @@ func (m *ManagerService) CreateCommand(ctx context.Context, serial string, comma
 		CommandType: commandType,
 		Payload:     payload,
 		Status:      domain.CommandStatusPending,
-		CreatedAt:   time.Now(),
 	}
 
 	if errCreateCommand := m.dataPort.CreateCommands(ctx, []domain.Command{cmd}); errCreateCommand != nil {
@@ -84,7 +83,6 @@ func (m *ManagerService) CreateCommandForAll(ctx context.Context, commandType st
 			CommandType: commandType,
 			Payload:     payload,
 			Status:      domain.CommandStatusPending,
-			CreatedAt:   time.Now(),
 		}
 		if err := m.dataPort.CreateCommands(ctx, []domain.Command{cmd}); err != nil {
 			metrics.CommandErrors.WithLabelValues("CreateCommands").Inc()

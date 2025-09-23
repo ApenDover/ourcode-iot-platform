@@ -38,13 +38,12 @@ func (r *PostgresRouterRepository) EnsureRoutersExist(ctx context.Context, seria
 	}
 	defer tx.Rollback(ctx)
 
-	now := time.Now()
 	for _, serial := range serials {
 		_, err := tx.Exec(ctx, `
-			INSERT INTO routers (id, serial_number, created_at)
-			VALUES ($1, $2, $3)
+			INSERT INTO routers (id, serial_number)
+			VALUES ($1, $2)
 			ON CONFLICT (serial_number) DO NOTHING
-		`, uuid.New(), serial, now)
+		`, uuid.New(), serial)
 		if err != nil {
 			return err
 		}
