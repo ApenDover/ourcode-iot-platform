@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/types/known/structpb"
+	"router-manager-service/cmd/app"
 	"router-manager-service/internal/conf/util"
 	"testing"
 	"time"
@@ -41,7 +42,7 @@ func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	})
 	defer rc.Close()
 
-	grpcServer := conf.InitGrpc(pool, rc)
+	grpcServer := main.InitGrpc(pool, rc)
 	defer grpcServer.GracefulStop()
 
 	conn, err := grpc.NewClient("localhost:9092",

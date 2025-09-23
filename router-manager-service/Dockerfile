@@ -3,7 +3,6 @@ WORKDIR /build
 COPY go.mod go.sum ./
 COPY cmd/ ./cmd/
 COPY config/ ./config/
-COPY db/ ./db/
 COPY internal/ ./internal/
 COPY protobuf/ ./protobuf/
 RUN go mod download && \
@@ -12,5 +11,4 @@ RUN go mod download && \
 FROM alpine:3.22
 WORKDIR /app
 COPY --from=builder /build/router-manager .
-COPY --from=builder /build/db/migrations ./db/migrations/
 ENTRYPOINT ["./router-manager"]

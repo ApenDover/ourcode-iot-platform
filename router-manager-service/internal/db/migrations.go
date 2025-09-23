@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 )
 
@@ -18,12 +19,12 @@ type Migrator struct {
 func NewMigrator(databaseURL string) (*Migrator, error) {
 	driver, err := iofs.New(migrationsFS, "migrations")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create iofs driver: %w", err)
+		return nil, fmt.Errorf("ошибка создания iofs драйвера: %w", err)
 	}
 
 	migrator, err := migrate.NewWithSourceInstance("iofs", driver, databaseURL)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create migrator: %w", err)
+		return nil, fmt.Errorf("Ошибка создания NewMigrator: %w", err)
 	}
 
 	return &Migrator{migrator: migrator}, nil

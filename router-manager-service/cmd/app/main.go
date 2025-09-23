@@ -11,7 +11,6 @@ import (
 	"os"
 	"os/signal"
 	"router-manager-service/config"
-	"router-manager-service/internal/conf"
 	"router-manager-service/internal/conf/logutil"
 	"router-manager-service/internal/conf/util"
 	"router-manager-service/internal/db"
@@ -45,7 +44,7 @@ func main() {
 	logCfg := logutil.LoadConfig()
 	log.Info("Конфигурация загружена", slog.String("profile", logCfg.Profile), slog.String("log_level", logCfg.Level))
 
-	tp, errTraceInit := conf.InitTracer(ctx, cfg.AlloyUrl)
+	tp, errTraceInit := InitTracer(ctx, cfg.AlloyUrl)
 	if errTraceInit != nil {
 		log.Error("не удалось инициализировать TracerProvider", slog.String("error", errTraceInit.Error()))
 		return
@@ -110,7 +109,7 @@ func main() {
 	})
 	defer rc.Close()
 
-	app.grpcServer = conf.InitGrpc(ctx, pool, rc, &app.wg)
+	app.grpcServer = InitGrpc(ctx, pool, rc, &app.wg)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
