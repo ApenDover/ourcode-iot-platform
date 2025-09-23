@@ -16,11 +16,11 @@ import (
 	"router-manager-service/internal/conf/util"
 	"router-manager-service/internal/core/domain"
 	"router-manager-service/internal/core/service"
-	routermanager "router-manager-service/internal/ports/genproto"
+	genproto "router-manager-service/internal/ports/genproto"
 )
 
 type Server struct {
-	routermanager.UnimplementedRouterManagerServiceServer
+	genproto.UnimplementedRouterManagerServiceServer
 	ManagerService *service.ManagerService
 }
 
@@ -35,14 +35,13 @@ func NewServer(pool *pgxpool.Pool, redisClient *redis.Client) *Server {
 	}
 }
 
-func (s *Server) SendCommand(ctx context.Context, req *routermanager.SendCommandRequest) (*routermanager.SendCommandResponse, error) {
+func (s *Server) SendCommand(ctx context.Context, req *genproto.SendCommandRequest) (*genproto.SendCommandResponse, error) {
 	log := util.GetLogger(ctx)
 
 	payloadMap := req.Payload.AsMap()
 	var created int
 
 	if req.RouterSerial != "" {
-		// Команда для конкретного роутера
 		_, err := s.ManagerService.CreateCommand(ctx, req.RouterSerial, req.CommandType, payloadMap)
 		if err != nil {
 			log.Error("Failed to create command", slog.String("error", err.Error()))
@@ -50,7 +49,6 @@ func (s *Server) SendCommand(ctx context.Context, req *routermanager.SendCommand
 		}
 		created = 1
 	} else {
-		// Команда для всех роутеров
 		commands, err := s.ManagerService.CreateCommandForAll(ctx, req.CommandType, payloadMap)
 		if err != nil {
 			log.Error("Failed to create commands for all routers", slog.String("error", err.Error()))
@@ -60,10 +58,10 @@ func (s *Server) SendCommand(ctx context.Context, req *routermanager.SendCommand
 	}
 
 	log.Debug("Commands created successfully", slog.Int("count", created))
-	return &routermanager.SendCommandResponse{Created: int32(created)}, nil
+	return &genproto.SendCommandResponse{Created: int32(created)}, nil
 }
 
-func (s *Server) PollCommands(ctx context.Context, req *routermanager.PollCommandsRequest) (*routermanager.PollCommandsResponse, error) {
+func (s *Server) PollCommands(ctx context.Context, req *genproto.PollCommandsRequest) (*genproto.PollCommandsResponse, error) {
 	log := util.GetLogger(ctx)
 
 	commands, err := s.ManagerService.GetPendingCommandsAndMarkItSent(ctx, req.RouterSerial)
@@ -72,21 +70,21 @@ func (s *Server) PollCommands(ctx context.Context, req *routermanager.PollComman
 		return nil, status.Error(codes.Internal, "failed to get commands")
 	}
 
-	pbCommands := make([]*routermanager.Command, 0, len(commands))
+	pbCommands := make([]*genproto.Command, 0, len(commands))
 	for _, cmd := range commands {
 		pbCommand, err := s.commandToProto(cmd)
 		if err != nil {
-			log.Error("Failed to convert command to proto", slog.String("error", err.Error()))
+			log.Error("Failed to convert command to genproto", slog.String("error", err.Error()))
 			continue
 		}
 		pbCommands = append(pbCommands, pbCommand)
 	}
 
 	log.Debug("Polled commands", slog.Int("count", len(pbCommands)))
-	return &routermanager.PollCommandsResponse{Commands: pbCommands}, nil
+	return &genproto.PollCommandsResponse{Commands: pbCommands}, nil
 }
 
-func (s *Server) AckCommand(ctx context.Context, req *routermanager.AckCommandRequest) (*routermanager.AckCommandResponse, error) {
+func (s *Server) AckCommand(ctx context.Context, req *genproto.AckCommandRequest) (*genproto.AckCommandResponse, error) {
 	log := util.GetLogger(ctx)
 
 	commandID, err := uuid.Parse(req.CommandId)
@@ -104,10 +102,10 @@ func (s *Server) AckCommand(ctx context.Context, req *routermanager.AckCommandRe
 	}
 
 	log.Debug("Command acknowledged", slog.String("command_id", req.CommandId))
-	return &routermanager.AckCommandResponse{Status: "ACKED"}, nil
+	return &genproto.AckCommandResponse{Status: "ACKED"}, nil
 }
 
-func (s *Server) commandToProto(cmd domain.CommandOut) (*routermanager.Command, error) {
+func (s *Server) commandToProto(cmd domain.CommandOut) (*genproto.Command, error) {
 	payload, err := structpb.NewStruct(*cmd.Payload)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create struct: %w", err)
@@ -121,7 +119,7 @@ func (s *Server) commandToProto(cmd domain.CommandOut) (*routermanager.Command, 
 		ackedAt = timestamppb.New(*cmd.AckedAt)
 	}
 
-	return &routermanager.Command{
+	return &genproto.Command{
 		Id:           cmd.ID.String(),
 		RouterSerial: cmd.SerialNumber,
 		CommandType:  cmd.CommandType,
