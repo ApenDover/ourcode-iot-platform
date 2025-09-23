@@ -29,6 +29,8 @@ type Config struct {
 	DbStatementTimeout     string
 	DbIdleTransSessTimeout string
 	DbConnectionTimeout    string
+	MetricsPort            string
+	GRPCPort               string
 }
 
 func LoadConfig() *Config {
@@ -54,6 +56,8 @@ func LoadConfig() *Config {
 		DbStatementTimeout:     getEnvOrDefault("APP_ROUTER_MANAGER_STATEMENT_TIMEOUT", "30000"),
 		DbIdleTransSessTimeout: getEnvOrDefault("APP_ROUTER_MANAGER_IDLE_IN_TRANSACTION_SESSION_TIMEOUT", "10000"),
 		DbConnectionTimeout:    getEnvOrDefault("APP_ROUTER_MANAGER_CONNECTION_TIMEOUT", "5"),
+		MetricsPort:            getEnvOrDefault("APP_ROUTER_MANAGER_METRICS_PORT", "9082"),
+		GRPCPort:               getEnvOrDefault("APP_ROUTER_MANAGER_GRPC_PORT", "9081"),
 	}
 }
 

@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"context"
@@ -33,13 +33,13 @@ func InitGrpc(ctx context.Context, pool *pgxpool.Pool, redisClient *redis.Client
 		runExpiredCommandsChecker(ctx, managerService, period, expiredTime, log)
 	}()
 
-	grpcServer, err := managerService.Start("9092")
+	grpcServer, err := managerService.Start(cfg.GRPCPort)
 	if err != nil {
 		log.Error("Не смог запустить сервер", slog.String("error", err.Error()))
 		return nil
 	}
 
-	log.Info("gRPC сервер запущен на порту 9092")
+	log.Info("gRPC сервер запущен на порту " + cfg.GRPCPort)
 	return grpcServer
 }
 
