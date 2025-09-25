@@ -215,6 +215,10 @@ j-prepare:
     			VALUES ('9354d1bd-ea67-494f-90fc-4b88bd874e95', '581811df-8b37-44fd-84ce-9b7791b0e4c0', 'FALLBACK', '{}', 'PENDING', null, null, '2025-09-19 19:56:18.410128')\
     			ON CONFLICT DO NOTHING;"
 
+	@docker exec -i -e PGPASSWORD=$(APP_ROUTER_MANAGER_DATASOURCE_PASSWORD) postgres_router_manager \
+    		psql -U $(APP_ROUTER_MANAGER_DATASOURCE_USERNAME) -d $(APP_ROUTER_MANAGER_DATASOURCE_DB) \
+    		< ./infrastructure/jmeter/routers.sql
+
 	@docker exec -i redis redis-cli -a $(REDIS_PASSWORD) FLUSHALL
 	@docker exec -i redis-rms redis-cli -a $(APP_ROUTER_MANAGER_REDIS_PASSWORD) FLUSHALL
 
