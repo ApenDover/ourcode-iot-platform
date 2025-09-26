@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version "${springBootVersion}"
 	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
 	id 'com.github.spotbugs' version "${spotbugsVersion}"
+	id "org.openapi.generator" version "${openApiGenerator}"
 	id 'jacoco'
 	id 'checkstyle'
 }
@@ -31,7 +32,7 @@ repositories {
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(24)
+		languageVersion = JavaLanguageVersion.of("${javaVersion}")
 	}
 }
 
@@ -115,3 +116,31 @@ tasks.named('test') {
 bootJar {
 	archiveFileName = "app.jar"
 }
+
+openApiGenerate {
+	generatorName = "spring"
+	inputSpec = "$projectDir/src/main/resources/openapi/event-api.yml"
+	outputDir = "$buildDir/generated"
+	apiPackage = "ts.andrey.api"
+	modelPackage = "ts.andrey.dto"
+	invokerPackage = "ts.andrey.invoker"
+	library = "spring-boot"
+	generateApiTests = false
+	generateModelTests = false
+	additionalProperties = [
+			interfaceOnly: "true",
+			useTags      : "true",
+			java8        : "true",
+			useJakartaEe : "true"
+	]
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "$buildDir/generated/src/main/java"
+		}
+	}
+}
+
+compileJava.dependsOn tasks.openApiGenerate
