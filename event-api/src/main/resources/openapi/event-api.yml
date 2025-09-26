@@ -1,0 +1,90 @@
+openapi: 3.0.3
+info:
+  title: Event Service API
+  version: 1.0.0
+  description: Read-only API для событий устройств (Cassandra)
+servers:
+  - url: http://localhost:8082
+paths:
+  /api/v1/events:
+    get:
+      tags:
+        - EventsV1
+      summary: Получить список событий по устройству и фильтрам
+      parameters:
+        - in: query
+          name: device_id
+          required: true
+          schema: { type: string }
+          description: Идентификатор устройства (partition key)
+        - in: query
+          name: from_timestamp
+          schema: { type: integer, format: int64 }
+          description: Начало интервала (Unix ms), включительно
+        - in: query
+          name: to_timestamp
+          schema: { type: integer, format: int64 }
+          description: Конец интервала (Unix ms), включительно
+        - in: query
+          name: type
+          schema: { type: string }
+          description: Фильтр по типу события
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 0, default: 0 }
+        - in: query
+          name: size
+          schema: { type: integer, minimum: 1, maximum: 1000, default: 100 }
+      responses:
+        '200':
+          description: Список событий
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventPage'
+        '400':
+          description: Невалидные параметры
+  /api/v1/events/{event_id}:
+    get:
+      tags:
+        - EventsV1
+      summary: Получить событие по event_id и device_id
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema: { type: string }
+        - in: query
+          name: device_id
+          required: true
+          schema: { type: string }
+          description: Partition key
+      responses:
+        '200':
+          description: Найденное событие
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: Событие не найдено
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        event_id: { type: string,  example: "event-001" }
+        device_id: { type: string,  example: "abc-123" }
+        timestamp: { type: integer, format: int64, example: 1718920034567 }
+        type: { type: string,  example: "temperature" }
+        payload: { type: string,  example: "{\"t\":26}" }
+      required: [ event_id, device_id, timestamp, type, payload ]
+    EventPage:
+      type: object
+      properties:
+        events:
+          type: array
+          items: { $ref: '#/components/schemas/Event' }
+        page: { type: integer, example: 0 }
+        size: { type: integer, example: 100 }
+        total: { type: integer, example: 233 }

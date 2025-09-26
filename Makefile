@@ -142,6 +142,12 @@ publish-nexus:
 		echo "device-api не найден, выполняем публикацию Gradle..."; \
 		cd device-api && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
 	fi
+	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/device-api/1.0.0/event-api-1.0.0.pom >/dev/null 2>&1; then \
+		echo "event-api уже опубликован, пропускаем публикацию"; \
+	else \
+		echo "event-api не найден, выполняем публикацию Gradle..."; \
+		cd event-api && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
+	fi
 	@echo "Выгружаю avro"
 	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-avro/1.0.0/iot-avro-1.0.0.pom >/dev/null 2>&1; then \
 		echo "iot-avro уже опубликован, пропускаем публикацию"; \
