@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import ts.andrey.deviceservice.data.entity.DeviceEntity;
 import ts.andrey.deviceservice.data.repository.DeviceRepository;
 import ts.andrey.deviceservice.exception.DeviceServiceException;
-import ts.andrey.deviceservice.exception.TextException;
+import ts.andrey.deviceservice.exception.ErrorExceptionMessages;
 
 @Slf4j
 @Service
@@ -31,7 +31,7 @@ public class DeviceDbService {
     @WithSpan
     public DeviceEntity getDeviceByDeviceId(String deviceId) {
         return deviceRepository.findByDeviceId(deviceId)
-                .orElseThrow(() -> new DeviceServiceException(TextException.DEVICE_NOT_FOUND, deviceId));
+                .orElseThrow(() -> new DeviceServiceException(ErrorExceptionMessages.DEVICE_NOT_FOUND, deviceId));
     }
 
     public DeviceEntity updateTypeMeta(String deviceId, String deviceType, String meta) {

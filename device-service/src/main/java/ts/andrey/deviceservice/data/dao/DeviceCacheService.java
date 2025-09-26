@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-import ts.andrey.deviceservice.exception.TextException;
+import ts.andrey.deviceservice.exception.ErrorExceptionMessages;
 import ts.andrey.deviceservice.metrics.DeviceMetrics;
 import ts.andrey.dto.Device;
 
@@ -32,7 +32,7 @@ public class DeviceCacheService {
             return Optional.ofNullable(device);
         } catch (Exception e) {
             deviceMetrics.deviceRedisFailure();
-            log.error(TextException.REDIS_NOT_AVAILABLE.format(e.getMessage()), e);
+            log.error(ErrorExceptionMessages.REDIS_NOT_AVAILABLE.format(e.getMessage()), e);
         }
         return Optional.empty();
     }
@@ -47,7 +47,7 @@ public class DeviceCacheService {
             return device;
         } catch (Exception e) {
             deviceMetrics.deviceRedisFailure();
-            log.error(TextException.REDIS_NOT_AVAILABLE.format(e.getMessage()), e);
+            log.error(ErrorExceptionMessages.REDIS_NOT_AVAILABLE.format(e.getMessage()), e);
         }
         return null;
     }
@@ -60,7 +60,7 @@ public class DeviceCacheService {
             log.info("Device удален из REDIS: {}", deviceId);
         } catch (Exception e) {
             deviceMetrics.deviceRedisFailure();
-            log.error(TextException.REDIS_NOT_AVAILABLE.format(e.getMessage()), e);
+            log.error(ErrorExceptionMessages.REDIS_NOT_AVAILABLE.format(e.getMessage()), e);
         }
     }
 

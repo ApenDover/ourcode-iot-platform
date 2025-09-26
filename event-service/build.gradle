@@ -50,6 +50,9 @@ dependencies {
 	implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
 	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
 	implementation "com.fasterxml.jackson.core:jackson-annotations"
+	implementation "com.fasterxml.jackson.core:jackson-annotations"
+
+	implementation "ts.andrey:iot-avro:1.0.0"
 
 	compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
 	compileOnly 'org.projectlombok:lombok'
