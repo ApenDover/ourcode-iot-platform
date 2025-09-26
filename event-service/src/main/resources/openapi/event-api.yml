@@ -77,7 +77,7 @@ components:
         device_id: { type: string,  example: "abc-123" }
         timestamp: { type: integer, format: int64, example: 1718920034567 }
         type: { type: string,  example: "temperature" }
-        payload: { type: string,  example: "{\"t\":26}" }
+        payload: { type: string,  example: "'t':26}" }
       required: [ event_id, device_id, timestamp, type, payload ]
     EventPage:
       type: object

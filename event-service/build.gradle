@@ -12,7 +12,6 @@ group = 'ts.andrey'
 version = "${appVersion}"
 description = 'event-service'
 
-
 def nexusUrl = System.getenv("NEXUS_URL") ?: project.findProperty("nexusUrl") ?: "http://localhost:7777/repository/maven-releases/"
 def nexusUser = System.getenv("NEXUS_USER") ?: project.findProperty("nexusUser") ?: "admin"
 def nexusPassword = System.getenv("NEXUS_PASSWORD") ?: project.findProperty("nexusPassword") ?: "admin123"
@@ -47,14 +46,24 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+
+	implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
+	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
+	implementation "com.fasterxml.jackson.core:jackson-annotations"
+
+	compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
 	compileOnly 'org.projectlombok:lombok'
+
 	runtimeOnly 'io.micrometer:micrometer-registry-otlp'
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
 	annotationProcessor 'org.projectlombok:lombok'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 	testImplementation 'org.testcontainers:cassandra'
 	testImplementation 'org.testcontainers:junit-jupiter'
+
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -129,9 +138,9 @@ openApiGenerate {
 	generateModelTests = false
 	additionalProperties = [
 			interfaceOnly: "true",
-			useTags      : "true",
-			java8        : "true",
-			useJakartaEe : "true"
+			useTags     : "true",
+			java8       : "true",
+			useJakartaEe: "true"
 	]
 }
 
