@@ -21,8 +21,7 @@ public class CassandraServiceImpl implements CassandraService {
 
     @Override
     public Event getEvent(String deviceId, String eventId) {
-        final var eventIdUuid = UUID.fromString(eventId);
-        final var eventEntity = deviceEventDataService.getEvent(deviceId, eventIdUuid);
+        final var eventEntity = deviceEventDataService.getEvent(deviceId, eventId);
         return eventMapper.entityToEvent(eventEntity);
     }
 

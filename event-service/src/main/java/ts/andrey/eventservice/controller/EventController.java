@@ -17,7 +17,7 @@ public class EventController implements EventsV1Api {
 
     @Override
     public ResponseEntity<Event> apiV1EventsEventIdGet(String eventId, String deviceId) {
-        return ResponseEntity.ok(cassandraService.getEvent(eventId, deviceId));
+        return ResponseEntity.ok(cassandraService.getEvent(deviceId, eventId));
     }
 
     @Override

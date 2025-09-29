@@ -14,7 +14,7 @@ public interface DeviceEventRepository extends CassandraRepository<DeviceEventEn
 
 
     @Query("SELECT * FROM device_events WHERE device_id = ?0 AND event_id = ?1")
-    Optional<DeviceEventEntity> findByDeviceIdAndEventId(String deviceId, UUID eventId);
+    Optional<DeviceEventEntity> findByDeviceIdAndEventId(String deviceId, String eventId);
 
     @Query("SELECT * FROM device_events WHERE device_id = ?0 AND timestamp >= ?1 AND timestamp <= ?2 AND type = ?3 ALLOW FILTERING")
     List<DeviceEventEntity> findByDeviceIdAndTimestampBetweenAndType(

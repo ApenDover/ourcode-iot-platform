@@ -27,9 +27,9 @@ public class DeviceEventDataService {
     private final DeviceEventRepository deviceEventRepository;
     private final CassandraTemplate cassandraTemplate;
 
-    public DeviceEventEntity getEvent(String deviceId, UUID eventId) {
+    public DeviceEventEntity getEvent(String deviceId, String eventId) {
         return deviceEventRepository.findByDeviceIdAndEventId(deviceId, eventId)
-                .orElseThrow(() -> new EventServiceException(ErrorExceptionMessages.EVENT_NOT_FOUND, deviceId, eventId.toString()));
+                .orElseThrow(() -> new EventServiceException(ErrorExceptionMessages.EVENT_NOT_FOUND, deviceId, eventId));
     }
 
     public List<DeviceEventEntity> getEventsByFilter(EventFilterRequest filter) {
