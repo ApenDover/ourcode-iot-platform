@@ -2,24 +2,61 @@ package ts.andrey.eventservice.data.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.cassandra.core.CassandraTemplate;
+import org.springframework.data.cassandra.core.query.Criteria;
+import org.springframework.data.cassandra.core.query.Query;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ts.andrey.eventservice.data.entity.DeviceEventEntity;
 import ts.andrey.eventservice.data.repository.DeviceEventRepository;
 import ts.andrey.eventservice.exception.ErrorExceptionMessages;
 import ts.andrey.eventservice.exception.EventServiceException;
+import ts.andrey.eventservice.model.EventFilterRequest;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeviceEventDataService {
+    
+    private static final String TIMESTAMP_FIELD = "timestamp";
+    private static final String TYPE_FIELD = "type";
 
     private final DeviceEventRepository deviceEventRepository;
+    private final CassandraTemplate cassandraTemplate;
 
     public DeviceEventEntity getEvent(String deviceId, UUID eventId) {
         return deviceEventRepository.findByDeviceIdAndEventId(deviceId, eventId)
                 .orElseThrow(() -> new EventServiceException(ErrorExceptionMessages.EVENT_NOT_FOUND, deviceId, eventId.toString()));
+    }
+
+    public List<DeviceEventEntity> getEventsByFilter(EventFilterRequest filter) {
+        final var query = createBaseQuery(filter);
+        applyOptionalFilters(query, filter);
+        return cassandraTemplate.select(query, DeviceEventEntity.class);
+    }
+
+    private Query createBaseQuery(EventFilterRequest filter) {
+        return Query.query(Criteria.where("device_id").is(filter.getDeviceId()));
+    }
+
+    private void applyOptionalFilters(Query query, EventFilterRequest filter) {
+        if (filter.getFromTimestamp() != null) {
+            query.and(Criteria.where(TIMESTAMP_FIELD).gte(filter.getFromTimestamp()));
+        }
+
+        if (filter.getToTimestamp() != null) {
+            query.and(Criteria.where(TIMESTAMP_FIELD).lte(filter.getToTimestamp()));
+        }
+
+        if (filter.getType() != null) {
+            query.and(Criteria.where(TYPE_FIELD).is(filter.getType()));
+        }
+
+        query.limit(filter.getSize());
+        query.sort(Sort.by(Sort.Direction.DESC, TIMESTAMP_FIELD));
     }
 
 

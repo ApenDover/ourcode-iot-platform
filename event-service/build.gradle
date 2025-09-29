@@ -51,6 +51,7 @@ dependencies {
 	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
 	implementation "com.fasterxml.jackson.core:jackson-annotations"
 	implementation "com.fasterxml.jackson.core:jackson-annotations"
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 
 	implementation "ts.andrey:iot-avro:1.0.0"
 
@@ -61,13 +62,17 @@ dependencies {
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
 	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 	testImplementation 'org.testcontainers:cassandra'
 	testImplementation 'org.testcontainers:junit-jupiter'
+	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testCompileOnly "org.projectlombok:lombok"
+	testAnnotationProcessor "org.projectlombok:lombok"
 }
 
 checkstyle {
