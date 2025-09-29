@@ -11,8 +11,12 @@ DCB=docker compose -f $(COMPOSE_FILE_BUILD)
 DCL=docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_FILE_LOCAL)
 ACTUATOR_URL=http://localhost:
 LOGGER_NAME=ts.andrey
+PROJECT_ROOT := $(shell pwd)
+PROTO_DIR := $(PROJECT_ROOT)/router-manager-service/protobuf
+GENPROTO_DIR := $(PROJECT_ROOT)/router-manager-service/internal/ports/genproto
+PROTO_FILES := $(wildcard $(PROTO_DIR)/*.proto)
 
-.PHONY: up down downv restart logs help exec logs-
+.PHONY: up down downv restart logs help exec logs- proto-gen
 
 help: ## Показать список доступных команд
 	@echo "Usage: make <command>\n"
@@ -24,7 +28,7 @@ help: ## Показать список доступных команд
 	@echo "  \033[36mset-log-<level>-<port>\033[0m  	Установить логирование (пример: make set-log-debug-8080)"
 	@echo "  \033[36mupdate-<service>\033[0m  		Пересобрать проект и развернуть контейнер"
 
-up:  ## Запустить контейнеры в фоне
+up: proto-gen clear  ## Запустить контейнеры в фоне
 	$(DC) up nexus -d
 	@echo "⏳ Жду пока контейнер nexus станет healthy..."
 	@until [ $$(docker inspect --format='{{.State.Health.Status}}' nexus) = "healthy" ]; do \
@@ -37,13 +41,14 @@ up:  ## Запустить контейнеры в фоне
 	done
 	$(DCB) up -d iot-common
 	$(DCB) up -d device-api
+	$(DCB) up -d router-manager-proto-client
 	@until curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-common/1.0.0/iot-common-1.0.0.pom >/dev/null 2>&1; do \
     	echo "жду публикацию iot-common.." & sleep 10; \
     done
 	$(DC) up -d
 	@make keycloak-setup-users
 
-up-local: ## Запустить все контейнеры в фоне
+up-local: clear ## Запустить все контейнеры в фоне
 	$(DCL) up -d
 	@make keycloak-setup-users
 
@@ -90,18 +95,23 @@ set-log-%:
 exec-%: ## Зайти в контейнер по имени
 	docker exec -it $* bash
 
-boot: nexus-deploy  ## локально пересобрать образы
+boot: nexus-deploy proto-gen  ## локально пересобрать образы
 	docker image rm infrastructure-device-collector -f
 	docker image rm infrastructure-device-service -f
 	docker image rm infrastructure-event-collector -f
 	docker image rm infrastructure-kafka-producer -f
 	docker image rm infrastructure-failed-events-processor -f
-	cd event-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
+	docker image rm infrastructure-router-manager-service -f
+	docker image rm infrastructure-device-api -f
+	docker image rm infrastructure-iot-avro -f
+	docker image rm infrastructure-iot-common -f
+	docker image rm infrastructure-router-manager-proto-client -f
 	cd event-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-service && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd kafka-producer && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd failed-events-processor && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
+	cd router-manager-service && go build -o router-manager ./cmd/app
 
 rebuild: nexus-deploy  ## локально пересобрать образы
 	cd event-collector && ./gradlew clean build
@@ -130,22 +140,30 @@ publish-nexus:
 		echo "device-api уже опубликован, пропускаем публикацию"; \
 	else \
 		echo "device-api не найден, выполняем публикацию Gradle..."; \
-		cd device-api && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew publish; \
+		cd device-api && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
 	fi
 	@echo "Выгружаю avro"
 	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-avro/1.0.0/iot-avro-1.0.0.pom >/dev/null 2>&1; then \
 		echo "iot-avro уже опубликован, пропускаем публикацию"; \
 	else \
 		echo "iot-avro не найден, выполняем публикацию Gradle..."; \
-		cd iot-avro && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew publish; \
+		cd iot-avro && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
 	fi
 	@echo "Выгружаю common"
 	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-common/1.0.0/iot-common-1.0.0.pom >/dev/null 2>&1; then \
 		echo "iot-common уже опубликован, пропускаем публикацию"; \
 	else \
 		echo "iot-common не найден, выполняем публикацию Gradle..."; \
-		cd iot-common && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew publish; \
+		cd iot-common && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
 	fi
+	@echo "Выгружаю proto"
+	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/router-manager-proto-client/1.0.0/router-manager-proto-client-1.0.0.pom >/dev/null 2>&1; then \
+		echo "router-manager-proto-client уже опубликован, пропускаем публикацию"; \
+	else \
+		echo "router-manager-proto-client не найден, выполняем публикацию Gradle..."; \
+		cd router-manager-proto-client && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
+	fi
+	@echo "Выгружаю proto"
 
 keycloak-setup-users: wait-for-keycloak
 	@chmod +x ./infrastructure/keycloak/create-admin.sh
@@ -158,3 +176,51 @@ keycloak-setup-users: wait-for-keycloak
 nexus-deploy:
 	$(DC) up nexus -d
 	@make publish-nexus
+
+proto-gen:
+	@echo "Generating Go code from .proto files..."
+	@mkdir -p $(GENPROTO_DIR)
+	@docker run --rm \
+		-v $(PROTO_DIR):/protos \
+		-v $(GENPROTO_DIR):/gen \
+		rvolosatovs/protoc \
+		--proto_path=/protos \
+		--go_out=/gen \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=/gen \
+		--go-grpc_opt=paths=source_relative \
+		$(notdir $(PROTO_FILES))
+	@echo "Done!"
+
+clear:
+	docker rm -f device-api iot-common iot-avro router-manager-proto-client
+
+jmeter: j-prepare
+	JVM_ARGS="-Xms512m -Xmx2g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/router-manager-service.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o ./report
+
+j-prepare:
+	@docker exec -i -e PGPASSWORD=$(APP_ROUTER_MANAGER_DATASOURCE_PASSWORD) postgres_router_manager \
+    		psql -U $(APP_ROUTER_MANAGER_DATASOURCE_USERNAME) -d $(APP_ROUTER_MANAGER_DATASOURCE_DB) \
+    		-c "TRUNCATE TABLE routers CASCADE;"
+
+	@docker exec -i -e PGPASSWORD=$(APP_ROUTER_MANAGER_DATASOURCE_PASSWORD) postgres_router_manager \
+    		psql -U $(APP_ROUTER_MANAGER_DATASOURCE_USERNAME) -d $(APP_ROUTER_MANAGER_DATASOURCE_DB) \
+    		-c "INSERT INTO public.routers (id, serial_number, ip_address, last_seen_at, created_at) \
+    			VALUES ('581811df-8b37-44fd-84ce-9b7791b0e4c0', '8354d1bd-ea67-494f-90fc-4b88bd874e95', null, null, '2025-09-19 19:56:18.389983')\
+    			ON CONFLICT DO NOTHING;"
+
+	@docker exec -i -e PGPASSWORD=$(APP_ROUTER_MANAGER_DATASOURCE_PASSWORD) postgres_router_manager \
+    		psql -U $(APP_ROUTER_MANAGER_DATASOURCE_USERNAME) -d $(APP_ROUTER_MANAGER_DATASOURCE_DB) \
+    		-c "INSERT INTO public.commands (id, router_id, command_type, payload, status, sent_at, acked_at, created_at) \
+    			VALUES ('9354d1bd-ea67-494f-90fc-4b88bd874e95', '581811df-8b37-44fd-84ce-9b7791b0e4c0', 'FALLBACK', '{}', 'PENDING', null, null, '2025-09-19 19:56:18.410128')\
+    			ON CONFLICT DO NOTHING;"
+
+	@docker exec -i -e PGPASSWORD=$(APP_ROUTER_MANAGER_DATASOURCE_PASSWORD) postgres_router_manager \
+    		psql -U $(APP_ROUTER_MANAGER_DATASOURCE_USERNAME) -d $(APP_ROUTER_MANAGER_DATASOURCE_DB) \
+    		< ./infrastructure/jmeter/routers.sql
+
+	@docker exec -i redis redis-cli -a $(REDIS_PASSWORD) FLUSHALL
+	@docker exec -i redis-rms redis-cli -a $(APP_ROUTER_MANAGER_REDIS_PASSWORD) FLUSHALL
+
+gotest:
+	cd router-manager-service && go test ./internal/it/routes_test

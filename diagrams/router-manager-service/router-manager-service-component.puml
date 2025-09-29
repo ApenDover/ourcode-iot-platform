@@ -1,0 +1,30 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+Container_Boundary(app, "router-manager-service") {
+    Component(grpc_server, "GRPCServer", "gRPC сервер", "gRPC", "microservice")
+    Component(manager_service, "ManagerService", "Бизнес-логика", "class")
+    Component(command_service, "CommandService", "Сервис команд", "class")
+    Component(router_service, "RouterService", "Сервис роутеров", "class")
+    Component(command_repo, "CommandRepository", "Postgres репозиторий", "class")
+    Component(router_repo, "RouterRepository", "Postgres репозиторий", "class")
+}
+
+System_Ext(router, "Роутер", "IoT устройство")
+System_Ext(admin_client, "Админ клиент", "Управление")
+System_Ext(postgres, "PostgreSQL", "База данных", "storage", "storage")
+System_Ext(prometheus, "Prometheus", "Метрики", "monitoring")
+
+Rel(router, grpc_server, "PollCommands()", "gRPC")
+Rel(router, grpc_server, "AckCommand()", "gRPC")
+Rel(admin_client, grpc_server, "SendCommand()", "gRPC")
+Rel(grpc_server, manager_service, "Вызов методов", "Go")
+Rel(manager_service, command_service, "create/get commands", "Go")
+Rel(manager_service, router_service, "create/get routers", "Go")
+Rel(command_service, command_repo, "CRUD операций", "Go")
+Rel(router_service, router_repo, "CRUD операций", "Go")
+Rel(command_repo, postgres, "SQL запросы", "SQL")
+Rel(router_repo, postgres, "SQL запросы", "SQL")
+Rel(grpc_server, prometheus, "Метрики", "HTTP")
+@enduml

@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Sequential Command-Poll-Ack Test">
+      <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Poll">
+        <intProp name="ThreadGroup.num_threads">100</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <intProp name="LoopController.loops">-1</intProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="PollCommands">
+          <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf</stringProp>
+          <stringProp name="GRPCSampler.host">localhost</stringProp>
+          <stringProp name="GRPCSampler.port">8890</stringProp>
+          <stringProp name="GRPCSampler.fullMethod">router_manager.RouterManagerService/PollCommands</stringProp>
+          <stringProp name="GRPCSampler.deadline">5000</stringProp>
+          <stringProp name="GRPCSampler.requestJson">{&quot;router_serial&quot;: &quot;${router_serial}&quot;}</stringProp>
+          <stringProp name="GRPCSampler.libFolder"></stringProp>
+          <stringProp name="GRPCSampler.metadata"></stringProp>
+          <boolProp name="GRPCSampler.tls">false</boolProp>
+          <boolProp name="GRPCSampler.tlsDisableVerification">false</boolProp>
+          <stringProp name="GRPCSampler.channelAwaitTermination">5000</stringProp>
+          <stringProp name="GRPCSampler.maxInboundMessageSize">4194304</stringProp>
+          <stringProp name="GRPCSampler.maxInboundMetadataSize">8192</stringProp>
+        </vn.zalopay.benchmark.GRPCSampler>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">def routers = [
+&quot;0ab56bcf-7edb-4e13-95a9-a69b6b36ab20&quot;,&quot;2bea003f-1b07-4d15-82dc-fc58e8a74dc6&quot;,&quot;479ab650-2bcb-434f-877c-1881fb4c7a32&quot;,&quot;878e4ede-20fc-45eb-a06d-50359dc5604c&quot;,&quot;2a777bd3-4384-470f-818b-02609d5b2992&quot;,&quot;bdd1563e-065f-4b3a-9f96-e54958722106&quot;,&quot;5374ba89-0999-4b64-b4b9-87943041eb08&quot;,&quot;050b132e-4d4c-4e57-ae4a-6e5dbe9ef2e0&quot;,&quot;9fa4d355-926d-4d04-b62d-281c676e23ac&quot;,&quot;dff43546-9620-4af6-b03e-ed79eac42277&quot;,&quot;64696d05-282d-45ef-8b60-98d40b55b288&quot;,&quot;dba4ebe3-3fb4-43b6-9321-d0c6881a98dd&quot;,&quot;828bbc2c-75ad-4fde-847c-15d814f3117c&quot;,&quot;2361d4ce-13b0-46e2-b89a-2835cd39e44c&quot;,&quot;fe3261af-417e-4bca-b1e7-66d11bb37523&quot;,&quot;6a0b60e4-1e80-4f97-a4e1-12699a9f0526&quot;,&quot;bbd24203-e966-4cb7-8889-c3ffb12c2cda&quot;,&quot;ded777c0-5558-46d4-8491-6e974f5d25d0&quot;,&quot;7c2b95b3-7682-48b2-9c66-d250f044a40a&quot;,&quot;70d12f37-6cf7-4888-ad0b-187a6adf1278&quot;,&quot;da6c8971-8bec-4043-86c6-a8ee7dc82551&quot;,&quot;d9589c3e-54f2-491f-a50c-1979832d91de&quot;,&quot;d7630551-55f1-4369-83bf-6261087c503d&quot;,&quot;db6b0e10-9164-461f-9a77-35a55879b9bb&quot;,&quot;4b3a4a15-644b-47ca-af37-2b7124147f8a&quot;,&quot;9fd3b77d-c475-4bd2-874f-decbc3848981&quot;,&quot;3c4e03cb-65cf-499e-a743-c88c9ac54834&quot;,&quot;5c2ea800-1222-4eaf-8fa5-ae01bb8a87b4&quot;,&quot;0d2583ef-5cfe-4679-9d8b-73d447666d95&quot;,&quot;e0c76bc0-a806-41c6-96b9-456fc523af29&quot;,&quot;3f33a5cf-1ec5-4666-97ac-1abd35d9a473&quot;,&quot;a30862eb-c0d6-482b-bd45-0beb442207be&quot;,&quot;5e361432-2242-43c0-9289-afd155224066&quot;,&quot;b50152d8-be5f-4de0-8015-7648b2b924be&quot;,&quot;bcd4171d-1f0a-46a5-a86c-d46d720e2a84&quot;,&quot;8feb054c-b4d0-4b5c-bd1b-cd175071274b&quot;,&quot;0047908e-6729-47db-8ae3-21c0bbdd5174&quot;,&quot;f85bf169-dc6f-4cd4-b253-29de8c632382&quot;,&quot;4367cbef-be8c-44e6-a46a-b7ef27fb95bb&quot;,&quot;10d9f37b-2686-49d5-80f8-39381ddbe335&quot;,&quot;25071ce4-4fee-4c7b-be87-d719e94b5b4f&quot;,&quot;4f09fd85-dd20-4b30-b745-9d764aee4baa&quot;,&quot;2eb00e98-49f2-4544-859e-f5dc790012cb&quot;,&quot;374103d8-4af4-42d8-ab59-23d002073c64&quot;,&quot;8d874d6e-56f5-424b-9119-9e6ee7709e40&quot;,&quot;2c1fd4ae-ad96-46ff-bd12-2749cb8123a8&quot;,&quot;130b3856-17d4-4c3d-b624-2300bec18120&quot;,&quot;9ae1cde2-892d-4a04-834b-31bfd8f4fddd&quot;,&quot;27b91b84-a138-4860-aec0-a562f49c6c33&quot;,&quot;fb6b776f-ea91-42cb-a4fe-681aef091c13&quot;,&quot;e43e305e-ccc6-4636-878e-001b9c4bd30c&quot;,&quot;16f7e192-f6c9-45d1-90f1-00033aaf2475&quot;,&quot;18a73bdf-94c5-4d81-82a3-3b4845289e11&quot;,&quot;401ef7af-c543-4585-a04f-b2376c72dd12&quot;,&quot;e83b32dd-68ee-4d99-8912-334c0ac6f7a6&quot;,&quot;9f778a30-693b-46eb-b100-ca9e58f41a9c&quot;,&quot;04d01eba-c36d-4b30-883e-10367838e211&quot;,&quot;89890675-af63-47e1-acab-5860e4e04932&quot;,&quot;1ff189e9-522e-46f0-a723-719f12e7e02b&quot;,&quot;4243a685-35dd-4f62-8ddd-016d77f3ef10&quot;,&quot;f8d200da-d4e0-4570-8944-1065415b5aa5&quot;,&quot;f13b2441-d3e6-433f-a21c-9480f955ef67&quot;,&quot;4cb61942-7fc6-49b1-92bd-ce303e89a49f&quot;,&quot;98c5975f-baf8-4784-85ce-d5e11d019e66&quot;,&quot;4f192b0b-4c5b-4971-9a9e-3e8985eeb107&quot;,&quot;440eb059-2b1c-4403-b4c6-df954edb1788&quot;,&quot;3f26b69e-1d1c-47e4-8e54-e2c5ed2e633d&quot;,&quot;683be523-ae3a-45a9-a379-f135811eaee8&quot;,&quot;5f30a5bc-4f82-4cf3-aee3-b0fc9a27c501&quot;,&quot;8958c731-12e9-48bb-84e9-1f71a2637d76&quot;,&quot;f6bae46c-f911-4478-98f4-d1edbc6a3a09&quot;,&quot;a64cd8ad-5a9c-4ebc-91ed-aec5b4fecb9a&quot;,&quot;e35c2966-4de5-4f99-8d29-a9a91eef1a55&quot;,&quot;f3100ba3-c862-4f7f-adb7-61779bfe0b9b&quot;,&quot;c44cb0aa-7d85-4158-984b-502c181007f2&quot;,&quot;ff17b856-eb26-4fcb-99c9-b9db5677f2a2&quot;,&quot;777852d2-8b5e-451f-b4e6-1e56e09f77e1&quot;,&quot;a6cae25e-08b9-4cfe-94f1-cf6f9fa403cf&quot;,&quot;03875f2d-04a3-4fb6-be98-868a6ff9a909&quot;,&quot;40dfda0d-8abf-46fa-9639-8816fe4977b4&quot;,&quot;3029da26-9763-459b-90db-578a8ff02120&quot;,&quot;242e3fad-1f42-48dd-8293-00483c14eaeb&quot;,&quot;b16a0f7e-dced-4a44-afe8-ebef4846c3b5&quot;,&quot;91137e59-5299-41ec-b473-d675a6394f7d&quot;,&quot;d3700655-d641-4f7d-8f3c-31a96797affb&quot;,&quot;f583d993-c0fd-46b3-b127-6bc383653688&quot;,&quot;1f270adb-b94f-4338-a06a-8ae39c12bf34&quot;,&quot;abcaa724-3710-4344-af86-cb906be30934&quot;,&quot;7becbcfc-6b58-4049-9094-978020baf397&quot;,&quot;2c50e700-2d49-402d-ab54-b251d05d5655&quot;,&quot;99d53c12-2048-4f64-8197-e32ece1a90a3&quot;,&quot;75cc5a5d-aad8-4305-b90d-997e74b0b381&quot;,&quot;b18a2c1a-b8e4-40fc-8021-2998a3cf955d&quot;,&quot;5d5cbb79-1dcd-4eb0-85e1-fbb7c15cba65&quot;,&quot;241c3212-7f84-4f30-b4aa-9c05cc872053&quot;,&quot;676160a2-3d2c-484e-850f-aef7a330f375&quot;,&quot;86c0abfc-2c8f-4aaf-87ee-f8e3c5d9d74d&quot;,&quot;d0f7b838-28c8-407d-9fe4-6b94f5eb4844&quot;,&quot;717709d8-c94d-4ab3-b4ca-2d061b75498e&quot;,&quot;d0c88932-8db0-4ff6-bff0-c32393399176&quot;,&quot;beb3d6be-853c-4e0d-b4dc-5f43d0fe8a6d&quot;,&quot;3a6e4c61-91a4-427e-8bdf-17c228b8267f&quot;,&quot;82bcbc26-a936-4765-9cf7-69461e8dff06&quot;,&quot;cbb07547-a77c-4714-9873-afe4b71615db&quot;,&quot;a6834156-03d8-4093-9287-46fe6030029d&quot;,&quot;81dc08bd-b759-4a83-8cd2-18e4ba4e46a2&quot;,&quot;5d9bb471-f126-411d-82dc-d9d02e6750d0&quot;,&quot;ae11d42d-7d4b-4d11-9efd-59d6201722e8&quot;,&quot;67b8be76-f7e0-4623-af9a-27de79bb8160&quot;,&quot;1f2e83eb-6106-4c3a-b320-3fb448986fa6&quot;,&quot;798fe987-d1ab-4424-9c75-c30148c3c9f4&quot;,&quot;cbb744cd-cc07-4500-a646-8201241178eb&quot;,&quot;9ebf8445-18fa-4a33-89d4-38fa10661465&quot;,&quot;afd37b9d-c1be-4872-97f0-b34363dc9208&quot;,&quot;7e4837ee-64ba-4ca8-a59e-9e1f27cbec76&quot;,&quot;6abe8792-377d-435b-9f57-769116b31c6e&quot;,&quot;fbb8b4b6-1005-4b36-8f0e-e4327f016e11&quot;,&quot;017a3aa6-6383-4309-875d-1afd3ad023c3&quot;,&quot;0d7ba63d-c8c9-4a3c-9dfa-3353b9dc28f8&quot;,&quot;0d651ca4-438f-423c-aa33-0921082510a9&quot;,&quot;7fa55ae8-8153-4d1f-a6ef-f905b8ca85e3&quot;,&quot;c6ea5f25-e967-425a-bb40-ff4a1775bf82&quot;,&quot;feb8e23e-4a8c-40b9-8a52-fb9f151497c2&quot;,&quot;4379a6d9-fb05-4876-8eff-7bfc20f4faee&quot;,&quot;789e9d4d-8570-415f-9f57-dfd1dd3b5793&quot;,&quot;8645d6dc-9dcf-4642-bd88-0904305400d4&quot;,&quot;ebf5701e-5993-4f4a-8c32-d1f14c225f34&quot;,&quot;402119f0-0687-4df0-86dd-98fd77033730&quot;,&quot;64ede8b6-510a-4499-9767-c21717e3eaa1&quot;,&quot;a1038ec6-e596-4de3-8066-f9696763fd6e&quot;,&quot;3ad6f96c-018a-4f15-aa3e-40f32d9a361e&quot;,&quot;a905cf88-3b4d-4f0e-b7fe-8e11117fb989&quot;,&quot;9bf411cd-227a-4793-a455-438ae0bb2581&quot;,&quot;d794e4cb-3fdc-49b6-affd-69475a16b6df&quot;,&quot;3a04da5a-f088-458e-9f27-04ceaaef2971&quot;,&quot;b69ef6d1-c86d-4790-b816-6c560c69dad7&quot;,&quot;1dd090bf-7aa8-4afe-b3a8-4c36b6609cef&quot;,&quot;1d4959f4-f466-4eda-b82b-9dd542c71ab7&quot;,&quot;50e1a5e5-08eb-449d-8c34-34f81bb3526c&quot;,&quot;6e737e52-b44b-4b20-a07a-c1d281ec45df&quot;,&quot;3e6069d2-9e6b-4463-93c2-4c66898a104a&quot;,&quot;d9f5e606-f0a3-4dfb-8628-5aa9797527ce&quot;,&quot;a3042de1-08c3-4735-b6b3-0c89936d42ce&quot;,&quot;2abc9f3f-3dc5-47be-9539-b7ba1f528aa9&quot;,&quot;76ad37c0-a598-475f-aa64-5df7d24943a0&quot;,&quot;8387e32a-deb4-4908-888d-008834d60a6b&quot;,&quot;02c68a74-a8c3-4889-8c1d-a87d4602dfc2&quot;,&quot;e16a19c5-31c9-4bbe-bf1c-322c4e4c67a8&quot;,&quot;6bac0df1-5ded-4758-8b79-6e5b89743850&quot;,&quot;fcbcf07f-b426-42d0-beac-90e64c1496ba&quot;,&quot;16f40ef2-f2cd-486b-bea4-59d20e6d893a&quot;,&quot;f977d628-b1ee-4d5a-aaf8-1a6caaf7d262&quot;,&quot;bc9de532-2f30-4d87-8f45-4d3cfba5e84c&quot;,&quot;fb7b58d3-7831-4cee-bd28-50d7d28055b5&quot;,&quot;f09b3ae8-299b-4371-8917-965c754e17b7&quot;,&quot;a322e579-c8da-4885-ba33-337f774fd53b&quot;,&quot;aa0c8d0f-9429-4cd7-9e02-7d461388da67&quot;,&quot;9cfdcac5-3e3b-45fc-b634-f4db236ca55c&quot;,&quot;24b80729-3ad4-4fb9-ae49-9e078b25a7ac&quot;,&quot;bbee6bf3-ed18-477c-8b5c-e854b543dc5f&quot;,&quot;0eae1d63-00c6-4313-b9e5-a57ef32c4a00&quot;,&quot;2c54e7ab-394d-4db3-9f3c-d71d92c204fc&quot;,&quot;4e747070-9ace-4c89-8b98-bf3c27f4f05a&quot;,&quot;cd39f403-acf7-4602-a544-4bd7d33d74df&quot;,&quot;8e0b7759-6846-4a61-89eb-c29bc05a836c&quot;,&quot;07277011-8f96-461b-b170-d00a27965b21&quot;,&quot;f4801f5b-4831-4a9c-bcdd-13272d3248cd&quot;,&quot;799fc28e-13c0-4367-90e2-417d523aa065&quot;,&quot;e054765e-e6e2-4112-9c5e-5f45cbd64d75&quot;,&quot;881d632f-590f-4cfe-9c0c-c78897933e1f&quot;,&quot;8b759a61-1aee-4fab-8b6a-0ff93f557871&quot;,&quot;b9a55a03-8438-4782-8d35-a6cd71fc307a&quot;,&quot;1cc0e346-d7ef-40e9-9ea3-b9343eb14b6b&quot;,&quot;b6345f9f-c786-47d6-96c3-42c49ad29769&quot;,&quot;251625ee-6917-4cc2-a278-3150338b2b83&quot;,&quot;4bbd0bd1-51bf-430b-8f93-6e811fcb6ec3&quot;,&quot;cb9573f5-acfd-4206-86e8-d987d5b447a6&quot;,&quot;0a81a02b-fb47-4aa8-a50c-4a00f8ad7868&quot;,&quot;912331a7-de45-493d-844e-0c2fc871b4d8&quot;,&quot;21a3ef1b-0693-42a7-97c9-b6dbff082841&quot;,&quot;bd7f4483-052e-4576-95a8-bf3f397fab59&quot;,&quot;f4812ced-5c0b-46d0-b374-871bdf377ba9&quot;,&quot;eede6c7f-7fe1-46bd-a025-6baf4c2537c6&quot;,&quot;bf050199-a0bc-49a5-b7ae-9790bbb71566&quot;,&quot;e951352d-947d-41aa-9753-14465e9f8f22&quot;,&quot;2395182c-c925-4092-a56f-64ec953e9262&quot;,&quot;af2064ed-beaa-493a-80a6-e567a1f72e77&quot;,&quot;d13d4252-b7f6-451c-a8fa-9c2a21a26e7b&quot;,&quot;2d504b0b-d798-48a8-b48a-fb98c9644e01&quot;,&quot;cd7c969a-42aa-44d4-9175-c7abb2222432&quot;,&quot;84dff722-98be-46c7-a38d-26371020ef83&quot;,&quot;c1c46cc5-7b50-461f-bab3-747fe0900f2f&quot;,&quot;bc1f280c-31bc-42d7-86fb-6711454c3f24&quot;,&quot;5a22fe25-612b-4874-8c1a-46588f88ea1a&quot;,&quot;670d1e07-fd7e-4ceb-86a7-55f24128fe1f&quot;,&quot;12e7c60a-a38f-4042-986b-9fdbb61eb3d8&quot;,&quot;942cb5fe-10bf-473e-b814-63c4da11a7f2&quot;,&quot;528b1fc5-a80f-47af-b541-01052ed0c5f8&quot;,&quot;0d9e2d8e-838b-4f10-929d-4bf7b2300129&quot;,&quot;90e941e1-a959-4a0a-a5ab-d4a50885d078&quot;,&quot;b5ebcede-31b8-4818-91ba-fa035bdecd3f&quot;,&quot;453d5960-e85b-4f58-95f3-f44811db5ced&quot;,&quot;2870b08b-58cf-444a-905d-a65a6fc4968f&quot;,&quot;337647ea-bdbb-47cd-89c0-5ae3748b4609&quot;,&quot;13586564-8c29-4ec1-bf53-377f37aa4033&quot;,&quot;61000969-696b-46cf-b941-da06063112e5&quot;,&quot;4a767e12-12ee-4616-81dd-a068d224028b&quot;,&quot;95caf068-1d86-4539-93b6-0efdb75f1b77&quot;,&quot;e9aac578-4039-4439-9724-0532476aa622&quot;,&quot;7db758da-8fa3-44bf-ad2d-ab41cc5dc7b7&quot;,&quot;151caccf-f2d7-4f52-ae8d-33e66ce406f6&quot;,&quot;519cbf5f-6427-40ff-8fd0-c21a48054329&quot;,&quot;cf1bad08-f803-422e-ad12-5a11a176c5bf&quot;,&quot;9027dad6-91c6-4eeb-9804-097bb90a31de&quot;,&quot;bd6e1890-2dd8-4008-87f9-3d07a4dbcb9a&quot;,&quot;01c312ec-a3fe-4aff-bd3c-ec554f75438e&quot;,&quot;98a649cc-f50b-4ca4-a7db-194fdddccfdb&quot;,&quot;e7220b35-c0c9-401f-90fc-74f554b8d931&quot;,&quot;a80e9310-a22a-48b5-a487-18cee52d3c56&quot;,&quot;c3c69c8b-21bd-40e6-b035-878efd392f64&quot;,&quot;d0784658-0d75-4bf6-bec8-2ce59229f24f&quot;,&quot;bf56dca4-ece6-4dff-bbc0-34a70158cd90&quot;,&quot;cbd6b1bc-2931-40ec-8e6a-774289602729&quot;,&quot;af198d89-ec0c-494b-80d1-247851475587&quot;,&quot;40146cf7-ed19-40ba-873c-7cc389501b3a&quot;,&quot;8008d62c-7fdf-487b-9a62-440ca648a1f1&quot;,&quot;b561b346-a20f-408d-9f86-01a9cedb41b3&quot;,&quot;a199f1e7-b793-47d5-be61-2f5d62f5be50&quot;,&quot;0e3ab2fb-37b0-4993-b566-9007dff912e2&quot;,&quot;44e398e7-1a29-4f59-9f21-d111dec4a381&quot;,&quot;c2d76c01-9f0b-4220-b876-92aa1ded7054&quot;,&quot;cad131b5-a93a-4da5-b1a0-9f0af76af0e9&quot;,&quot;dc6b8281-5494-4014-a4f5-343040a0bd87&quot;,&quot;f574ea17-3498-4a25-ac7a-f0a1e5206ecd&quot;,&quot;9332c824-0f81-4936-b538-6264ad5e2d42&quot;,&quot;dcf45b61-2ad5-4dfe-855e-1092e848f5fe&quot;,&quot;1f3866c1-41d8-4252-9972-b83e8dde1b79&quot;,&quot;f518a005-a2f0-4203-98f7-b6ad858d8be6&quot;,&quot;02a611f9-f42b-4033-83c7-2cd8ffc4ba18&quot;,&quot;c85ace67-3289-4177-bf7a-d6bb2221cdb5&quot;,&quot;c53a2c4f-ca09-461c-aab6-20c686f52cb3&quot;,&quot;01f05be5-b646-49ce-8250-de67ff390a9e&quot;,&quot;88f2bb9a-bf3a-4f90-897e-f442dd024041&quot;,&quot;ff695019-5fbe-4267-9558-3175d189c80b&quot;,&quot;2f3cd180-81fb-4cd1-a805-ee2e288f024b&quot;,&quot;1b92a66c-ab77-4187-aae9-16abfc8af4a1&quot;,&quot;81aa6f0f-7b3e-4790-ac7a-7051fcd70e81&quot;,&quot;cd7ba786-1275-441d-9eaa-348bfbe23d60&quot;,&quot;a2293ee5-490e-45ca-b7d4-11ddf71e6c80&quot;,&quot;4925ca9c-1fe0-4321-8b21-1f69c066df7a&quot;,&quot;f04f2192-2c57-4c93-96f4-7cb5126ba11b&quot;,&quot;35956b5c-44b5-44c5-9506-54e6e574992f&quot;,&quot;856172f1-7d25-4385-a566-c379011962c9&quot;,&quot;17bf33cd-a820-48f5-ad14-d3803139a67d&quot;,&quot;c1c1a4b6-5822-4805-8eca-8d861e93453d&quot;,&quot;10764e82-5852-4e5a-a4c1-204bae955933&quot;,&quot;5407bbca-c803-403a-b531-88b9ccef2242&quot;,&quot;029abfac-7491-48d8-b5fb-ccd4ce265bd2&quot;,&quot;ce653dc8-01d5-4936-8547-265603446c35&quot;,&quot;44b8e93e-55bc-4a84-b13c-846c21e06d22&quot;,&quot;8a1ca77c-b0b4-4bb7-943e-6c2f5cfb2978&quot;,&quot;712179d9-af89-422d-8b89-f7a26bbab4c3&quot;,&quot;7688d94d-3279-42bc-9a0c-8699c6fd56e6&quot;,&quot;b338f127-edb7-4d10-b4ca-725a4b569c46&quot;,&quot;8a958606-3456-46c9-add0-1c8c7c5830d5&quot;,&quot;82b5ccdc-f863-41bd-b0da-bde6a7d86b3b&quot;,&quot;b4cfee95-37da-4301-b689-f4521bc248a3&quot;,&quot;4043d04a-18db-41ed-81b1-96d7d7674ea4&quot;,&quot;df32d594-1c1c-4e2d-93b0-2f5c4ea32006&quot;,&quot;5759b9ed-58b5-458f-a1bb-c444c31bae87&quot;,&quot;f89e91ae-6a9c-42c2-ae56-fd4dfc6846c7&quot;,&quot;d95d4759-334c-447b-a424-70827b6b756b&quot;,&quot;d0897b39-b94b-4bb6-8609-4fbd7636b742&quot;,&quot;aadc6cfc-edd8-4fe3-90a3-a271ebffe872&quot;,&quot;62fd0c13-99a3-47d6-a804-2ce963c66936&quot;,&quot;2bedadec-4524-4f39-94f9-e2757b956f6c&quot;,&quot;2ce3e77d-d129-421d-b76b-ef2255d15565&quot;,&quot;5d6be631-f9f4-4d7b-aafb-d7ba35fea07a&quot;,&quot;e00a667f-0b0e-46a4-9737-77f90f0fad44&quot;,&quot;73a3e13e-928b-49e3-8c58-9a664dc20153&quot;,&quot;8706c516-5ada-4389-b35e-6b989be86326&quot;,&quot;bef93171-8113-44de-a1ca-ef3b795d8e43&quot;,&quot;c65a1ab2-2988-482e-9c42-bf9a4ae3541e&quot;,&quot;13951221-ff24-40ce-8e4e-55758b0cda7d&quot;,&quot;919b91d3-53d2-4f6b-a99d-7969cd872588&quot;,&quot;15d1c0e1-3bbb-4a41-8ab1-99e9ad5bc382&quot;,&quot;ae294563-c11a-4537-8d30-72b72488e04f&quot;,&quot;82b21eaa-3153-4dcf-965c-6869f23d458d&quot;,&quot;4ede16fc-a795-48df-8ba2-4210a1a604ae&quot;,&quot;d8db22b6-f173-4e53-aaf2-0fe5022a268e&quot;,&quot;1282ccae-54e0-4bf4-878f-980251aab881&quot;,&quot;86a8f739-c966-4be4-9afa-5da03951e94e&quot;,&quot;b1789b50-f773-48e9-ae2f-9314e596255d&quot;,&quot;b2640b44-3491-4ce2-9f02-2cee5ff921d5&quot;,&quot;ff2e0aac-8ed7-4f0f-b3be-6285872cdb05&quot;,&quot;5ae9dc7a-f097-4c19-90c8-faa7700e835d&quot;,&quot;6eb11d94-2435-448a-bb3e-bff3fe6796f9&quot;,&quot;261e3c82-7874-48dd-a53b-19ca18907099&quot;,&quot;cc56dcad-d100-43d6-8c43-b96c184d91f9&quot;,&quot;23d36930-b903-4e47-a508-eefacb7dcd85&quot;,&quot;aa70e754-73f5-45a2-b713-14269b0a11fc&quot;,&quot;1b899958-6534-499d-a508-5972a9aca83b&quot;,&quot;beca13dc-553d-4f10-90ec-38e371543a01&quot;,&quot;ba65ecbd-cdba-448b-913c-c942fdbec8be&quot;,&quot;5083b512-4dec-4114-b28d-9829cacf115d&quot;,&quot;1c3765d1-4917-4038-b45b-8dd761fcfc49&quot;,&quot;6532b105-617b-4373-b571-e4330148954c&quot;,&quot;38e65caf-1880-4341-9ed2-038c15ec4823&quot;,&quot;5470c574-a113-4e3d-8836-0794a22ff05c&quot;,&quot;007568d9-89ac-4cbd-a8f3-b8e28e0e721f&quot;,&quot;3cfcba56-6872-4b0a-a316-1f260cef553f&quot;,&quot;924f84c9-0d25-4d79-875f-c7b1ee49fa82&quot;,&quot;d8f77c61-3e82-486f-a4b9-1925694668e7&quot;,&quot;09ed399a-d278-4640-9d82-83c87ddc5f5c&quot;,&quot;2e5f58e2-bbf2-4cf4-a1e7-058965ffd40e&quot;,&quot;09ff5dcd-cb18-49a2-8ec7-b3f0f20093f0&quot;,&quot;781d60c8-7f00-431a-838d-4516950dccb5&quot;,&quot;b71fdb71-1937-4c49-9231-3c811b8f5f82&quot;,&quot;3d8c16af-fa3f-468c-9326-41c1cdeed267&quot;,&quot;ea002722-4f5b-40ea-b168-8690c0d1b484&quot;,&quot;c2201008-046d-4f73-a67a-a3b8350d5e48&quot;,&quot;12c16417-e68b-40ce-8798-2260d486f6f6&quot;,&quot;ea9a95a8-e6e3-4b95-ac82-5be052a8ac46&quot;,&quot;fa693141-8a83-45e8-ba06-8a98f26b0229&quot;,&quot;df7d0107-f933-44c3-a887-99b479bb2e5a&quot;,&quot;9d039ee9-b395-4cd1-a8d7-83e2cec3fb24&quot;,&quot;c6eb26fe-f0c9-4a05-a05d-b65458e285dc&quot;,&quot;a3b435e7-a899-42d3-ae33-cfbc5056d7d9&quot;,&quot;735c8b56-8da1-4517-93ad-fb033f2fee84&quot;,&quot;0fbd3022-27dd-4a75-9ede-2d7573160307&quot;,&quot;d178be07-7ef1-428f-a9cb-a2e4db8f421c&quot;,&quot;9e1a1293-46ac-472a-8b2d-bf122d61e1f4&quot;,&quot;390404cc-651e-4070-8366-8356e9fb7c40&quot;,&quot;3af80ab1-b141-4350-90cf-85e4ff5aa1ef&quot;,&quot;b220e666-84b8-446c-ad4b-61d691eeca07&quot;,&quot;06318c8b-83c9-409e-8454-681a21b958b4&quot;,&quot;4a3e1e5f-fa6b-4979-b7ba-bf88a005018e&quot;,&quot;6e5dec2a-8d8c-4d0d-996e-2a2def8835de&quot;,&quot;7443602f-78bf-4ffe-ae29-334a893f401f&quot;,&quot;8c4c5cba-8072-4699-80ee-108442544de1&quot;,&quot;1fa18190-6bf2-4893-b82d-e7968cd0703c&quot;,&quot;e5dfa1dd-2521-480e-9cc8-7e59d71f9932&quot;,&quot;a2fca335-fa1c-4f9e-9e37-b0dccc768ceb&quot;,&quot;c5909fd0-9fb9-448a-b88f-a619b40a001a&quot;,&quot;85453ff4-03e0-4e03-9ec6-ae3cc08a8f98&quot;,&quot;0287f6f4-f796-4894-a691-259c3568d1cd&quot;,&quot;a94a86a7-63bb-4b4e-b4fe-ac4cb5ea4b08&quot;,&quot;8993b893-3936-4ef3-a80d-deade9000178&quot;,&quot;beb2b24b-4892-4073-bd16-7fd61883196e&quot;,&quot;a43919ac-eee2-4765-93fa-b22561008101&quot;,&quot;ce3a6201-22b5-4152-8644-1e0b0b9ce35d&quot;,&quot;8dc040ec-9aa4-492c-b48f-26f1e4da2c35&quot;,&quot;cd6d4297-7b81-4cde-989b-75ef2657f42c&quot;,&quot;755abd22-b918-4597-8c15-652489fcc8e3&quot;,&quot;1cc04760-b2ad-4f18-9f14-c4445fa50bc9&quot;,&quot;fccfc7e9-a25c-4354-92bf-a6ecae70ba03&quot;,&quot;732df42e-ef86-4bf3-aa59-b771bb13efdf&quot;,&quot;65338cd4-21b3-45dd-ab63-746dcba27542&quot;,&quot;67c2a406-bd66-49a2-bee5-777067e5e93b&quot;,&quot;a10d9fb1-2ad6-4f8f-8e9a-e48e9f891720&quot;,&quot;b77b1956-4bce-42ec-b84e-940e95675d26&quot;,&quot;aa6271f4-248f-464a-9bf9-05eeac0bb654&quot;,&quot;ce3aa467-200b-4d7c-9b0b-a72ce10e3d85&quot;,&quot;c6b391ff-7f41-4658-a8cd-cbf3b6e48af3&quot;,&quot;14b4d4b6-fb5e-4670-b15c-1f704f697882&quot;,&quot;b33849b4-95dc-4cac-a51e-e4361ea62526&quot;,&quot;0bc84e0d-6f10-41d3-84e9-a4d92bbbd017&quot;,&quot;5afd0636-dff7-4237-9784-c8b1b1216f95&quot;,&quot;b9ec706a-32c1-4a5c-85df-1c89be0aa741&quot;,&quot;0d78f26b-8a5c-4f2e-817d-f1293bfc9425&quot;,&quot;79280a5c-7f6f-4bb5-b231-268fe08d1781&quot;,&quot;9e36371e-d4d0-41e0-81d2-6008545433d6&quot;,&quot;421d0718-762c-46bd-ab22-a59c0cf431a9&quot;,&quot;ffabf04d-14e7-461d-ae9b-5073611cb180&quot;,&quot;ef4c3eb0-b787-497d-be5e-54cadda1e419&quot;,&quot;2e9c8960-8243-468f-93bb-8fcadee4a171&quot;,&quot;bcdd910e-2fb5-4b0d-af21-14828604d10f&quot;,&quot;e5a40115-c1e0-4890-8b2b-f8a3ce2e9e13&quot;,&quot;795ae5b4-96b9-4b17-a958-6f9507ed9dd5&quot;,&quot;1597fa07-5d54-4817-85c9-2cd7ce871bbc&quot;,&quot;ae5e0f60-ccfe-4376-81d9-70f9b4f33dc3&quot;,&quot;14c5a763-539b-4701-abcd-b1c90a64156c&quot;,&quot;785a6279-d4d1-4879-981b-a1c95c33fdaf&quot;,&quot;02feebdf-54bb-4e8b-bb46-b1b48c58d269&quot;,&quot;9a59e445-9de8-4e33-b49f-33439b0f3fdd&quot;,&quot;4b843cca-6dc9-4534-ac10-cc61a29607a4&quot;,&quot;97710c41-a6d1-4bd9-b50f-8e7d18a45b5e&quot;,&quot;43c24dc7-3ed9-40bd-ba33-189368224ed2&quot;,&quot;e7ace178-6b02-4c24-aa60-c0210281274e&quot;,&quot;3022eff1-6ffa-46da-a9d3-523e22df7c8f&quot;,&quot;b1ffe306-c778-4e91-8192-d32259e7de93&quot;,&quot;8bec93de-8968-4c5e-bdee-b40b86ac56da&quot;,&quot;b764ac35-6af7-4c7e-842a-d066b78279bc&quot;,&quot;05252e7c-3bcc-442f-aa2f-1534721c9c5f&quot;,&quot;fd7e3034-1f8b-49f7-abf1-e1f9f39468f3&quot;,&quot;b71438dc-639c-4658-ba1d-49d94ea30568&quot;,&quot;b6a991b4-bb9a-480e-90f5-0f014bed7d7f&quot;,&quot;7ff6d44b-5fbe-4c96-9a24-ddd33f1c072e&quot;,&quot;4d82ac44-ca88-45e3-be74-d0eb4e58a030&quot;,&quot;adf74752-b2ea-469b-a7eb-9daed5dd70d5&quot;,&quot;88a7a75e-0916-4f42-888e-44604cdfe07c&quot;,&quot;3f432004-da5e-488b-ab4d-3236c2afdbba&quot;,&quot;24bee586-d786-4a30-be93-a4be66151711&quot;,&quot;b1f9dd5c-2b61-47fa-a567-66741d198d46&quot;,&quot;a0f3056a-7ba2-40f8-a182-fbdf3f22ee02&quot;,&quot;bfdd742f-2df4-4357-b96d-c2512d334f03&quot;,&quot;eedd3771-cc29-438e-bdc4-a515ead6e14c&quot;,&quot;3e30e333-628d-470d-bbf9-36df7e592a21&quot;,&quot;77b37125-ffd5-4ad3-b299-0da12102829c&quot;,&quot;f8728fb5-6bde-41b0-89c2-e77c798bd749&quot;,&quot;5e896102-5c08-4eb7-b10d-2e67c2ad3bf8&quot;,&quot;7435bf82-cce6-4e3c-8ab5-574748b197bf&quot;,&quot;489bb4df-4403-4d4b-b8be-70694e50c494&quot;,&quot;b6fd2dfd-d0f5-4fd6-9f7a-58eceaf52a1b&quot;,&quot;7ed2dfdd-965f-42c1-9297-cff6da8ec065&quot;,&quot;eaae8722-60c5-4e9c-8d3d-ff3815552561&quot;,&quot;6d40622b-445c-41e2-8ffa-9ba7a570fc8a&quot;,&quot;0bba8f66-6ca3-4e67-8d1a-6b711d195c73&quot;,&quot;8b6df25e-7be9-4fa8-97e2-e960446d017f&quot;,&quot;81a2fc7d-9d1e-4980-ba84-8cce4afe18bb&quot;,&quot;91078884-8429-4ab5-8b52-41b86418a712&quot;,&quot;81d9d32a-a6ad-493b-aa9d-f1fd05e78331&quot;,&quot;bbd92304-40e2-46de-b264-19bca1f2e220&quot;,&quot;6abd0692-27c6-4c62-967c-6d09d7e844ac&quot;,&quot;172c0a8d-a81f-4a67-a0e1-1039c6f19fbe&quot;,&quot;383fff47-5ae0-4f79-9c92-676dca9eae80&quot;,&quot;72621eb0-86f1-443b-af95-d75e1eb78dd1&quot;,&quot;09182750-df90-4066-9c01-6af2e1bcf168&quot;,&quot;e968e4be-cb3a-415f-a116-e284d0d84485&quot;,&quot;356c3122-790b-4586-b0a7-d15a0dc57a10&quot;,&quot;752635be-885c-400d-b1e0-cb32b187d5b7&quot;,&quot;e835dc6c-1f2c-41b0-9ba5-3262eecf98b1&quot;,&quot;6e87c7e7-7354-4f73-8600-0546d8de3126&quot;,&quot;e2f1eef4-3f0e-430b-89a5-51e8759ab836&quot;,&quot;64f3355b-692f-445c-8bb6-734e67cbe016&quot;,&quot;0e16ec10-97a9-4104-9a87-562858a53bdb&quot;,&quot;b3362204-5b72-49f9-a907-b2ed44891371&quot;,&quot;2ca972a9-da0f-46cd-b4c5-bb935fca9ca3&quot;,&quot;8289b403-35ca-48a9-b35f-35c51d2da8d3&quot;,&quot;2445c8a4-b52d-4eb8-a1f9-5427fda0ed71&quot;,&quot;5b32785c-91ac-477d-b68e-508723c12f2c&quot;,&quot;a567e178-9de0-4565-98b2-878781146d47&quot;,&quot;f05cb0db-c0d2-44f2-92e4-d855748a80cc&quot;,&quot;9d27d46b-2508-48b4-b08e-99556f7d9218&quot;,&quot;cc0fe971-f9ee-4b7b-af55-3fc5fbdaa967&quot;,&quot;9bc6d0af-996b-479b-a1f5-f37fc9975f07&quot;,&quot;674b360a-40f5-4455-a18e-26b360b164a4&quot;,&quot;ca0174ed-ec41-4f5e-8b07-a6f1683edb38&quot;,&quot;fb2493f1-e8ed-41ee-8e3d-12fe05979a3d&quot;,&quot;b8394293-5905-42ff-867d-d4607abe85f0&quot;,&quot;d0931fb4-8bca-49b1-ab35-c7c9c1fc27ca&quot;,&quot;b51b5694-2e1c-4110-96a0-3d6be896e78a&quot;,&quot;7ea93290-45b8-4896-be40-16188afeef53&quot;,&quot;e02bb789-3a62-49c8-8c6c-565f5856a315&quot;,&quot;2fdcf1b8-481d-4529-a523-539d857c9caa&quot;,&quot;3ff0a801-1e3c-4162-ba70-bc832961dcf7&quot;,&quot;f853d345-234b-4f40-a597-2a6c225aa7b0&quot;,&quot;4f116720-3791-421a-a45c-d0fc32c96997&quot;,&quot;f4448baf-6e9d-4fba-ba4a-c267d2b819ad&quot;,&quot;31ef4d4b-1b50-4f39-b921-ef239c05f04c&quot;,&quot;acc72b15-9618-4a33-983d-3c41718f4cf9&quot;,&quot;1cacaf32-1895-4b35-82e3-da393d42822d&quot;,&quot;dbc3ee58-3699-4412-92a2-fd386382ea75&quot;,&quot;614294c1-778e-4f97-bbfd-faf67599eb3b&quot;,&quot;124780f9-79c1-4063-b795-d5d0f44fb882&quot;,&quot;34757847-4b41-4b3c-9903-15f234491a00&quot;,&quot;f6750b5a-1e5f-486b-9c8c-20507247d79e&quot;,&quot;bed80313-7c25-440e-8367-21ab9f64ecf7&quot;,&quot;92190000-f578-4144-acff-beac3869c5d6&quot;,&quot;cf8892b7-78f2-47e4-a499-27bed774835b&quot;,&quot;1b326ef2-4ebc-446a-9ff6-9b330779f8fa&quot;,&quot;4553c7df-3858-4f52-9966-35cbfde71687&quot;,&quot;b2ba1f22-8ef6-451f-829a-925cf2b04d84&quot;,&quot;87981d00-3134-49f6-b33c-3a1066996a2e&quot;,&quot;aba35669-1775-4182-97e2-972c5278fde9&quot;,&quot;a3e5ba7c-fd69-4a75-b273-e6471bf0f3da&quot;,&quot;8dda2dd6-108a-49d3-8874-b89e8d545c9d&quot;,&quot;cd0de6e4-6e93-4652-b2d6-77b63cb69a28&quot;,&quot;e296511c-5d44-477d-8afc-d3d3634f1ab9&quot;,&quot;8b10719b-0399-49ef-a991-3f1a8af62371&quot;,&quot;5114b6db-20ae-40d1-877f-148c6ea61712&quot;,&quot;b27fd5ef-1d4d-4b05-ac1f-b3eee71556c9&quot;,&quot;6c6d8ea0-f471-4a45-8589-e8829a55c50f&quot;,&quot;d8f5dd09-74d8-41ad-b567-6dd8c45962fa&quot;,&quot;4c3de2a8-b342-4bc1-a308-29cad3f9aed3&quot;,&quot;b2104c3b-769f-46e0-9d21-b5b9a69858b2&quot;,&quot;d2bd6378-389e-4fb4-966f-a7b39122002f&quot;,&quot;b4350d0b-1f64-4342-9499-9c636003d658&quot;,&quot;1913f026-28d9-4a24-ae24-4a4bdbc404c0&quot;,&quot;4963c1de-e018-49f0-aaa3-e6c42797d9d5&quot;,&quot;41374501-c2f5-49c1-9809-871394cddf3f&quot;,&quot;b6f77612-9a6c-45f8-b32b-445e9caca567&quot;,&quot;7d300c6d-8a89-4804-93d9-89208c0cafac&quot;,&quot;d50ca740-05cf-4b3c-9013-b141d1b3c9bb&quot;,&quot;9c2565f8-8c83-4849-9002-20ae0859206d&quot;,&quot;52a5318e-86a2-4e1f-8658-709e159d0824&quot;,&quot;0655f8f1-7241-49d6-b727-12088a9097ef&quot;,&quot;0517b7cc-8ac2-4e61-a127-9661ecc66b57&quot;,&quot;bd082705-8204-4973-8c72-69b95f98a434&quot;,&quot;20429b49-2290-4acb-ad24-80545e1be169&quot;
+]
+
+
+def random = new Random()
+def randomRouter = routers[random.nextInt(routers.size())]
+vars.put(&quot;router_serial&quot;, randomRouter)</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>false</responseData>
+                <samplerData>false</samplerData>
+                <xml>false</xml>
+                <fieldNames>true</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+                <sentBytes>true</sentBytes>
+                <url>true</url>
+                <threadCounts>true</threadCounts>
+                <idleTime>true</idleTime>
+                <connectTime>true</connectTime>
+              </value>
+            </objProp>
+            <stringProp name="filename"></stringProp>
+          </ResultCollector>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Command-Poll-Ack Sequence" enabled="false">
+        <intProp name="ThreadGroup.num_threads">20</intProp>
+        <intProp name="ThreadGroup.ramp_time">2</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1000</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="SendCommand">
+          <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf</stringProp>
+          <stringProp name="GRPCSampler.host">localhost</stringProp>
+          <stringProp name="GRPCSampler.port">8890</stringProp>
+          <stringProp name="GRPCSampler.fullMethod">router_manager.RouterManagerService/SendCommand</stringProp>
+          <stringProp name="GRPCSampler.deadline">5000</stringProp>
+          <boolProp name="GRPCSampler.tls">false</boolProp>
+          <stringProp name="GRPCSampler.requestJson">${requestBody}</stringProp>
+          <stringProp name="GRPCSampler.libFolder"></stringProp>
+          <stringProp name="GRPCSampler.metadata"></stringProp>
+          <boolProp name="GRPCSampler.tlsDisableVerification">false</boolProp>
+          <stringProp name="GRPCSampler.channelAwaitTermination">5000</stringProp>
+          <stringProp name="GRPCSampler.maxInboundMessageSize">4194304</stringProp>
+          <stringProp name="GRPCSampler.maxInboundMetadataSize">8192</stringProp>
+        </vn.zalopay.benchmark.GRPCSampler>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Generate Command">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.util.UUID
+import groovy.json.JsonOutput
+
+// Инициализация shared данных
+def routerCommands = props.get(&quot;router_commands&quot;)
+if (routerCommands == null) {
+    routerCommands = new java.util.concurrent.ConcurrentHashMap()
+    props.put(&quot;router_commands&quot;, routerCommands)
+}
+
+def routerCounter = props.get(&quot;router_counter&quot;) ?: 0
+
+// Генерация команды
+def routerUuid = UUID.randomUUID().toString()
+routerCounter++
+props.put(&quot;router_counter&quot;, routerCounter)
+
+def body = [
+    command_type: &quot;TEST_SEQUENTIAL&quot;,
+    router_serial: routerUuid,
+    payload: [foo: &quot;bar&quot;]
+]
+
+vars.put(&quot;requestBody&quot;, JsonOutput.toJson(body))
+vars.put(&quot;current_router_serial&quot;, routerUuid)
+
+// Сохраняем routerUuid для последующих шагов
+routerCommands[routerUuid] = new java.util.concurrent.ConcurrentLinkedQueue()
+log.info(&quot;Generated command for router: ${routerUuid}&quot;)</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="PollCommands">
+          <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf</stringProp>
+          <stringProp name="GRPCSampler.host">localhost</stringProp>
+          <stringProp name="GRPCSampler.port">8890</stringProp>
+          <stringProp name="GRPCSampler.fullMethod">router_manager.RouterManagerService/PollCommands</stringProp>
+          <stringProp name="GRPCSampler.deadline">5000</stringProp>
+          <stringProp name="GRPCSampler.requestJson">{&quot;router_serial&quot;: &quot;${current_router_serial}&quot;}</stringProp>
+          <stringProp name="GRPCSampler.libFolder"></stringProp>
+          <stringProp name="GRPCSampler.metadata"></stringProp>
+          <boolProp name="GRPCSampler.tls">false</boolProp>
+          <boolProp name="GRPCSampler.tlsDisableVerification">false</boolProp>
+          <stringProp name="GRPCSampler.channelAwaitTermination">5000</stringProp>
+          <stringProp name="GRPCSampler.maxInboundMessageSize">4194304</stringProp>
+          <stringProp name="GRPCSampler.maxInboundMetadataSize">8192</stringProp>
+        </vn.zalopay.benchmark.GRPCSampler>
+        <hashTree>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Process Poll Response" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import groovy.json.JsonSlurper
+
+if (prev.isSuccessful() &amp;&amp; prev.getResponseDataAsString()?.trim()?.startsWith(&apos;{&apos;)) {
+    try {
+        def response = new JsonSlurper().parseText(prev.getResponseDataAsString())
+        def routerUuid = vars.get(&quot;current_router_serial&quot;)
+        def routerCommands = props.get(&quot;router_commands&quot;)
+
+        if (routerCommands &amp;&amp; response.commands) {
+            def queue = routerCommands[routerUuid]
+            if (queue == null) {
+                queue = new java.util.concurrent.ConcurrentLinkedQueue()
+                routerCommands[routerUuid] = queue
+            }
+
+            response.commands.each { cmd -&gt;
+                if (cmd?.id) {
+                    queue.add(cmd.id as String)
+                    log.info(&quot;Poll: found command ${cmd.id} for router ${routerUuid}&quot;)
+                }
+            }
+            vars.put(&quot;has_commands&quot;, queue.size() &gt; 0 ? &quot;true&quot; : &quot;false&quot;)
+        }
+    } catch (Exception e) {
+        log.error(&quot;Poll processing error: ${e.message}&quot;)
+        vars.put(&quot;has_commands&quot;, &quot;false&quot;)
+    }
+} else {
+    vars.put(&quot;has_commands&quot;, &quot;false&quot;)
+}</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
+        </hashTree>
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If Commands Exist" enabled="true">
+          <stringProp name="IfController.condition">${__javaScript(vars.get(&quot;has_commands&quot;) == &quot;true&quot;)}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">false</boolProp>
+        </IfController>
+        <hashTree>
+          <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="AckCommand" enabled="true">
+            <stringProp name="GRPCSampler.protoFolder">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/router-manager-service/protobuf</stringProp>
+            <stringProp name="GRPCSampler.host">localhost</stringProp>
+            <stringProp name="GRPCSampler.port">8890</stringProp>
+            <stringProp name="GRPCSampler.fullMethod">router_manager.RouterManagerService/AckCommand</stringProp>
+            <stringProp name="GRPCSampler.deadline">5000</stringProp>
+            <stringProp name="GRPCSampler.requestJson">{
+  &quot;router_serial&quot;: &quot;${current_router_serial}&quot;,
+  &quot;command_id&quot;: &quot;${command_id}&quot;
+}</stringProp>
+            <stringProp name="GRPCSampler.libFolder"></stringProp>
+            <stringProp name="GRPCSampler.metadata"></stringProp>
+            <boolProp name="GRPCSampler.tls">false</boolProp>
+            <boolProp name="GRPCSampler.tlsDisableVerification">false</boolProp>
+            <stringProp name="GRPCSampler.channelAwaitTermination">5000</stringProp>
+            <stringProp name="GRPCSampler.maxInboundMessageSize">4194304</stringProp>
+            <stringProp name="GRPCSampler.maxInboundMetadataSize">8192</stringProp>
+          </vn.zalopay.benchmark.GRPCSampler>
+          <hashTree>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Get Command for Ack" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">def routerUuid = vars.get(&quot;current_router_serial&quot;)
+def routerCommands = props.get(&quot;router_commands&quot;)
+
+if (routerCommands) {
+    def queue = routerCommands[routerUuid]
+    if (queue &amp;&amp; !queue.isEmpty()) {
+        def commandId = queue.poll()
+        vars.put(&quot;command_id&quot;, commandId)
+        log.info(&quot;Ack: processing command ${commandId} for router ${routerUuid}&quot;)
+    } else {
+        vars.put(&quot;command_id&quot;, &quot;no-command-available&quot;)
+    }
+}</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Wait Between Iterations" enabled="true">
+          <stringProp name="ConstantTimer.delay">500</stringProp>
+        </ConstantTimer>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

@@ -57,16 +57,12 @@ services:
         condition: service_healthy
       postgres2r:
         condition: service_healthy
-      event-collector:
-        condition: service_healthy
-      failed-events-processor:
-        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8889/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
-      interval: 3s
+      interval: 5s
       timeout: 5s
       retries: 5
-      start_period: 6s
+      start_period: 10s
     networks:
       - iot_network
   device-service:
@@ -142,7 +138,7 @@ services:
       grafana:
         condition: service_started
       failed-events-processor:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8888/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
       interval: 6s
@@ -175,6 +171,8 @@ services:
       OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
     depends_on:
       minio:
+        condition: service_healthy
+      device-collector:
         condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "wget -q -O - http://localhost:8880/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
@@ -332,7 +330,7 @@ services:
       POSTGRES_PASSWORD: ${APP_DATASOURCE_1_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${APP_DATASOURCE_1_USERNAME}", "-d", "${APP_DATASOURCE_1_URL}" ]
+      test: ["CMD", "pg_isready", "-U", "${APP_DATASOURCE_1_USERNAME}", "-d", "${POSTGRES_DB}"]
       interval: 10s
       retries: 5
     networks:
@@ -356,7 +354,7 @@ services:
       POSTGRES_PASSWORD: ${APP_DATASOURCE_2_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${APP_DATASOURCE_2_USERNAME}", "-d", "${APP_DATASOURCE_2_URL}" ]
+      test: [ "CMD", "pg_isready", "-U", "${APP_DATASOURCE_2_USERNAME}", "-d", "${POSTGRES_DB}" ]
       interval: 10s
       retries: 5
     networks:
@@ -378,7 +376,7 @@ services:
       POSTGRES_PASSWORD: ${APP_REPLICA_DATASOURCE_1_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${APP_REPLICA_DATASOURCE_1_USERNAME}", "-d", "${APP_REPLICA_DATASOURCE_1_URL}" ]
+      test: [ "CMD", "pg_isready", "-U", "${APP_REPLICA_DATASOURCE_1_USERNAME}", "-d", "${POSTGRES_DB}" ]
       interval: 10s
       retries: 5
     depends_on:
@@ -406,7 +404,50 @@ services:
       postgres2:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${APP_REPLICA_DATASOURCE_2_USERNAME}", "-d", "${APP_REPLICA_DATASOURCE_2_URL}" ]
+      test: [ "CMD", "pg_isready", "-U", "${APP_REPLICA_DATASOURCE_2_USERNAME}", "-d", "${POSTGRES_DB}" ]
+      interval: 10s
+      retries: 5
+    networks:
+      - iot_network
+  router-manager-service:
+    build:
+      context: ../router-manager-service
+    container_name: router-manager-service
+    env_file:
+      - .env
+    ports:
+      - 8890:9092
+      - 8891:9091
+    restart: unless-stopped
+    depends_on:
+      postgres_router_manager:
+        condition: service_healthy
+      redis-rms:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q -O - http://localhost:9091/metrics || exit 1" ]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 3s
+    networks:
+      - iot_network
+  postgres_router_manager:
+    container_name: postgres_router_manager
+    image: postgres:15
+    restart: unless-stopped
+    ports:
+      - "5439:5432"
+    volumes:
+      - postgres_data_router_manager:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${APP_ROUTER_MANAGER_DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${APP_ROUTER_MANAGER_DATASOURCE_PASSWORD}
+      POSTGRES_DB: ${APP_ROUTER_MANAGER_DATASOURCE_DB}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${APP_ROUTER_MANAGER_DATASOURCE_USERNAME}", "-d", "${APP_ROUTER_MANAGER_DATASOURCE_DB}" ]
       interval: 10s
       retries: 5
     networks:
@@ -472,12 +513,30 @@ services:
       - redis_data:/data
     networks:
       - iot_network
+  redis-rms:
+    image: redis:7-alpine
+    container_name: redis-rms
+    ports:
+      - "6377:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
+      interval: 5s
+      retries: 5
+    volumes:
+      - redis_data_rms:/data
+    networks:
+      - iot_network
   redis-insight:
-    image: redis/redisinsight:2.70
-    container_name: proselyte-redisinsight
+    image: redis/redisinsight:latest
+    container_name: redis-insight
     restart: always
     depends_on:
       - redis
+      - redis-rms
     ports:
       - "5540:5540"
     volumes:
@@ -542,6 +601,7 @@ services:
       - kafka-exporter
       - postgres-exporter1
       - postgres-exporter2
+      - postgres-exporter-rms
     networks:
       - iot_network
   kafka-exporter:
@@ -559,7 +619,7 @@ services:
     container_name: postgres-exporter1
     restart: unless-stopped
     environment:
-      DATA_SOURCE_NAME: "postgresql://${APP_DATASOURCE_1_USERNAME}:${APP_DATASOURCE_1_PASSWORD}@postgres1:5432/${APP_DATASOURCE_1_URL}?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://${APP_DATASOURCE_1_USERNAME}:${APP_DATASOURCE_1_PASSWORD}@postgres1:5432/${POSTGRES_DB}?sslmode=disable"
     depends_on:
       postgres1:
         condition: service_healthy
@@ -570,9 +630,20 @@ services:
     container_name: postgres-exporter2
     restart: unless-stopped
     environment:
-      DATA_SOURCE_NAME: "postgresql://${APP_DATASOURCE_2_USERNAME}:${APP_DATASOURCE_2_PASSWORD}@postgres2:5432/${APP_DATASOURCE_2_URL}?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://${APP_DATASOURCE_2_USERNAME}:${APP_DATASOURCE_2_PASSWORD}@postgres2:5432/${POSTGRES_DB}?sslmode=disable"
     depends_on:
       postgres2:
+        condition: service_healthy
+    networks:
+      - iot_network
+  postgres-exporter-rms:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter-rms
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${APP_ROUTER_MANAGER_DATASOURCE_USERNAME}:${APP_ROUTER_MANAGER_DATASOURCE_PASSWORD}@postgres_router_manager:5432/${APP_ROUTER_MANAGER_DATASOURCE_DB}?sslmode=disable"
+    depends_on:
+      postgres_router_manager:
         condition: service_healthy
     networks:
       - iot_network
@@ -636,12 +707,14 @@ volumes:
   nexus-data:
   schema-registry-data:
   zookeeper_data:
+  postgres_data_router_manager:
   postgres_keycloak_data:
   postgres_data1:
   postgres_data2:
   postgres_data1r:
   postgres_data2r:
   redis_data:
+  redis_data_rms:
   redis-insight:
   cassandra_data:
   grafana_data:

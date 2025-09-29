@@ -1,0 +1,80 @@
+plugins {
+    id "java-library"
+    id "maven-publish"
+    id 'com.google.protobuf' version '0.9.4'
+}
+
+group = "ts.andrey"
+version = "${appVersion}"
+description = 'router-manager-proto-client'
+
+def nexusUrl = System.getenv("NEXUS_URL") ?: project.findProperty("nexusUrl") ?: "http://localhost:7777/repository/maven-releases/"
+def nexusUser = System.getenv("NEXUS_USER") ?: project.findProperty("nexusUser") ?: "admin"
+def nexusPassword = System.getenv("NEXUS_PASSWORD") ?: project.findProperty("nexusPassword") ?: "admin123"
+
+repositories {
+    mavenCentral()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = "router-manager-proto-client"
+        }
+    }
+    repositories {
+        maven {
+            name = "nexus"
+            url = uri(nexusUrl)
+            allowInsecureProtocol = true
+            credentials {
+                username = nexusUser
+                password = nexusPassword
+            }
+        }
+    }
+}
+
+ext {
+}
+
+dependencies {
+    implementation "io.grpc:grpc-netty:${grpcVersion}"
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+
+    compileOnly "com.google.protobuf:protobuf-java:${protobufVersion}"
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                grpc {}
+            }
+        }
+    }
+}
+
+tasks.withType(Copy).configureEach {
+    filesMatching("**/*.proto") {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDir 'src/main/proto'
+        }
+    }
+}
