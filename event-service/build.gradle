@@ -45,11 +45,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
 	implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
 	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
-	implementation "com.fasterxml.jackson.core:jackson-annotations"
 	implementation "com.fasterxml.jackson.core:jackson-annotations"
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 
@@ -58,6 +56,8 @@ dependencies {
 	compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
 	compileOnly 'org.projectlombok:lombok'
 
+	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+	implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetrySpringBootVersion}"
 	runtimeOnly 'io.micrometer:micrometer-registry-otlp'
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
@@ -68,7 +68,6 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 	testImplementation 'org.testcontainers:cassandra'
 	testImplementation 'org.testcontainers:junit-jupiter'
-	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testCompileOnly "org.projectlombok:lombok"

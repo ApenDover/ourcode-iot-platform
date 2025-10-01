@@ -36,4 +36,5 @@ public class EventServiceException extends RuntimeException {
                                     boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
+
 }

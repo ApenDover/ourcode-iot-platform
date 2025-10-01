@@ -10,8 +10,6 @@ import ts.andrey.eventservice.model.EventFilterRequest;
 import ts.andrey.eventservice.service.CassandraService;
 import ts.andrey.eventservice.utils.PageUtil;
 
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 public class CassandraServiceImpl implements CassandraService {

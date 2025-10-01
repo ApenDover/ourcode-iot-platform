@@ -25,6 +25,8 @@ public interface EventMapper {
     @Mapping(target = "page", source = "eventFilterRequest.page")
     @Mapping(target = "size", source = "eventFilterRequest.size")
     @Mapping(target = "total", source = "total")
-    EventPage entityListToEventPage(List<DeviceEventEntity> deviceEventEntities, EventFilterRequest eventFilterRequest, Integer total);
+    EventPage entityListToEventPage(List<DeviceEventEntity> deviceEventEntities,
+                                    EventFilterRequest eventFilterRequest,
+                                    Integer total);
 
 }

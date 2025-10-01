@@ -26,7 +26,7 @@ import (
 
 func TestSendPollAckCommandsWithPoolGrpc(t *testing.T) {
 	// SETUP
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second) // увеличиваем таймаут
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	_, pool, terminate, err := SetupPostgresContainerPool(t)
@@ -246,7 +246,6 @@ func SetupPostgresContainerPool(t *testing.T) (*string, *pgxpool.Pool, func(), e
 
 	dsn := fmt.Sprintf("postgres://test:test@%s:%s/testdb?sslmode=disable", host, port.Port())
 
-	// Ждем пока БД будет готова принимать соединения
 	var pool *pgxpool.Pool
 	for i := 0; i < 30; i++ {
 		pool, err = pgxpool.New(ctx, dsn)
@@ -261,7 +260,6 @@ func SetupPostgresContainerPool(t *testing.T) (*string, *pgxpool.Pool, func(), e
 		time.Sleep(time.Second)
 	}
 
-	// Выполняем миграции используя наш новый migrator
 	migrator, err := database.NewMigrator(dsn)
 	require.NoError(t, err)
 	defer migrator.Close()
@@ -285,6 +283,6 @@ func createTestRedisClient(cfg *config.Config) *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", cfg.RedisUrl, cfg.RedisPort),
 		Password: cfg.RedisPassword,
-		DB:       1, // используем БД 1 для тестов чтобы не мешать основным данным
+		DB:       0,
 	})
 }

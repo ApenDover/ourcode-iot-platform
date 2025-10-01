@@ -14,13 +14,12 @@ import ts.andrey.eventservice.exception.EventServiceException;
 import ts.andrey.eventservice.model.EventFilterRequest;
 
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeviceEventDataService {
-    
+
     private static final String TIMESTAMP_FIELD = "timestamp";
     private static final String TYPE_FIELD = "type";
 
@@ -58,6 +57,5 @@ public class DeviceEventDataService {
         query.limit(filter.getSize());
         query.sort(Sort.by(Sort.Direction.DESC, TIMESTAMP_FIELD));
     }
-
 
 }
