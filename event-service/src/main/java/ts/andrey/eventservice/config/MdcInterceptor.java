@@ -11,7 +11,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 public class MdcInterceptor implements HandlerInterceptor {
 
-    private static final String TRACE = "trace_id";
+    public static final String TRACE = "trace_id";
     private static final String SPAN = "span_id";
     private static final String FLAGS = "trace_flags";
     private static final String SERVICE = "service_name";

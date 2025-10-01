@@ -105,6 +105,38 @@ services:
       start_period: 6s
     networks:
       - iot_network
+  event-service:
+    build:
+      context: ../event-service
+      args:
+        NEXUS_URL: ${NEXUS_URL}
+        NEXUS_USER: ${NEXUS_USER}
+        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
+    container_name: event-service
+    env_file:
+      - .env
+    ports:
+      - "8881:8881"
+    restart: unless-stopped
+    environment:
+      OTEL_SERVICE_NAME: event-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: none
+      OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q -O - http://localhost:8881/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 6s
+    networks:
+      - iot_network
   event-collector:
     build:
       context: ../event-collector

@@ -46,6 +46,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
+	implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
+
 	implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
 	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
 	implementation "com.fasterxml.jackson.core:jackson-annotations"

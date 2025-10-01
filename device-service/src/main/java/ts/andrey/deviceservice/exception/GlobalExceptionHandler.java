@@ -14,6 +14,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import ts.andrey.deviceservice.configuration.MdcInterceptor;
 import ts.andrey.dto.DeviceError;
 
 @Slf4j
@@ -91,7 +92,7 @@ public class GlobalExceptionHandler {
         error.setStatus(status.value());
         error.setDetail(detail);
         error.setInstance(instance);
-        error.setTrace(MDC.get("trace-id"));
+        error.setTrace(MDC.get(MdcInterceptor.TRACE));
         return ResponseEntity.status(status).body(error);
     }
 

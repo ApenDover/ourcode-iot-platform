@@ -98,6 +98,7 @@ exec-%: ## Зайти в контейнер по имени
 boot: nexus-deploy proto-gen  ## локально пересобрать образы
 	docker image rm infrastructure-device-collector -f
 	docker image rm infrastructure-device-service -f
+	docker image rm infrastructure-event-service -f
 	docker image rm infrastructure-event-collector -f
 	docker image rm infrastructure-kafka-producer -f
 	docker image rm infrastructure-failed-events-processor -f
@@ -109,6 +110,7 @@ boot: nexus-deploy proto-gen  ## локально пересобрать обр�
 	cd event-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-service && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
+	cd event-service && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd kafka-producer && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd failed-events-processor && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd router-manager-service && go build -o router-manager ./cmd/app
@@ -117,6 +119,7 @@ rebuild: nexus-deploy  ## локально пересобрать образы
 	cd event-collector && ./gradlew clean build
 	cd device-collector && ./gradlew clean build
 	cd device-service && ./gradlew clean build
+	cd event-service && ./gradlew clean build
 	cd kafka-producer && ./gradlew clean build
 	cd failed-events-processor && ./gradlew clean build
 

@@ -14,6 +14,7 @@ import ts.andrey.eventservice.exception.EventServiceException;
 import ts.andrey.eventservice.model.EventFilterRequest;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -27,7 +28,8 @@ public class DeviceEventDataService {
     private final CassandraTemplate cassandraTemplate;
 
     public DeviceEventEntity getEvent(String deviceId, String eventId) {
-        return deviceEventRepository.findByDeviceIdAndEventId(deviceId, eventId)
+        final var eventUuid = UUID.fromString(eventId);
+        return deviceEventRepository.findByDeviceIdAndEventId(deviceId, eventUuid)
                 .orElseThrow(() -> new EventServiceException(ErrorExceptionMessages.EVENT_NOT_FOUND, deviceId, eventId));
     }
 

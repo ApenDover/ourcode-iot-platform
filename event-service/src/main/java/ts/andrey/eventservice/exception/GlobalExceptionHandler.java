@@ -11,6 +11,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import ts.andrey.eventservice.config.MdcInterceptor;
 import ts.andrey.eventservice.model.ResponseError;
 
 @Slf4j
@@ -77,7 +78,7 @@ public class GlobalExceptionHandler {
                 .status(status.value())
                 .detail(detail)
                 .instance(instance)
-                .trace(MDC.get("trace-id"))
+                .trace(MDC.get(MdcInterceptor.TRACE))
                 .build();
         return ResponseEntity.status(status).body(error);
     }
