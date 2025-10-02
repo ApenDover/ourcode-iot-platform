@@ -60,7 +60,6 @@ public class GlobalExceptionHandler {
     })
     public ResponseEntity<ResponseError> handleDatabaseExceptions(Exception ex, WebRequest request) {
         log.error(ex.getMessage(), ex);
-
         return buildDeviceError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Database Error",

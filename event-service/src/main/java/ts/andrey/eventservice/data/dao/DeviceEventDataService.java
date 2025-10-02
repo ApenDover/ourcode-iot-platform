@@ -34,8 +34,8 @@ public class DeviceEventDataService {
     }
 
     public List<DeviceEventEntity> getEventsByFilter(EventFilterRequest filter) {
-        final var query = createBaseQuery(filter);
-        applyOptionalFilters(query, filter);
+        var query = createBaseQuery(filter);
+        query = applyOptionalFilters(query, filter);
         return cassandraTemplate.select(query, DeviceEventEntity.class);
     }
 
@@ -43,21 +43,22 @@ public class DeviceEventDataService {
         return Query.query(Criteria.where("device_id").is(filter.getDeviceId()));
     }
 
-    private void applyOptionalFilters(Query query, EventFilterRequest filter) {
+    private Query applyOptionalFilters(Query query, EventFilterRequest filter) {
         if (filter.getFromTimestamp() != null) {
-            query.and(Criteria.where(TIMESTAMP_FIELD).gte(filter.getFromTimestamp()));
+            query = query.and(Criteria.where(TIMESTAMP_FIELD).gte(filter.getFromTimestamp()));
         }
 
         if (filter.getToTimestamp() != null) {
-            query.and(Criteria.where(TIMESTAMP_FIELD).lte(filter.getToTimestamp()));
+            query = query.and(Criteria.where(TIMESTAMP_FIELD).lte(filter.getToTimestamp()));
         }
 
         if (filter.getType() != null) {
-            query.and(Criteria.where(TYPE_FIELD).is(filter.getType()));
+            query = query.and(Criteria.where(TYPE_FIELD).is(filter.getType()));
         }
 
-        query.limit(filter.getSize());
-        query.sort(Sort.by(Sort.Direction.DESC, TIMESTAMP_FIELD));
+        query = query.limit(filter.getSize());
+        query = query.sort(Sort.by(Sort.Direction.DESC, TIMESTAMP_FIELD));
+        return query.withAllowFiltering();
     }
 
 }

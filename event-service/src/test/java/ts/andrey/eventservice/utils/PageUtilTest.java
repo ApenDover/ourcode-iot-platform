@@ -97,5 +97,20 @@ class PageUtilTest {
         assertEquals("payload-29", actual.get(9).getPayload());
     }
 
+    @Test
+    void getPageableRequestSizeZero() {
+        //GIVEN
+        final var entities = DummyTDF.deviceEventEntity.getList(2);
+        final var filter = DummyTDF.eventFilterRequest.getDefault(0, 2);
+
+        //WHEN
+        final var actual = PageUtil.getPageableList(entities, filter);
+
+        //THEN
+        assertEquals(2, actual.size());
+        assertEquals("payload-0", actual.get(0).getPayload());
+        assertEquals("payload-1", actual.get(1).getPayload());
+    }
+
 
 }

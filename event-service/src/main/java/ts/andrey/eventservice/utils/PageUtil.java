@@ -15,10 +15,10 @@ public class PageUtil {
         entities.sort(Comparator.comparing(deviceEventEntity -> deviceEventEntity.getKey().getTimestamp()));
         final var requestSize = request.getSize();
         final var requestPage = request.getPage();
-        if (Objects.isNull(requestSize)) {
+        if (Objects.isNull(requestSize) || requestSize < 1) {
             return entities;
         }
-        if (Objects.isNull(requestPage)) {
+        if (Objects.isNull(requestPage) || requestPage < 1) {
             return entities.subList(0, requestSize);
         }
         if (entities.size() < requestSize) {
