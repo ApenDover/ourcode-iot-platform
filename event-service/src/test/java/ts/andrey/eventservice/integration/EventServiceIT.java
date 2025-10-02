@@ -32,7 +32,11 @@ class EventServiceIT extends BaseIntegrationTest {
     @Test
     void testGetOneNotFound() {
         // WHEN
-        final var result = sendGet("/api/v1/events/15?device_id=device-1", ResponseError.class);
+        //GIVEN
+        final var eventId = "150e8400-e29b-41d4-a716-446655440000";
+        // WHEN
+        final var result = sendGet("/api/v1/events/"
+                + eventId + "?device_id=device-1", ResponseError.class);
         final var body = result.getBody();
 
         //THEN
@@ -40,8 +44,8 @@ class EventServiceIT extends BaseIntegrationTest {
         assertEquals("Entity not found", body.getTitle());
         assertEquals(404, body.getStatus());
         assertEquals("Событие с deviceId [device-1] "
-                + "и eventId [15] не найдено", body.getDetail());
-        assertEquals("/api/v1/events/15", body.getInstance());
+                + "и eventId [150e8400-e29b-41d4-a716-446655440000] не найдено", body.getDetail());
+        assertEquals("/api/v1/events/150e8400-e29b-41d4-a716-446655440000", body.getInstance());
         assertNotNull(body.getTrace());
     }
 
