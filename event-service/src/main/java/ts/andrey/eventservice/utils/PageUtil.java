@@ -19,6 +19,9 @@ public class PageUtil {
             return entities;
         }
         if (Objects.isNull(requestPage) || requestPage < 1) {
+            if (entities.size() < requestSize) {
+                return entities;
+            }
             return entities.subList(0, requestSize);
         }
         if (entities.size() < requestSize) {
