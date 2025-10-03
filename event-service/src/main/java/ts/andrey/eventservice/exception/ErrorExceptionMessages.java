@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorExceptionMessages {
 
-    EVENT_NOT_FOUND("Событие с deviceId [%s] и eventId [%s] не найдено", HttpStatus.NOT_FOUND);
+    EVENT_DEVICE_NOT_FOUND("Событие с deviceId [%s] и eventId [%s] не найдено", HttpStatus.NOT_FOUND),
+    EVENT_NOT_FOUND("Событие c eventId [%s] не найдено", HttpStatus.NOT_FOUND);
 
     private final String description;
     private final HttpStatus httpStatus;
