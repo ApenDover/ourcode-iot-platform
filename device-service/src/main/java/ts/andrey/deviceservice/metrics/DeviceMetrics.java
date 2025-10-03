@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
@@ -74,15 +73,15 @@ public class DeviceMetrics {
         ).increment();
     }
 
-    public <T> T recordExecutionTime(String method, String uri, Supplier<T> supplier) {
-        return Timer.builder("device.requests.duration")
+    public void recordExecutionTime(String method, String uri, long durationNs) {
+        Timer.builder("device.requests.duration")
                 .tag("method", method)
                 .tag("uri", normalizeUri(uri))
                 .description("Время выполнения запроса")
                 .publishPercentileHistogram(true)
                 .sla(Duration.ofMillis(SLA_ONE), Duration.ofMillis(SLA_TWO), Duration.ofSeconds(SLA_THREE))
                 .register(meterRegistry)
-                .record(supplier);
+                .record(Duration.ofNanos(durationNs));
     }
 
     public void recordDatabaseError(String operation) {

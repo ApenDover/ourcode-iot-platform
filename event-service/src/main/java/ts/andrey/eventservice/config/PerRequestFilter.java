@@ -1,4 +1,4 @@
-package ts.andrey.deviceservice.configuration;
+package ts.andrey.eventservice.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
-import ts.andrey.deviceservice.metrics.DeviceMetrics;
+import ts.andrey.eventservice.metrics.GlobalMetrics;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,7 +24,7 @@ public class PerRequestFilter extends OncePerRequestFilter {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private final DeviceMetrics deviceMetrics;
+    private final GlobalMetrics globalMetrics;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -48,26 +48,21 @@ public class PerRequestFilter extends OncePerRequestFilter {
             final var httpStatus = HttpStatus.resolve(wrappedResponse.getStatus());
             final var isError = httpStatus != null && httpStatus.isError();
 
-            deviceMetrics.recordExecutionTime(
-                    wrappedRequest.getMethod(),
-                    wrappedRequest.getRequestURI(),
+            final var method = wrappedRequest.getMethod().contains("/api/v1/events/")
+                    ? "GetEventById"
+                    : "GetEventByFilter";
+
+            globalMetrics.recordEndpointTime(
+                    method,
                     durationNs
             );
 
             if (!isError && exception == null) {
-                deviceMetrics.recordSuccess(
-                        wrappedRequest.getMethod(),
-                        wrappedRequest.getRequestURI(),
-                        wrappedResponse.getStatus()
-                );
+                globalMetrics.incrementSuccess(method);
             } else {
-                deviceMetrics.recordFailure(
-                        wrappedRequest.getMethod(),
-                        wrappedRequest.getRequestURI(),
-                        wrappedResponse.getStatus(),
-                        exception
-                );
+                globalMetrics.incrementError(method);
             }
+
             logRequest(wrappedRequest);
             logResponse(wrappedResponse, wrappedRequest);
             wrappedResponse.copyBodyToResponse();
