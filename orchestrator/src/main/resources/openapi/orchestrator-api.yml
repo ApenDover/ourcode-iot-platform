@@ -1,0 +1,183 @@
+openapi: 3.0.3
+info:
+  title: API Orchestrator
+  version: 1.0.0
+  description: Фасадный API (OIDC, Feign/gRPC к device-service, event-service, router-manager)
+servers:
+  - url: http://localhost:8080
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        event_id: { type: string }
+        device_id: { type: string }
+        timestamp: { type: integer, format: int64 }
+        type: { type: string }
+        payload: { type: string }
+      required: [ event_id, device_id, timestamp, type, payload ]
+    EventPage:
+      type: object
+      properties:
+        events:
+          type: array
+          items: { $ref: '#/components/schemas/Event' }
+        page: { type: integer }
+        size: { type: integer }
+        total: { type: integer }
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: [ ]
+
+paths:
+  /api/v1/devices:
+    get:
+      summary: Проксирует список устройств (device-service)
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '200':
+          description: Список устройств
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object  # упрощенная схема; точная — из client-библиотеки
+
+  /api/v1/devices/{id}:
+    get:
+      summary: Проксирует получение устройства по id (device-service)
+      security: [ { bearerAuth: [ ] } ]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Устройство найдено
+          content:
+            application/json:
+              schema: { type: object }
+        '404':
+          description: Не найдено
+
+  /api/v1/events:
+    get:
+      summary: Проксирует поиск событий (event-service)
+      security: [ { bearerAuth: [ ] } ]
+      parameters:
+        - { in: query, name: device_id, required: true, schema: { type: string } }
+        - { in: query, name: from_timestamp, schema: { type: integer, format: int64 } }
+        - { in: query, name: to_timestamp, schema: { type: integer, format: int64 } }
+        - { in: query, name: type, schema: { type: string } }
+        - { in: query, name: page, schema: { type: integer, minimum: 0, default: 0 } }
+        - { in: query, name: size, schema: { type: integer, minimum: 1, maximum: 1000, default: 100 } }
+      responses:
+        '200':
+          description: Проксированный ответ со списком событий
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventPage'
+        '400':
+          description: Невалидные параметры
+
+  /api/v1/events/{event_id}:
+    get:
+      summary: Проксирует получение события (event-service)
+      security: [ { bearerAuth: [ ] } ]
+      parameters:
+        - { in: path,  name: event_id,  required: true, schema: { type: string } }
+        - { in: query, name: device_id, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Событие найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: Не найдено
+
+  /api/v1/commands:
+    post:
+      summary: Проксирует отправку команды (router-manager)
+      security: [ { bearerAuth: [ ] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }  # точная схема — из client-библиотеки
+      responses:
+        '202':
+          description: Команда принята к выполнению
+        '400':
+          description: Ошибка валидации
+
+  /api/v1/commands/{id}:
+    get:
+      summary: Проксирует получение статуса команды (router-manager)
+      security: [ { bearerAuth: [ ] } ]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Статус команды
+          content:
+            application/json:
+              schema: { type: object }
+        '404':
+          description: Не найдено
+
+  /api/v1/devices/{deviceId}/version:
+    post:
+      summary: Обновить версию устройства (сага с компенсацией)
+      description: >
+        Шаг A: зафиксировать targetVersion в device-service (status=UPDATING).
+        Шаг B: отправить команду обновления в router-manager.
+        При сбое шага B — выполняется компенсация: rollback в device-service.
+      security: [ { bearerAuth: [ ] } ]
+      parameters:
+        - in: path
+          name: deviceId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ targetVersion ]
+              properties:
+                targetVersion: { type: string, example: "2.3.5" }
+                idempotencyKey: { type: string, example: "f4f6b4a2-..." }
+      responses:
+        '200':
+          description: Версия зафиксирована, команда отправлена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deviceId: { type: string }
+                  prevVersion: { type: string }
+                  targetVersion: { type: string }
+                  commandId: { type: string }
+        '409':
+          description: Конфликт версий/статуса в device-service (optimistic lock)
+        '502':
+          description: Сбой router-manager, выполнена компенсация
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string, example: "ROUTER_MANAGER_FAILED" }
+                  compensated: { type: boolean, example: true }
+                  details: { type: string }

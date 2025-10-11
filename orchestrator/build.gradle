@@ -42,20 +42,36 @@ configurations {
 }
 
 dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
 	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
 	implementation "ts.andrey:event-api:${eventApi}"
 	implementation "ts.andrey:device-api:${deviceApi}"
 	implementation "ts.andrey:router-manager-proto-client:${routerManagerApi}"
 
+	implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
+
+	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
+	implementation "com.fasterxml.jackson.core:jackson-annotations"
+	implementation "com.fasterxml.jackson.core:jackson-databind"
+
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+
 	compileOnly 'org.projectlombok:lombok'
+	compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
 
 	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner'
 
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -66,6 +82,79 @@ dependencyManagement {
 	}
 }
 
+openApiGenerate {
+	generatorName = "spring"
+	inputSpec = "$projectDir/src/main/resources/openapi/orchestrator-api.yml"
+	outputDir = "$buildDir/generated"
+	apiPackage = "ts.andrey.api"
+	modelPackage = "ts.andrey.dto"
+	invokerPackage = "ts.andrey.invoker"
+	library = "spring-boot"
+	generateApiTests = false
+	generateModelTests = false
+	additionalProperties = [
+			interfaceOnly: "true",
+			useTags     : "true",
+			java8       : "true",
+			useJakartaEe: "true"
+	]
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "$buildDir/generated/src/main/java"
+		}
+	}
+}
+compileJava.dependsOn tasks.openApiGenerate
+
+
+checkstyle {
+	toolVersion = "${checkstyleToolVersion}"
+	configFile = file("$rootDir/config/checkstyle/checkstyle.xml")
+	configProperties = [
+			'checkstyle.suppressions.file': "$rootDir/config/checkstyle/exclude-filter.xml"
+	]
+	showViolations = true
+	ignoreFailures = false
+	maxWarnings = 0
+}
+
+jacoco {
+	toolVersion = "${jacocoToolVersion}"
+	reportsDirectory = layout.buildDirectory.dir('reports/jacoco')
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = false
+		html.required = true
+		csv.required = false
+	}
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'**/cassandra/**',
+					'**/configuration/**',
+					'**/controller/**',
+					'**/exception/**',
+					'**/*EventCollectorApplication*'
+			])
+		}))
+	}
+}
+
+configurations.configureEach {
+	exclude group: 'org.slf4j', module: 'slf4j-simple'
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+bootJar {
+	archiveFileName = "app.jar"
 }
