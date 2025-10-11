@@ -54,13 +54,15 @@ dependencies {
 	implementation "ts.andrey:device-api:${deviceApi}"
 	implementation "ts.andrey:router-manager-proto-client:${routerManagerApi}"
 
-	implementation "net.devh:grpc-spring-boot-starter:${grpcStarter}"
-
 	implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
 
 	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
 	implementation "com.fasterxml.jackson.core:jackson-annotations"
 	implementation "com.fasterxml.jackson.core:jackson-databind"
+
+	implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+	implementation "io.grpc:grpc-stub:${grpcVersion}"
+	implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
 
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 

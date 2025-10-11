@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package router_manager;
+package ts.andrey.routermanager;
 
 option go_package = "router-manager-service/internal/pb;pb";
 

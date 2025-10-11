@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package router_manager;
+package ts.andrey.routermanager;
 
-option go_package = ".;router_manager";
+option go_package = "router-manager-service/internal/pb;pb";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";

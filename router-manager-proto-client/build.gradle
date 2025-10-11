@@ -1,7 +1,7 @@
 plugins {
     id "java-library"
     id "maven-publish"
-    id 'com.google.protobuf' version '0.9.4'
+    id 'com.google.protobuf' version "${protobufVersionPlugin}"
 }
 
 group = "ts.andrey"
@@ -36,15 +36,10 @@ publishing {
     }
 }
 
-ext {
-}
-
 dependencies {
-    implementation "io.grpc:grpc-netty:${grpcVersion}"
-    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
-    implementation "io.grpc:grpc-stub:${grpcVersion}"
-
-    compileOnly "com.google.protobuf:protobuf-java:${protobufVersion}"
+    api "io.grpc:grpc-protobuf:${grpcVersion}"
+    api "io.grpc:grpc-stub:${grpcVersion}"
+    api "com.google.protobuf:protobuf-java:${protobufVersion}"
 }
 
 protobuf {
@@ -74,7 +69,23 @@ tasks.withType(Copy).configureEach {
 sourceSets {
     main {
         proto {
-            srcDir 'src/main/proto'
+            srcDirs 'src/main/proto'
+        }
+        resources {
+            exclude '**/*.proto'
         }
     }
 }
+
+compileJava.dependsOn generateProto
+
+jar {
+    exclude("**/*.proto")
+    from sourceSets.main.output
+    dependsOn generateProto
+}
+
+task cleanGenerated(type: Delete) {
+    delete 'build/generated'
+}
+clean.dependsOn cleanGenerated
