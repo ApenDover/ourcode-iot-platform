@@ -1,30 +1,13 @@
 package ts.andrey.orchestrator.out.adapter;
 
-import io.grpc.ManagedChannel;
-import org.springframework.stereotype.Component;
-import ts.andrey.orchestrator.out.port.RouterManagerGrpcPort;
 import ts.andrey.routermanager.Roma;
-import ts.andrey.routermanager.RouterManagerServiceGrpc;
 
-@Component
-public class RouterManagerGrpcAdapter implements RouterManagerGrpcPort {
+interface RouterManagerGrpcAdapter {
 
-    private final RouterManagerServiceGrpc.RouterManagerServiceBlockingStub blockingStub;
+    Roma.SendCommandResponse sendCommand(Roma.SendCommandRequest request);
 
-    public RouterManagerGrpcAdapter(ManagedChannel managedChannel) {
-        this.blockingStub = RouterManagerServiceGrpc.newBlockingStub(managedChannel);
-    }
+    Roma.AckCommandResponse ackCommand(Roma.AckCommandRequest ackCommandRequest);
 
-    public Roma.SendCommandResponse sendCommand(Roma.SendCommandRequest request) {
-        return blockingStub.sendCommand(request);
-    }
-
-    public Roma.PollCommandsResponse pollCommands(Roma.PollCommandsRequest request) {
-        return blockingStub.pollCommands(request);
-    }
-
-    public Roma.AckCommandResponse ackCommand(Roma.AckCommandRequest request) {
-        return blockingStub.ackCommand(request);
-    }
+    Roma.PollCommandsResponse pollCommands(Roma.PollCommandsRequest request);
 
 }

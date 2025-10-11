@@ -8,7 +8,6 @@ import ts.andrey.orchestrator.dto.PollCommandsResponse;
 import ts.andrey.orchestrator.dto.SendCommandRequest;
 import ts.andrey.orchestrator.dto.SendCommandResponse;
 import ts.andrey.orchestrator.mapper.ProtoMapper;
-import ts.andrey.orchestrator.out.port.RouterManagerGrpcPort;
 import ts.andrey.orchestrator.out.port.RouterManagerPort;
 import ts.andrey.orchestrator.utils.ProtoStructMapper;
 import ts.andrey.routermanager.Roma;
@@ -17,7 +16,7 @@ import ts.andrey.routermanager.Roma;
 @RequiredArgsConstructor
 public class RouterManagerAdapter implements RouterManagerPort {
 
-    private final RouterManagerGrpcPort routerManagerGrpcPort;
+    private final RouterManagerGrpcAdapter routerManagerGrpcAdapter;
 
     public SendCommandResponse sendCommand(SendCommandRequest sendCommandRequest) {
 
@@ -29,7 +28,7 @@ public class RouterManagerAdapter implements RouterManagerPort {
                 .setPayload(payloadStruct)
                 .build();
 
-        final var sendCommandResponse = routerManagerGrpcPort.sendCommand(commandRequest);
+        final var sendCommandResponse = routerManagerGrpcAdapter.sendCommand(commandRequest);
         return ProtoMapper.mapToSendCommandResponseDto(sendCommandResponse);
     }
 
@@ -40,7 +39,7 @@ public class RouterManagerAdapter implements RouterManagerPort {
                 .setCommandId(ackCommandRequest.getCommandId())
                 .build();
 
-        final var ackResponse = routerManagerGrpcPort.ackCommand(ackRequest);
+        final var ackResponse = routerManagerGrpcAdapter.ackCommand(ackRequest);
         return ProtoMapper.mapToAckCommandResponseDto(ackResponse);
     }
 
@@ -50,7 +49,7 @@ public class RouterManagerAdapter implements RouterManagerPort {
                 .setRouterSerial(routerSerial)
                 .build();
 
-        final var pollResponse = routerManagerGrpcPort.pollCommands(pollRequest);
+        final var pollResponse = routerManagerGrpcAdapter.pollCommands(pollRequest);
         return ProtoMapper.mapToPollCommandsResponseDto(pollResponse);
     }
 
