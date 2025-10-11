@@ -1,8 +1,13 @@
 package ts.andrey.orchestrator.mapper;
 
 import lombok.experimental.UtilityClass;
+import ts.andrey.orchestrator.dto.AckCommandResponse;
+import ts.andrey.orchestrator.dto.Command;
+import ts.andrey.orchestrator.dto.PollCommandsResponse;
 import ts.andrey.orchestrator.dto.SendCommandRequest;
+import ts.andrey.orchestrator.dto.SendCommandResponse;
 import ts.andrey.orchestrator.utils.ProtoStructMapper;
+import ts.andrey.orchestrator.utils.TimeUtils;
 import ts.andrey.routermanager.Roma;
 
 @UtilityClass
@@ -25,4 +30,43 @@ public class ProtoMapper {
         return request;
     }
 
+    public Command mapToCommandDto(Roma.Command command) {
+        final var commandDto = new Command();
+        commandDto.setId(command.getId());
+        commandDto.setCommandType(command.getCommandType());
+        commandDto.setRouterSerial(command.getRouterSerial());
+        commandDto.setStatus(command.getStatus());
+        commandDto.setPayload(ProtoStructMapper.fromStruct(command.getPayload()));
+        commandDto.setAckedAt(TimeUtils.toOffsetDateTime(command.getAckedAt()));
+        commandDto.setCreatedAt(TimeUtils.toOffsetDateTime(command.getCreatedAt()));
+        commandDto.setSentAt(TimeUtils.toOffsetDateTime(command.getSentAt()));
+        return commandDto;
+    }
+
+    public Roma.SendCommandResponse mapToSendCommandResponseProto(SendCommandResponse sendCommandResponse) {
+        return Roma.SendCommandResponse.newBuilder()
+                .setCreated(sendCommandResponse.getCreated())
+                .build();
+    }
+
+    public SendCommandResponse mapToSendCommandResponseDto(Roma.SendCommandResponse sendCommandResponse) {
+        final var response = new SendCommandResponse();
+        response.setCreated(sendCommandResponse.getCreated());
+        return response;
+    }
+
+    public static AckCommandResponse mapToAckCommandResponseDto(Roma.AckCommandResponse ackResponse) {
+        final var response = new AckCommandResponse();
+        response.setStatus(ackResponse.getStatus());
+        return response;
+    }
+
+    public static PollCommandsResponse mapToPollCommandsResponseDto(Roma.PollCommandsResponse pollResponse) {
+        final var commands = pollResponse.getCommandsList().stream()
+                .map(ProtoMapper::mapToCommandDto)
+                .toList();
+        final var response = new PollCommandsResponse();
+        response.setCommands(commands);
+        return response;
+    }
 }
