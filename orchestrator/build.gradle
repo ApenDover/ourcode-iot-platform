@@ -54,6 +54,8 @@ dependencies {
 	implementation "ts.andrey:device-api:${deviceApi}"
 	implementation "ts.andrey:router-manager-proto-client:${routerManagerApi}"
 
+	implementation "net.devh:grpc-spring-boot-starter:${grpcStarter}"
+
 	implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
 
 	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
@@ -86,8 +88,8 @@ openApiGenerate {
 	generatorName = "spring"
 	inputSpec = "$projectDir/src/main/resources/openapi/orchestrator-api.yml"
 	outputDir = "$buildDir/generated"
-	apiPackage = "ts.andrey.api"
-	modelPackage = "ts.andrey.dto"
+	apiPackage = "ts.andrey.orchestrator.api"
+	modelPackage = "ts.andrey.orchestrator.dto"
 	invokerPackage = "ts.andrey.invoker"
 	library = "spring-boot"
 	generateApiTests = false
