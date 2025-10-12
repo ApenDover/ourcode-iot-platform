@@ -73,22 +73,26 @@ public class OrchestratorController implements DefaultApi {
 
     @Override
     public ResponseEntity<List<Device>> apiV1DevicesGet() {
-        return DefaultApi.super.apiV1DevicesGet();
+        final var device = deviceServicePort.getDevice("");
+        return ResponseEntity.ok(List.of(device));
     }
 
     @Override
     public ResponseEntity<Device> apiV1DevicesPost(DeviceCreateRequest deviceCreateRequest) {
-        return DefaultApi.super.apiV1DevicesPost(deviceCreateRequest);
+        final var device = deviceServicePort.createDevice(deviceCreateRequest);
+        return ResponseEntity.ok(device);
     }
 
     @Override
     public ResponseEntity<Event> apiV1EventsEventIdGet(String eventId, String deviceId) {
-        return DefaultApi.super.apiV1EventsEventIdGet(eventId, deviceId);
+        final var event = eventServicePort.getEvent(eventId, deviceId);
+        return ResponseEntity.ok(event);
     }
 
     @Override
     public ResponseEntity<EventPage> apiV1EventsGet(String deviceId, Long fromTimestamp, Long toTimestamp, String type, Integer page, Integer size) {
-        return DefaultApi.super.apiV1EventsGet(deviceId, fromTimestamp, toTimestamp, type, page, size);
+        final var response = eventServicePort.getEventByFilter(deviceId, fromTimestamp, toTimestamp, type, page, size);
+        return ResponseEntity.ok(response);
     }
 
 }
