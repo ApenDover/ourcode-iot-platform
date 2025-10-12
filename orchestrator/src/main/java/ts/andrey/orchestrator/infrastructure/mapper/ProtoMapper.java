@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.mapper;
+package ts.andrey.orchestrator.infrastructure.mapper;
 
 import lombok.experimental.UtilityClass;
 import ts.andrey.orchestrator.dto.AckCommandResponse;
@@ -6,8 +6,8 @@ import ts.andrey.orchestrator.dto.Command;
 import ts.andrey.orchestrator.dto.PollCommandsResponse;
 import ts.andrey.orchestrator.dto.SendCommandRequest;
 import ts.andrey.orchestrator.dto.SendCommandResponse;
-import ts.andrey.orchestrator.utils.ProtoStructMapper;
-import ts.andrey.orchestrator.utils.TimeUtils;
+import ts.andrey.orchestrator.infrastructure.util.ProtoStructMapper;
+import ts.andrey.orchestrator.infrastructure.util.TimeUtils;
 import ts.andrey.routermanager.Roma;
 
 @UtilityClass

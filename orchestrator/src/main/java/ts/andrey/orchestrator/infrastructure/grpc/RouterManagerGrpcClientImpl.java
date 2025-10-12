@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.out.adapter;
+package ts.andrey.orchestrator.infrastructure.grpc;
 
 import io.grpc.ManagedChannel;
 import org.springframework.stereotype.Component;
@@ -6,11 +6,11 @@ import ts.andrey.routermanager.Roma;
 import ts.andrey.routermanager.RouterManagerServiceGrpc;
 
 @Component
-class RouterManagerGrpcAdapterImpl implements RouterManagerGrpcAdapter {
+public class RouterManagerGrpcClientImpl implements RouterManagerGrpcClient {
 
     private final RouterManagerServiceGrpc.RouterManagerServiceBlockingStub blockingStub;
 
-    public RouterManagerGrpcAdapterImpl(ManagedChannel managedChannel) {
+    public RouterManagerGrpcClientImpl(ManagedChannel managedChannel) {
         this.blockingStub = RouterManagerServiceGrpc.newBlockingStub(managedChannel);
     }
 

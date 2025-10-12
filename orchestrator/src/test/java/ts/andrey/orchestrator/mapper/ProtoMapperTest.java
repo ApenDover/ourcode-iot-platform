@@ -1,6 +1,7 @@
 package ts.andrey.orchestrator.mapper;
 
 import org.junit.jupiter.api.Test;
+import ts.andrey.orchestrator.infrastructure.mapper.ProtoMapper;
 import ts.andrey.orchestrator.dto.SendCommandRequest;
 
 import java.util.Map;

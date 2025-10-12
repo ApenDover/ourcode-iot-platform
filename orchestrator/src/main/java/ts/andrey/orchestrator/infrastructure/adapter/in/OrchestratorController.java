@@ -1,7 +1,12 @@
-package ts.andrey.orchestrator.in;
+package ts.andrey.orchestrator.infrastructure.adapter.in;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 import ts.andrey.orchestrator.api.DefaultApi;
+import ts.andrey.orchestrator.application.outport.DeviceServicePort;
+import ts.andrey.orchestrator.application.outport.EventServicePort;
+import ts.andrey.orchestrator.application.outport.RouterManagerPort;
 import ts.andrey.orchestrator.dto.AckCommandRequest;
 import ts.andrey.orchestrator.dto.AckCommandResponse;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost200Response;
@@ -17,36 +22,48 @@ import ts.andrey.orchestrator.dto.SendCommandResponse;
 
 import java.util.List;
 
+@RestController
+@RequiredArgsConstructor
 public class OrchestratorController implements DefaultApi {
+
+    private final RouterManagerPort routerManagerPort;
+    private final DeviceServicePort deviceServicePort;
+    private final EventServicePort eventServicePort;
 
     @Override
     public ResponseEntity<AckCommandResponse> apiV1CommandsAckPost(AckCommandRequest ackCommandRequest) {
-        return DefaultApi.super.apiV1CommandsAckPost(ackCommandRequest);
+        final var response = routerManagerPort.ackCommand(ackCommandRequest);
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<PollCommandsResponse> apiV1CommandsPollGet(String routerSerial) {
-        return DefaultApi.super.apiV1CommandsPollGet(routerSerial);
+        final var response = routerManagerPort.pollCommands(routerSerial);
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<SendCommandResponse> apiV1CommandsPost(SendCommandRequest sendCommandRequest) {
-        return DefaultApi.super.apiV1CommandsPost(sendCommandRequest);
+        final var response = routerManagerPort.sendCommand(sendCommandRequest);
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<Void> apiV1DevicesDeviceIdDelete(String deviceId) {
-        return DefaultApi.super.apiV1DevicesDeviceIdDelete(deviceId);
+        deviceServicePort.deleteDevice(deviceId);
+        return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Device> apiV1DevicesDeviceIdGet(String deviceId) {
-        return DefaultApi.super.apiV1DevicesDeviceIdGet(deviceId);
+        final var response = deviceServicePort.getDevice(deviceId);
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<Device> apiV1DevicesDeviceIdPut(String deviceId, DeviceUpdateRequest deviceUpdateRequest) {
-        return DefaultApi.super.apiV1DevicesDeviceIdPut(deviceId, deviceUpdateRequest);
+        final var response = deviceServicePort.updateDevice(deviceId, deviceUpdateRequest);
+        return ResponseEntity.ok(response);
     }
 
     @Override

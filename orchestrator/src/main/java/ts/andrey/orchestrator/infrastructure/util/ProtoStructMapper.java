@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.utils;
+package ts.andrey.orchestrator.infrastructure.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Struct;

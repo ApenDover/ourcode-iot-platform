@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.out.adapter;
+package ts.andrey.orchestrator.infrastructure.adapter.out;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -7,16 +7,17 @@ import ts.andrey.orchestrator.dto.AckCommandResponse;
 import ts.andrey.orchestrator.dto.PollCommandsResponse;
 import ts.andrey.orchestrator.dto.SendCommandRequest;
 import ts.andrey.orchestrator.dto.SendCommandResponse;
-import ts.andrey.orchestrator.mapper.ProtoMapper;
-import ts.andrey.orchestrator.out.port.RouterManagerPort;
-import ts.andrey.orchestrator.utils.ProtoStructMapper;
+import ts.andrey.orchestrator.infrastructure.grpc.RouterManagerGrpcClient;
+import ts.andrey.orchestrator.infrastructure.mapper.ProtoMapper;
+import ts.andrey.orchestrator.application.outport.RouterManagerPort;
+import ts.andrey.orchestrator.infrastructure.util.ProtoStructMapper;
 import ts.andrey.routermanager.Roma;
 
 @Service
 @RequiredArgsConstructor
 public class RouterManagerAdapter implements RouterManagerPort {
 
-    private final RouterManagerGrpcAdapter routerManagerGrpcAdapter;
+    private final RouterManagerGrpcClient routerManagerGrpcClient;
 
     public SendCommandResponse sendCommand(SendCommandRequest sendCommandRequest) {
 
@@ -28,7 +29,7 @@ public class RouterManagerAdapter implements RouterManagerPort {
                 .setPayload(payloadStruct)
                 .build();
 
-        final var sendCommandResponse = routerManagerGrpcAdapter.sendCommand(commandRequest);
+        final var sendCommandResponse = routerManagerGrpcClient.sendCommand(commandRequest);
         return ProtoMapper.mapToSendCommandResponseDto(sendCommandResponse);
     }
 
@@ -39,7 +40,7 @@ public class RouterManagerAdapter implements RouterManagerPort {
                 .setCommandId(ackCommandRequest.getCommandId())
                 .build();
 
-        final var ackResponse = routerManagerGrpcAdapter.ackCommand(ackRequest);
+        final var ackResponse = routerManagerGrpcClient.ackCommand(ackRequest);
         return ProtoMapper.mapToAckCommandResponseDto(ackResponse);
     }
 
@@ -49,7 +50,7 @@ public class RouterManagerAdapter implements RouterManagerPort {
                 .setRouterSerial(routerSerial)
                 .build();
 
-        final var pollResponse = routerManagerGrpcAdapter.pollCommands(pollRequest);
+        final var pollResponse = routerManagerGrpcClient.pollCommands(pollRequest);
         return ProtoMapper.mapToPollCommandsResponseDto(pollResponse);
     }
 

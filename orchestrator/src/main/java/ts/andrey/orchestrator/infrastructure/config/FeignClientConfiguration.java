@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.config;
+package ts.andrey.orchestrator.infrastructure.config;
 
 import feign.Client;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

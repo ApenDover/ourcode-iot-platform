@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.config;
+package ts.andrey.orchestrator.infrastructure.config;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;

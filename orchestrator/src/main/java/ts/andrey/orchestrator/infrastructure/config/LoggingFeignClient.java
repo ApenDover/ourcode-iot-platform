@@ -1,11 +1,11 @@
-package ts.andrey.orchestrator.config;
+package ts.andrey.orchestrator.infrastructure.config;
 
 import feign.Client;
 import feign.Request;
 import feign.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StreamUtils;
-import ts.andrey.orchestrator.utils.JsonUtils;
+import ts.andrey.orchestrator.infrastructure.util.JsonUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

@@ -1,8 +1,8 @@
-package ts.andrey.orchestrator.out.adapter;
+package ts.andrey.orchestrator.infrastructure.grpc;
 
 import ts.andrey.routermanager.Roma;
 
-interface RouterManagerGrpcAdapter {
+public interface RouterManagerGrpcClient {
 
     Roma.SendCommandResponse sendCommand(Roma.SendCommandRequest request);
 

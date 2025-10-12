@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.mapper;
+package ts.andrey.orchestrator.infrastructure.mapper;
 
 import org.mapstruct.Mapper;
 import ts.andrey.orchestrator.dto.Device;
