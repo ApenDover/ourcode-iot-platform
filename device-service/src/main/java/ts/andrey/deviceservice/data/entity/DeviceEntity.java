@@ -31,6 +31,8 @@ public class DeviceEntity {
     @CreatedDate
     private Instant createdAt;
 
+    private Integer version;
+
     private String meta;
 
     @Override
