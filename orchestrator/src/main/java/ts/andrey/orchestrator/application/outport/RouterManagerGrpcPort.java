@@ -6,8 +6,12 @@ import ts.andrey.orchestrator.dto.PollCommandsResponse;
 import ts.andrey.orchestrator.dto.SendCommandRequest;
 import ts.andrey.orchestrator.dto.SendCommandResponse;
 
-public interface RouterManagerPort {
+public interface RouterManagerGrpcPort {
 
-    Integer sendCommand(String deviceId, String commandType, Object payload);
+    SendCommandResponse sendCommand(SendCommandRequest request);
+
+    AckCommandResponse ackCommand(AckCommandRequest ackCommandRequest);
+
+    PollCommandsResponse pollCommands(String routerSerial);
 
 }

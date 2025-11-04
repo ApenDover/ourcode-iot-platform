@@ -275,6 +275,21 @@ components:
           format: int64
         meta:
           type: string
+        version:
+          type: string
+          description: Текущая версия устройства (semver)
+          example: "1.2.3"
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+        etag:
+          type: integer
+          format: int64
+          description: Версия для оптимистичной блокировки
+          example: 5
+
+    DeviceStatus:
+      type: string
+      enum: [ READY, UPDATING, ERROR ]
 
     DeviceCreateRequest:
       type: object
@@ -284,6 +299,10 @@ components:
           type: string
         meta:
           type: string
+        version:
+          type: string
+          description: Начальная версия устройства
+          example: "1.0.0"
 
     DeviceUpdateRequest:
       type: object
@@ -292,6 +311,10 @@ components:
           type: string
         meta:
           type: string
+        version:
+          type: string
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
 
     # Event Service schemas
     Event:

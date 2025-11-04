@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ts.andrey.orchestrator.api.DefaultApi;
 import ts.andrey.orchestrator.application.outport.DeviceServicePort;
 import ts.andrey.orchestrator.application.outport.EventServicePort;
-import ts.andrey.orchestrator.application.outport.RouterManagerPort;
+import ts.andrey.orchestrator.application.outport.RouterManagerGrpcPort;
+import ts.andrey.orchestrator.application.service.UpdateDeviceVersionUseCase;
 import ts.andrey.orchestrator.dto.AckCommandRequest;
 import ts.andrey.orchestrator.dto.AckCommandResponse;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost200Response;
@@ -26,25 +27,26 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrchestratorController implements DefaultApi {
 
-    private final RouterManagerPort routerManagerPort;
+    private final RouterManagerGrpcPort routerManagerGrpcPort;
     private final DeviceServicePort deviceServicePort;
     private final EventServicePort eventServicePort;
+    private final UpdateDeviceVersionUseCase updateDeviceVersionUseCase;
 
     @Override
     public ResponseEntity<AckCommandResponse> apiV1CommandsAckPost(AckCommandRequest ackCommandRequest) {
-        final var response = routerManagerPort.ackCommand(ackCommandRequest);
+        final var response = routerManagerGrpcPort.ackCommand(ackCommandRequest);
         return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<PollCommandsResponse> apiV1CommandsPollGet(String routerSerial) {
-        final var response = routerManagerPort.pollCommands(routerSerial);
+        final var response = routerManagerGrpcPort.pollCommands(routerSerial);
         return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<SendCommandResponse> apiV1CommandsPost(SendCommandRequest sendCommandRequest) {
-        final var response = routerManagerPort.sendCommand(sendCommandRequest);
+        final var response = routerManagerGrpcPort.sendCommand(sendCommandRequest);
         return ResponseEntity.ok(response);
     }
 
@@ -68,7 +70,8 @@ public class OrchestratorController implements DefaultApi {
 
     @Override
     public ResponseEntity<ApiV1DevicesDeviceIdVersionPost200Response> apiV1DevicesDeviceIdVersionPost(String deviceId, ApiV1DevicesDeviceIdVersionPostRequest apiV1DevicesDeviceIdVersionPostRequest) {
-        return DefaultApi.super.apiV1DevicesDeviceIdVersionPost(deviceId, apiV1DevicesDeviceIdVersionPostRequest);
+        final var response = updateDeviceVersionUseCase.updateDeviceVersion(deviceId, apiV1DevicesDeviceIdVersionPostRequest);
+        return ResponseEntity.ok(response);
     }
 
     @Override

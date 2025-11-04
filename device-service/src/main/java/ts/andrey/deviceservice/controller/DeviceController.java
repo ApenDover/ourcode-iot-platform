@@ -36,7 +36,7 @@ public class DeviceController implements DeviceV1Api {
         final var response = deviceService.updateVersion(
                 deviceId,
                 deviceVersionRollbackRequest.getEtag(),
-                deviceVersionRollbackRequest.getRollbackTo(),
+                deviceVersionRollbackRequest.getRollbackVersion(),
                 DeviceStatus.READY);
         return ResponseEntity.ok(response);
     }
