@@ -10,6 +10,7 @@ import ts.andrey.dto.DeviceCreateRequest;
 import ts.andrey.dto.DeviceStatus;
 import ts.andrey.dto.DeviceUpdateRequest;
 import ts.andrey.dto.DeviceVersionResponse;
+import ts.andrey.dto.DeviceVersionRollbackRequest;
 import ts.andrey.dto.DeviceVersionUpdateRequest;
 
 @RestController
@@ -22,7 +23,21 @@ public class DeviceController implements DeviceV1Api {
     public ResponseEntity<DeviceVersionResponse> updateDeviceVersion(
             String deviceId, DeviceVersionUpdateRequest deviceVersionUpdateRequest
     ) {
-        final var response = deviceService.updateVersion(deviceId, deviceVersionUpdateRequest, DeviceStatus.UPDATING);
+        final var response = deviceService.updateVersion(
+                deviceId,
+                deviceVersionUpdateRequest.getEtag(),
+                deviceVersionUpdateRequest.getTargetVersion(),
+                DeviceStatus.UPDATING);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<DeviceVersionResponse> rollbackDeviceVersion(String deviceId, DeviceVersionRollbackRequest deviceVersionRollbackRequest) {
+        final var response = deviceService.updateVersion(
+                deviceId,
+                deviceVersionRollbackRequest.getEtag(),
+                deviceVersionRollbackRequest.getRollbackTo(),
+                DeviceStatus.READY);
         return ResponseEntity.ok(response);
     }
 

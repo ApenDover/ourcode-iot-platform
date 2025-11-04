@@ -13,7 +13,6 @@ import ts.andrey.dto.DeviceCreateRequest;
 import ts.andrey.dto.DeviceStatus;
 import ts.andrey.dto.DeviceUpdateRequest;
 import ts.andrey.dto.DeviceVersionResponse;
-import ts.andrey.dto.DeviceVersionUpdateRequest;
 
 @Slf4j
 @Service
@@ -25,14 +24,13 @@ public class DeviceCacheServiceImpl implements DeviceService {
     private final DeviceMapper deviceMapper;
 
     @Override
-    public DeviceVersionResponse updateVersion(String deviceId, DeviceVersionUpdateRequest request, DeviceStatus deviceStatus) {
+    public DeviceVersionResponse updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus) {
         final var device = getDevice(deviceId);
-        final var etag = device.getEtag();
-        if (!etag.equals(request.getEtag())) {
+        if (!device.getEtag().equals(etag)) {
             throw new DeviceServiceException(ErrorExceptionMessages.ETAG_NOT_ACTUAL);
         }
         final var oldVersion = device.getVersion();
-        device.setVersion(request.getTargetVersion());
+        device.setVersion(updateVersion);
         device.setStatus(deviceStatus);
         device.setEtag(etag + 1);
         final var updated = deviceDataServiceImpl.saveDevice(device);

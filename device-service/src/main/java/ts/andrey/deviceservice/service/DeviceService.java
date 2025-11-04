@@ -9,7 +9,7 @@ import ts.andrey.dto.DeviceVersionUpdateRequest;
 
 public interface DeviceService {
 
-    DeviceVersionResponse updateVersion(String deviceId, DeviceVersionUpdateRequest request, DeviceStatus deviceStatus);
+    DeviceVersionResponse updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus);
 
     Device getDevice(String deviceId);
 

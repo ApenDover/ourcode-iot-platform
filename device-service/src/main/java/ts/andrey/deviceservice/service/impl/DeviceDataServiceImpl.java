@@ -23,11 +23,11 @@ public class DeviceDataServiceImpl implements DeviceService {
     private final DeviceMapper deviceMapper;
 
     @Override
-    public DeviceVersionResponse updateVersion(String deviceId, DeviceVersionUpdateRequest request) {
+    public DeviceVersionResponse updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus) {
         final var device = deviceDbService.getDeviceByDeviceId(deviceId);
         final var oldVersion = device.getVersion();
-        device.setVersion(request.getTargetVersion());
-        device.setStatus(DeviceStatus.UPDATING);
+        device.setVersion(updateVersion);
+        device.setStatus(deviceStatus);
         deviceDbService.save(device);
         return deviceMapper.toUpdateVersionResponse(device, oldVersion);
     }
