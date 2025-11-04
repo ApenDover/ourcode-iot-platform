@@ -73,6 +73,71 @@ paths:
         '404':
           $ref: '#/components/responses/DeviceError'
 
+  # НОВЫЕ ЭНДПОИНТЫ ДЛЯ SAGA
+  /api/v1/devices/{deviceId}/version:
+    patch:
+      tags:
+        - DeviceV1
+      summary: Зафиксировать целевую версию устройства (Шаг A SAGA)
+      description: |
+        Обновляет версию устройства и устанавливает статус UPDATING.
+        Используется оптимистичная блокировка через поле version.
+      operationId: updateDeviceVersion
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceVersionUpdateRequest'
+      responses:
+        '200':
+          description: Версия успешно зафиксирована
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceVersionResponse'
+        '400':
+          $ref: '#/components/responses/DeviceError'
+        '404':
+          $ref: '#/components/responses/DeviceError'
+        '409':
+          description: Конфликт версий (optimistic locking)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/DeviceError'
+
+  /api/v1/devices/{deviceId}/version/rollback:
+    post:
+      tags:
+        - DeviceV1
+      summary: Откат версии устройства (Компенсация SAGA)
+      description: |
+        Откатывает версию устройства к предыдущему значению и устанавливает статус READY.
+        Должен быть идемпотентным.
+      operationId: rollbackDeviceVersion
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceVersionRollbackRequest'
+      responses:
+        '200':
+          description: Версия успешно откатана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceVersionResponse'
+        '400':
+          $ref: '#/components/responses/DeviceError'
+        '404':
+          $ref: '#/components/responses/DeviceError'
+
 components:
   parameters:
     DeviceId:
@@ -97,6 +162,7 @@ components:
             $ref: '#/components/schemas/DeviceUpdateRequest'
 
   schemas:
+    # СУЩЕСТВУЮЩИЕ СХЕМЫ С ДОПОЛНЕНИЯМИ
     Device:
       type: object
       properties:
@@ -109,6 +175,17 @@ components:
           format: int64
         meta:
           type: string
+        version:
+          type: string
+          description: Текущая версия устройства (semver)
+          example: "1.2.3"
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+        etag:
+          type: integer
+          format: int64
+          description: Версия для оптимистичной блокировки
+          example: 5
 
     DeviceCreateRequest:
       type: object
@@ -118,6 +195,10 @@ components:
           type: string
         meta:
           type: string
+        version:
+          type: string
+          description: Начальная версия устройства
+          example: "1.0.0"
 
     DeviceUpdateRequest:
       type: object
@@ -126,6 +207,66 @@ components:
           type: string
         meta:
           type: string
+        version:
+          type: string
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+
+    # НОВЫЕ СХЕМЫ ДЛЯ SAGA
+    DeviceVersionUpdateRequest:
+      type: object
+      required: [targetVersion, etag]
+      properties:
+        targetVersion:
+          type: string
+          description: Целевая версия для обновления
+          example: "2.3.5"
+        etag:
+          type: integer
+          format: int64
+          description: Ожидаемая версия etag для оптимистичной блокировки
+          example: 5
+
+    DeviceVersionRollbackRequest:
+      type: object
+      required: [rollbackTo, status]
+      properties:
+        rollbackTo:
+          type: string
+          description: Версия, к которой нужно откатиться
+          example: "1.2.3"
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+        etag:
+          type: integer
+          format: int64
+          description: Ожидаемая версия etag для оптимистичной блокировки
+          example: 6
+
+    DeviceVersionResponse:
+      type: object
+      properties:
+        deviceId:
+          type: string
+        prevVersion:
+          type: string
+          description: Предыдущая версия устройства
+          example: "1.2.3"
+        targetVersion:
+          type: string
+          description: Текущая/целевая версия устройства
+          example: "2.3.5"
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+        etag:
+          type: integer
+          format: int64
+          description: Новая версия для оптимистичной блокировки
+          example: 6
+
+    DeviceStatus:
+      type: string
+      enum: [READY, UPDATING, ERROR]
 
     DeviceError:
       type: object

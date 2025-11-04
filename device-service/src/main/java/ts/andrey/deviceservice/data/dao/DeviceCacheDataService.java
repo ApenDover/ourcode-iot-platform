@@ -15,7 +15,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DeviceCacheService {
+public class DeviceCacheDataService {
 
     @Value("${app.redis.ttl-minutes}")
     private int ttlMinutes;

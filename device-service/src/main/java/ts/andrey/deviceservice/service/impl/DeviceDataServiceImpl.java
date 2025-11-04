@@ -3,21 +3,34 @@ package ts.andrey.deviceservice.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import ts.andrey.deviceservice.data.dao.DeviceDbService;
+import ts.andrey.deviceservice.data.dao.DeviceDbDataService;
 import ts.andrey.deviceservice.mapper.DeviceMapper;
 import ts.andrey.deviceservice.metrics.DeviceMetrics;
 import ts.andrey.deviceservice.service.DeviceService;
 import ts.andrey.dto.Device;
 import ts.andrey.dto.DeviceCreateRequest;
+import ts.andrey.dto.DeviceStatus;
 import ts.andrey.dto.DeviceUpdateRequest;
+import ts.andrey.dto.DeviceVersionResponse;
+import ts.andrey.dto.DeviceVersionUpdateRequest;
 
 @Service
 @RequiredArgsConstructor
 public class DeviceDataServiceImpl implements DeviceService {
 
     private final DeviceMetrics deviceMetrics;
-    private final DeviceDbService deviceDbService;
+    private final DeviceDbDataService deviceDbService;
     private final DeviceMapper deviceMapper;
+
+    @Override
+    public DeviceVersionResponse updateVersion(String deviceId, DeviceVersionUpdateRequest request) {
+        final var device = deviceDbService.getDeviceByDeviceId(deviceId);
+        final var oldVersion = device.getVersion();
+        device.setVersion(request.getTargetVersion());
+        device.setStatus(DeviceStatus.UPDATING);
+        deviceDbService.save(device);
+        return deviceMapper.toUpdateVersionResponse(device, oldVersion);
+    }
 
     @Override
     public Device getDevice(String deviceId) {
@@ -27,10 +40,18 @@ public class DeviceDataServiceImpl implements DeviceService {
     }
 
     @Override
-    public Device saveDevice(DeviceCreateRequest deviceCreateRequest) {
+    public Device createDevice(DeviceCreateRequest deviceCreateRequest) {
         final var device = deviceMapper.createDeviceEntity(deviceCreateRequest);
         final var created = deviceDbService.save(device);
         deviceMetrics.createDeviceSuccess();
+        return deviceMapper.toDevice(created);
+    }
+
+    @Override
+    public Device saveDevice(Device device) {
+        final var deviceEntity = deviceMapper.toEntity(device);
+        final var created = deviceDbService.save(deviceEntity);
+        deviceMetrics.updateDeviceSuccess();
         return deviceMapper.toDevice(created);
     }
 

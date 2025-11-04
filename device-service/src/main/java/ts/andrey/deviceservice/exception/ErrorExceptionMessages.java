@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 public enum ErrorExceptionMessages {
 
     DEVICE_NOT_FOUND("Устройство с deviceId [%s] не найдено", HttpStatus.NOT_FOUND),
-    REDIS_NOT_AVAILABLE("REDIS недоступен: %s", HttpStatus.SERVICE_UNAVAILABLE);
+    REDIS_NOT_AVAILABLE("REDIS недоступен: %s", HttpStatus.SERVICE_UNAVAILABLE),
+    ETAG_NOT_ACTUAL("передан неверный etag", HttpStatus.CONFLICT);
 
     private final String description;
     private final HttpStatus httpStatus;

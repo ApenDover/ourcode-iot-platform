@@ -7,7 +7,10 @@ import ts.andrey.api.DeviceV1Api;
 import ts.andrey.deviceservice.service.DeviceService;
 import ts.andrey.dto.Device;
 import ts.andrey.dto.DeviceCreateRequest;
+import ts.andrey.dto.DeviceStatus;
 import ts.andrey.dto.DeviceUpdateRequest;
+import ts.andrey.dto.DeviceVersionResponse;
+import ts.andrey.dto.DeviceVersionUpdateRequest;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,8 +19,16 @@ public class DeviceController implements DeviceV1Api {
     private final DeviceService deviceService;
 
     @Override
+    public ResponseEntity<DeviceVersionResponse> updateDeviceVersion(
+            String deviceId, DeviceVersionUpdateRequest deviceVersionUpdateRequest
+    ) {
+        final var response = deviceService.updateVersion(deviceId, deviceVersionUpdateRequest, DeviceStatus.UPDATING);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
     public ResponseEntity<Device> createDevice(DeviceCreateRequest deviceCreateRequest) {
-        final var device = deviceService.saveDevice(deviceCreateRequest);
+        final var device = deviceService.createDevice(deviceCreateRequest);
         return ResponseEntity.ok(device);
     }
 

@@ -3,6 +3,7 @@ package ts.andrey.deviceservice.tdf;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ts.andrey.dto.Device;
+import ts.andrey.dto.DeviceStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,9 @@ public class DummyDevice {
         device.setDeviceType("deviceType");
         device.setMeta("meta");
         device.setCreatedAt(600L);
+        device.setEtag(1L);
+        device.setStatus(DeviceStatus.READY);
+        device.setVersion("0.0.1");
         return device;
     }
 

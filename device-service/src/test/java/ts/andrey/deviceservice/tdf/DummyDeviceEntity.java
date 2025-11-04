@@ -3,6 +3,7 @@ package ts.andrey.deviceservice.tdf;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ts.andrey.deviceservice.data.entity.DeviceEntity;
+import ts.andrey.dto.DeviceStatus;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -19,6 +20,9 @@ public class DummyDeviceEntity {
         deviceEntity.setDeviceType("deviceType");
         deviceEntity.setMeta("meta");
         deviceEntity.setCreatedAt(Instant.ofEpochMilli(200L));
+        deviceEntity.setVersion("0.0.1");
+        deviceEntity.setEtag(1L);
+        deviceEntity.setStatus(DeviceStatus.READY);
         return deviceEntity;
     }
 
