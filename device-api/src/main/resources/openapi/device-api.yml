@@ -180,10 +180,7 @@ components:
           description: Текущая версия устройства (semver)
           example: "1.2.3"
         status:
-          type: string
-          description: Статус устройства
-          enum: [READY, UPDATING, ERROR]
-          example: "READY"
+          $ref: '#/components/schemas/DeviceStatus'
         etag:
           type: integer
           format: int64
@@ -213,19 +210,18 @@ components:
         version:
           type: string
         status:
-          type: string
-          enum: [READY, UPDATING, ERROR]
+          $ref: '#/components/schemas/DeviceStatus'
 
     # НОВЫЕ СХЕМЫ ДЛЯ SAGA
     DeviceVersionUpdateRequest:
       type: object
-      required: [targetVersion]
+      required: [targetVersion, etag]
       properties:
         targetVersion:
           type: string
           description: Целевая версия для обновления
           example: "2.3.5"
-        expectedVersion:
+        etag:
           type: integer
           format: int64
           description: Ожидаемая версия etag для оптимистичной блокировки
@@ -233,18 +229,15 @@ components:
 
     DeviceVersionRollbackRequest:
       type: object
-      required: [rollbackTo, status]
+      required: [rollbackVersion, status]
       properties:
-        rollbackTo:
+        rollbackVersion:
           type: string
           description: Версия, к которой нужно откатиться
           example: "1.2.3"
         status:
-          type: string
-          enum: [READY]
-          description: Статус после отката
-          example: "READY"
-        expectedVersion:
+          $ref: '#/components/schemas/DeviceStatus'
+        etag:
           type: integer
           format: int64
           description: Ожидаемая версия etag для оптимистичной блокировки
@@ -264,13 +257,16 @@ components:
           description: Текущая/целевая версия устройства
           example: "2.3.5"
         status:
-          type: string
-          enum: [READY, UPDATING, ERROR]
+          $ref: '#/components/schemas/DeviceStatus'
         etag:
           type: integer
           format: int64
           description: Новая версия для оптимистичной блокировки
           example: 6
+
+    DeviceStatus:
+      type: string
+      enum: [READY, UPDATING, ERROR]
 
     DeviceError:
       type: object
