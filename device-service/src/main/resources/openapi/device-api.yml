@@ -229,9 +229,9 @@ components:
 
     DeviceVersionRollbackRequest:
       type: object
-      required: [rollbackTo, status]
+      required: [rollbackVersion, status]
       properties:
-        rollbackTo:
+        rollbackVersion:
           type: string
           description: Версия, к которой нужно откатиться
           example: "1.2.3"
