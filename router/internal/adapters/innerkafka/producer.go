@@ -1,11 +1,13 @@
-package kafka
+package innerkafka
 
 import (
 	"fmt"
 	"log/slog"
+
 	"router-manager-service/config"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	_ "github.com/linkedin/goavro/v2"
 )
 
 type Producer struct {
@@ -34,6 +36,11 @@ func NewProducer(cfg *config.Config, serializer *AvroSerializer, logger *slog.Lo
 				if ev.TopicPartition.Error != nil {
 					logger.Error("Delivery failed",
 						slog.String("error", ev.TopicPartition.Error.Error()))
+				} else {
+					logger.Debug("Message delivered",
+						slog.String("topic", *ev.TopicPartition.Topic),
+						slog.Int64("partition", int64(ev.TopicPartition.Partition)),
+						slog.Int64("offset", int64(ev.TopicPartition.Offset)))
 				}
 			}
 		}

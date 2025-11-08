@@ -10,7 +10,7 @@ import (
 
 	"router-manager-service/config"
 	"router-manager-service/internal/adapters/innergrpc"
-	"router-manager-service/internal/adapters/kafka"
+	"router-manager-service/internal/adapters/innerkafka"
 	"router-manager-service/internal/conf/util"
 
 	"github.com/google/uuid"
@@ -26,7 +26,7 @@ type App struct {
 	wg            sync.WaitGroup
 	deps          *Dependencies
 	gClient       *innergrpc.Client
-	kafkaProducer *kafka.Producer
+	kafkaProducer *innerkafka.Producer
 	shutdownOnce  sync.Once
 }
 
@@ -46,7 +46,6 @@ func New(ctx context.Context, deps *Dependencies) (*App, error) {
 		gClient: grpcClient,
 	}
 
-	// Инициализация Kafka producer
 	if err := app.initKafka(); err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to init Kafka: %w", err)
@@ -63,14 +62,14 @@ func (a *App) initKafka() error {
 		return nil
 	}
 
-	schemaLoader, err := kafka.NewSchemaLoader("./avro")
+	schemaLoader, err := innerkafka.NewSchemaLoader("./avro")
 	if err != nil {
 		return fmt.Errorf("failed to load avro schemas: %w", err)
 	}
 
-	avroSerializer := kafka.NewAvroSerializer(schemaLoader.GetDeviceEventCodec())
+	avroSerializer := innerkafka.NewAvroSerializer(schemaLoader.GetDeviceEventCodec())
 
-	kafkaProducer, err := kafka.NewProducer(a.deps.Config, avroSerializer, log)
+	kafkaProducer, err := innerkafka.NewProducer(a.deps.Config, avroSerializer, log)
 	if err != nil {
 		return fmt.Errorf("failed to create kafka producer: %w", err)
 	}
@@ -192,12 +191,12 @@ func (a *App) sendDeviceEvents() {
 
 	log := util.GetLogger(a.ctx)
 
-	deviceEvent := &kafka.DeviceEvent{
+	deviceEvent := &innerkafka.DeviceEvent{
 		EventID:   fmt.Sprintf("event-%s-%d", a.deps.Config.RouterSerial, time.Now().UnixMilli()),
 		Timestamp: time.Now(),
-		Type:      kafka.EventTypeStatus,
+		Type:      innerkafka.EventTypeStatus,
 		Payload:   fmt.Sprintf(`{"status": "online", "serial": "%s", "timestamp": %d}`, a.deps.Config.RouterSerial, time.Now().Unix()),
-		Device: kafka.Device{
+		Device: innerkafka.Device{
 			ID:           uuid.NewString(),
 			SerialNumber: a.deps.Config.RouterSerial,
 			Model:        "Router-3000",

@@ -487,6 +487,8 @@ services:
     depends_on:
       router-manager-service:
         condition: service_healthy
+      event-collector:
+        condition: service_healthy
     networks:
       - iot_network
   router-manager-service:
