@@ -29,12 +29,10 @@ func (s *AvroSerializer) SerializeDeviceEvent(event *DeviceEvent) ([]byte, error
 			"type":      event.Type,
 			"payload":   event.Payload,
 			"device": map[string]interface{}{
-				"com.nashkod.avro.Device": map[string]interface{}{
-					"deviceId":   event.Device.DeviceId,
-					"deviceType": event.Device.DeviceType,
-					"meta":       event.Device.Meta,
-					"createdAt":  event.Device.CreatedAt.UnixMilli(),
-				},
+				"deviceId":   event.Device.DeviceId,
+				"deviceType": event.Device.DeviceType,
+				"meta":       event.Device.Meta,
+				"createdAt":  event.Device.CreatedAt.UnixMilli(),
 			},
 		},
 	}

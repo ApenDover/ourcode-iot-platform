@@ -11,7 +11,6 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-// Producer Kafka продюсер
 type Producer struct {
 	writer     *kafka.Writer
 	topic      string
