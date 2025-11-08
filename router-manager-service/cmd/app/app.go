@@ -4,9 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"log/slog"
 	"net"
 	"net/http"
@@ -14,13 +11,19 @@ import (
 	"sync"
 	"time"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
+
+	"router-manager-service/config"
+	"router-manager-service/internal/adapters/innergrpc"
+	"router-manager-service/internal/conf/util"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
-	"router-manager-service/config"
-	"router-manager-service/internal/adapters/innergrpc"
-	"router-manager-service/internal/conf/util"
 )
 
 type Dependencies struct {
@@ -71,7 +74,6 @@ func (a *App) Start() error {
 }
 
 func (a *App) initGRPCServer() error {
-
 	a.managerService = innergrpc.NewServer(a.deps.DBPool, a.deps.RedisClient)
 
 	port := a.deps.Config.GRPCPort
@@ -82,7 +84,15 @@ func (a *App) initGRPCServer() error {
 	}
 	a.grpcListener = listener
 	a.grpcServer = a.createGRPCServer()
+
 	routermanager.RegisterRouterManagerServiceServer(a.grpcServer, a.managerService)
+	reflection.Register(a.grpcServer)
+
+	log := util.GetLogger(a.ctx)
+	log.Info("gRPC сервер инициализирован с рефлексией",
+		slog.String("port", port),
+		slog.String("address", listener.Addr().String()),
+	)
 
 	return nil
 }
@@ -224,30 +234,44 @@ func (a *App) checkExpiredCommands(period, expiredTime time.Duration, log *slog.
 }
 
 func (a *App) startServers() error {
+	serverErrors := make(chan error, 2)
+
 	a.wg.Add(1)
 	go func() {
 		defer a.wg.Done()
 		log := util.GetLogger(a.ctx)
 
-		log.Info("Запускаю gRPC сервер", slog.String("info", a.grpcListener.Addr().String()))
+		log.Info("Запускаю gRPC сервер", slog.String("address", a.grpcListener.Addr().String()))
 
 		if err := a.grpcServer.Serve(a.grpcListener); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
-			log.Error("ошибка gRPC сервера", slog.String("error", err.Error()))
+			log.Error("Ошибка gRPC сервера", slog.String("error", err.Error()))
+			serverErrors <- fmt.Errorf("gRPC server failed: %w", err)
 		}
 	}()
+
 	a.wg.Add(1)
 	go func() {
 		defer a.wg.Done()
 		log := util.GetLogger(a.ctx)
 
-		log.Info("Запускаю metrics сервер", slog.String("info", a.metricsServer.Addr))
+		log.Info("Запускаю metrics сервер", slog.String("address", a.metricsServer.Addr))
 
 		if err := a.metricsServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Error("ошибка metrics сервара", slog.String("error", err.Error()))
+			log.Error("Ошибка metrics сервера", slog.String("error", err.Error()))
+			serverErrors <- fmt.Errorf("metrics server failed: %w", err)
 		}
 	}()
 
-	return nil
+	time.Sleep(100 * time.Millisecond)
+
+	select {
+	case err := <-serverErrors:
+		return err
+	default:
+		log := util.GetLogger(a.ctx)
+		log.Info("Оба сервера запущены успешно")
+		return nil
+	}
 }
 
 func (a *App) Stop() {
