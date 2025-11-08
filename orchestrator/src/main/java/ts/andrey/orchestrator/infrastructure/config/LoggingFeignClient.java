@@ -30,7 +30,10 @@ public class LoggingFeignClient extends Client.Default {
             final var bodyStream = response.body().asInputStream();
             final var responseBody = StreamUtils.copyToString(bodyStream, StandardCharsets.UTF_8);
             final var unformattedJson = JsonUtils.minifyJson(responseBody);
-            log.debug("Response status: {}, headers: {}, body: {}", response.status(), response.headers(), unformattedJson);
+            log.debug(
+                    "Response status: {}, headers: {}, body: {}",
+                    response.status(), response.headers(), unformattedJson
+            );
             return response.toBuilder().body(responseBody, StandardCharsets.UTF_8).build();
         }
     }

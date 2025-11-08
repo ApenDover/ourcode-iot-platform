@@ -22,7 +22,10 @@ public class EventServiceAdapter implements EventServicePort {
     }
 
     @Override
-    public EventPage getEventByFilter(String deviceId, Long fromMs, Long toMs, String eventType, Integer page, Integer size) {
+    public EventPage getEventByFilter(
+            String deviceId, Long fromMs, Long toMs,
+            String eventType, Integer page, Integer size
+    ) {
         final var response = eventServiceClient.apiV1EventsGet(deviceId, fromMs, toMs, eventType, page, size);
         return eventMapper.toOrchestratorEventPageDto(response.getBody());
     }

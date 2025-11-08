@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import ts.andrey.orchestrator.application.outport.DeviceServicePort;
 import ts.andrey.orchestrator.domain.exception.RouterManagerRollbackException;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost200Response;
-import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost502Response;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPostRequest;
 import ts.andrey.orchestrator.infrastructure.adapter.out.RouterManagerAdapter;
 

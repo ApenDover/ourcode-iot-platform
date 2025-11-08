@@ -17,3 +17,6 @@ services:
   failed-events-processor:
     build:
       dockerfile: ../failed-events-processor/Dockerfile.local
+  orchestrator:
+    build:
+      dockerfile: ../orchestrator/Dockerfile.local

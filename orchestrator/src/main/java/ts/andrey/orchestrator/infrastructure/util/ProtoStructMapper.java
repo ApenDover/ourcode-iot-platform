@@ -10,7 +10,7 @@ import java.util.Map;
 @UtilityClass
 public class ProtoStructMapper {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     public Struct toStruct(Object payload) {
         if (payload == null) {
@@ -18,7 +18,7 @@ public class ProtoStructMapper {
         }
 
         try {
-            final var map = objectMapper.convertValue(payload, Map.class);
+            final var map = OBJECT_MAPPER.convertValue(payload, Map.class);
             return mapToStructSimple(map);
 
         } catch (Exception e) {
@@ -33,7 +33,7 @@ public class ProtoStructMapper {
 
         try {
             Map<String, Object> map = structToMapSimple(struct);
-            return objectMapper.convertValue(map, Object.class);
+            return OBJECT_MAPPER.convertValue(map, Object.class);
         } catch (Exception e) {
             throw new RuntimeException("Error converting Struct to Object", e);
         }
@@ -76,4 +76,5 @@ public class ProtoStructMapper {
             default -> new Object();
         };
     }
+
 }

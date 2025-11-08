@@ -69,8 +69,12 @@ public class OrchestratorController implements DefaultApi {
     }
 
     @Override
-    public ResponseEntity<ApiV1DevicesDeviceIdVersionPost200Response> apiV1DevicesDeviceIdVersionPost(String deviceId, ApiV1DevicesDeviceIdVersionPostRequest apiV1DevicesDeviceIdVersionPostRequest) {
-        final var response = updateDeviceVersionUseCase.updateDeviceVersion(deviceId, apiV1DevicesDeviceIdVersionPostRequest);
+    public ResponseEntity<ApiV1DevicesDeviceIdVersionPost200Response> apiV1DevicesDeviceIdVersionPost(
+            String deviceId, ApiV1DevicesDeviceIdVersionPostRequest apiV1DevicesDeviceIdVersionPostRequest
+    ) {
+        final var response = updateDeviceVersionUseCase.updateDeviceVersion(
+                deviceId, apiV1DevicesDeviceIdVersionPostRequest
+        );
         return ResponseEntity.ok(response);
     }
 
@@ -93,7 +97,10 @@ public class OrchestratorController implements DefaultApi {
     }
 
     @Override
-    public ResponseEntity<EventPage> apiV1EventsGet(String deviceId, Long fromTimestamp, Long toTimestamp, String type, Integer page, Integer size) {
+    public ResponseEntity<EventPage> apiV1EventsGet(
+            String deviceId, Long fromTimestamp, Long toTimestamp,
+            String type, Integer page, Integer size
+    ) {
         final var response = eventServicePort.getEventByFilter(deviceId, fromTimestamp, toTimestamp, type, page, size);
         return ResponseEntity.ok(response);
     }

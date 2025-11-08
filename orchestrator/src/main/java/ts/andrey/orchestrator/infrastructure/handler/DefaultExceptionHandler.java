@@ -15,7 +15,9 @@ import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost502Response;
 public class DefaultExceptionHandler {
 
     @ExceptionHandler(value = RouterManagerRollbackException.class)
-    public ResponseEntity<ApiV1DevicesDeviceIdVersionPost502Response> handleException(RouterManagerRollbackException ex) {
+    public ResponseEntity<ApiV1DevicesDeviceIdVersionPost502Response> handleException(
+            RouterManagerRollbackException ex
+    ) {
         final var errorResult = new ApiV1DevicesDeviceIdVersionPost502Response();
         errorResult.setError(ExceptionMessage.ROUTER_MANAGER_FAILED.name());
         errorResult.setCompensated(true);
@@ -26,7 +28,9 @@ public class DefaultExceptionHandler {
     }
 
     @ExceptionHandler(value = DeviceServiceRollbackException.class)
-    public ResponseEntity<ApiV1DevicesDeviceIdVersionPost502Response> handleException(DeviceServiceRollbackException ex) {
+    public ResponseEntity<ApiV1DevicesDeviceIdVersionPost502Response> handleException(
+            DeviceServiceRollbackException ex
+    ) {
         final var errorResult = new ApiV1DevicesDeviceIdVersionPost502Response();
         errorResult.setError(ExceptionMessage.ROUTER_MANAGER_FAILED.name());
         errorResult.setCompensated(false);
