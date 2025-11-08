@@ -24,8 +24,8 @@ func LoadConfig() *Config {
 		PollInterval:      getTimeOrDefault("ROUTER_POLL_INTERVAL", "10s"),
 		AlloyUrl:          getEnvOrDefault("FAILED_PROCESSOR_MANAGEMENT_TRACING_OTLP_ENDPOINT_GRPC", "http://localhost:4317"),
 		MetricsPort:       getEnvOrDefault("APP_ROUTER_MANAGER_METRICS_PORT", "9091"),
-		GRPCPort:          getEnvOrDefault("APP_ROUTER_MANAGER_HOST", "9092"),
-		GRPCServerAddress: getEnvOrDefault("APP_ROUTER_MANAGER_GRPC_PORT", "9092"),
+		GRPCPort:          getEnvOrDefault("APP_ROUTER_MANAGER_GRPC_PORT", "9092"),
+		GRPCServerAddress: getEnvOrDefault("APP_ROUTER_MANAGER_HOST", "router-manager-service"),
 		RouterSerial:      "01K6GJ564FPTXDWX8R1F91VZK0",
 	}
 }

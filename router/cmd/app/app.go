@@ -22,25 +22,24 @@ type App struct {
 	cancel       context.CancelFunc
 	wg           sync.WaitGroup
 	deps         *Dependencies
-	innergrpc    *innergrpc.Client
+	gClient      *innergrpc.Client
 	shutdownOnce sync.Once
 }
 
 func New(ctx context.Context, deps *Dependencies) (*App, error) {
 	ctx, cancel := context.WithCancel(ctx)
 
-	// Инициализируем gRPC клиент
-	innergrpc, err := innergrpc.New(ctx, deps.Config.GRPCServerAddress)
+	grpcClient, err := innergrpc.New(ctx, deps.Config.GRPCServerAddress+":"+deps.Config.GRPCPort)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to create gRPC client: %w", err)
 	}
 
 	return &App{
-		ctx:       ctx,
-		cancel:    cancel,
-		deps:      deps,
-		innergrpc: innergrpc,
+		ctx:     ctx,
+		cancel:  cancel,
+		deps:    deps,
+		gClient: grpcClient,
 	}, nil
 }
 
@@ -88,7 +87,7 @@ func (a *App) sendGRPCRequests() {
 	log := util.GetLogger(a.ctx)
 
 	routerSerial := a.deps.Config.RouterSerial
-	resp, err := a.innergrpc.PollCommands(a.ctx, routerSerial)
+	resp, err := a.gClient.PollCommands(a.ctx, routerSerial)
 	if err != nil {
 		log.Error("Poll commands failed",
 			slog.String("router_serial", routerSerial),
@@ -113,7 +112,7 @@ func (a *App) sendGRPCRequests() {
 			continue
 		}
 
-		_, err = a.innergrpc.AckCommand(a.ctx, routerSerial, cmd.Id)
+		_, err = a.gClient.AckCommand(a.ctx, routerSerial, cmd.Id)
 		if err != nil {
 			log.Error("Failed to ack command",
 				slog.String("command_id", cmd.Id),
@@ -151,8 +150,8 @@ func (a *App) gracefulShutdown() {
 	log.Info("Начинаю graceful shutdown")
 
 	// Закрываем gRPC клиент
-	if a.innergrpc != nil {
-		if err := a.innergrpc.Close(); err != nil {
+	if a.gClient != nil {
+		if err := a.gClient.Close(); err != nil {
 			log.Error("Failed to close gRPC client", slog.String("error", err.Error()))
 		} else {
 			log.Info("gRPC client closed")
