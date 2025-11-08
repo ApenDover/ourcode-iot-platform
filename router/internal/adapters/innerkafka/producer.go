@@ -4,14 +4,22 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"router-manager-service/config"
+	"strings"
 	"time"
+
+	"embed"
+
+	"github.com/segmentio/kafka-go"
 
 	"github.com/linkedin/goavro/v2"
 	"github.com/riferrei/srclient"
-	"github.com/segmentio/kafka-go"
 )
+
+//go:embed avro/*.avsc
+var avroSchemasFS embed.FS
 
 type Producer struct {
 	writer   *kafka.Writer
@@ -61,10 +69,8 @@ func NewProducer(cfg *config.Config, logger *slog.Logger) (*Producer, error) {
 func registerSchemaAndGetCodec(srClient *srclient.SchemaRegistryClient, topic string) (*srclient.Schema, *goavro.Codec, error) {
 	subject := topic + "-value"
 
-	// Пытаемся получить существующую схему
 	schema, err := srClient.GetLatestSchema(subject)
 	if err == nil {
-		// Создаем codec из существующей схемы
 		codec, err := goavro.NewCodec(schema.Schema())
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to create codec from existing schema: %w", err)
@@ -72,41 +78,54 @@ func registerSchemaAndGetCodec(srClient *srclient.SchemaRegistryClient, topic st
 		return schema, codec, nil
 	}
 
-	// Создаем новую схему
-	avroSchema := `{
-		"type": "record",
-		"name": "DeviceEvent",
-		"namespace": "com.nashkod.avro",
-		"fields": [
-			{"name": "eventId", "type": "string"},
-			{"name": "timestamp", "type": "long"},
-			{"name": "type", "type": "string"},
-			{"name": "payload", "type": "string"},
-			{"name": "device", "type": {
-				"type": "record",
-				"name": "Device", 
-				"fields": [
-					{"name": "deviceId", "type": "string"},
-					{"name": "deviceType", "type": "string"},
-					{"name": "meta", "type": "string"},
-					{"name": "createdAt", "type": "long"}
-				]
-			}}
-		]
-	}`
+	avroSchema, err := loadSchemaFromFile()
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to load schema from file: %w", err)
+	}
 
 	schema, err = srClient.CreateSchema(subject, avroSchema, srclient.Avro)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create schema: %w", err)
 	}
 
-	// Создаем codec из новой схемы
-	codec, err := goavro.NewCodec(schema.Schema())
+	codec, err := goavro.NewCodec(avroSchema)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create codec from new schema: %w", err)
 	}
 
 	return schema, codec, nil
+}
+
+func loadSchemaFromFile() (string, error) {
+	// Читаем все .avsc файлы из папки avro
+	files, err := fs.ReadDir(avroSchemasFS, "avro")
+	if err != nil {
+		return "", fmt.Errorf("failed to read schemas directory: %w", err)
+	}
+
+	var schemas []string
+	for _, file := range files {
+		if !file.IsDir() && strings.HasSuffix(file.Name(), ".avsc") {
+			schemaPath := "avro/" + file.Name()
+			schemaData, err := fs.ReadFile(avroSchemasFS, schemaPath)
+			if err != nil {
+				return "", fmt.Errorf("failed to read schema %s: %w", file.Name(), err)
+			}
+			schemas = append(schemas, string(schemaData))
+		}
+	}
+
+	if len(schemas) == 0 {
+		return "", fmt.Errorf("no .avsc files found in avro directory")
+	}
+
+	// Если файлов несколько - объединяем их в массив JSON
+	if len(schemas) > 1 {
+		return fmt.Sprintf("[%s]", strings.Join(schemas, ",")), nil
+	}
+
+	// Если файл один - возвращаем как есть
+	return schemas[0], nil
 }
 
 func (p *Producer) SendDeviceEvent(event *DeviceEvent) error {
@@ -116,16 +135,13 @@ func (p *Producer) SendDeviceEvent(event *DeviceEvent) error {
 		return fmt.Errorf("failed to serialize event: %w", err)
 	}
 
-	// Формируем сообщение в формате Schema Registry
 	messageValue := make([]byte, 0, 5+len(avroData))
 	messageValue = append(messageValue, 0) // Magic byte
-	// Schema ID (big-endian)
 	schemaIDBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(schemaIDBytes, uint32(p.schemaID))
 	messageValue = append(messageValue, schemaIDBytes...)
 	messageValue = append(messageValue, avroData...)
 
-	// Отправляем в Kafka
 	msg := kafka.Message{
 		Key:   []byte(event.Device.DeviceId),
 		Value: messageValue,
@@ -153,7 +169,6 @@ func (p *Producer) serializeToAvro(event *DeviceEvent) ([]byte, error) {
 		return nil, fmt.Errorf("avro codec not initialized")
 	}
 
-	// Подготавливаем данные для сериализации
 	nativeData := map[string]interface{}{
 		"eventId":   event.EventID,
 		"timestamp": event.Timestamp.UnixMilli(),
