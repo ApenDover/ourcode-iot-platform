@@ -36,6 +36,4 @@ public class DefaultExceptionHandler {
                 .body(errorResult);
     }
 
-    // это общий handler а мы тут думаем пока только про наш useCase
-
 }
