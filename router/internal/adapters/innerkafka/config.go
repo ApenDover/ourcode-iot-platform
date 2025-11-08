@@ -1,38 +1,43 @@
 package innerkafka
 
 import (
+	"embed"
 	"fmt"
-	"os"
-	"path/filepath"
+	"io/fs"
 	"strings"
 
 	"github.com/linkedin/goavro/v2"
 )
 
+//go:embed avro/*.avsc
+var avroSchemasFS embed.FS
+
 type SchemaLoader struct {
 	deviceEventCodec *goavro.Codec
 }
 
-func NewSchemaLoader(schemasPath string) (*SchemaLoader, error) {
-	files, err := os.ReadDir(schemasPath)
+func NewSchemaLoader() (*SchemaLoader, error) {
+	files, err := fs.ReadDir(avroSchemasFS, "avro")
 	if err != nil {
-		return nil, fmt.Errorf("failed to read schemas directory: %w", err)
+		return nil, fmt.Errorf("failed to read schemas directory from embed: %w", err)
 	}
 
 	var schemas []string
+	var fileNames []string
 	for _, file := range files {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".avsc") {
-			schemaPath := filepath.Join(schemasPath, file.Name())
-			schemaData, err := os.ReadFile(schemaPath)
+			schemaPath := "avro/" + file.Name()
+			schemaData, err := fs.ReadFile(avroSchemasFS, schemaPath)
 			if err != nil {
 				return nil, fmt.Errorf("failed to read schema %s: %w", file.Name(), err)
 			}
 			schemas = append(schemas, string(schemaData))
+			fileNames = append(fileNames, file.Name())
 		}
 	}
 
 	if len(schemas) == 0 {
-		return nil, fmt.Errorf("no .avsc files found in %s", schemasPath)
+		return nil, fmt.Errorf("no .avsc files found in embed FS")
 	}
 
 	combinedSchema := fmt.Sprintf("[%s]", strings.Join(schemas, ","))

@@ -36,21 +36,17 @@ func NewProducer(cfg *config.Config, serializer *AvroSerializer, logger *slog.Lo
 	}, nil
 }
 
-// SendDeviceEvent отправляет событие устройства в Kafka
 func (p *Producer) SendDeviceEvent(event *DeviceEvent) error {
-	// Сериализуем в Avro
 	avroData, err := p.serializer.SerializeDeviceEvent(event)
 	if err != nil {
 		return fmt.Errorf("failed to serialize event: %w", err)
 	}
 
-	// Создаем Kafka сообщение
 	msg := kafka.Message{
-		Key:   []byte(event.Device.SerialNumber),
+		Key:   []byte(event.Device.DeviceId),
 		Value: avroData,
 	}
 
-	// Отправляем сообщение
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -60,8 +56,8 @@ func (p *Producer) SendDeviceEvent(event *DeviceEvent) error {
 
 	p.logger.Debug("Device event sent to Kafka",
 		slog.String("event_id", event.EventID),
-		slog.String("device_serial", event.Device.SerialNumber),
-		slog.String("event_type", string(event.Type)),
+		slog.String("device_serial", event.Device.DeviceId),
+		slog.String("event_type", event.Type),
 	)
 
 	return nil

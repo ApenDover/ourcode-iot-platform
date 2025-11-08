@@ -12,8 +12,6 @@ import (
 	"router-manager-service/internal/adapters/innergrpc"
 	"router-manager-service/internal/adapters/innerkafka"
 	"router-manager-service/internal/conf/util"
-
-	"github.com/google/uuid"
 )
 
 type Dependencies struct {
@@ -57,18 +55,22 @@ func New(ctx context.Context, deps *Dependencies) (*App, error) {
 func (a *App) initKafka() error {
 	log := util.GetLogger(a.ctx)
 
+	// Проверяем что есть настройки Kafka
 	if a.deps.Config.BootstrapServers == "" || a.deps.Config.Topic == "" {
 		log.Info("Kafka config not provided, skipping Kafka initialization")
 		return nil
 	}
 
-	schemaLoader, err := innerkafka.NewSchemaLoader("./avro")
+	// Загружаем Avro схемы из embed FS - БЕЗ АРГУМЕНТОВ!
+	schemaLoader, err := innerkafka.NewSchemaLoader()
 	if err != nil {
 		return fmt.Errorf("failed to load avro schemas: %w", err)
 	}
 
+	// Создаем сериализатор для device events
 	avroSerializer := innerkafka.NewAvroSerializer(schemaLoader.GetDeviceEventCodec())
 
+	// Создаем producer
 	kafkaProducer, err := innerkafka.NewProducer(a.deps.Config, avroSerializer, log)
 	if err != nil {
 		return fmt.Errorf("failed to create kafka producer: %w", err)
@@ -194,13 +196,13 @@ func (a *App) sendDeviceEvents() {
 	deviceEvent := &innerkafka.DeviceEvent{
 		EventID:   fmt.Sprintf("event-%s-%d", a.deps.Config.RouterSerial, time.Now().UnixMilli()),
 		Timestamp: time.Now(),
-		Type:      innerkafka.EventTypeStatus,
-		Payload:   fmt.Sprintf(`{"status": "online", "serial": "%s", "timestamp": %d}`, a.deps.Config.RouterSerial, time.Now().Unix()),
+		Type:      "STATUS",
+		Payload:   fmt.Sprintf(`{"TEMPERATURE": "online", "serial": "%s"}`, a.deps.Config.RouterSerial),
 		Device: innerkafka.Device{
-			ID:           uuid.NewString(),
-			SerialNumber: a.deps.Config.RouterSerial,
-			Model:        "Router-3000",
-			Location:     "Office A",
+			DeviceId:   "01K6GJ564FPTXDWX8R1F91VZK0",
+			DeviceType: "ROUTER",
+			Meta:       "Office A",
+			CreatedAt:  time.Now(),
 		},
 	}
 
@@ -214,8 +216,7 @@ func (a *App) sendDeviceEvents() {
 
 	log.Info("Device event sent to Kafka",
 		slog.String("event_id", deviceEvent.EventID),
-		slog.String("device_serial", deviceEvent.Device.SerialNumber),
-		slog.String("event_type", string(deviceEvent.Type)),
+		slog.String("device_id", deviceEvent.Device.DeviceId),
 	)
 }
 
