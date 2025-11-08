@@ -10,7 +10,10 @@ import (
 
 	"router-manager-service/config"
 	"router-manager-service/internal/adapters/innergrpc"
+	"router-manager-service/internal/adapters/kafka"
 	"router-manager-service/internal/conf/util"
+
+	"github.com/google/uuid"
 )
 
 type Dependencies struct {
@@ -18,12 +21,13 @@ type Dependencies struct {
 }
 
 type App struct {
-	ctx          context.Context
-	cancel       context.CancelFunc
-	wg           sync.WaitGroup
-	deps         *Dependencies
-	gClient      *innergrpc.Client
-	shutdownOnce sync.Once
+	ctx           context.Context
+	cancel        context.CancelFunc
+	wg            sync.WaitGroup
+	deps          *Dependencies
+	gClient       *innergrpc.Client
+	kafkaProducer *kafka.Producer
+	shutdownOnce  sync.Once
 }
 
 func New(ctx context.Context, deps *Dependencies) (*App, error) {
@@ -35,22 +39,66 @@ func New(ctx context.Context, deps *Dependencies) (*App, error) {
 		return nil, fmt.Errorf("failed to create gRPC client: %w", err)
 	}
 
-	return &App{
+	app := &App{
 		ctx:     ctx,
 		cancel:  cancel,
 		deps:    deps,
 		gClient: grpcClient,
-	}, nil
+	}
+
+	// Инициализация Kafka producer
+	if err := app.initKafka(); err != nil {
+		cancel()
+		return nil, fmt.Errorf("failed to init Kafka: %w", err)
+	}
+
+	return app, nil
+}
+
+func (a *App) initKafka() error {
+	log := util.GetLogger(a.ctx)
+
+	if a.deps.Config.BootstrapServers == "" || a.deps.Config.Topic == "" {
+		log.Info("Kafka config not provided, skipping Kafka initialization")
+		return nil
+	}
+
+	schemaLoader, err := kafka.NewSchemaLoader("./avro")
+	if err != nil {
+		return fmt.Errorf("failed to load avro schemas: %w", err)
+	}
+
+	avroSerializer := kafka.NewAvroSerializer(schemaLoader.GetDeviceEventCodec())
+
+	kafkaProducer, err := kafka.NewProducer(a.deps.Config, avroSerializer, log)
+	if err != nil {
+		return fmt.Errorf("failed to create kafka producer: %w", err)
+	}
+
+	a.kafkaProducer = kafkaProducer
+	log.Info("Kafka producer for device events initialized successfully",
+		slog.String("bootstrap_servers", a.deps.Config.BootstrapServers),
+		slog.String("topic", a.deps.Config.Topic),
+	)
+
+	return nil
 }
 
 func (a *App) Start() error {
 	a.startBackgroundTasks()
 
 	log := util.GetLogger(a.ctx)
-	log.Info("App started with gRPC client",
+
+	fields := []any{
 		slog.String("server_address", a.deps.Config.GRPCServerAddress),
 		slog.String("router_serial", a.deps.Config.RouterSerial),
-	)
+	}
+
+	if a.kafkaProducer != nil {
+		fields = append(fields, slog.Bool("kafka_enabled", true))
+	}
+
+	log.Info("App started with gRPC client", fields...)
 
 	return nil
 }
@@ -64,13 +112,17 @@ func (a *App) startBackgroundTasks() {
 }
 
 func (a *App) scheduledRequestWorker() {
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(a.deps.Config.PollInterval)
 	defer ticker.Stop()
 
 	log := util.GetLogger(a.ctx)
-	log.Info("Запущен worker для отправки запросов по расписанию")
+	log.Info("Запущен worker для отправки запросов по расписанию",
+		slog.String("poll_interval", a.deps.Config.PollInterval.String()),
+	)
 
+	// Первый запуск
 	a.sendGRPCRequests()
+	a.sendDeviceEvents()
 
 	for {
 		select {
@@ -79,6 +131,7 @@ func (a *App) scheduledRequestWorker() {
 			return
 		case <-ticker.C:
 			a.sendGRPCRequests()
+			a.sendDeviceEvents() // Отправляем события в Kafka
 		}
 	}
 }
@@ -132,12 +185,51 @@ func (a *App) sendGRPCRequests() {
 	}
 }
 
+func (a *App) sendDeviceEvents() {
+	if a.kafkaProducer == nil {
+		return
+	}
+
+	log := util.GetLogger(a.ctx)
+
+	deviceEvent := &kafka.DeviceEvent{
+		EventID:   fmt.Sprintf("event-%s-%d", a.deps.Config.RouterSerial, time.Now().UnixMilli()),
+		Timestamp: time.Now(),
+		Type:      kafka.EventTypeStatus,
+		Payload:   fmt.Sprintf(`{"status": "online", "serial": "%s", "timestamp": %d}`, a.deps.Config.RouterSerial, time.Now().Unix()),
+		Device: kafka.Device{
+			ID:           uuid.NewString(),
+			SerialNumber: a.deps.Config.RouterSerial,
+			Model:        "Router-3000",
+			Location:     "Office A",
+		},
+	}
+
+	if err := a.kafkaProducer.SendDeviceEvent(deviceEvent); err != nil {
+		log.Error("Failed to send device event to Kafka",
+			slog.String("error", err.Error()),
+			slog.String("event_id", deviceEvent.EventID),
+		)
+		return
+	}
+
+	log.Info("Device event sent to Kafka",
+		slog.String("event_id", deviceEvent.EventID),
+		slog.String("device_serial", deviceEvent.Device.SerialNumber),
+		slog.String("event_type", string(deviceEvent.Type)),
+	)
+}
+
 func (a *App) processCommand(cmd *genproto.Command) error {
 	log := util.GetLogger(a.ctx)
 	log.Debug("Processing command",
 		slog.String("command_id", cmd.Id),
 		slog.String("command_type", cmd.CommandType),
 	)
+
+	// Здесь можно добавить логику обработки команды
+	// Например, отправку события в Kafka при выполнении команды
+
 	return nil
 }
 
@@ -156,6 +248,12 @@ func (a *App) gracefulShutdown() {
 		} else {
 			log.Info("gRPC client closed")
 		}
+	}
+
+	// Закрываем Kafka producer
+	if a.kafkaProducer != nil {
+		a.kafkaProducer.Close()
+		log.Info("Kafka producer closed")
 	}
 
 	a.cancel()
