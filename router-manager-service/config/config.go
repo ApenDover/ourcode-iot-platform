@@ -72,13 +72,13 @@ func getTimeOrDefault(key, defaultValue string) time.Duration {
 	if value := os.Getenv(key); value != "" {
 		duration, err := time.ParseDuration(os.Getenv(key))
 		if err != nil {
-			log.Error("неверный формат TimeExpired в ENV APP_ROUTER_MANAGER_SENT_EXPIRED")
+			log.Error("неверный формат PollInterval в ENV APP_ROUTER_MANAGER_SENT_EXPIRED")
 		}
 		return duration
 	}
 	duration, err := time.ParseDuration(defaultValue)
 	if err != nil {
-		log.Error("неверный формат TimeExpired в defaultValue, ENV APP_ROUTER_MANAGER_SENT_EXPIRED отсутствует")
+		log.Error("неверный формат PollInterval в defaultValue, ENV APP_ROUTER_MANAGER_SENT_EXPIRED отсутствует")
 	}
 	return duration
 }

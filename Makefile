@@ -13,7 +13,8 @@ ACTUATOR_URL=http://localhost:
 LOGGER_NAME=ts.andrey
 PROJECT_ROOT := $(shell pwd)
 PROTO_DIR := $(PROJECT_ROOT)/router-manager-service/protobuf
-GENPROTO_DIR := $(PROJECT_ROOT)/router-manager-service/internal/ports/genproto
+GENPROTO_DIR_SERVER := $(PROJECT_ROOT)/router-manager-service/internal/ports/genproto
+GENPROTO_DIR_CLIENT := $(PROJECT_ROOT)/router/internal/ports/genproto
 PROTO_FILES := $(wildcard $(PROTO_DIR)/*.proto)
 
 .PHONY: up down downv restart logs help exec logs- proto-gen
@@ -104,6 +105,7 @@ boot: nexus-deploy proto-gen  ## локально пересобрать обр�
 	docker image rm infrastructure-kafka-producer -f
 	docker image rm infrastructure-failed-events-processor -f
 	docker image rm infrastructure-router-manager-service -f
+	docker image rm infrastructure-router -f
 	docker image rm infrastructure-device-api -f
 	docker image rm infrastructure-iot-avro -f
 	docker image rm infrastructure-iot-common -f
@@ -116,12 +118,14 @@ boot: nexus-deploy proto-gen  ## локально пересобрать обр�
 	cd kafka-producer && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd failed-events-processor && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd router-manager-service && go build -o router-manager ./cmd/app
+	cd router && go build -o router ./cmd/app
 
 rebuild: nexus-deploy  ## локально пересобрать образы
 	cd event-collector && ./gradlew clean build
 	cd device-collector && ./gradlew clean build
 	cd device-service && ./gradlew clean build
 	cd event-service && ./gradlew clean build
+	cd orchestrator && ./gradlew clean build
 	cd kafka-producer && ./gradlew clean build
 	cd failed-events-processor && ./gradlew clean build
 
@@ -190,10 +194,11 @@ nexus-deploy:
 
 proto-gen:
 	@echo "Generating Go code from .proto files..."
-	@mkdir -p $(GENPROTO_DIR)
+	@mkdir -p $(GENPROTO_DIR_SERVER)
+	@mkdir -p $(GENPROTO_DIR_CLIENT)
 	@docker run --rm \
 		-v $(PROTO_DIR):/protos \
-		-v $(GENPROTO_DIR):/gen \
+		-v $(GENPROTO_DIR_SERVER):/gen \
 		rvolosatovs/protoc \
 		--proto_path=/protos \
 		--go_out=/gen \
@@ -201,6 +206,16 @@ proto-gen:
 		--go-grpc_out=/gen \
 		--go-grpc_opt=paths=source_relative \
 		$(notdir $(PROTO_FILES))
+	@docker run --rm \
+    		-v $(PROTO_DIR):/protos \
+    		-v $(GENPROTO_DIR_CLIENT):/gen \
+    		rvolosatovs/protoc \
+    		--proto_path=/protos \
+    		--go_out=/gen \
+    		--go_opt=paths=source_relative \
+    		--go-grpc_out=/gen \
+    		--go-grpc_opt=paths=source_relative \
+    		$(notdir $(PROTO_FILES))
 	@echo "Done!"
 
 clear:
