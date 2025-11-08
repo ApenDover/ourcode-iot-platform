@@ -3,10 +3,10 @@ module router-manager-service
 go 1.25
 
 require (
-	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/google/uuid v1.6.0
 	github.com/linkedin/goavro/v2 v2.14.1
 	github.com/prometheus/client_golang v1.23.2
+	github.com/segmentio/kafka-go v0.4.49
 	go.opentelemetry.io/otel v1.38.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.38.0
 	go.opentelemetry.io/otel/sdk v1.38.0
@@ -23,7 +23,9 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2 // indirect
+	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.66.1 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
