@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net/http"
 	genproto "router-manager-service/internal/ports/genproto"
 	"sync"
 	"time"
@@ -55,31 +56,31 @@ func New(ctx context.Context, deps *Dependencies) (*App, error) {
 func (a *App) initKafka() error {
 	log := util.GetLogger(a.ctx)
 
-	// Проверяем что есть настройки Kafka
 	if a.deps.Config.BootstrapServers == "" || a.deps.Config.Topic == "" {
 		log.Info("Kafka config not provided, skipping Kafka initialization")
 		return nil
 	}
 
-	// Загружаем Avro схемы из embed FS - БЕЗ АРГУМЕНТОВ!
-	schemaLoader, err := innerkafka.NewSchemaLoader()
-	if err != nil {
-		return fmt.Errorf("failed to load avro schemas: %w", err)
+	if a.deps.Config.SchemaRegistryURL != "" {
+		resp, err := http.Get(a.deps.Config.SchemaRegistryURL + "/config")
+		if err != nil {
+			log.Warn("Cannot connect to Schema Registry", slog.String("error", err.Error()))
+		} else {
+			defer resp.Body.Close()
+			log.Info("Successfully connected to Schema Registry")
+		}
 	}
 
-	// Создаем сериализатор для device events
-	avroSerializer := innerkafka.NewAvroSerializer(schemaLoader.GetDeviceEventCodec())
-
-	// Создаем producer
-	kafkaProducer, err := innerkafka.NewProducer(a.deps.Config, avroSerializer, log)
+	kafkaProducer, err := innerkafka.NewProducer(a.deps.Config, log)
 	if err != nil {
 		return fmt.Errorf("failed to create kafka producer: %w", err)
 	}
 
 	a.kafkaProducer = kafkaProducer
-	log.Info("Kafka producer for device events initialized successfully",
+	log.Info("Kafka producer with Schema Registry initialized",
 		slog.String("bootstrap_servers", a.deps.Config.BootstrapServers),
 		slog.String("topic", a.deps.Config.Topic),
+		slog.String("schema_registry", a.deps.Config.SchemaRegistryURL),
 	)
 
 	return nil

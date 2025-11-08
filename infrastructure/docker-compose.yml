@@ -481,6 +481,8 @@ services:
     build:
       context: ../router
     container_name: router
+    environment:
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
     env_file:
       - .env
     restart: unless-stopped

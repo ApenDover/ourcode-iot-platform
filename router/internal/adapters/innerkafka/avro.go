@@ -21,19 +21,16 @@ func (s *AvroSerializer) SerializeDeviceEvent(event *DeviceEvent) ([]byte, error
 		return nil, fmt.Errorf("avro codec not initialized")
 	}
 
-	// Для union схемы нужно указать какой именно тип мы сериализуем
 	nativeData := map[string]interface{}{
-		"com.nashkod.avro.DeviceEvent": map[string]interface{}{
-			"eventId":   event.EventID,
-			"timestamp": event.Timestamp.UnixMilli(),
-			"type":      event.Type,
-			"payload":   event.Payload,
-			"device": map[string]interface{}{
-				"deviceId":   event.Device.DeviceId,
-				"deviceType": event.Device.DeviceType,
-				"meta":       event.Device.Meta,
-				"createdAt":  event.Device.CreatedAt.UnixMilli(),
-			},
+		"eventId":   event.EventID,
+		"timestamp": event.Timestamp.UnixMilli(),
+		"type":      event.Type,
+		"payload":   event.Payload,
+		"device": map[string]interface{}{
+			"deviceId":   event.Device.DeviceId,
+			"deviceType": event.Device.DeviceType,
+			"meta":       event.Device.Meta,
+			"createdAt":  event.Device.CreatedAt.UnixMilli(),
 		},
 	}
 
