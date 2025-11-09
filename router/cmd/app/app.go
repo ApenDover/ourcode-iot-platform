@@ -13,6 +13,8 @@ import (
 	"router-manager-service/internal/adapters/innergrpc"
 	"router-manager-service/internal/adapters/innerkafka"
 	"router-manager-service/internal/conf/util"
+
+	"github.com/google/uuid"
 )
 
 type Dependencies struct {
@@ -195,10 +197,10 @@ func (a *App) sendDeviceEvents() {
 	log := util.GetLogger(a.ctx)
 
 	deviceEvent := &innerkafka.DeviceEvent{
-		EventID:   fmt.Sprintf("event-%s-%d", a.deps.Config.RouterSerial, time.Now().UnixMilli()),
+		EventID:   uuid.New().String(),
 		Timestamp: time.Now(),
 		Type:      "STATUS",
-		Payload:   fmt.Sprintf(`{"TEMPERATURE": "online", "serial": "%s"}`, a.deps.Config.RouterSerial),
+		Payload:   fmt.Sprintf(`{"STATUS": "online"}`),
 		Device: innerkafka.Device{
 			DeviceId:   "01K6GJ564FPTXDWX8R1F91VZK0",
 			DeviceType: "ROUTER",

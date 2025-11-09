@@ -30,7 +30,6 @@ type Producer struct {
 	logger   *slog.Logger
 }
 
-// Новый конструктор БЕЗ AvroSerializer
 func NewProducer(cfg *config.Config, logger *slog.Logger) (*Producer, error) {
 	writer := &kafka.Writer{
 		Addr:         kafka.TCP(cfg.BootstrapServers),
@@ -40,10 +39,8 @@ func NewProducer(cfg *config.Config, logger *slog.Logger) (*Producer, error) {
 		RequiredAcks: kafka.RequireAll,
 	}
 
-	// Инициализация Schema Registry клиента
-	srClient := srclient.CreateSchemaRegistryClient(cfg.SchemaRegistryURL)
+	srClient := srclient.NewSchemaRegistryClient(cfg.SchemaRegistryURL)
 
-	// Регистрируем схему и получаем codec
 	schema, codec, err := registerSchemaAndGetCodec(srClient, cfg.Topic)
 	if err != nil {
 		return nil, fmt.Errorf("failed to register schema: %w", err)
@@ -97,7 +94,6 @@ func registerSchemaAndGetCodec(srClient *srclient.SchemaRegistryClient, topic st
 }
 
 func loadSchemaFromFile() (string, error) {
-	// Читаем все .avsc файлы из папки avro
 	files, err := fs.ReadDir(avroSchemasFS, "avro")
 	if err != nil {
 		return "", fmt.Errorf("failed to read schemas directory: %w", err)
@@ -119,17 +115,14 @@ func loadSchemaFromFile() (string, error) {
 		return "", fmt.Errorf("no .avsc files found in avro directory")
 	}
 
-	// Если файлов несколько - объединяем их в массив JSON
 	if len(schemas) > 1 {
 		return fmt.Sprintf("[%s]", strings.Join(schemas, ",")), nil
 	}
 
-	// Если файл один - возвращаем как есть
 	return schemas[0], nil
 }
 
 func (p *Producer) SendDeviceEvent(event *DeviceEvent) error {
-	// Сериализуем данные в Avro binary
 	avroData, err := p.serializeToAvro(event)
 	if err != nil {
 		return fmt.Errorf("failed to serialize event: %w", err)
