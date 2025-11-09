@@ -55,7 +55,7 @@ spring:
 orchestrator:
   integration:
     event-service:
-      url: event-service:8081
+      url: event-service:8881
     device-service:
       url: device-service:8886
     router-manager:
