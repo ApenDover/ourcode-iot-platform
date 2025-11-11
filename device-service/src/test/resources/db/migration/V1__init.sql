@@ -5,5 +5,8 @@ CREATE TABLE t_device
     device_type TEXT,
     created_at  TIMESTAMPTZ,
     meta        TEXT,
-    CONSTRAINT device_uuid_pk PRIMARY KEY (id)
+    version     VARCHAR(26) NOT NULL DEFAULT '0',
+    status      VARCHAR(26) NOT NULL DEFAULT 'READY',
+    etag        numeric,
+    CONSTRAINT  device_uuid_pk PRIMARY KEY (id)
 );

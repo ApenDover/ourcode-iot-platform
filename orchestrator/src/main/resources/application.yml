@@ -51,6 +51,22 @@ opentelemetry:
 spring:
   application:
     name: orchestrator
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: ${APP_CLIENT_ID_ORCHESTRATOR_KEYCLOAK:orchestrator}
+            client-secret: ${APP_CLIENT_ORCHESTRATOR_SECRET_KEYCLOAK:EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU}
+            authorization-grant-type: ${APP_CLIENT_AUTH_TYPE_KEYCLOAK:authorization_code}
+            scope: openid,profile,email
+        provider:
+          keycloak:
+            issuer-uri: http://keycloak:8080/realms/iot-platform
+            token-uri: http://keycloak:8080/realms/iot-platform/protocol/openid-connect/token
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/iot-platform
 
 orchestrator:
   integration:

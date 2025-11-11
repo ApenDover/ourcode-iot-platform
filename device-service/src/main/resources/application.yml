@@ -72,8 +72,8 @@ spring:
       client:
         registration:
           keycloak:
-            client-id: ${APP_CLIENT_ID_KEYCLOAK:device-service}
-            client-secret: ${APP_CLIENT_SECRET_KEYCLOAK:EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU}
+            client-id: ${APP_CLIENT_ID_DEVICE_SERVICE_KEYCLOAK:device-service}
+            client-secret: ${APP_CLIENT_DEVICE_SERVICE_SECRET_KEYCLOAK:EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU}
             authorization-grant-type: ${APP_CLIENT_AUTH_TYPE_KEYCLOAK:authorization_code}
             scope: openid,profile,email
         provider:

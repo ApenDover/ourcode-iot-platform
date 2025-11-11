@@ -37,6 +37,8 @@ public class DeviceEntity {
 
     private String version;
 
+    private Long etag;
+
     @JsonIgnore
     @Transient
     @Getter(AccessLevel.NONE)

@@ -101,4 +101,4 @@ keycloak:
   url: http://keycloak:8080
   realm: ${APP_CLIENT_REALM_NAME_KEYCLOAK:iot-platform}
   client-id: ${APP_CLIENT_ID_KEYCLOAK:device-service}
-  client-secret: ${APP_CLIENT_SECRET_KEYCLOAK:secret}
+  client-secret: ${APP_CLIENT_ORCHESTRATOR_SECRET_KEYCLOAK:secret}

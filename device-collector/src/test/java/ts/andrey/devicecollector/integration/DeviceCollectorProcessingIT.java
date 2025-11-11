@@ -120,6 +120,7 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
                         rs.getString("device_type"),
                         DateUtil.getFromString(rs.getString("created_at")),
                         "0",
+                        0L,
                         "READY",
                         rs.getString("meta")
                 ),
@@ -142,6 +143,7 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
                                 rs.getString("device_type"),
                                 DateUtil.getFromString(rs.getString("created_at")),
                                 "0",
+                                0L,
                                 "READY",
                                 rs.getString("meta")
                         ),
@@ -160,6 +162,7 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
                         rs.getString("device_type"),
                         DateUtil.getFromString(rs.getString("created_at")),
                         "0",
+                        0L,
                         "READY",
                         rs.getString("meta")
                 ),
@@ -182,6 +185,7 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
                                 rs.getString("device_type"),
                                 DateUtil.getFromString(rs.getString("created_at")),
                                 "0",
+                                0L,
                                 "READY",
                                 rs.getString("meta")
                         ),
