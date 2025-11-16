@@ -184,15 +184,9 @@ keycloak-setup-users: wait-for-keycloak
 	@chmod +x ./infrastructure/keycloak/create-admin-device.sh
 	@chmod +x ./infrastructure/keycloak/create-admin-orchestrator.sh
 	@chmod +x ./infrastructure/keycloak/create-user-device.sh
-	@chmod +x ./infrastructure/keycloak/create-user-orchestrator.sh
-	@chmod +x ./infrastructure/keycloak/create-secret-device.sh
-	@chmod +x ./infrastructure/keycloak/create-secret-orchestrator.sh
 	@cd ./infrastructure/keycloak && ./create-admin-device.sh
 	@cd ./infrastructure/keycloak && ./create-user-device.sh
 	@cd ./infrastructure/keycloak && ./create-secret-device.sh
-	@cd ./infrastructure/keycloak && ./create-admin-orchestrator.sh
-	@cd ./infrastructure/keycloak && ./create-user-orchestrator.sh
-	@cd ./infrastructure/keycloak && ./create-secret-orchestrator.sh
 
 nexus-deploy:
 	$(DC) up nexus -d
