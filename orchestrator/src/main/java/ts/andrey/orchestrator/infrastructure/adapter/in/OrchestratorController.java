@@ -80,8 +80,8 @@ public class OrchestratorController implements DefaultApi {
 
     @Override
     public ResponseEntity<List<Device>> apiV1DevicesGet() {
-        final var device = deviceServicePort.getDevice("");
-        return ResponseEntity.ok(List.of(device));
+        final var device = deviceServicePort.getDevices();
+        return ResponseEntity.ok(device);
     }
 
     @Override

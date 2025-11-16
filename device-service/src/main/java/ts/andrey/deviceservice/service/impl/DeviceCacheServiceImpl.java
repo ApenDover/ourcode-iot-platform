@@ -14,6 +14,8 @@ import ts.andrey.dto.DeviceStatus;
 import ts.andrey.dto.DeviceUpdateRequest;
 import ts.andrey.dto.DeviceVersionResponse;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -45,6 +47,10 @@ public class DeviceCacheServiceImpl implements DeviceService {
             deviceCacheService.saveDevice(device);
             return device;
         });
+    }
+
+    public List<Device> getDevice() {
+        return deviceDataServiceImpl.getDevice();
     }
 
     public Device createDevice(DeviceCreateRequest request) {

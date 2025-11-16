@@ -13,6 +13,8 @@ import ts.andrey.dto.DeviceVersionResponse;
 import ts.andrey.dto.DeviceVersionRollbackRequest;
 import ts.andrey.dto.DeviceVersionUpdateRequest;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class DeviceController implements DeviceV1Api {
@@ -56,6 +58,12 @@ public class DeviceController implements DeviceV1Api {
     @Override
     public ResponseEntity<Device> getDevice(String deviceId) {
         final var device = deviceService.getDevice(deviceId);
+        return ResponseEntity.ok(device);
+    }
+
+    @Override
+    public ResponseEntity<List<Device>> getDevices() {
+        final var device = deviceService.getDevice();
         return ResponseEntity.ok(device);
     }
 

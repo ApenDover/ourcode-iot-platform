@@ -9,6 +9,8 @@ import ts.andrey.deviceservice.data.repository.DeviceRepository;
 import ts.andrey.deviceservice.exception.DeviceServiceException;
 import ts.andrey.deviceservice.exception.ErrorExceptionMessages;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,6 +34,10 @@ public class DeviceDbDataService {
     public DeviceEntity getDeviceByDeviceId(String deviceId) {
         return deviceRepository.findByDeviceId(deviceId)
                 .orElseThrow(() -> new DeviceServiceException(ErrorExceptionMessages.DEVICE_NOT_FOUND, deviceId));
+    }
+
+    public List<DeviceEntity> getAllDevices() {
+        return deviceRepository.findAll();
     }
 
     public DeviceEntity updateTypeMeta(String deviceId, String deviceType, String meta) {

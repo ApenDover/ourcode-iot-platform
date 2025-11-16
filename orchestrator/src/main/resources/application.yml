@@ -67,6 +67,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://keycloak:8080/realms/iot-platform
+          audiences: device-service,orchestrator,account
 
 orchestrator:
   integration:
@@ -77,3 +78,4 @@ orchestrator:
     router-manager:
       host: router-manager-service
       port: 8890
+

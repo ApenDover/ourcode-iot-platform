@@ -13,6 +13,8 @@ import ts.andrey.orchestrator.dto.DeviceUpdateRequest;
 import ts.andrey.orchestrator.infrastructure.feign.DeviceServiceClient;
 import ts.andrey.orchestrator.infrastructure.mapper.DeviceMapper;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class DeviceServiceAdapter implements DeviceServicePort {
@@ -43,6 +45,12 @@ public class DeviceServiceAdapter implements DeviceServicePort {
     public Device getDevice(String deviceId) {
         final var response = deviceServiceClient.getDevice(deviceId);
         return deviceMapper.toOrchestratorDeviceDto(response.getBody());
+    }
+
+    @Override
+    public List<Device> getDevices() {
+        final var response = deviceServiceClient.getDevices();
+        return deviceMapper.toOrchestratorDeviceDtos(response.getBody());
     }
 
     @Override

@@ -31,11 +31,18 @@ public class LoggingFeignClient extends Client.Default {
             );
             log.info("Request:{}, {}", heads, new String(request.body(), StandardCharsets.UTF_8));
         } else {
-            log.info("GET request to {}", request.url());
+            List<String> heads = new ArrayList<String>();
+            request.headers().forEach((key, values) ->
+                    heads.add(key + ": " + String.join(",", values))
+            );
+            log.info("GET request to {}, headers: {}", request.url(), request.headers());
         }
 
         try (var response = super.execute(request, options)) {
             if  (response.status() != HttpStatus.OK.value()) {
+                log.debug(
+                        "Response status: {}, headers: {}",
+                        response.status(), response.headers());
                 throw new OrchestratorException(String.valueOf(response.status()));
             }
             final var bodyStream = response.body().asInputStream();

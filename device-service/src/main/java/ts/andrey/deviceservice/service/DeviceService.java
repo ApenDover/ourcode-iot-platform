@@ -7,11 +7,15 @@ import ts.andrey.dto.DeviceUpdateRequest;
 import ts.andrey.dto.DeviceVersionResponse;
 import ts.andrey.dto.DeviceVersionUpdateRequest;
 
+import java.util.List;
+
 public interface DeviceService {
 
     DeviceVersionResponse updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus);
 
     Device getDevice(String deviceId);
+
+    List<Device> getDevice();
 
     Device createDevice(DeviceCreateRequest deviceCreateRequest);
 

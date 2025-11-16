@@ -5,6 +5,8 @@ import ts.andrey.orchestrator.dto.Device;
 import ts.andrey.orchestrator.dto.DeviceCreateRequest;
 import ts.andrey.orchestrator.dto.DeviceUpdateRequest;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface DeviceMapper {
 
@@ -17,6 +19,8 @@ public interface DeviceMapper {
     ts.andrey.device.model.DeviceUpdateRequest toDeviceUpdateRequestDto(DeviceUpdateRequest deviceUpdateRequest);
 
     Device toOrchestratorDeviceDto(ts.andrey.device.model.Device device);
+
+    List<Device> toOrchestratorDeviceDtos(List<ts.andrey.device.model.Device> device);
 
     ts.andrey.device.model.Device toDeviceDto(Device device);
 

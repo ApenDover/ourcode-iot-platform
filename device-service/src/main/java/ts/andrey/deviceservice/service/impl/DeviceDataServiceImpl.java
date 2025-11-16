@@ -12,7 +12,8 @@ import ts.andrey.dto.DeviceCreateRequest;
 import ts.andrey.dto.DeviceStatus;
 import ts.andrey.dto.DeviceUpdateRequest;
 import ts.andrey.dto.DeviceVersionResponse;
-import ts.andrey.dto.DeviceVersionUpdateRequest;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +38,13 @@ public class DeviceDataServiceImpl implements DeviceService {
         final var device = deviceDbService.getDeviceByDeviceId(deviceId);
         deviceMetrics.getDeviceSuccess();
         return deviceMapper.toDevice(device);
+    }
+
+    @Override
+    public List<Device> getDevice() {
+        final var devices = deviceDbService.getAllDevices();
+        deviceMetrics.getDeviceSuccess();
+        return deviceMapper.toDevices(devices);
     }
 
     @Override

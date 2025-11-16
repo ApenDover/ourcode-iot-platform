@@ -10,6 +10,7 @@ import ts.andrey.dto.DeviceCreateRequest;
 import ts.andrey.dto.DeviceVersionResponse;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -30,6 +31,8 @@ public interface DeviceMapper {
 
     @Mapping(target = "createdAt", expression = "java(deviceEntity.getCreatedAt().toEpochMilli())")
     Device toDevice(DeviceEntity deviceEntity);
+
+    List<Device> toDevices(List<DeviceEntity> deviceEntities);
 
     @Mapping(target = "deviceId", expression = "java(UlidCreator.getUlid().toString())")
     @Mapping(target = "createdAt", ignore = true)
