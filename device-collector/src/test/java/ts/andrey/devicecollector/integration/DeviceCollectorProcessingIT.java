@@ -83,6 +83,8 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
                     assertEquals("deviceType", entity.getDeviceType());
                     assertEquals("meta", entity.getMeta());
                     assertEquals(Instant.ofEpochMilli(300L), entity.getCreatedAt());
+                    assertEquals("0", entity.getVersion());
+                    assertEquals(0L, entity.getEtag());
                 });
 
         //GIVEN
