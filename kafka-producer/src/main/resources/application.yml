@@ -1,7 +1,6 @@
 server:
   port: ${KAFKA_PRODUCER_SERVER_PORT:8887}
 
-
 management:
   endpoint:
     health:

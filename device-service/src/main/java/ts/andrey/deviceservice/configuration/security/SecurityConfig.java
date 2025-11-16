@@ -16,6 +16,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/metrics").permitAll()
                         .requestMatchers("/actuator/prometheus").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/**").hasAuthority("ROLE_deviceapp.admin")
                         .requestMatchers("/api/v1/devices/**")
                         .hasAnyAuthority("ROLE_deviceapp.user", "ROLE_deviceapp.admin")

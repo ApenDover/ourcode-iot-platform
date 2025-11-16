@@ -2,14 +2,14 @@ server:
   port: 8879
 
 management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"        # все endpoints доступны по HTTP
   endpoint:
     health:
       probes:
-        enabled: true       # включаем liveness/readiness
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
   metrics:
     tags:
       application: orchestrator

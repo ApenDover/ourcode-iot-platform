@@ -77,5 +77,4 @@ orchestrator:
       url: device-service:8886
     router-manager:
       host: router-manager-service
-      port: 8890
-
+      port: 9092
