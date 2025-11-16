@@ -11,6 +11,8 @@ import ts.andrey.orchestrator.infrastructure.util.JsonUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public class LoggingFeignClient extends Client.Default {
@@ -23,7 +25,11 @@ public class LoggingFeignClient extends Client.Default {
     @Override
     public Response execute(Request request, Request.Options options) throws IOException {
         if (request.httpMethod().equals(Request.HttpMethod.POST)) {
-            log.info("Request: {}", new String(request.body(), StandardCharsets.UTF_8));
+            List<String> heads = new ArrayList<String>();
+            request.headers().forEach((key, values) ->
+                    heads.add(key + ": " + String.join(",", values))
+            );
+            log.info("Request:{}, {}", heads, new String(request.body(), StandardCharsets.UTF_8));
         } else {
             log.info("GET request to {}", request.url());
         }
