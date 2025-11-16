@@ -2,6 +2,7 @@ package ts.andrey.deviceservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ts.andrey.deviceservice.data.dao.DeviceDbDataService;
 import ts.andrey.deviceservice.mapper.DeviceMapper;

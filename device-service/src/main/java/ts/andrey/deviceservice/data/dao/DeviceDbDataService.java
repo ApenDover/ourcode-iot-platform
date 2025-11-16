@@ -3,6 +3,7 @@ package ts.andrey.deviceservice.data.dao;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ts.andrey.deviceservice.data.entity.DeviceEntity;
 import ts.andrey.deviceservice.data.repository.DeviceRepository;
@@ -18,8 +19,12 @@ public class DeviceDbDataService {
 
     private final DeviceRepository deviceRepository;
 
+    @Value("${spring.application.name}")
+    private String appName;
+
     @WithSpan
     public DeviceEntity save(DeviceEntity device) {
+        device.setApplication(appName);
         final var saved = deviceRepository.save(device);
         log.info("Сохранено устройство {}", saved);
         return saved;
@@ -41,17 +46,17 @@ public class DeviceDbDataService {
     }
 
     public DeviceEntity updateTypeMeta(String deviceId, String deviceType, String meta) {
-        deviceRepository.updateTypeAndMetaByDeviceId(deviceId, deviceType, meta);
+        deviceRepository.updateTypeAndMetaByDeviceId(deviceId, deviceType, appName, meta);
         return getDeviceByDeviceId(deviceId);
     }
 
     public DeviceEntity updateMeta(String deviceId, String meta) {
-        deviceRepository.updateMetaByDeviceId(deviceId, meta);
+        deviceRepository.updateMetaByDeviceId(deviceId, appName, meta);
         return getDeviceByDeviceId(deviceId);
     }
 
     public DeviceEntity updateType(String deviceId, String deviceType) {
-        deviceRepository.updateTypeByDeviceId(deviceId, deviceType);
+        deviceRepository.updateTypeByDeviceId(deviceId, appName, deviceType);
         return getDeviceByDeviceId(deviceId);
     }
 

@@ -8,5 +8,6 @@ CREATE TABLE t_device
     version     VARCHAR(26) NOT NULL DEFAULT '0',
     status      VARCHAR(26) NOT NULL DEFAULT 'READY',
     etag        numeric,
+    application VARCHAR(26) NOT NULL,
     CONSTRAINT  device_uuid_pk PRIMARY KEY (id)
 );

@@ -38,6 +38,8 @@ public class DeviceEntity {
 
     private Long etag;
 
+    private String application;
+
     @Enumerated(EnumType.STRING)
     private DeviceStatus status;
 
