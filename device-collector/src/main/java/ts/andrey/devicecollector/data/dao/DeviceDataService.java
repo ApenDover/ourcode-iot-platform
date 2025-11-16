@@ -53,7 +53,14 @@ public class DeviceDataService {
         final var deviceEntities = deviceMapper.toDeviceEntityList(devices);
         deviceEntities.forEach(e -> e.setId(UUID.randomUUID()));
         Lists.partition(deviceEntities, batchSize)
-                .forEach(deviceBatchRepository::batchUpsert);
+                .forEach(part -> {
+                    try {
+                        deviceBatchRepository.batchUpsert(part);
+                    } catch (Exception e) {
+                        log.error("Ошибка при обработке батча:", e);
+                        throw e;
+                    }
+                });
     }
 
     @Recover
