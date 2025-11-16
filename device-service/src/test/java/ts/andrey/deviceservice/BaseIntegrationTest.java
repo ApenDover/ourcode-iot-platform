@@ -235,15 +235,15 @@ public abstract class BaseIntegrationTest {
     }
 
     protected static void runUserSetupScript() throws Exception {
-        final var pb = new ProcessBuilder("bash", "src/test/resources/keycloak/create-admin.sh");
+        final var pb = new ProcessBuilder("bash", "src/test/resources/keycloak/create-admin-device.sh");
         final var env = pb.environment();
         env.put("ENV_KEYCLOAK_REALM", KEYCLOAK_REALM);
         env.put("ENV_KEYCLOAK_URL", getServerUrl());
         env.put("ENV_KEYCLOAK_ADMIN", KEYCLOAK_ADMIN);
         env.put("ENV_KEYCLOAK_ADMIN_PASSWORD", KEYCLOAK_PASSWORD);
-        env.put("ENV_KEYCLOAK_CLIENT", KEYCLOAK_CLIENT);
+        env.put("ENV_KEYCLOAK_DEVICE_CLIENT", KEYCLOAK_CLIENT);
         env.put("REALM", "test-realm");
-        env.put("ENV_KEYCLOAK_ADMIN_ROLE", "deviceapp.admin");
+        env.put("ENV_KEYCLOAK_DEVICE_ADMIN_ROLE", "deviceapp.admin");
         env.put("ADMIN_USER", KEYCLOAK_ADMIN);
         env.put("ADMIN_PASSWORD", KEYCLOAK_PASSWORD);
 

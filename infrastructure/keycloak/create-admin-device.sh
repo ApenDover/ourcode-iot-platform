@@ -1,4 +1,5 @@
 #!/bin/bash
+. ../.env
 
 set -e
 KEYCLOAK_URL="${ENV_KEYCLOAK_URL}"
@@ -10,6 +11,8 @@ NEW_PASS="${ENV_KEYCLOAK_ADMIN_PASSWORD}"
 NEW_EMAIL="${ENV_KEYCLOAK_ADMIN}@example.com"
 CLIENT_ID_NAME="${ENV_KEYCLOAK_DEVICE_CLIENT}"
 ROLE_NAME="${ENV_KEYCLOAK_DEVICE_ADMIN_ROLE}"
+
+echo "Настройка keycloak для device service:"
 
 # 1. Получаем admin token
 ADMIN_TOKEN=$(curl -s -X POST \
