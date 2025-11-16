@@ -1,2 +1,90 @@
 server:
   port: 8879
+
+logging:
+  level:
+    org.apache.kafka: OFF
+    springframework.kafka: OFF
+    org.springframework.jdbc.core.JdbcTemplate: DEBUG
+    org.springframework.jdbc.core.StatementCreatorUtils: TRACE
+    org.postgresql: DEBUG
+    org.hibernate.stat: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"        # все endpoints доступны по HTTP
+  endpoint:
+    health:
+      probes:
+        enabled: true       # включаем liveness/readiness
+  metrics:
+    tags:
+      application: orchestrator
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    otlp:
+      endpoint: http://localhost:4318
+      protocol: http/protobuf
+
+opentelemetry:
+  instrumentation:
+    logback-mdc:
+      enabled: true
+  service:
+    name: ${spring.application.name}
+  exporter:
+    otlp:
+      endpoint: http://localhost:4318
+      protocol: http/protobuf
+      timeout: 10000
+      compression: gzip
+  traces:
+    exporter: otlp
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+  resource-attributes:
+    service.version: 1.0.0
+    deployment.environment: docker
+    service.name: ${spring.application.name}
+
+spring:
+  application:
+    name: orchestrator
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: orchestrator
+            client-secret: EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU
+            authorization-grant-type: authorization_code
+            scope: openid,profile,email
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:7878/realms/iot-platform
+            token-uri: http://localhost:7878/realms/iot-platform/protocol/openid-connect/token
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:7878/realms/iot-platform
+
+orchestrator:
+  feign-logger:
+    enabled: false
+  integration:
+    event-service:
+      url: localhost:8881
+    device-service:
+      url: localhost:8886
+    router-manager:
+      host: localhost
+      port: 8890

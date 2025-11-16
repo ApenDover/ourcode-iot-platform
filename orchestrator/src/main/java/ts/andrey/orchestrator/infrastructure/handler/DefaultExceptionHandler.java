@@ -63,4 +63,22 @@ public class DefaultExceptionHandler {
                 .body(errorResult);
     }
 
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<ts.andrey.orchestrator.dto.Error> handleException(Exception ex) {
+        log.error(ExceptionMessage.FEIGN_INTEGRATION_FAILED.name(), ex);
+
+        final var trace = String.valueOf(Arrays.stream(ex.getStackTrace())
+                .findFirst()
+                .orElse(null));
+
+        final var errorResult = new ts.andrey.orchestrator.dto.Error();
+        errorResult.setInstance(INSTANCE_NAME);
+        errorResult.setDetail(ex.getMessage());
+        errorResult.setTitle(ex.getLocalizedMessage());
+        errorResult.setTrace(trace);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorResult);
+    }
+
 }

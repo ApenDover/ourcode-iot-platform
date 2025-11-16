@@ -4,7 +4,9 @@ import feign.Client;
 import feign.Request;
 import feign.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.StreamUtils;
+import ts.andrey.orchestrator.domain.exception.OrchestratorException;
 import ts.andrey.orchestrator.infrastructure.util.JsonUtils;
 
 import java.io.IOException;
@@ -27,6 +29,9 @@ public class LoggingFeignClient extends Client.Default {
         }
 
         try (var response = super.execute(request, options)) {
+            if  (response.status() != HttpStatus.OK.value()) {
+                throw new OrchestratorException(String.valueOf(response.status()));
+            }
             final var bodyStream = response.body().asInputStream();
             final var responseBody = StreamUtils.copyToString(bodyStream, StandardCharsets.UTF_8);
             final var unformattedJson = JsonUtils.minifyJson(responseBody);
