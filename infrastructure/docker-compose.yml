@@ -557,7 +557,7 @@ services:
     networks:
       - iot_network
   keycloak:
-    image: quay.io/keycloak/keycloak:26.2
+    image: quay.io/keycloak/keycloak:26.3
     container_name: keycloak
     env_file:
       - .env
