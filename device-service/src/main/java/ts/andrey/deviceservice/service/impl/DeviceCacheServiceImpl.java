@@ -4,15 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ts.andrey.deviceservice.data.dao.DeviceCacheDataService;
-import ts.andrey.deviceservice.exception.DeviceServiceException;
-import ts.andrey.deviceservice.exception.ErrorExceptionMessages;
-import ts.andrey.deviceservice.mapper.DeviceMapper;
 import ts.andrey.deviceservice.service.DeviceService;
 import ts.andrey.dto.Device;
 import ts.andrey.dto.DeviceCreateRequest;
 import ts.andrey.dto.DeviceStatus;
 import ts.andrey.dto.DeviceUpdateRequest;
-import ts.andrey.dto.DeviceVersionResponse;
 
 import java.util.List;
 

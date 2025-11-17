@@ -12,7 +12,6 @@ import ts.andrey.dto.Device;
 import ts.andrey.dto.DeviceCreateRequest;
 import ts.andrey.dto.DeviceStatus;
 import ts.andrey.dto.DeviceUpdateRequest;
-import ts.andrey.dto.DeviceVersionResponse;
 
 import java.util.List;
 
@@ -23,16 +22,6 @@ public class DeviceDataServiceImpl implements DeviceService {
     private final DeviceMetrics deviceMetrics;
     private final DeviceDbDataService deviceDbService;
     private final DeviceMapper deviceMapper;
-
-    @Override
-    @Transactional
-    public Device updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus) {
-        final var device = deviceDbService.getDeviceByDeviceId(deviceId);
-        device.setVersion(updateVersion);
-        device.setStatus(deviceStatus);
-        final var updated = deviceDbService.save(device);
-        return deviceMapper.toDevice(updated);
-    }
 
     @Override
     public Device getDevice(String deviceId) {
@@ -65,6 +54,17 @@ public class DeviceDataServiceImpl implements DeviceService {
     }
 
     @Override
+    @Transactional
+    public Device updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus) {
+        final var device = deviceDbService.getDeviceByDeviceId(deviceId);
+        device.setVersion(updateVersion);
+        device.setStatus(deviceStatus);
+        final var updated = deviceDbService.save(device);
+        return deviceMapper.toDevice(updated);
+    }
+
+    @Override
+    @Transactional
     public Device updateDevice(String deviceId, DeviceUpdateRequest deviceUpdateRequest) {
         final var meta = deviceUpdateRequest.getMeta();
         final var deviceType = deviceUpdateRequest.getDeviceType();
