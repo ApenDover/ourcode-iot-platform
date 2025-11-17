@@ -1,8 +1,8 @@
 package ts.andrey.deviceservice.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ts.andrey.deviceservice.data.dao.DeviceDbDataService;
 import ts.andrey.deviceservice.mapper.DeviceMapper;
@@ -25,13 +25,13 @@ public class DeviceDataServiceImpl implements DeviceService {
     private final DeviceMapper deviceMapper;
 
     @Override
-    public DeviceVersionResponse updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus) {
+    @Transactional
+    public Device updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus) {
         final var device = deviceDbService.getDeviceByDeviceId(deviceId);
-        final var oldVersion = device.getVersion();
         device.setVersion(updateVersion);
         device.setStatus(deviceStatus);
-        deviceDbService.save(device);
-        return deviceMapper.toUpdateVersionResponse(device, oldVersion);
+        final var updated = deviceDbService.save(device);
+        return deviceMapper.toDevice(updated);
     }
 
     @Override

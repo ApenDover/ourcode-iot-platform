@@ -23,21 +23,12 @@ public class DeviceCacheServiceImpl implements DeviceService {
 
     private final DeviceCacheDataService deviceCacheService;
     private final DeviceService deviceDataServiceImpl;
-    private final DeviceMapper deviceMapper;
 
     @Override
-    public DeviceVersionResponse updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus) {
-        final var device = getDevice(deviceId);
-        if (!device.getEtag().equals(etag)) {
-            throw new DeviceServiceException(ErrorExceptionMessages.ETAG_NOT_ACTUAL);
-        }
-        final var oldVersion = device.getVersion();
-        device.setVersion(updateVersion);
-        device.setStatus(deviceStatus);
-        device.setEtag(etag + 1);
-        final var updated = deviceDataServiceImpl.saveDevice(device);
-        deviceCacheService.saveDevice(updated);
-        return deviceMapper.toUpdateVersionResponse(updated, oldVersion);
+    public Device updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus) {
+        final var updated = deviceDataServiceImpl.updateVersion(deviceId, etag, updateVersion, deviceStatus);
+        saveDevice(updated);
+        return updated;
     }
 
     public Device getDevice(String deviceId) {

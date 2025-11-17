@@ -26,7 +26,7 @@ public class ProtoMapper {
         final var request = new SendCommandRequest();
         request.setCommandType(sendCommandRequest.getCommandType());
         request.setRouterSerial(sendCommandRequest.getRouterSerial());
-        request.setPayload(ProtoStructMapper.fromStruct(sendCommandRequest.getPayload()));
+        request.setPayload(ProtoStructMapper.toStruct(sendCommandRequest.getPayload()));
         return request;
     }
 
@@ -36,7 +36,7 @@ public class ProtoMapper {
         commandDto.setCommandType(command.getCommandType());
         commandDto.setRouterSerial(command.getRouterSerial());
         commandDto.setStatus(command.getStatus());
-        commandDto.setPayload(ProtoStructMapper.fromStruct(command.getPayload()));
+        commandDto.setPayload(ProtoStructMapper.toStruct(command.getPayload()));
         commandDto.setAckedAt(TimeUtils.toOffsetDateTime(command.getAckedAt()));
         commandDto.setCreatedAt(TimeUtils.toOffsetDateTime(command.getCreatedAt()));
         commandDto.setSentAt(TimeUtils.toOffsetDateTime(command.getSentAt()));

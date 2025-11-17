@@ -5,9 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import ts.andrey.api.DeviceV1Api;
 import ts.andrey.deviceservice.service.DeviceService;
+import ts.andrey.deviceservice.service.SagaService;
 import ts.andrey.dto.Device;
 import ts.andrey.dto.DeviceCreateRequest;
-import ts.andrey.dto.DeviceStatus;
 import ts.andrey.dto.DeviceUpdateRequest;
 import ts.andrey.dto.DeviceVersionResponse;
 import ts.andrey.dto.DeviceVersionRollbackRequest;
@@ -20,26 +20,25 @@ import java.util.List;
 public class DeviceController implements DeviceV1Api {
 
     private final DeviceService deviceService;
+    private final SagaService sagaService;
 
     @Override
     public ResponseEntity<DeviceVersionResponse> updateDeviceVersion(
             String deviceId, DeviceVersionUpdateRequest deviceVersionUpdateRequest
     ) {
-        final var response = deviceService.updateVersion(
-                deviceId,
-                deviceVersionUpdateRequest.getEtag(),
-                deviceVersionUpdateRequest.getTargetVersion(),
-                DeviceStatus.UPDATING);
+        final var response = sagaService.updateVersion(
+                deviceId, deviceVersionUpdateRequest
+        );
         return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<DeviceVersionResponse> rollbackDeviceVersion(String deviceId, DeviceVersionRollbackRequest deviceVersionRollbackRequest) {
-        final var response = deviceService.updateVersion(
-                deviceId,
-                deviceVersionRollbackRequest.getEtag(),
-                deviceVersionRollbackRequest.getRollbackVersion(),
-                DeviceStatus.READY);
+    public ResponseEntity<DeviceVersionResponse> rollbackDeviceVersion(
+            String deviceId, DeviceVersionRollbackRequest deviceVersionRollbackRequest
+    ) {
+        final var response = sagaService.rollbackVersion(
+                deviceId, deviceVersionRollbackRequest
+        );
         return ResponseEntity.ok(response);
     }
 

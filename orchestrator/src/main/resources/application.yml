@@ -70,6 +70,8 @@ spring:
           audiences: device-service,orchestrator,account
 
 orchestrator:
+  feign-logger:
+    enabled: true
   integration:
     event-service:
       url: event-service:8881
@@ -78,3 +80,7 @@ orchestrator:
     router-manager:
       host: router-manager-service
       port: 9092
+
+feign:
+  httpclient:
+    enabled: true

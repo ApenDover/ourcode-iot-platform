@@ -3,6 +3,7 @@ package ts.andrey.orchestrator.infrastructure.config;
 import feign.Client;
 import feign.Request;
 import feign.Response;
+import feign.httpclient.ApacheHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StreamUtils;
@@ -15,11 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class LoggingFeignClient extends Client.Default {
+public class LoggingFeignClient implements Client {
 
+    private final Client delegate;
 
     public LoggingFeignClient() {
-        super(null, null);
+        this.delegate = new ApacheHttpClient(); // Используем OkHttp
     }
 
     @Override
@@ -38,7 +40,7 @@ public class LoggingFeignClient extends Client.Default {
             log.info("GET request to {}, headers: {}", request.url(), request.headers());
         }
 
-        try (var response = super.execute(request, options)) {
+        try (var response = delegate.execute(request, options)) {
             if  (response.status() != HttpStatus.OK.value()) {
                 log.debug(
                         "Response status: {}, headers: {}",

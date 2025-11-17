@@ -1,5 +1,6 @@
 package ts.andrey.orchestrator.infrastructure.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
@@ -18,6 +19,10 @@ public class ProtoStructMapper {
         }
 
         try {
+            if (payload instanceof String stringPayload) {
+                return handleStringPayload(stringPayload);
+            }
+
             final var map = OBJECT_MAPPER.convertValue(payload, Map.class);
             return mapToStructSimple(map);
 
@@ -26,36 +31,28 @@ public class ProtoStructMapper {
         }
     }
 
-    public Object fromStruct(Struct struct) {
-        if (struct == null || struct.getFieldsCount() == 0) {
-            return null;
+    private Struct handleStringPayload(String payload) {
+        try {
+            JsonNode jsonNode = OBJECT_MAPPER.readTree(payload);
+            if (jsonNode.isObject()) {
+                final var map = OBJECT_MAPPER.convertValue(jsonNode, Map.class);
+                return mapToStructSimple(map);
+            }
+        } catch (Exception _) {
         }
 
-        try {
-            Map<String, Object> map = structToMapSimple(struct);
-            return OBJECT_MAPPER.convertValue(map, Object.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Error converting Struct to Object", e);
-        }
+        return Struct.newBuilder()
+                .putFields("updateVersion", Value.newBuilder().setStringValue(payload).build())
+                .build();
     }
 
     private Struct mapToStructSimple(Map<String, Object> map) {
         Struct.Builder builder = Struct.newBuilder();
-
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             Value value = convertToValueSimple(entry.getValue());
             builder.putFields(entry.getKey(), value);
         }
-
         return builder.build();
-    }
-
-    private static Map<String, Object> structToMapSimple(Struct struct) {
-        return struct.getFieldsMap().entrySet().stream()
-                .collect(java.util.stream.Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> convertFromValueSimple(entry.getValue())
-                ));
     }
 
     private Value convertToValueSimple(Object obj) {
@@ -65,15 +62,6 @@ public class ProtoStructMapper {
             case Boolean b -> Value.newBuilder().setBoolValue(b).build();
             case Number number -> Value.newBuilder().setNumberValue(number.doubleValue()).build();
             default -> Value.newBuilder().setStringValue(obj.toString()).build();
-        };
-    }
-
-    private static Object convertFromValueSimple(Value value) {
-        return switch (value.getKindCase()) {
-            case STRING_VALUE -> value.getStringValue();
-            case NUMBER_VALUE -> value.getNumberValue();
-            case BOOL_VALUE -> value.getBoolValue();
-            default -> new Object();
         };
     }
 

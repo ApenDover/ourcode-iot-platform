@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface DeviceService {
 
-    DeviceVersionResponse updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus);
+    Device updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus);
 
     Device getDevice(String deviceId);
 
