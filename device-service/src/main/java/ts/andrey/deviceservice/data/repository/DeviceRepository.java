@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import ts.andrey.deviceservice.data.entity.DeviceEntity;
+import ts.andrey.dto.DeviceStatus;
 
 import java.util.Optional;
 
@@ -55,5 +56,22 @@ public interface DeviceRepository extends JpaRepository<DeviceEntity, String> {
     int updateTypeByDeviceId(@Param("deviceId") String deviceId,
                              @Param("appName") String appName,
                              @Param("deviceType") String deviceType);
+
+    @Modifying
+    @Transactional
+    @Query("""
+                UPDATE DeviceEntity d
+                   SET d.application = :appName,
+                       d.etag = :etag,
+                       d.status = :status,
+                       d.version = :version
+                 WHERE d.deviceId = :deviceId
+            """)
+    int updateAndrey(@Param("deviceId") String deviceId,
+                             @Param("appName") String appName,
+                             @Param("etag") Long etag,
+                             @Param("status") DeviceStatus status,
+                             @Param("version") String version
+                             );
 
 }

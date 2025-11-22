@@ -26,10 +26,8 @@ public class DeviceDbDataService {
     private String appName;
 
     @WithSpan
+    @Transactional
     public DeviceEntity save(DeviceEntity device) {
-        if (!entityManager.contains(device)) {
-            System.out.println();
-        }
         device.setApplication(appName);
         final var saved = deviceRepository.save(device);
         log.info("Сохранено устройство {}", saved);
@@ -42,6 +40,7 @@ public class DeviceDbDataService {
     }
 
     @WithSpan
+    @Transactional
     public DeviceEntity getDeviceByDeviceId(String deviceId) {
         return deviceRepository.findByDeviceId(deviceId)
                 .orElseThrow(() -> new DeviceServiceException(ErrorExceptionMessages.DEVICE_NOT_FOUND, deviceId));
@@ -64,6 +63,11 @@ public class DeviceDbDataService {
     public DeviceEntity updateType(String deviceId, String deviceType) {
         deviceRepository.updateTypeByDeviceId(deviceId, appName, deviceType);
         return getDeviceByDeviceId(deviceId);
+    }
+
+    public DeviceEntity saveAndrey(DeviceEntity device) {
+        deviceRepository.updateAndrey(device.getDeviceId(), device.getApplication(), device.getEtag(), device.getStatus(), device.getVersion());
+        return getDeviceByDeviceId(device.getDeviceId());
     }
 
 }

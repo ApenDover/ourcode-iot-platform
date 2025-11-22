@@ -1,10 +1,13 @@
 package ts.andrey.deviceservice.service.impl;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ts.andrey.deviceservice.data.dao.DeviceDbDataService;
+import ts.andrey.deviceservice.data.repository.DeviceRepository;
 import ts.andrey.deviceservice.mapper.DeviceMapper;
 import ts.andrey.deviceservice.metrics.DeviceMetrics;
 import ts.andrey.deviceservice.service.DeviceService;
@@ -25,6 +28,8 @@ public class DeviceDataServiceImpl implements DeviceService {
     private final DeviceMetrics deviceMetrics;
     private final DeviceDbDataService deviceDbService;
     private final DeviceMapper deviceMapper;
+    private final DeviceRepository deviceRepository;
+    private final EntityManager entityManager;
 
     @Override
     public Device getDevice(String deviceId) {
@@ -61,9 +66,8 @@ public class DeviceDataServiceImpl implements DeviceService {
         final var device = deviceDbService.getDeviceByDeviceId(deviceId);
         device.setVersion(updateVersion);
         device.setStatus(deviceStatus);
-        device.setApplication(appName);
-        final var updated = deviceDbService.save(device);
-        return deviceMapper.toDevice(device);
+        final var updated = deviceDbService.saveAndrey(device);
+        return deviceMapper.toDevice(updated);
     }
 
     @Override
