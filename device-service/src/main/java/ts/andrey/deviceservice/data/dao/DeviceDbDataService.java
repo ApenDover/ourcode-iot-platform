@@ -1,10 +1,12 @@
 package ts.andrey.deviceservice.data.dao;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ts.andrey.deviceservice.data.entity.DeviceEntity;
 import ts.andrey.deviceservice.data.repository.DeviceRepository;
 import ts.andrey.deviceservice.exception.DeviceServiceException;
@@ -18,12 +20,16 @@ import java.util.List;
 public class DeviceDbDataService {
 
     private final DeviceRepository deviceRepository;
+    private final EntityManager entityManager;
 
     @Value("${spring.application.name}")
     private String appName;
 
     @WithSpan
     public DeviceEntity save(DeviceEntity device) {
+        if (!entityManager.contains(device)) {
+            System.out.println();
+        }
         device.setApplication(appName);
         final var saved = deviceRepository.save(device);
         log.info("Сохранено устройство {}", saved);

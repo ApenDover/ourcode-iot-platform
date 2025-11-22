@@ -8,6 +8,8 @@ import org.springframework.http.MediaType;
 import ts.andrey.deviceservice.BaseIntegrationTest;
 import ts.andrey.deviceservice.tdf.DummyTDF;
 import ts.andrey.dto.Device;
+import ts.andrey.dto.DeviceStatus;
+import ts.andrey.dto.DeviceVersionResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -113,22 +115,23 @@ class ControllerV1IT extends BaseIntegrationTest {
     @Test
     void updateVersionDevice() {
         // WHEN
-        final var update = DummyTDF.device.getForUpdate();
+        final var request = DummyTDF.deviceVersionUpdateRequest.getDefault();
         final var headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        final var entity = new HttpEntity<>(update, headers);
+        final var entity = new HttpEntity<>(request, headers);
 
-        final var response = sendRequest("/api/v1/devices/DEV-001/version", HttpMethod.POST, entity, Device.class);
+        final var response = sendRequest("/api/v1/devices/DEV-001/version", HttpMethod.PATCH, entity, DeviceVersionResponse.class);
 
         // THEN ASSERT RESPONSE
         final var body = response.getBody();
 
         assertNotNull(response);
         assertNotNull(body);
-        assertNotNull(body.getDeviceId());
-        assertNotNull(body.getCreatedAt());
-        assertEquals("updatedMeta", body.getMeta());
-        assertEquals("updatedType", body.getDeviceType());
+        assertEquals("DEV-001", body.getDeviceId());
+        assertEquals(1L, body.getEtag());
+        assertEquals("0.0.1", body.getPrevVersion());
+        assertEquals("2.1.1", body.getTargetVersion());
+        assertEquals(DeviceStatus.UPDATING, body.getStatus());
 
         // THEN ASSERT DATABASE ENTITY
         final var actualOpt = deviceRepository.findByDeviceId("DEV-001");
@@ -137,21 +140,19 @@ class ControllerV1IT extends BaseIntegrationTest {
         final var actual = actualOpt.get();
         assertNotNull(actual.getId());
         assertNotNull(actual.getCreatedAt());
-        assertEquals(body.getDeviceId(), actual.getDeviceId());
-        assertEquals("updatedType", actual.getDeviceType());
-        assertEquals("updatedMeta", actual.getMeta());
-        assertNotNull(actual.getEtag());
-        assertNotNull(actual.getVersion());
+        assertEquals("DEV-001", actual.getDeviceId());
+        assertEquals(1L, actual.getEtag());
+        assertEquals("2.1.1", actual.getVersion());
+        assertEquals(DeviceStatus.UPDATING, actual.getStatus());
 
         //THEN REDIS
         final var redisActual = redisTemplate.opsForValue().get(body.getDeviceId());
         assertNotNull(redisActual);
-        assertEquals("updatedType", redisActual.getDeviceType());
-        assertEquals("updatedMeta", redisActual.getMeta());
-        assertEquals(body.getDeviceId(), redisActual.getDeviceId());
-        assertEquals(body.getCreatedAt(), redisActual.getCreatedAt());
-        assertEquals(body.getVersion(), redisActual.getVersion());
-        assertEquals(body.getEtag(), redisActual.getEtag());
+        assertNotNull(redisActual.getCreatedAt());
+        assertEquals("DEV-001", redisActual.getDeviceId());
+        assertEquals(1L, redisActual.getEtag());
+        assertEquals("2.1.1", redisActual.getVersion());
+        assertEquals(DeviceStatus.UPDATING, redisActual.getStatus());
     }
 
     @Test

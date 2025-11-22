@@ -33,3 +33,10 @@ app:
       initial-delay: 1000
       multiplier: 5
     batch-size: 300
+
+logging:
+  level:
+    org.springframework: DEBUG
+    org.hibernate: DEBUG
+    javax.persistence: DEBUG
+    org.apache.http: DEBUG

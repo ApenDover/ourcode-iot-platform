@@ -23,7 +23,7 @@ public class DeviceCacheServiceImpl implements DeviceService {
     @Override
     public Device updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus) {
         final var updated = deviceDataServiceImpl.updateVersion(deviceId, etag, updateVersion, deviceStatus);
-        saveDevice(updated);
+        deviceCacheService.saveDevice(updated);
         return updated;
     }
 

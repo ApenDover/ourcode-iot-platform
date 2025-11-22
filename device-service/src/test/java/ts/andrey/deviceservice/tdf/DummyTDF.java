@@ -9,5 +9,6 @@ public class DummyTDF {
     public static final DummyDeviceEntity deviceEntity = new DummyDeviceEntity();
     public static final DummyDeviceCreateRequest deviceCreateRequest = new DummyDeviceCreateRequest();
     public static final DummyDeviceUpdateRequest deviceUpdateRequest = new DummyDeviceUpdateRequest();
+    public static final DummyDeviceVersionUpdateRequest deviceVersionUpdateRequest = new DummyDeviceVersionUpdateRequest();
 
 }
