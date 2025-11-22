@@ -27,7 +27,7 @@ public class SagaService {
             throw new DeviceServiceException("Ошибка обновления: данное устройство уже в работе");
         }
         final var updatedDevice = deviceCacheServiceImpl.updateVersion(deviceId,
-                deviceVersionUpdateRequest.getEtag(),
+                deviceVersionUpdateRequest.getEtag() + 1,
                 deviceVersionUpdateRequest.getTargetVersion(),
                 DeviceStatus.UPDATING);
         return deviceMapper.toUpdateVersionResponse(updatedDevice, actualDevice.getVersion());
@@ -35,11 +35,14 @@ public class SagaService {
 
     public DeviceVersionResponse rollbackVersion(String deviceId, DeviceVersionRollbackRequest deviceVersionRollbackRequest) {
         final var actualDevice = deviceCacheServiceImpl.getDevice(deviceId);
+        if (!actualDevice.getEtag().equals(deviceVersionRollbackRequest.getEtag())) {
+            throw new DeviceServiceException("Etag не совпал, попробуй еще раз");
+        }
         if (DeviceStatus.READY.equals(actualDevice.getStatus())) {
             throw new DeviceServiceException("Ошибка восстановления: данное устройство в статусе READY");
         }
         final var updatedDevice = deviceCacheServiceImpl.updateVersion(deviceId,
-                deviceVersionRollbackRequest.getEtag(),
+                deviceVersionRollbackRequest.getEtag() + 1,
                 deviceVersionRollbackRequest.getRollbackVersion(),
                 DeviceStatus.READY);
         return deviceMapper.toUpdateVersionResponse(updatedDevice, actualDevice.getVersion());

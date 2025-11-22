@@ -17,6 +17,8 @@ import org.springframework.web.context.request.WebRequest;
 import ts.andrey.deviceservice.configuration.MdcInterceptor;
 import ts.andrey.dto.DeviceError;
 
+import java.util.Objects;
+
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -88,8 +90,11 @@ public class GlobalExceptionHandler {
             String detail, String instance
     ) {
         final var error = new DeviceError();
-        error.setTitle(title);
+        if (Objects.isNull(status)) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
         error.setStatus(status.value());
+        error.setTitle(title);
         error.setDetail(detail);
         error.setInstance(instance);
         error.setTrace(MDC.get(MdcInterceptor.TRACE));

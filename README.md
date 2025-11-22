@@ -10,6 +10,16 @@
 - Настраивает роли для keycloak и nexus
 - Публикует API клиент в nexus
 
+
+  сборка локальная:
+```bash
+   cd ./infrastructure
+   cp .env.example .env
+   cd ..
+   make boot && make up-local
+```
+
+сборка в контенерах (дольше, но надежнее):
 ```bash
    cd ./infrastructure
    cp .env.example .env
