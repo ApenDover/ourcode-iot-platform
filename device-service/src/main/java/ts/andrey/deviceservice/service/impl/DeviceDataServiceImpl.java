@@ -66,6 +66,7 @@ public class DeviceDataServiceImpl implements DeviceService {
         final var device = deviceDbService.getDeviceByDeviceId(deviceId);
         device.setVersion(updateVersion);
         device.setStatus(deviceStatus);
+        device.setEtag(etag+1);
         final var updated = deviceDbService.saveAndrey(device);
         return deviceMapper.toDevice(updated);
     }
