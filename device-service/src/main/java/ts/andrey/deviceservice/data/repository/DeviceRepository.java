@@ -59,19 +59,17 @@ public interface DeviceRepository extends JpaRepository<DeviceEntity, String> {
 
     @Modifying
     @Transactional
-    @Query(value = """
-                UPDATE DeviceEntity d
-                   SET d.application = :appName,
-                       d.etag = :etag,
-                       d.status = :status,
-                       d.version = :version
-                 WHERE d.deviceId = :deviceId
-            """, nativeQuery = true)
+    @Query("""
+            UPDATE DeviceEntity d SET d.application = :appName,
+                d.etag = :etag,
+                d.status = :status,
+                d.version = :version
+            WHERE d.deviceId = :deviceId
+            """)
     int updateAndrey(@Param("deviceId") String deviceId,
-                             @Param("appName") String appName,
-                             @Param("etag") Long etag,
-                             @Param("status") DeviceStatus status,
-                             @Param("version") String version
-                             );
+                     @Param("appName") String appName,
+                     @Param("etag") Long etag,
+                     @Param("status") DeviceStatus status,
+                     @Param("version") String version);
 
 }

@@ -12,6 +12,8 @@ spring:
             client-secret: secret
             authorization-grant-type: authorization_code
             scope: openid,profile,email
+  jpa:
+    show-sql: true
 
 otel:
   traces:
@@ -34,9 +36,9 @@ app:
       multiplier: 5
     batch-size: 300
 
-logging:
-  level:
-    org.springframework: DEBUG
-    org.hibernate: DEBUG
-    javax.persistence: DEBUG
-    org.apache.http: DEBUG
+#logging:
+#  level:
+#    org.springframework: DEBUG
+#    org.hibernate: DEBUG
+#    javax.persistence: DEBUG
+#    org.apache.http: DEBUG
