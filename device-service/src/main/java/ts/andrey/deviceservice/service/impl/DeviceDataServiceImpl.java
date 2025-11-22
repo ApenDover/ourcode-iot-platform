@@ -62,13 +62,14 @@ public class DeviceDataServiceImpl implements DeviceService {
     }
 
     @Override
+    @Transactional
     public Device updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus) {
         final var device = deviceDbService.getDeviceByDeviceId(deviceId);
+        device.setApplication(appName);
         device.setVersion(updateVersion);
         device.setStatus(deviceStatus);
-        device.setEtag(etag+1);
-        final var updated = deviceDbService.saveAndrey(device);
-        return deviceMapper.toDevice(updated);
+        device.setEtag(etag);
+        return deviceMapper.toDevice(device);
     }
 
     @Override

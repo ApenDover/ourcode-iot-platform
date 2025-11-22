@@ -10,6 +10,7 @@ import ts.andrey.deviceservice.metrics.DeviceMetrics;
 import ts.andrey.dto.Device;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -26,9 +27,11 @@ public class DeviceCacheDataService {
     public Optional<Device> getDevice(String deviceId) {
         try {
             final var device = redisTemplate.opsForValue().get(deviceId);
-            log.info("Device найден в REDIS: {}", device);
-            deviceMetrics.getDeviceRedisSuccess();
-            deviceMetrics.deviceRedisSuccess();
+            if (Objects.nonNull(device)) {
+                log.info("Device найден в REDIS: {}", device);
+                deviceMetrics.getDeviceRedisSuccess();
+                deviceMetrics.deviceRedisSuccess();
+            }
             return Optional.ofNullable(device);
         } catch (Exception e) {
             deviceMetrics.deviceRedisFailure();

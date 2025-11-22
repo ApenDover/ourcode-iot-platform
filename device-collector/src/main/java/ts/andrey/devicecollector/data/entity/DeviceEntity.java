@@ -65,4 +65,19 @@ public class DeviceEntity {
         return getClass().hashCode();
     }
 
+    @Override
+    public String toString() {
+        return "DeviceEntity{"
+                + "id=" + id
+                + ", deviceId='" + deviceId + '\''
+                + ", deviceType='" + deviceType + '\''
+                + ", createdAt=" + createdAt
+                + ", version='" + version + '\''
+                + ", etag=" + etag
+                + ", application='" + application + '\''
+                + ", status=" + status
+                + ", meta='" + meta + '\''
+                + '}';
+    }
+
 }

@@ -10,5 +10,6 @@ public class DummyTDF {
     public static final DummyDeviceCreateRequest deviceCreateRequest = new DummyDeviceCreateRequest();
     public static final DummyDeviceUpdateRequest deviceUpdateRequest = new DummyDeviceUpdateRequest();
     public static final DummyDeviceVersionUpdateRequest deviceVersionUpdateRequest = new DummyDeviceVersionUpdateRequest();
+    public static final DummyDeviceVersionRollbackRequest deviceVersionRollbackRequest = new DummyDeviceVersionRollbackRequest();
 
 }

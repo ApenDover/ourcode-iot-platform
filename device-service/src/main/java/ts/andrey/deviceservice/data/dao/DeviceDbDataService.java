@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ts.andrey.deviceservice.data.entity.DeviceEntity;
 import ts.andrey.deviceservice.data.repository.DeviceRepository;
 import ts.andrey.deviceservice.exception.DeviceServiceException;
@@ -26,7 +25,6 @@ public class DeviceDbDataService {
     private String appName;
 
     @WithSpan
-    @Transactional
     public DeviceEntity save(DeviceEntity device) {
         device.setApplication(appName);
         final var saved = deviceRepository.save(device);
@@ -40,7 +38,6 @@ public class DeviceDbDataService {
     }
 
     @WithSpan
-    @Transactional
     public DeviceEntity getDeviceByDeviceId(String deviceId) {
         return deviceRepository.findByDeviceId(deviceId)
                 .orElseThrow(() -> new DeviceServiceException(ErrorExceptionMessages.DEVICE_NOT_FOUND, deviceId));
@@ -63,11 +60,6 @@ public class DeviceDbDataService {
     public DeviceEntity updateType(String deviceId, String deviceType) {
         deviceRepository.updateTypeByDeviceId(deviceId, appName, deviceType);
         return getDeviceByDeviceId(deviceId);
-    }
-
-    public DeviceEntity saveAndrey(DeviceEntity device) {
-        deviceRepository.updateAndrey(device.getDeviceId(), device.getApplication(), device.getEtag(), device.getStatus(), device.getVersion());
-        return getDeviceByDeviceId(device.getDeviceId());
     }
 
 }

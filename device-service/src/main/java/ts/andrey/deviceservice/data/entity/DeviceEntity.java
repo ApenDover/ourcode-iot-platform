@@ -69,11 +69,14 @@ public class DeviceEntity {
     public String toString() {
         return "DeviceEntity{"
                 + "id=" + id
-                + ", deviceId='" + deviceId
-                + '\'' + ", deviceType='" + deviceType + '\''
+                + ", deviceId='" + deviceId + '\''
+                + ", deviceType='" + deviceType + '\''
                 + ", createdAt=" + createdAt
-                + ", meta='"
-                + meta + '\'' + '}';
+                + ", version='" + version + '\''
+                + ", etag=" + etag
+                + ", application='" + application + '\''
+                + ", status=" + status
+                + ", meta='" + meta + '\''
+                + '}';
     }
-
 }

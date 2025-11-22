@@ -2,6 +2,7 @@ package ts.andrey.deviceservice.testconfiguration;
 
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.driver.api.ShardingSphereDataSourceFactory;
 import org.apache.shardingsphere.infra.algorithm.core.config.AlgorithmConfiguration;
 import org.apache.shardingsphere.sharding.api.config.ShardingRuleConfiguration;
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Properties;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class ShardingSphereConfig {
@@ -64,6 +66,10 @@ public class ShardingSphereConfig {
         ds1.setUsername(postgres2.getUsername());
         ds1.setPassword(postgres2.getPassword());
         ds1.setDriverClassName("org.postgresql.Driver");
+        log.info("\nDB1:{}, user:{}, pass:{}\nDB2:{}, user:{}, pass:{}",
+                postgres1.getJdbcUrl(), postgres1.getUsername(), postgres1.getPassword(),
+                postgres2.getJdbcUrl(), postgres2.getUsername(), postgres2.getPassword()
+                );
 
         final var dataSourceMap = new HashMap<String, DataSource>();
         dataSourceMap.put("shard0", ds0);
