@@ -29,7 +29,7 @@ public interface DeviceRepository extends JpaRepository<DeviceEntity, String> {
             """)
     int updateTypeAndMetaByDeviceId(@Param("deviceId") String deviceId,
                                     @Param("deviceType") String deviceType,
-                                    @Param("application") String appName,
+                                    @Param("appName") String appName,
                                     @Param("meta") String meta);
 
     @Modifying
@@ -41,7 +41,7 @@ public interface DeviceRepository extends JpaRepository<DeviceEntity, String> {
                  WHERE d.deviceId = :deviceId
             """)
     int updateMetaByDeviceId(@Param("deviceId") String deviceId,
-                             @Param("application") String appName,
+                             @Param("appName") String appName,
                              @Param("meta") String meta);
 
     @Modifying
@@ -53,7 +53,7 @@ public interface DeviceRepository extends JpaRepository<DeviceEntity, String> {
                  WHERE d.deviceId = :deviceId
             """)
     int updateTypeByDeviceId(@Param("deviceId") String deviceId,
-                             @Param("application") String appName,
+                             @Param("appName") String appName,
                              @Param("deviceType") String deviceType);
 
 }

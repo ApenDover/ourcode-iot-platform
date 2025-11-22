@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: device-service
   flyway:
     enabled: false
   security:

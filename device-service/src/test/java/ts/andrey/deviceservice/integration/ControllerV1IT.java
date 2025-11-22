@@ -59,6 +59,8 @@ class ControllerV1IT extends BaseIntegrationTest {
         assertNotNull(actual);
         assertNotNull(actual.getId());
         assertNotNull(actual.getCreatedAt());
+        assertNotNull(actual.getEtag());
+        assertNotNull(actual.getVersion());
         assertEquals(body.getDeviceId(), actual.getDeviceId());
         assertEquals("deviceType", actual.getDeviceType());
         assertEquals("meta", actual.getMeta());
@@ -91,6 +93,8 @@ class ControllerV1IT extends BaseIntegrationTest {
         final var actual = actualOpt.get();
         assertNotNull(actual.getId());
         assertNotNull(actual.getCreatedAt());
+        assertNotNull(actual.getEtag());
+        assertNotNull(actual.getVersion());
         assertEquals(body.getDeviceId(), actual.getDeviceId());
         assertEquals("updatedType", actual.getDeviceType());
         assertEquals("updatedMeta", actual.getMeta());
@@ -102,6 +106,52 @@ class ControllerV1IT extends BaseIntegrationTest {
         assertEquals("updatedMeta", redisActual.getMeta());
         assertEquals(body.getDeviceId(), redisActual.getDeviceId());
         assertEquals(body.getCreatedAt(), redisActual.getCreatedAt());
+        assertEquals(body.getVersion(), redisActual.getVersion());
+        assertEquals(body.getEtag(), redisActual.getEtag());
+    }
+
+    @Test
+    void updateVersionDevice() {
+        // WHEN
+        final var update = DummyTDF.device.getForUpdate();
+        final var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        final var entity = new HttpEntity<>(update, headers);
+
+        final var response = sendRequest("/api/v1/devices/DEV-001/version", HttpMethod.POST, entity, Device.class);
+
+        // THEN ASSERT RESPONSE
+        final var body = response.getBody();
+
+        assertNotNull(response);
+        assertNotNull(body);
+        assertNotNull(body.getDeviceId());
+        assertNotNull(body.getCreatedAt());
+        assertEquals("updatedMeta", body.getMeta());
+        assertEquals("updatedType", body.getDeviceType());
+
+        // THEN ASSERT DATABASE ENTITY
+        final var actualOpt = deviceRepository.findByDeviceId("DEV-001");
+        assertTrue(actualOpt.isPresent());
+
+        final var actual = actualOpt.get();
+        assertNotNull(actual.getId());
+        assertNotNull(actual.getCreatedAt());
+        assertEquals(body.getDeviceId(), actual.getDeviceId());
+        assertEquals("updatedType", actual.getDeviceType());
+        assertEquals("updatedMeta", actual.getMeta());
+        assertNotNull(actual.getEtag());
+        assertNotNull(actual.getVersion());
+
+        //THEN REDIS
+        final var redisActual = redisTemplate.opsForValue().get(body.getDeviceId());
+        assertNotNull(redisActual);
+        assertEquals("updatedType", redisActual.getDeviceType());
+        assertEquals("updatedMeta", redisActual.getMeta());
+        assertEquals(body.getDeviceId(), redisActual.getDeviceId());
+        assertEquals(body.getCreatedAt(), redisActual.getCreatedAt());
+        assertEquals(body.getVersion(), redisActual.getVersion());
+        assertEquals(body.getEtag(), redisActual.getEtag());
     }
 
     @Test
@@ -117,6 +167,8 @@ class ControllerV1IT extends BaseIntegrationTest {
         assertEquals("SENSOR", body.getDeviceType());
         assertEquals(1756365012345L, body.getCreatedAt());
         assertEquals("meta-text-two", body.getMeta());
+        assertEquals(0, body.getEtag());
+        assertEquals("0.0.1", body.getVersion());
     }
 
     @Test
