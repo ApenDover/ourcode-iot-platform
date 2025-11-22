@@ -175,6 +175,39 @@ postman коллекция тут: [postman](infrastructure/postman)
 
 # Описание сервисов
 
+## orchestrator
+
+### Процесс
+
+- взаимодействует с device-service, event-service, router-manager-service
+- реализует логику распределенныз транзакций (SAGA) для обновления версии устройста
+- api закрыт с помощью keycloak
+
+API: [orchestrator-api.yml](orchestrator/src/main/resources/openapi/orchestrator-api.yml)
+
+<details>
+
+<summary>Компоненты сервиса</summary>
+
+![orchestrator-component.png](diagrams/orchestrator/orchestrator-component.png)
+
+</details>
+
+<details>
+
+<summary>Логическая последовательность</summary>
+
+[orchestrator-sequence.puml](diagrams/orchestrator/orchestrator-sequence.puml)
+
+</details>
+
+### Технологии:
+- Язык программирования: Java 24
+- Фреймворк: Spring Boot 3.5
+- Обмен сообщениями: REST
+- keycloak
+- Система сборки: Gradle
+
 ## event-collector
 
 ### Процесс
@@ -276,10 +309,10 @@ API: [event-api.yml](event-service/src/main/resources/openapi/event-api.yml)
 
 ## device-service
 
-- все endpoint защищены keycloak
 - СRUD операции на устройствами в PostgreSQL, используя шардирование через Apache ShardingSphere
 - между приложение и базой есть redis
 - экспортирует метрики
+- api защищен keycloak
 
 <details>
 
@@ -303,6 +336,7 @@ API: [event-api.yml](event-service/src/main/resources/openapi/event-api.yml)
 - Обмен сообщениями: REST
 - Шардирование: ShardingSphere
 - Хранилище: Postgres
+- keycloak
 - Тестирование и окружение: Testcontainers (Postgres, Redis, Keycloak)
 - Система сборки: Gradle
 
@@ -391,3 +425,18 @@ gRPC API на Go:
 proto можно найти тут [roma.proto](router-manager-service/protobuf/roma.proto)
 
 jmeter .JMX брать тут: [router-manager-service.jmx](infrastructure/jmeter/router-manager-service.jmx)
+
+## router
+
+Имитация устройства
+
+- С заданным интервалом запрашивает команды у router-manager-service
+- При получении команды отправляет подтверждение выполнения
+- С заданным интервалом публикует события в kafka
+- Роутер имеет хардкод серийный номер
+
+### Технологии:
+
+- Язык программирования: Go 1.25
+- gRPC подключение к router-manager-service
+- kafka producer для публикации событий в топик

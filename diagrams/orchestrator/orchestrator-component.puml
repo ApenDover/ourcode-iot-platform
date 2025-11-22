@@ -1,0 +1,41 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(app, "orchestrator") {
+    Component(seq, "Spring Security", "framework", "framework")
+    Component(controller, "OrchestratorController", "adapter-in", "class")
+    Component(grpcport, "RouterManagerGrpcPort", "port-out", "class")
+    Component(deviceport, "DeviceServicePort", "port-out", "class")
+    Component(deviceclient, "DeviceServiceClient", "client", "class")
+    Component(eventport, "EventServicePort", "port-out", "class")
+    Component(eventclient, "EventServiceClient", "client", "class")
+    Component(sagaport, "UpdateDeviceVersionUseCase", "port-out", "class")
+    Component(grpcclient, "RouterManagerGrpcClient", "client", "class")
+}
+
+System_Ext(keycloak, "Keycloak", "авториазация", "service")
+System_Ext(deviceservice, "Device Service", "CRUD устройства", "service")
+System_Ext(eventservice, "Event Service", "Данные о собыиях", "service")
+System_Ext(routermanager, "Router Manager Service", "Управление устройствами", "service")
+
+Rel("seq", "keycloak", "вызов")
+Rel("seq", "controller", "вызов")
+Rel("controller", "grpcport", "вызов")
+Rel("grpcport", "grpcclient", "вызов")
+Rel("grpcclient", "routermanager", "вызов")
+
+Rel("controller", "deviceport", "вызов")
+Rel("deviceport", "deviceclient", "вызов")
+Rel("deviceclient", "deviceservice", "вызов")
+
+Rel("controller", "eventport", "вызов")
+Rel("eventport", "eventclient", "вызов")
+Rel("eventclient", "eventservice", "вызов")
+
+Rel("sagaport", "deviceport", "вызов")
+Rel("sagaport", "grpcport", "вызов")
+
+
+Rel("controller", "sagaport", "вызов")
+
+@enduml

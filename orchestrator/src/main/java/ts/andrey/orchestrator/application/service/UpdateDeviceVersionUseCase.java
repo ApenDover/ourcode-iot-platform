@@ -3,16 +3,16 @@ package ts.andrey.orchestrator.application.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ts.andrey.orchestrator.application.outport.DeviceServicePort;
+import ts.andrey.orchestrator.application.outport.RouterManagerPort;
 import ts.andrey.orchestrator.domain.exception.RouterManagerRollbackException;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost200Response;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPostRequest;
-import ts.andrey.orchestrator.infrastructure.adapter.out.RouterManagerAdapter;
 
 @Service
 @RequiredArgsConstructor
 public class UpdateDeviceVersionUseCase {
 
-    private final RouterManagerAdapter routerManagerAdapter;
+    private final RouterManagerPort routerManagerPort;
     private final DeviceServicePort deviceServicePort;
 
     public ApiV1DevicesDeviceIdVersionPost200Response updateDeviceVersion(
@@ -28,7 +28,7 @@ public class UpdateDeviceVersionUseCase {
 
         Integer commandId;
         try {
-            commandId = routerManagerAdapter.sendCommand(
+            commandId = routerManagerPort.sendCommand(
                     deviceId,
                     "UPDATE VERSION",
                     apiV1DevicesDeviceIdVersionPostRequest.getTargetVersion()
