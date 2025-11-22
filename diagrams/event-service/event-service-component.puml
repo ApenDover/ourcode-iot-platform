@@ -1,0 +1,24 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+AddElementTag("microservice", $bgColor="#E6F3F7", $fontColor="#333333", $borderColor="#3F668F")
+AddElementTag("storage", $bgColor="#F7E9E6", $fontColor="#333333", $borderColor="#8F3F3F")
+AddElementTag("queue", $bgColor="#E6F7E6", $fontColor="#333333", $borderColor="#3F8F5F")
+
+Container_Boundary(app, "event-collector") {
+    Component(controller, "EventController", "Контроллер", "class")
+    Component(caservice, "CassandraService", "Маппинг и логика", "class")
+    Component(mapper, "EventMapper", "маппинг", "class")
+    Component(dataservice, "DeviceEventDataService", "Слой работы с данными", "class")
+    Component(repo, "CriteriaRepository", "Репозиторий", "class")
+}
+
+System_Ext(cassandra, "Cassandra", "Постоянное хранилище", "storage")
+
+Rel("controller", "caservice", "вызов")
+Rel("caservice", "mapper", "маппинг")
+Rel("caservice", "dataservice", "вызов")
+Rel("dataservice", "repo", "вызов")
+Rel("repo", "cassandra", "вызов")
+
+@enduml

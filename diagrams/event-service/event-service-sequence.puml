@@ -1,0 +1,22 @@
+@startuml
+actor INVOKE
+participant "Controller" as CTL #lightblue
+participant "CassandraService" as CS #lightblue
+participant "EventMapper" as EM #lightblue
+participant "DeviceEventDataService" as DS #lightblue
+participant "CriteriaRepository" as CR #lightblue
+participant "Cassandra" as DB
+
+INVOKE -> CTL : request
+CTL -> CS : вызов
+CS -> DS : вызов
+DS -> CR : вызов
+CR -> DB : запрос
+DB -> CR : Данные
+CR -> DS : Entity
+DS -> CS : Entity
+CS -> EM : Entity to DTO
+EM -> CS : DTO
+CS -> CTL : DTO
+CTL -> INVOKE : response
+@enduml
