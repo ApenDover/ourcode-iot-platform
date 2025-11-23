@@ -5,14 +5,14 @@ Container_Boundary(platform, "IoT Platform") {
     Container(router, "Router", "GO", "Устройство")
     Container(routermanager, "Router Manager", "GO", "Управление устройствами")
     Container(eventcollector, "Event Collector", "Spring Boot", "Сбор событий")
-    Container(cassandra, "Cassandra", "events", "хранение событий") #gray
+    Container(cassandra, "Cassandra", "events", "Хранение событий") #gray
     Container(eventservice, "Event Service", "Spring Boot", "Сбор событий")
     Container(devicecollector, "Device Collector", "Spring Boot", "Сбор устройств")
     Container(routermanagerdb, "Router Manager DataBase", "Postgres", "Хранение команд") #gray
     Container(devicedb, "Device DataBase", "Postgres", "Хранение устройств") #gray
     Container(devser, "Device Service", "Spring Boot", "CRUD над devices")
     Container(kafkaproducer, "Kafka Producer", "Spring Boot", "Системный сервис для тестирования") #333355
-    Container(kafka, "Kafka", "Avro", "хранение событий и устройств") #gray
+    Container(kafka, "Kafka", "Avro", "Хранение событий и устройств") #gray
     Container(keycloak, "keycloak", "keycloak", "Авторизация") #gray
     Container(orchestrator, "Orchestrator", "Spring Boot", "Оркестрация")
 }

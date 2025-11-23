@@ -207,7 +207,9 @@ API: [orchestrator-api.yml](orchestrator/src/main/resources/openapi/orchestrator
 
 <summary>Логическая последовательность</summary>
 
-[orchestrator-sequence.puml](diagrams/orchestrator/orchestrator-sequence.puml)
+![orchestrator-sequence-saga.png](diagrams/orchestrator/orchestrator-sequence-saga.png)
+
+![orchestrator-sequence-events.png](diagrams/orchestrator/orchestrator-sequence-events.png)
 
 </details>
 
