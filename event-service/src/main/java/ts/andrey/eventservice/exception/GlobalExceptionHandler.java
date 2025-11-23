@@ -14,6 +14,8 @@ import org.springframework.web.context.request.WebRequest;
 import ts.andrey.eventservice.config.MdcInterceptor;
 import ts.andrey.eventservice.model.ResponseError;
 
+import java.util.Objects;
+
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -72,6 +74,9 @@ public class GlobalExceptionHandler {
             HttpStatus status, String title,
             String detail, String instance
     ) {
+        if (Objects.isNull(status)) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
         final var error = ResponseError.builder()
                 .title(title)
                 .status(status.value())
