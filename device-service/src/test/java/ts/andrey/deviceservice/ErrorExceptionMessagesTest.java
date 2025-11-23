@@ -5,7 +5,7 @@ import ts.andrey.deviceservice.exception.ErrorExceptionMessages;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ErrorExceptionMessagesTest {
+class ErrorExceptionMessagesTest {
 
     @Test
     void test() {

@@ -1,0 +1,9 @@
+{
+  "deviceId": "DEV-001",
+  "deviceType": "SMARTPHONE",
+  "createdAt": 1732297123000,
+  "meta": "{\"color\":\"black\",\"model\":\"X100\"}",
+  "version": "1.1.1",
+  "status": "UPDATING",
+  "etag": 0
+}

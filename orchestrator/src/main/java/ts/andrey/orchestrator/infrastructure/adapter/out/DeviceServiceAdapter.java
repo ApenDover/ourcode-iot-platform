@@ -2,6 +2,7 @@ package ts.andrey.orchestrator.infrastructure.adapter.out;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ts.andrey.device.model.DeviceStatus;
 import ts.andrey.device.model.DeviceVersionResponse;
 import ts.andrey.device.model.DeviceVersionRollbackRequest;
 import ts.andrey.device.model.DeviceVersionUpdateRequest;
@@ -68,6 +69,7 @@ public class DeviceServiceAdapter implements DeviceServicePort {
             final var request = new DeviceVersionRollbackRequest();
             request.setEtag(etag);
             request.setRollbackVersion(deviceVersion);
+            request.setStatus(DeviceStatus.READY);
             final var deviceVersionResponse = deviceServiceClient.rollbackDeviceVersion(deviceId, request);
             return deviceVersionResponse.getBody();
         } catch (Exception ex) {
