@@ -106,7 +106,31 @@
       }
     ],
     "client": {
-      "orchestrator": [],
+      "orchestrator": [
+        {
+          "name": "uma_protection",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "59941787-e73d-432a-b0e9-3950e37aaa20",
+          "attributes": {}
+        },
+        {
+          "name": "deviceapp.user",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "59941787-e73d-432a-b0e9-3950e37aaa20",
+          "attributes": {}
+        },
+        {
+          "name": "deviceapp.admin",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "59941787-e73d-432a-b0e9-3950e37aaa20",
+          "attributes": {}
+        }
+      ],
       "realm-management": [
         {
           "id": "380cae36-a30d-447d-8689-2261b6204976",
@@ -767,7 +791,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": true,
       "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
+      "secret": "secret",
       "redirectUris": [
         "*"
       ],
@@ -871,7 +895,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": true,
       "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
+      "secret": "secret",
       "redirectUris": [
         "*"
       ],
