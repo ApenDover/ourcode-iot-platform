@@ -9,7 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import ts.andrey.orchestrator.application.outport.RouterManagerGrpcPort;
+import ts.andrey.orchestrator.application.port.RouterManagerGrpcPort;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost200Response;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost502Response;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPostRequest;

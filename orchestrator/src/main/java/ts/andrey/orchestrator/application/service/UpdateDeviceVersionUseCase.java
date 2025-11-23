@@ -2,8 +2,8 @@ package ts.andrey.orchestrator.application.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ts.andrey.orchestrator.application.outport.DeviceServicePort;
-import ts.andrey.orchestrator.application.outport.RouterManagerPort;
+import ts.andrey.orchestrator.application.port.DeviceServicePort;
+import ts.andrey.orchestrator.application.port.RouterManagerPort;
 import ts.andrey.orchestrator.domain.exception.RouterManagerRollbackException;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost200Response;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPostRequest;

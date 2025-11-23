@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-import ts.andrey.orchestrator.application.outport.RedisDataServicePort;
+import ts.andrey.orchestrator.application.port.RedisDataServicePort;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost200Response;
-import ts.andrey.orchestrator.infrastructure.metrics.OrchestratorMetrics;
+import ts.andrey.orchestrator.domain.metrics.OrchestratorMetrics;
 
 import java.time.Duration;
 import java.util.Objects;

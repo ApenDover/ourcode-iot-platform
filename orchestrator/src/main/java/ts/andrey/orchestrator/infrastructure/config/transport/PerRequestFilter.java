@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.infrastructure.config;
+package ts.andrey.orchestrator.infrastructure.config.transport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
-import ts.andrey.orchestrator.infrastructure.metrics.OrchestratorMetrics;
+import ts.andrey.orchestrator.domain.metrics.OrchestratorMetrics;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

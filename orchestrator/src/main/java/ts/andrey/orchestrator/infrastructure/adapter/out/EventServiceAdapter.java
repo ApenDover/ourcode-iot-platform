@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ts.andrey.orchestrator.dto.Event;
 import ts.andrey.orchestrator.dto.EventPage;
-import ts.andrey.orchestrator.infrastructure.feign.EventServiceClient;
+import ts.andrey.orchestrator.infrastructure.out.port.feign.EventServiceClient;
 import ts.andrey.orchestrator.infrastructure.mapper.EventMapper;
-import ts.andrey.orchestrator.application.outport.EventServicePort;
+import ts.andrey.orchestrator.application.port.EventServicePort;
 
 @Component
 @RequiredArgsConstructor

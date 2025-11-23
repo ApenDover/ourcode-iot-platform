@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.application.outport;
+package ts.andrey.orchestrator.application.port;
 
 import ts.andrey.device.model.DeviceVersionResponse;
 import ts.andrey.orchestrator.dto.Device;

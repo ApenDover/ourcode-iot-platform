@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.infrastructure.config;
+package ts.andrey.orchestrator.infrastructure.config.data;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

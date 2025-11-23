@@ -6,7 +6,6 @@ import ts.andrey.orchestrator.dto.Command;
 import ts.andrey.orchestrator.dto.PollCommandsResponse;
 import ts.andrey.orchestrator.dto.SendCommandRequest;
 import ts.andrey.orchestrator.dto.SendCommandResponse;
-import ts.andrey.orchestrator.infrastructure.util.ProtoStructMapper;
 import ts.andrey.orchestrator.infrastructure.util.TimeUtils;
 import ts.andrey.routermanager.Roma;
 
@@ -14,7 +13,7 @@ import ts.andrey.routermanager.Roma;
 public class ProtoMapper {
 
     public Roma.SendCommandRequest mapToSendCommandRequestProto(SendCommandRequest sendCommandRequest) {
-        final var payloadStruct = ProtoStructMapper.toStruct(sendCommandRequest.getPayload());
+        final var payloadStruct = ProtoPayloadMapper.toStruct(sendCommandRequest.getPayload());
         return Roma.SendCommandRequest.newBuilder()
                 .setRouterSerial(sendCommandRequest.getRouterSerial())
                 .setCommandType(sendCommandRequest.getCommandType())
@@ -26,7 +25,7 @@ public class ProtoMapper {
         final var request = new SendCommandRequest();
         request.setCommandType(sendCommandRequest.getCommandType());
         request.setRouterSerial(sendCommandRequest.getRouterSerial());
-        request.setPayload(ProtoStructMapper.structToMap(sendCommandRequest.getPayload()));
+        request.setPayload(ProtoPayloadMapper.structToMap(sendCommandRequest.getPayload()));
         return request;
     }
 
@@ -36,7 +35,7 @@ public class ProtoMapper {
         commandDto.setCommandType(command.getCommandType());
         commandDto.setRouterSerial(command.getRouterSerial());
         commandDto.setStatus(command.getStatus());
-        commandDto.setPayload(ProtoStructMapper.toStruct(command.getPayload()));
+        commandDto.setPayload(ProtoPayloadMapper.toStruct(command.getPayload()));
         commandDto.setAckedAt(TimeUtils.toOffsetDateTime(command.getAckedAt()));
         commandDto.setCreatedAt(TimeUtils.toOffsetDateTime(command.getCreatedAt()));
         commandDto.setSentAt(TimeUtils.toOffsetDateTime(command.getSentAt()));

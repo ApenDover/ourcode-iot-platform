@@ -6,12 +6,12 @@ import ts.andrey.device.model.DeviceStatus;
 import ts.andrey.device.model.DeviceVersionResponse;
 import ts.andrey.device.model.DeviceVersionRollbackRequest;
 import ts.andrey.device.model.DeviceVersionUpdateRequest;
-import ts.andrey.orchestrator.application.outport.DeviceServicePort;
+import ts.andrey.orchestrator.application.port.DeviceServicePort;
 import ts.andrey.orchestrator.domain.exception.DeviceServiceRollbackException;
 import ts.andrey.orchestrator.dto.Device;
 import ts.andrey.orchestrator.dto.DeviceCreateRequest;
 import ts.andrey.orchestrator.dto.DeviceUpdateRequest;
-import ts.andrey.orchestrator.infrastructure.feign.DeviceServiceClient;
+import ts.andrey.orchestrator.infrastructure.out.port.feign.DeviceServiceClient;
 import ts.andrey.orchestrator.infrastructure.mapper.DeviceMapper;
 
 import java.util.List;

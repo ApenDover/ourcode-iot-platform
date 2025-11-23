@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.application.outport;
+package ts.andrey.orchestrator.application.port;
 
 import ts.andrey.orchestrator.dto.AckCommandRequest;
 import ts.andrey.orchestrator.dto.AckCommandResponse;

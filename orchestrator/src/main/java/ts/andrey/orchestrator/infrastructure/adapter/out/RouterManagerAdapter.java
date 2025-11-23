@@ -2,8 +2,8 @@ package ts.andrey.orchestrator.infrastructure.adapter.out;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ts.andrey.orchestrator.application.outport.RouterManagerGrpcPort;
-import ts.andrey.orchestrator.application.outport.RouterManagerPort;
+import ts.andrey.orchestrator.application.port.RouterManagerGrpcPort;
+import ts.andrey.orchestrator.application.port.RouterManagerPort;
 import ts.andrey.orchestrator.dto.SendCommandRequest;
 
 @Service

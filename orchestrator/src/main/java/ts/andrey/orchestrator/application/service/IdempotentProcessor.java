@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ts.andrey.orchestrator.application.outport.RedisDataServicePort;
+import ts.andrey.orchestrator.application.port.RedisDataServicePort;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost200Response;
 
 import java.util.Optional;

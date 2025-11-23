@@ -7,10 +7,10 @@ import ts.andrey.orchestrator.dto.AckCommandResponse;
 import ts.andrey.orchestrator.dto.PollCommandsResponse;
 import ts.andrey.orchestrator.dto.SendCommandRequest;
 import ts.andrey.orchestrator.dto.SendCommandResponse;
-import ts.andrey.orchestrator.infrastructure.grpc.RouterManagerGrpcClient;
+import ts.andrey.orchestrator.infrastructure.out.port.grpc.RouterManagerGrpcClient;
 import ts.andrey.orchestrator.infrastructure.mapper.ProtoMapper;
-import ts.andrey.orchestrator.application.outport.RouterManagerGrpcPort;
-import ts.andrey.orchestrator.infrastructure.util.ProtoStructMapper;
+import ts.andrey.orchestrator.application.port.RouterManagerGrpcPort;
+import ts.andrey.orchestrator.infrastructure.mapper.ProtoPayloadMapper;
 import ts.andrey.routermanager.Roma;
 
 @Service
@@ -21,7 +21,7 @@ public class RouterManagerGrpcAdapter implements RouterManagerGrpcPort {
 
     public SendCommandResponse sendCommand(SendCommandRequest sendCommandRequest) {
 
-        final var payloadStruct = ProtoStructMapper.toStruct(sendCommandRequest.getPayload());
+        final var payloadStruct = ProtoPayloadMapper.toStruct(sendCommandRequest.getPayload());
 
         final var commandRequest = Roma.SendCommandRequest.newBuilder()
                 .setRouterSerial(sendCommandRequest.getRouterSerial())

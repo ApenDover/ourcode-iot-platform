@@ -1,7 +1,8 @@
-package ts.andrey.orchestrator.infrastructure.grpc;
+package ts.andrey.orchestrator.infrastructure.out.adapter;
 
 import io.grpc.ManagedChannel;
 import org.springframework.stereotype.Component;
+import ts.andrey.orchestrator.infrastructure.out.port.grpc.RouterManagerGrpcClient;
 import ts.andrey.routermanager.Roma;
 import ts.andrey.routermanager.RouterManagerServiceGrpc;
 

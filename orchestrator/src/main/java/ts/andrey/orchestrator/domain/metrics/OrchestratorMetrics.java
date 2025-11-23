@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.infrastructure.metrics;
+package ts.andrey.orchestrator.domain.metrics;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;

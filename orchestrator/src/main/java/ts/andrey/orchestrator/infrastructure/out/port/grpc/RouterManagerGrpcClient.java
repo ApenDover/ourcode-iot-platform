@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.infrastructure.grpc;
+package ts.andrey.orchestrator.infrastructure.out.port.grpc;
 
 import ts.andrey.routermanager.Roma;
 

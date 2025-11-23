@@ -1,4 +1,4 @@
-package ts.andrey.orchestrator.infrastructure.util;
+package ts.andrey.orchestrator.infrastructure.mapper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @UtilityClass
-public class ProtoStructMapper {
+public class ProtoPayloadMapper {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -56,7 +56,7 @@ public class ProtoStructMapper {
                 return structToMap(value.getStructValue()); // рекурсия для вложенных объектов
             case LIST_VALUE:
                 return value.getListValue().getValuesList().stream()
-                        .map(ProtoStructMapper::valueToObject)
+                        .map(ProtoPayloadMapper::valueToObject)
                         .toList();
             default:
                 throw new IllegalArgumentException("Unsupported value type: " + value.getKindCase());
