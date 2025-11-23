@@ -248,7 +248,7 @@
 					"response": []
 				},
 				{
-					"name": "getToken",
+					"name": "getTokenDeviceService",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -262,7 +262,50 @@
 								},
 								{
 									"key": "client_secret",
-									"value": "i9sXbfCRgvZjFJxGQrfOSIUZPdkHeBPa",
+									"value": "EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:7878/realms/iot-platform/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7878",
+							"path": [
+								"realms",
+								"iot-platform",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getTokenOrchestrator",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "orchestrator",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU",
 									"type": "text"
 								},
 								{
@@ -293,7 +336,7 @@
 			]
 		},
 		{
-			"name": "Device-collector",
+			"name": "Kafka-producer",
 			"item": [
 				{
 					"name": "addDeviceEvent",
@@ -409,6 +452,74 @@
 								{
 									"key": "saveDevice",
 									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "health",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "traceId",
+								"value": "AndreyTest",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8887/actuator/beans",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8887",
+							"path": [
+								"actuator",
+								"beans"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getDirectToken",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8887/auth/token?login=admin&password=admin",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8887",
+							"path": [
+								"auth",
+								"token"
+							],
+							"query": [
+								{
+									"key": "login",
+									"value": "admin"
+								},
+								{
+									"key": "password",
+									"value": "admin"
 								}
 							]
 						}
@@ -564,44 +675,19 @@
 			"name": "Device-service",
 			"item": [
 				{
-					"name": "getDirectToken",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8887/auth/token?login=admin&password=admin",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8887",
-							"path": [
-								"auth",
-								"token"
-							],
-							"query": [
-								{
-									"key": "login",
-									"value": "admin"
-								},
-								{
-									"key": "password",
-									"value": "admin"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "DeviceService-EndPoint",
+					"name": "CreateDeviceService",
 					"request": {
 						"auth": {
 							"type": "oauth2",
 							"oauth2": [
 								{
 									"key": "clientSecret",
-									"value": "",
+									"value": "EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "device-service",
 									"type": "string"
 								},
 								{
@@ -623,11 +709,6 @@
 									"key": "useBrowser",
 									"value": true,
 									"type": "boolean"
-								},
-								{
-									"key": "clientId",
-									"value": "device-service",
-									"type": "string"
 								},
 								{
 									"key": "authUrl",
@@ -655,48 +736,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"deviceType\": \"postmanA\",\n    \"meta\": \"postmanA\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:8886/api/v1/devices/",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8886",
-							"path": [
-								"api",
-								"v1",
-								"devices",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "DeviceService-EndPoint-DirectToken",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJtMGtjb1ViV3Q3bEEtc3lWYWxvOHJyRDhQbXRQUmJBUFhOMkFhNjk0UnNrIn0.eyJleHAiOjE3NTY0NjQ4MzAsImlhdCI6MTc1NjQ2NDUzMCwianRpIjoib25ydHJvOmQ2MjA0NDIwLTI3ZmEtNDIzZC1iNTE0LWMyYmJiMDdlNzdjMCIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9pb3QtcGxhdGZvcm0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiODU2MWRmZTUtY2M4Ny00ZmE0LWFiZjEtMjJiYmFmZGRjMmMzIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2aWNlLXNlcnZpY2UiLCJzaWQiOiI2OTY2ZjJhNS04MDZhLTRkMzgtYTc0NS03YmJiYjk3YzRlYmUiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtaW90LXBsYXRmb3JtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImRldmljZS1zZXJ2aWNlIjp7InJvbGVzIjpbImRldmljZWFwcC5hZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGVzIjpbIlJPTEVfZGV2aWNlYXBwLmFkbWluIiwiUk9MRV9tYW5hZ2UtYWNjb3VudCIsIlJPTEVfdmlldy1wcm9maWxlIiwiUk9MRV9tYW5hZ2UtYWNjb3VudC1saW5rcyJdLCJuYW1lIjoidGVzdCB0ZXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4iLCJnaXZlbl9uYW1lIjoidGVzdCIsImZhbWlseV9uYW1lIjoidGVzdCIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20ifQ.LKe0UjB4FocNG7MbTusR7lzo_sOvy9g8KK2UNuYLqEL6ocCKuAztbxNb45VbY7P6dCi_BXzwFcGMIjvmrzRb4W47MAowgBrBFiqjEGG4i5AD0XGRh8xoeRBoIt2rr9zbd-lmaVH6UKFQiOjGNa-ShJsyuNPHeA8YYyBLGKvNucSPy_vdySy3r2wVRL4CrlHv-hlk5QxC_iWGpPPifYLIDSiha5I0Cpbst0VIsvNhDdbB0QBUHNhox0n3xmT8LZDM2_aYBMrfF1hqYv6xPSR5Ix9ZQNPlRwNlROFZz3s51QXf9o5tswnan-aShiJdXhBsos9VJxlBtPHwdr9GWf48Yg",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"deviceType\": \"postmanA\",\n    \"meta\": \"postmanA\"\n}",
+							"raw": "{\n    \"deviceType\": \"postmanA\",\n    \"meta\": \"postmanA\",\n    \"version\": \"0\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -718,6 +758,875 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "GetDevice",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenName",
+									"value": "device-token",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "device-service",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "authorization_code_with_pkce",
+									"type": "string"
+								},
+								{
+									"key": "scope",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "useBrowser",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "authUrl",
+									"value": "http://localhost:7878/realms/iot-platform/protocol/openid-connect/auth",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://localhost:7878/realms/iot-platform/protocol/openid-connect/token",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8886/api/v1/devices/01K6GJ564FPTXDWX8R1F91VZK0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8886",
+							"path": [
+								"api",
+								"v1",
+								"devices",
+								"01K6GJ564FPTXDWX8R1F91VZK0"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "rollback",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIzQ01zN1R4cG0xSWd1Mm1IR2s1M3RZU1BScndONHc5a2dCc3pvV3FSenY4In0.eyJleHAiOjE3NjMzOTg1MTgsImlhdCI6MTc2MzM5NDkxOCwianRpIjoib25ydHJvOmMwN2EzYzhjLWRmNjctODI4Ny05N2FlLWJlZDRlMmMxMzk3OSIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9pb3QtcGxhdGZvcm0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiNWQ1OTc2N2MtMzM3Mi00YWVjLThlYTktOTMzYTc0M2M4ZWRhIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2aWNlLXNlcnZpY2UiLCJzaWQiOiI0YTRjOTliMS1kZGFlLTRhMGQtOTY4Ny1kOGNmNzljOTc5NTgiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtaW90LXBsYXRmb3JtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImRldmljZS1zZXJ2aWNlIjp7InJvbGVzIjpbImRldmljZWFwcC5hZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGVzIjpbIlJPTEVfZGV2aWNlYXBwLmFkbWluIiwiUk9MRV9tYW5hZ2UtYWNjb3VudCIsIlJPTEVfdmlldy1wcm9maWxlIiwiUk9MRV9tYW5hZ2UtYWNjb3VudC1saW5rcyJdLCJuYW1lIjoidGVzdCB0ZXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4iLCJnaXZlbl9uYW1lIjoidGVzdCIsImZhbWlseV9uYW1lIjoidGVzdCIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20ifQ.xBZQEMj0gPKEW-swCMvRdsZfJIaw2WcYOGn8wAElEpV6KEM1q1F9xnXQPnz2NvbbTP_Jq047DaIrC1H5VvN2o-xieKun2tTgHoVZPzddnj5uKXGeWS9lJ0BorjmWG-t7h-j94LxWxK2l_e7vQSVGurb3CPZjDa2L4RadiguSrAb-i3kkknjQMannXYffoxUTLwnH-jc_JOnDtjPN3me34l59n9FHIxAVBDp8jqpUkl3UKT5MhMmKV2xH4toLXMFv8Xo7GWYm2rw8B7jCqdQnIV9U5aTDrHj0UIFDMyITbcW5HPuDz8Oa0twQhU5lcmubmPV3iidkIA_8hXmVdzrDGw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"targetVersion\": \"1.0.1\",\n  \"idempotencyKey\": \"f4f6b4a2\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8886/api/v1/devices/01K6GJ564FPTXDWX8R1F91VZK0/rollback",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8886",
+							"path": [
+								"api",
+								"v1",
+								"devices",
+								"01K6GJ564FPTXDWX8R1F91VZK0",
+								"rollback"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Event-service",
+			"item": [
+				{
+					"name": "getEvent",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8881/api/v1/events/0d94040f-879a-4ba5-b19c-857f3596500b?device_id=01K6GJ564FPTXDWX8R1F91VZK0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8881",
+							"path": [
+								"api",
+								"v1",
+								"events",
+								"0d94040f-879a-4ba5-b19c-857f3596500b"
+							],
+							"query": [
+								{
+									"key": "device_id",
+									"value": "01K6GJ564FPTXDWX8R1F91VZK0"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "getEventRequest",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8881/api/v1/events/0d94040f-879a-4ba5-b19c-857f3596500b?device_id=01K6GJ564FPTXDWX8R1F91VZK0",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8881",
+									"path": [
+										"api",
+										"v1",
+										"events",
+										"0d94040f-879a-4ba5-b19c-857f3596500b"
+									],
+									"query": [
+										{
+											"key": "device_id",
+											"value": "01K6GJ564FPTXDWX8R1F91VZK0"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 01 Oct 2025 18:57:50 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=60"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"event_id\": \"0d94040f-879a-4ba5-b19c-857f3596500b\",\n    \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n    \"timestamp\": 1759345023000,\n    \"type\": \"TEMPERATURE\",\n    \"payload\": \"-24\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "ORCHESTRATOR",
+			"item": [
+				{
+					"name": "getDevices",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ0M0tGTkVpLVhCS3c4WXEyclJkSzVJMC1SSWRkWXZZRFpjeFZsd3E0YXBFIn0.eyJleHAiOjE3NjMzMTU5MTYsImlhdCI6MTc2MzMxMjMxNiwianRpIjoib25ydHJvOjdiZGNiOTFhLTZjY2EtYzRmYy04MGM4LTNiNzZmNDgxN2ViNyIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9pb3QtcGxhdGZvcm0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiNjAxZWI5OWItYjIyNS00ZjUyLTljMjYtZmRkOWQxYzA5MjAwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2aWNlLXNlcnZpY2UiLCJzaWQiOiIyODJmYWE1Yy1iMTA0LTQwYWEtODRkYy0xODZkNTIyMzkyMzkiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtaW90LXBsYXRmb3JtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImRldmljZS1zZXJ2aWNlIjp7InJvbGVzIjpbImRldmljZWFwcC5hZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGVzIjpbIlJPTEVfZGV2aWNlYXBwLmFkbWluIiwiUk9MRV9tYW5hZ2UtYWNjb3VudCIsIlJPTEVfdmlldy1wcm9maWxlIiwiUk9MRV9tYW5hZ2UtYWNjb3VudC1saW5rcyJdLCJuYW1lIjoidGVzdCB0ZXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4iLCJnaXZlbl9uYW1lIjoidGVzdCIsImZhbWlseV9uYW1lIjoidGVzdCIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20ifQ.mWMEIZ8CypmNi6fjl2_YUuNrmsTntaV1wGO8B_hrLQW68wpMIBS2Y6cyU6FV-I2QyB58BetPmCuRXVMz8X26FrRShYs36chSUfj1JbSRSxbB8NYupbXdXc0bitCVfJ95TE-cjkQ15RU5QyrpBusbwNNwkaoiy3ej2nGbBgDCck_aRvocY3JqZZUOLqMDH79iUOfDX1TroI0-fc6bwsSfcjHiQAzG0ojfirfDEZFY3uFIHxIANcOJFIcyG-jg8kilFfn7ziRiq75udVZRdEz47UMcS2OFC7EoP1rZhpP48qlm4HXyUPLnRFM-lozYn3obgbL2YIq09uDuGZkOeJaZMA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8879/api/v1/devices",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8879",
+							"path": [
+								"api",
+								"v1",
+								"devices"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "getDevices",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8879/api/v1/devices",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8879",
+									"path": [
+										"api",
+										"v1",
+										"devices"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Nov 2025 17:11:39 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=60"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"deviceId\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n        \"deviceType\": \"ROUTER\",\n        \"createdAt\": 1763312173986,\n        \"meta\": \"Office A\",\n        \"version\": \"0\",\n        \"status\": \"READY\",\n        \"etag\": null\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "getEventByFilter",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ0M0tGTkVpLVhCS3c4WXEyclJkSzVJMC1SSWRkWXZZRFpjeFZsd3E0YXBFIn0.eyJleHAiOjE3NjMzMTk5MTYsImlhdCI6MTc2MzMxNjMxNiwianRpIjoib25ydHJvOjMwNzRhMmZmLTcxZTktNTc4My04OWVhLWE2NjcyZTYyN2RmMiIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9pb3QtcGxhdGZvcm0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiNjAxZWI5OWItYjIyNS00ZjUyLTljMjYtZmRkOWQxYzA5MjAwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2aWNlLXNlcnZpY2UiLCJzaWQiOiJjY2IyYzYwMS0wMTMxLTRiMjUtODQ3YS05YjFjNWQyNDk4OTAiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtaW90LXBsYXRmb3JtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImRldmljZS1zZXJ2aWNlIjp7InJvbGVzIjpbImRldmljZWFwcC5hZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGVzIjpbIlJPTEVfZGV2aWNlYXBwLmFkbWluIiwiUk9MRV9tYW5hZ2UtYWNjb3VudCIsIlJPTEVfdmlldy1wcm9maWxlIiwiUk9MRV9tYW5hZ2UtYWNjb3VudC1saW5rcyJdLCJuYW1lIjoidGVzdCB0ZXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4iLCJnaXZlbl9uYW1lIjoidGVzdCIsImZhbWlseV9uYW1lIjoidGVzdCIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20ifQ.EVcghpGEeVl2WfGlKiURrPxAQzxuU0KxEdV3zg67ywqTmpPjfghvPLZEO984dgXDxp9biaHecVkVQRsGSF51IQtPeS0Y4J-xYcbdoNNIujYDqxsNMoagl22510SHkiN1pcc-mscShSpTCeSfvp6-qVpE4Ddss9R6eWNeRXbON-4sBGYhTxDYCNvSzqGYhAKvn7ne5p043tcIkLWzICubGxUL9hDBZrsp9it0lMK7uHcAkh7ibL8Qc0_Wn_1tpb0V9Gmk-vI2HNxthaRzibAunTpJnX3j0weklNWtWuctvlgLf7HbvzDvz1lSY8pQaoStTiIT18ibzKACbFGHAfUcqw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8879/api/v1/events?device_id=01K6GJ564FPTXDWX8R1F91VZK0&page=3&size=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8879",
+							"path": [
+								"api",
+								"v1",
+								"events"
+							],
+							"query": [
+								{
+									"key": "device_id",
+									"value": "01K6GJ564FPTXDWX8R1F91VZK0"
+								},
+								{
+									"key": "page",
+									"value": "3"
+								},
+								{
+									"key": "size",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "getEventByFilter",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:8879/api/v1/events?device_id=01K6GJ564FPTXDWX8R1F91VZK0&page=3&size=2",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8879",
+									"path": [
+										"api",
+										"v1",
+										"events"
+									],
+									"query": [
+										{
+											"key": "device_id",
+											"value": "01K6GJ564FPTXDWX8R1F91VZK0"
+										},
+										{
+											"key": "page",
+											"value": "3"
+										},
+										{
+											"key": "size",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Nov 2025 18:11:27 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=60"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"events\": [\n        {\n            \"event_id\": \"d90ddc8f-42d9-40b8-b8af-3026a8a23e8b\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1763312213993,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"a6507405-7d70-49a9-9342-5e702f43d447\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1763312223994,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        }\n    ],\n    \"page\": 3,\n    \"size\": 2,\n    \"total\": 452\n}"
+						}
+					]
+				},
+				{
+					"name": "getEvent",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ0M0tGTkVpLVhCS3c4WXEyclJkSzVJMC1SSWRkWXZZRFpjeFZsd3E0YXBFIn0.eyJleHAiOjE3NjMzMTk5MTYsImlhdCI6MTc2MzMxNjMxNiwianRpIjoib25ydHJvOjMwNzRhMmZmLTcxZTktNTc4My04OWVhLWE2NjcyZTYyN2RmMiIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9pb3QtcGxhdGZvcm0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiNjAxZWI5OWItYjIyNS00ZjUyLTljMjYtZmRkOWQxYzA5MjAwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2aWNlLXNlcnZpY2UiLCJzaWQiOiJjY2IyYzYwMS0wMTMxLTRiMjUtODQ3YS05YjFjNWQyNDk4OTAiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtaW90LXBsYXRmb3JtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImRldmljZS1zZXJ2aWNlIjp7InJvbGVzIjpbImRldmljZWFwcC5hZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGVzIjpbIlJPTEVfZGV2aWNlYXBwLmFkbWluIiwiUk9MRV9tYW5hZ2UtYWNjb3VudCIsIlJPTEVfdmlldy1wcm9maWxlIiwiUk9MRV9tYW5hZ2UtYWNjb3VudC1saW5rcyJdLCJuYW1lIjoidGVzdCB0ZXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4iLCJnaXZlbl9uYW1lIjoidGVzdCIsImZhbWlseV9uYW1lIjoidGVzdCIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20ifQ.EVcghpGEeVl2WfGlKiURrPxAQzxuU0KxEdV3zg67ywqTmpPjfghvPLZEO984dgXDxp9biaHecVkVQRsGSF51IQtPeS0Y4J-xYcbdoNNIujYDqxsNMoagl22510SHkiN1pcc-mscShSpTCeSfvp6-qVpE4Ddss9R6eWNeRXbON-4sBGYhTxDYCNvSzqGYhAKvn7ne5p043tcIkLWzICubGxUL9hDBZrsp9it0lMK7uHcAkh7ibL8Qc0_Wn_1tpb0V9Gmk-vI2HNxthaRzibAunTpJnX3j0weklNWtWuctvlgLf7HbvzDvz1lSY8pQaoStTiIT18ibzKACbFGHAfUcqw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8879/api/v1/events/d90ddc8f-42d9-40b8-b8af-3026a8a23e8b?device_id=01K6GJ564FPTXDWX8R1F91VZK0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8879",
+							"path": [
+								"api",
+								"v1",
+								"events",
+								"d90ddc8f-42d9-40b8-b8af-3026a8a23e8b"
+							],
+							"query": [
+								{
+									"key": "device_id",
+									"value": "01K6GJ564FPTXDWX8R1F91VZK0"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "getEvent",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:8879/api/v1/events/d90ddc8f-42d9-40b8-b8af-3026a8a23e8b?device_id=01K6GJ564FPTXDWX8R1F91VZK0",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8879",
+									"path": [
+										"api",
+										"v1",
+										"events",
+										"d90ddc8f-42d9-40b8-b8af-3026a8a23e8b"
+									],
+									"query": [
+										{
+											"key": "device_id",
+											"value": "01K6GJ564FPTXDWX8R1F91VZK0"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Nov 2025 18:12:42 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=60"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"event_id\": \"d90ddc8f-42d9-40b8-b8af-3026a8a23e8b\",\n    \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n    \"timestamp\": 1763312213993,\n    \"type\": \"STATUS\",\n    \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n}"
+						}
+					]
+				},
+				{
+					"name": "sendCommandToDevice",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ0M0tGTkVpLVhCS3c4WXEyclJkSzVJMC1SSWRkWXZZRFpjeFZsd3E0YXBFIn0.eyJleHAiOjE3NjMzMTk5MTYsImlhdCI6MTc2MzMxNjMxNiwianRpIjoib25ydHJvOjMwNzRhMmZmLTcxZTktNTc4My04OWVhLWE2NjcyZTYyN2RmMiIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9pb3QtcGxhdGZvcm0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiNjAxZWI5OWItYjIyNS00ZjUyLTljMjYtZmRkOWQxYzA5MjAwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2aWNlLXNlcnZpY2UiLCJzaWQiOiJjY2IyYzYwMS0wMTMxLTRiMjUtODQ3YS05YjFjNWQyNDk4OTAiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtaW90LXBsYXRmb3JtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImRldmljZS1zZXJ2aWNlIjp7InJvbGVzIjpbImRldmljZWFwcC5hZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGVzIjpbIlJPTEVfZGV2aWNlYXBwLmFkbWluIiwiUk9MRV9tYW5hZ2UtYWNjb3VudCIsIlJPTEVfdmlldy1wcm9maWxlIiwiUk9MRV9tYW5hZ2UtYWNjb3VudC1saW5rcyJdLCJuYW1lIjoidGVzdCB0ZXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4iLCJnaXZlbl9uYW1lIjoidGVzdCIsImZhbWlseV9uYW1lIjoidGVzdCIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20ifQ.EVcghpGEeVl2WfGlKiURrPxAQzxuU0KxEdV3zg67ywqTmpPjfghvPLZEO984dgXDxp9biaHecVkVQRsGSF51IQtPeS0Y4J-xYcbdoNNIujYDqxsNMoagl22510SHkiN1pcc-mscShSpTCeSfvp6-qVpE4Ddss9R6eWNeRXbON-4sBGYhTxDYCNvSzqGYhAKvn7ne5p043tcIkLWzICubGxUL9hDBZrsp9it0lMK7uHcAkh7ibL8Qc0_Wn_1tpb0V9Gmk-vI2HNxthaRzibAunTpJnX3j0weklNWtWuctvlgLf7HbvzDvz1lSY8pQaoStTiIT18ibzKACbFGHAfUcqw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"router_serial\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n  \"command_type\": \"SYSTEM\",\n  \"payload\": {\"RELOAD\": \"NOW\"}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8879/api/v1/commands",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8879",
+							"path": [
+								"api",
+								"v1",
+								"commands"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "sendCommandToDevice",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"router_serial\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n  \"command_type\": \"SYSTEM\",\n  \"payload\": {\"RELOAD\": \"NOW\"}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8879/api/v1/commands",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8879",
+									"path": [
+										"api",
+										"v1",
+										"commands"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "13"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Nov 2025 18:31:51 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=60"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"created\": 1\n}"
+						}
+					]
+				},
+				{
+					"name": "SAGA-update-frameware-version",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIzQ01zN1R4cG0xSWd1Mm1IR2s1M3RZU1BScndONHc5a2dCc3pvV3FSenY4In0.eyJleHAiOjE3NjMzOTg1MTgsImlhdCI6MTc2MzM5NDkxOCwianRpIjoib25ydHJvOmMwN2EzYzhjLWRmNjctODI4Ny05N2FlLWJlZDRlMmMxMzk3OSIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9pb3QtcGxhdGZvcm0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiNWQ1OTc2N2MtMzM3Mi00YWVjLThlYTktOTMzYTc0M2M4ZWRhIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2aWNlLXNlcnZpY2UiLCJzaWQiOiI0YTRjOTliMS1kZGFlLTRhMGQtOTY4Ny1kOGNmNzljOTc5NTgiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtaW90LXBsYXRmb3JtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImRldmljZS1zZXJ2aWNlIjp7InJvbGVzIjpbImRldmljZWFwcC5hZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGVzIjpbIlJPTEVfZGV2aWNlYXBwLmFkbWluIiwiUk9MRV9tYW5hZ2UtYWNjb3VudCIsIlJPTEVfdmlldy1wcm9maWxlIiwiUk9MRV9tYW5hZ2UtYWNjb3VudC1saW5rcyJdLCJuYW1lIjoidGVzdCB0ZXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4iLCJnaXZlbl9uYW1lIjoidGVzdCIsImZhbWlseV9uYW1lIjoidGVzdCIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20ifQ.xBZQEMj0gPKEW-swCMvRdsZfJIaw2WcYOGn8wAElEpV6KEM1q1F9xnXQPnz2NvbbTP_Jq047DaIrC1H5VvN2o-xieKun2tTgHoVZPzddnj5uKXGeWS9lJ0BorjmWG-t7h-j94LxWxK2l_e7vQSVGurb3CPZjDa2L4RadiguSrAb-i3kkknjQMannXYffoxUTLwnH-jc_JOnDtjPN3me34l59n9FHIxAVBDp8jqpUkl3UKT5MhMmKV2xH4toLXMFv8Xo7GWYm2rw8B7jCqdQnIV9U5aTDrHj0UIFDMyITbcW5HPuDz8Oa0twQhU5lcmubmPV3iidkIA_8hXmVdzrDGw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"targetVersion\": \"2.0.1\",\n  \"idempotencyKey\": \"f4f6b4a2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8879/api/v1/devices/01K6GJ564FPTXDWX8R1F91VZK0/version",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8879",
+							"path": [
+								"api",
+								"v1",
+								"devices",
+								"01K6GJ564FPTXDWX8R1F91VZK0",
+								"version"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "SAGA-update-frameware-version",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"targetVersion\": \"2.0.1\",\n  \"idempotencyKey\": \"f4f6b4a2\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8879/api/v1/devices/01K6GJ564FPTXDWX8R1F91VZK0/version",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8879",
+									"path": [
+										"api",
+										"v1",
+										"devices",
+										"01K6GJ564FPTXDWX8R1F91VZK0",
+										"version"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "103"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 17 Nov 2025 15:55:44 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=60"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"deviceId\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n    \"prevVersion\": \"2.0.0\",\n    \"targetVersion\": \"2.0.1\",\n    \"commandId\": \"1\"\n}"
+						}
+					]
 				}
 			]
 		}
