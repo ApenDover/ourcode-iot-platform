@@ -2,7 +2,6 @@ package ts.andrey.orchestrator.infrastructure.config.security;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -26,4 +25,5 @@ public class OAuth2RequestInterceptor implements RequestInterceptor {
             template.header("Authorization", "Bearer " + tokenValue);
         }
     }
+
 }

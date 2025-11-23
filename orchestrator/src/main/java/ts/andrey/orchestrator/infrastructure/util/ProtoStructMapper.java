@@ -6,6 +6,7 @@ import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 import lombok.experimental.UtilityClass;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @UtilityClass
@@ -28,6 +29,37 @@ public class ProtoStructMapper {
 
         } catch (Exception e) {
             throw new RuntimeException("Error converting Object to Struct", e);
+        }
+    }
+
+    public Map<String, Object> structToMap(Struct struct) {
+        Map<String, Object> result = new HashMap<>();
+
+        for (Map.Entry<String, Value> entry : struct.getFieldsMap().entrySet()) {
+            result.put(entry.getKey(), valueToObject(entry.getValue()));
+        }
+
+        return result;
+    }
+
+    private Object valueToObject(Value value) {
+        switch (value.getKindCase()) {
+            case NULL_VALUE:
+                return null;
+            case NUMBER_VALUE:
+                return value.getNumberValue();
+            case STRING_VALUE:
+                return value.getStringValue();
+            case BOOL_VALUE:
+                return value.getBoolValue();
+            case STRUCT_VALUE:
+                return structToMap(value.getStructValue()); // рекурсия для вложенных объектов
+            case LIST_VALUE:
+                return value.getListValue().getValuesList().stream()
+                        .map(ProtoStructMapper::valueToObject)
+                        .toList();
+            default:
+                throw new IllegalArgumentException("Unsupported value type: " + value.getKindCase());
         }
     }
 

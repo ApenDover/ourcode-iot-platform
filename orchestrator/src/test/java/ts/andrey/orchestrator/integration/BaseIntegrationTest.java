@@ -45,7 +45,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
                 "orchestrator.integration.device-service.url=http://localhost:${wiremock.server.port}",
-                "orchestrator.integration.event-service.url=http://localhost:${wiremock.server.port}"
+                "orchestrator.integration.event-service.url=http://localhost:${wiremock.server.port}",
+                "orchestrator.redis.enabled=true"
         }
 )
 @Testcontainers
@@ -63,10 +64,16 @@ public abstract class BaseIntegrationTest {
     private static final Network NETWORK = Network.newNetwork();
 
     @Container
+    public static final GenericContainer<?> REDIS = new GenericContainer<>("redis:7-alpine")
+            .withNetwork(NETWORK)
+            .withExposedPorts(6379);
+
+    @Container
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16")
             .withDatabaseName("keycloak")
             .withUsername("test")
             .withPassword("test")
+            .dependsOn(REDIS)
             .withNetwork(NETWORK)
             .withCreateContainerCmdModifier(cmd -> cmd.withName("postgres"));
 
@@ -203,6 +210,8 @@ public abstract class BaseIntegrationTest {
     @DynamicPropertySource
     static void registerKeycloakProperties(DynamicPropertyRegistry registry) {
         final var authServerUrl = getServerUrl();
+        registry.add("spring.data.redis.host", REDIS::getHost);
+        registry.add("spring.data.redis.port", REDIS::getFirstMappedPort);
         registry.add("spring.security.oauth2.client.provider.keycloak.issuer-uri",
                 () -> authServerUrl + "/realms/" + KEYCLOAK_REALM);
         registry.add("spring.security.oauth2.client.provider.keycloak.token-uri",
@@ -255,6 +264,7 @@ public abstract class BaseIntegrationTest {
 
     @BeforeAll
     static void init() throws Exception {
+        REDIS.start();
         POSTGRES.start();
         KEYCLOAK.start();
         System.setProperty("keycloak.auth-server-url", getAuthServerUrl());

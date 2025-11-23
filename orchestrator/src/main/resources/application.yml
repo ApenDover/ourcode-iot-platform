@@ -51,6 +51,11 @@ opentelemetry:
 spring:
   application:
     name: orchestrator
+  data:
+    redis:
+      host: ${REDIS_ORCHESTRATOR_HOST}
+      port: ${REDIS_ORCHESTRATOR_PORT}
+      password: ${REDIS_ORCHESTRATOR_PASSWORD}
   security:
     oauth2:
       client:
@@ -80,6 +85,9 @@ orchestrator:
     router-manager:
       host: router-manager-service
       port: 9092
+  redis:
+    enabled: ${ORCHESTRATOR_REDIS_ENABLED:true}
+    ttl-minutes: 5
 
 feign:
   httpclient:

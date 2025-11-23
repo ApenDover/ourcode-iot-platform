@@ -34,6 +34,14 @@ public class OrchestratorMetrics {
         meterRegistry.counter("orchestrator.database.create").increment();
     }
 
+    public void orchestratorRedisSuccess() {
+        meterRegistry.counter("orchestrator.redis.success").increment();
+    }
+
+    public void orchestratorRedisFailure() {
+        meterRegistry.counter("orchestrator.redis.error").increment();
+    }
+
     public void recordSuccess(String method, String uri, int status) {
         meterRegistry.counter("orchestrator.requests.success",
                 "method", method,

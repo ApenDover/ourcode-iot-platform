@@ -5,11 +5,11 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"        # все endpoints доступны по HTTP
+        include: "*"
   endpoint:
     health:
       probes:
-        enabled: true       # включаем liveness/readiness
+        enabled: true
   metrics:
     tags:
       application: device-service

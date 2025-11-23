@@ -26,7 +26,7 @@ public class ProtoMapper {
         final var request = new SendCommandRequest();
         request.setCommandType(sendCommandRequest.getCommandType());
         request.setRouterSerial(sendCommandRequest.getRouterSerial());
-        request.setPayload(ProtoStructMapper.toStruct(sendCommandRequest.getPayload()));
+        request.setPayload(ProtoStructMapper.structToMap(sendCommandRequest.getPayload()));
         return request;
     }
 

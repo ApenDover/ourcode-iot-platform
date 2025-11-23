@@ -66,7 +66,9 @@ class SagaUseCaseIT extends BaseIntegrationTest {
                         .withBody(deviceResponse))
         );
 
-        final var deviceVersionResponse = ReadJsonFileUtil.readStringFromFile("wiremock/device/SuccessPatchVersionResponse.json");
+        final var deviceVersionResponse = ReadJsonFileUtil.readStringFromFile(
+                "wiremock/device/SuccessPatchVersionResponse.json"
+        );
         stubFor(patch(urlEqualTo("/api/v1/devices/DEV-001/version"))
                 .withHeader("Authorization", containing("Bearer"))
                 .willReturn(aResponse()
@@ -94,6 +96,21 @@ class SagaUseCaseIT extends BaseIntegrationTest {
         assertEquals("1.1.1", body.getTargetVersion());
         assertEquals("1", body.getCommandId());
 
+        // REDIS TEST
+
+        //WHEN
+        final var redisResponse = sendRequest("/api/v1/devices/DEV-001/version",
+                HttpMethod.POST, request, ApiV1DevicesDeviceIdVersionPost200Response.class);
+
+        //THEN
+        assertTrue(redisResponse.getStatusCode().is2xxSuccessful());
+        assertNotNull(redisResponse.getBody());
+        final var redisBody = redisResponse.getBody();
+        assertEquals("DEV-001", redisBody.getDeviceId());
+        assertEquals("0.0.0", redisBody.getPrevVersion());
+        assertEquals("1.1.1", redisBody.getTargetVersion());
+        assertEquals("1", redisBody.getCommandId());
+
         verify(1, getRequestedFor(urlEqualTo("/api/v1/devices/DEV-001")));
         verify(1, patchRequestedFor(urlEqualTo("/api/v1/devices/DEV-001/version")));
 
@@ -117,7 +134,9 @@ class SagaUseCaseIT extends BaseIntegrationTest {
                         .withBody(deviceResponse))
         );
 
-        final var deviceVersionResponse = ReadJsonFileUtil.readStringFromFile("wiremock/device/SuccessPatchVersionResponse.json");
+        final var deviceVersionResponse = ReadJsonFileUtil.readStringFromFile(
+                "wiremock/device/SuccessPatchVersionResponse.json"
+        );
         stubFor(patch(urlEqualTo("/api/v1/devices/DEV-001/version"))
                 .withHeader("Authorization", containing("Bearer"))
                 .willReturn(aResponse()
@@ -134,7 +153,9 @@ class SagaUseCaseIT extends BaseIntegrationTest {
 
         when(routerManagerGrpcPort.sendCommand(any())).thenThrow(grpcException);
 
-        final var rollbackVersionResponse = ReadJsonFileUtil.readStringFromFile("wiremock/device/SuccessRollbackVersionResponse.json");
+        final var rollbackVersionResponse = ReadJsonFileUtil.readStringFromFile(
+                "wiremock/device/SuccessRollbackVersionResponse.json"
+        );
         stubFor(post(urlEqualTo("/api/v1/devices/DEV-001/version/rollback"))
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -179,7 +200,9 @@ class SagaUseCaseIT extends BaseIntegrationTest {
                         .withBody(deviceResponse))
         );
 
-        final var deviceVersionResponse = ReadJsonFileUtil.readStringFromFile("wiremock/device/SuccessPatchVersionResponse.json");
+        final var deviceVersionResponse = ReadJsonFileUtil.readStringFromFile(
+                "wiremock/device/SuccessPatchVersionResponse.json"
+        );
         stubFor(patch(urlEqualTo("/api/v1/devices/DEV-001/version"))
                 .withHeader("Authorization", containing("Bearer"))
                 .willReturn(aResponse()

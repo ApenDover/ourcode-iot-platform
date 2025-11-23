@@ -7,6 +7,7 @@ import ts.andrey.orchestrator.api.DefaultApi;
 import ts.andrey.orchestrator.application.outport.DeviceServicePort;
 import ts.andrey.orchestrator.application.outport.EventServicePort;
 import ts.andrey.orchestrator.application.outport.RouterManagerGrpcPort;
+import ts.andrey.orchestrator.application.service.IdempotentProcessor;
 import ts.andrey.orchestrator.application.service.UpdateDeviceVersionUseCase;
 import ts.andrey.orchestrator.dto.AckCommandRequest;
 import ts.andrey.orchestrator.dto.AckCommandResponse;
@@ -31,6 +32,7 @@ public class OrchestratorController implements DefaultApi {
     private final DeviceServicePort deviceServicePort;
     private final EventServicePort eventServicePort;
     private final UpdateDeviceVersionUseCase updateDeviceVersionUseCase;
+    private final IdempotentProcessor idempotentProcessor;
 
     @Override
     public ResponseEntity<AckCommandResponse> apiV1CommandsAckPost(AckCommandRequest ackCommandRequest) {
@@ -72,9 +74,16 @@ public class OrchestratorController implements DefaultApi {
     public ResponseEntity<ApiV1DevicesDeviceIdVersionPost200Response> apiV1DevicesDeviceIdVersionPost(
             String deviceId, ApiV1DevicesDeviceIdVersionPostRequest apiV1DevicesDeviceIdVersionPostRequest
     ) {
+        final var cashed = idempotentProcessor.checkIdempotentKey(
+                apiV1DevicesDeviceIdVersionPostRequest.getIdempotencyKey()
+        );
+        if (cashed.isPresent()) {
+            return ResponseEntity.ok(cashed.get());
+        }
         final var response = updateDeviceVersionUseCase.updateDeviceVersion(
                 deviceId, apiV1DevicesDeviceIdVersionPostRequest
         );
+        idempotentProcessor.saveResponse(apiV1DevicesDeviceIdVersionPostRequest.getIdempotencyKey(), response);
         return ResponseEntity.ok(response);
     }
 
