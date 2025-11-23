@@ -86,6 +86,7 @@ dependencies {
     testImplementation "com.github.dasniko:testcontainers-keycloak:${testContainerKeycloak}"
     testImplementation 'org.testcontainers:postgresql'
     testImplementation 'org.springframework.cloud:spring-cloud-contract-wiremock'
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.4.1'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testCompileOnly "org.projectlombok:lombok"
