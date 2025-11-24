@@ -95,8 +95,10 @@ postman коллекция тут: [postman](infrastructure/postman)
 | `postgres_router_manager` | База данных PostgreSQL router-manager-service      | `5439`         |
 | `postgres-keycloak`       | База данных PostgreSQL для keycloak                | `5430`         |
 | `keycloak`                | IAM-платформа, авторизация                         | `8080`         |
-| `redis`                   | In-memory кэш с паролем                            | `6379`         |
-| `redis-insight`           | UI для redis                                       | `6379`         |
+| `redis`                   | In-memory кэш с паролем (device-service)           | `6379`         |
+| `redis-rms`               | In-memory кэш с паролем (router-manager-service)   | `6377`         |
+| `redis-orchestrator`      | In-memory кэш с паролем (orchestrator)             | `6378`         |
+| `redis-insight`           | UI для redis (device-service)                      | `5540`         |
 | `cassandra`               | NoSQL база данных                                  | `9042`         |
 | `grafana`                 | Визуализация метрик                                | `3000`         |
 | `prometheus`              | Мониторинг и сбор метрик                           | `9090`         |
@@ -104,6 +106,8 @@ postman коллекция тут: [postman](infrastructure/postman)
 | `cassandra-exporter`      | Экспорт метрик cassandra для Prometheus            | `9500`         |
 | `postgres-exporter`       | Экспорт метрик postgres для Prometheus             | `9187`         |
 | `kafka-ui`                | Kafka-UI для удобства просмотра                    | `8099`         |
+| `keycloak`                | для orchestrator и device-service                  | `7878`         |
+| `nexus`                   | nexus для выгрузки библиотек                       | `7777`         |
 
 ⚠️ **Важно:**  Убедитесь, что у Docker достаточно памяти и CPU. В Docker Desktop (Windows/Mac) можно выделить, например, 4+ ГБ RAM. Иначе рискуете столкнуться с тормозами или перезапусками контейнеров (особенно Java-сервисы как Keycloak могут потреблять >512МБ).
 
