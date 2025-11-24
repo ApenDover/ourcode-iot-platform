@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: device-service
   flyway:
     enabled: false
   security:
@@ -10,6 +12,8 @@ spring:
             client-secret: secret
             authorization-grant-type: authorization_code
             scope: openid,profile,email
+  jpa:
+    show-sql: true
 
 otel:
   traces:
@@ -31,3 +35,18 @@ app:
       initial-delay: 1000
       multiplier: 5
     batch-size: 300
+
+# Generate and log statistics
+spring.jpa.properties.hibernate.generate_statistics: true
+logging.level.org.hibernate.stat: DEBUG
+# Log slow queries
+spring.jpa.properties.hibernate.session.events.log.LOG_QUERIES_SLOWER_THAN_MS: 3
+# Activate parameter padding
+spring.jpa.properties.hibernate.query.in_clause_parameter_padding: true
+
+logging:
+  level:
+    org.springframework: DEBUG
+    org.hibernate: DEBUG
+    javax.persistence: DEBUG
+    org.apache.http: DEBUG

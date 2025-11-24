@@ -51,7 +51,7 @@ public class PerRequestFilter extends OncePerRequestFilter {
             deviceMetrics.recordExecutionTime(
                     wrappedRequest.getMethod(),
                     wrappedRequest.getRequestURI(),
-                    () -> durationNs
+                    durationNs
             );
 
             if (!isError && exception == null) {

@@ -14,9 +14,9 @@ public class DeviceServiceException extends RuntimeException {
         super();
     }
 
-    public DeviceServiceException(TextException textException, Object... args) {
-        super(textException.format(args));
-        status = textException.getHttpStatus();
+    public DeviceServiceException(ErrorExceptionMessages errorExceptionMessages, Object... args) {
+        super(errorExceptionMessages.format(args));
+        status = errorExceptionMessages.getHttpStatus();
     }
 
     public DeviceServiceException(String message) {

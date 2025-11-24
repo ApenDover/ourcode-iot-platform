@@ -86,6 +86,7 @@ spring:
       properties:
         schema.registry.url: ${SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL:http://schema-registry:8081}
         auto.register.schemas: ${SPRING_KAFKA_PRODUCER_PROPERTIES_AUTO_REGISTER_SCHEMAS:true}
+        avro.remove.java.properties: ${SPRING_KAFKA_CONSUMER_PROPERTIES_AVRO_REMOVE_JAVA_PROPERTIES:true}
     consumer:
       max-poll-records: ${SPRING_KAFKA_CONSUMER_MAX_POLL_RECORDS:20000}
       fetch-max-wait: ${SPRING_KAFKA_CONSUMER_FETCH_MAX_WAIT:500}

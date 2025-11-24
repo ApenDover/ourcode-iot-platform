@@ -1,9 +1,12 @@
 package ts.andrey.devicecollector.data.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,6 +35,18 @@ public class DeviceEntity {
 
     private Instant createdAt;
 
+    private String version;
+
+    private Long etag;
+
+    private String application;
+
+    @JsonIgnore
+    @Transient
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private String status;
+
     private String meta;
 
     @Override
@@ -48,6 +63,21 @@ public class DeviceEntity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "DeviceEntity{"
+                + "id=" + id
+                + ", deviceId='" + deviceId + '\''
+                + ", deviceType='" + deviceType + '\''
+                + ", createdAt=" + createdAt
+                + ", version='" + version + '\''
+                + ", etag=" + etag
+                + ", application='" + application + '\''
+                + ", status=" + status
+                + ", meta='" + meta + '\''
+                + '}';
     }
 
 }

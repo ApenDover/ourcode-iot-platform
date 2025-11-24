@@ -3,6 +3,7 @@ package ts.andrey.deviceservice.tdf;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ts.andrey.deviceservice.data.entity.DeviceEntity;
+import ts.andrey.dto.DeviceStatus;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -19,6 +20,9 @@ public class DummyDeviceEntity {
         deviceEntity.setDeviceType("deviceType");
         deviceEntity.setMeta("meta");
         deviceEntity.setCreatedAt(Instant.ofEpochMilli(200L));
+        deviceEntity.setVersion("0.0.1");
+        deviceEntity.setEtag(1L);
+        deviceEntity.setStatus(DeviceStatus.READY);
         return deviceEntity;
     }
 
@@ -62,6 +66,56 @@ public class DummyDeviceEntity {
             list.add(getDefault(i));
         }
         return list;
+    }
+
+    public DeviceEntity getDeviceOne() {
+        final var deviceEntity = new DeviceEntity();
+        deviceEntity.setId(UUID.fromString("f4c1b0dd-0e4b-4d91-95b0-92d3f5ffad78"));
+        deviceEntity.setDeviceId("DEV-001");
+        deviceEntity.setDeviceType("SENSOR");
+        deviceEntity.setCreatedAt(Instant.parse("2025-08-27T20:45:12.345678Z"));
+        deviceEntity.setMeta("meta-text");
+        deviceEntity.setEtag(0L);
+        deviceEntity.setVersion("0.0.1");
+        deviceEntity.setApplication("device-service");
+        deviceEntity.setStatus(DeviceStatus.READY);
+        return deviceEntity;
+    }
+
+    public DeviceEntity getDeviceTwo() {
+        final var deviceEntity = new DeviceEntity();
+        deviceEntity.setId(UUID.fromString("c0a801d9-77ab-4c3e-bcb2-0c5ffb97ea21"));
+        deviceEntity.setDeviceId("DEV-002");
+        deviceEntity.setDeviceType("SENSOR");
+        deviceEntity.setCreatedAt(Instant.parse("2025-08-28T07:10:12.345678Z"));
+        deviceEntity.setMeta("meta-text-two");
+        deviceEntity.setEtag(0L);
+        deviceEntity.setVersion("0.0.1");
+        deviceEntity.setApplication("device-service");
+        deviceEntity.setStatus(DeviceStatus.READY);
+        return deviceEntity;
+    }
+
+    public DeviceEntity getDeviceDelete() {
+        final var deviceEntity = new DeviceEntity();
+        deviceEntity.setId(UUID.fromString("2a1f9b92-3c9d-497b-a84c-efc11cbeb3a2"));
+        deviceEntity.setDeviceId("DEV-DELETE");
+        deviceEntity.setDeviceType("SENSOR");
+        deviceEntity.setCreatedAt(Instant.parse("2025-08-28T07:15:12.345678Z"));
+        deviceEntity.setMeta("meta-text-for-delete");
+        deviceEntity.setEtag(0L);
+        deviceEntity.setVersion("0.0.1");
+        deviceEntity.setApplication("device-service");
+        deviceEntity.setStatus(DeviceStatus.READY);
+        return deviceEntity;
+    }
+
+    public List<DeviceEntity> getAllTestDevices() {
+        return List.of(
+                getDeviceOne(),
+                getDeviceTwo(),
+                getDeviceDelete()
+        );
     }
 
 }

@@ -11,6 +11,7 @@ public class DummyDeviceCreateRequest {
         final var request = new DeviceCreateRequest();
         request.setDeviceType("deviceType");
         request.setMeta("meta");
+        request.setVersion("1.0.0");
         return request;
     }
 

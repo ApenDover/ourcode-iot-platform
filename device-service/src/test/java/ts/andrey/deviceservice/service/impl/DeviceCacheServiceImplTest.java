@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ts.andrey.deviceservice.data.dao.DeviceCacheService;
+import ts.andrey.deviceservice.data.dao.DeviceCacheDataService;
 import ts.andrey.deviceservice.service.DeviceService;
 import ts.andrey.deviceservice.tdf.DummyTDF;
 import ts.andrey.dto.Device;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 class DeviceCacheServiceImplTest {
 
     @Mock
-    private DeviceCacheService deviceCacheService;
+    private DeviceCacheDataService deviceCacheService;
 
     @Mock
     private DeviceService deviceDataServiceImpl;
@@ -66,18 +66,18 @@ class DeviceCacheServiceImplTest {
     }
 
     @Test
-    void saveDeviceShouldSaveToDataServiceAndCache() {
+    void saveDeviceShouldCreateToDataServiceAndCache() {
         // GIVEN
         DeviceCreateRequest request = DummyTDF.deviceCreateRequest.getDefault();
         Device createdDevice = DummyTDF.device.getDefault();
-        when(deviceDataServiceImpl.saveDevice(request)).thenReturn(createdDevice);
+        when(deviceDataServiceImpl.createDevice(request)).thenReturn(createdDevice);
 
         // WHEN
-        Device result = deviceCacheServiceImpl.saveDevice(request);
+        Device result = deviceCacheServiceImpl.createDevice(request);
 
         // THEN
         assertEquals(createdDevice, result);
-        verify(deviceDataServiceImpl).saveDevice(request);
+        verify(deviceDataServiceImpl).createDevice(request);
         verify(deviceCacheService).saveDevice(createdDevice);
     }
 

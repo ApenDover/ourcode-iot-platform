@@ -2,13 +2,24 @@ package ts.andrey.deviceservice.service;
 
 import ts.andrey.dto.Device;
 import ts.andrey.dto.DeviceCreateRequest;
+import ts.andrey.dto.DeviceStatus;
 import ts.andrey.dto.DeviceUpdateRequest;
+import ts.andrey.dto.DeviceVersionResponse;
+import ts.andrey.dto.DeviceVersionUpdateRequest;
+
+import java.util.List;
 
 public interface DeviceService {
 
+    Device updateVersion(String deviceId, Long etag, String updateVersion, DeviceStatus deviceStatus);
+
     Device getDevice(String deviceId);
 
-    Device saveDevice(DeviceCreateRequest deviceCreateRequest);
+    List<Device> getDevice();
+
+    Device createDevice(DeviceCreateRequest deviceCreateRequest);
+
+    Device saveDevice(Device device);
 
     Device updateDevice(String deviceId, DeviceUpdateRequest deviceUpdateRequest);
 

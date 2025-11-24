@@ -83,6 +83,8 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
                     assertEquals("deviceType", entity.getDeviceType());
                     assertEquals("meta", entity.getMeta());
                     assertEquals(Instant.ofEpochMilli(300L), entity.getCreatedAt());
+                    assertEquals("0", entity.getVersion());
+                    assertEquals(0L, entity.getEtag());
                 });
 
         //GIVEN
@@ -119,6 +121,9 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
                         rs.getString("device_id"),
                         rs.getString("device_type"),
                         DateUtil.getFromString(rs.getString("created_at")),
+                        "0",
+                        0L,
+                        "READY",
                         rs.getString("meta")
                 ),
                 deviceOne.getDeviceId()
@@ -139,6 +144,9 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
                                 rs.getString("device_id"),
                                 rs.getString("device_type"),
                                 DateUtil.getFromString(rs.getString("created_at")),
+                                "0",
+                                0L,
+                                "READY",
                                 rs.getString("meta")
                         ),
                         deviceTwo.getDeviceId()
@@ -155,6 +163,9 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
                         rs.getString("device_id"),
                         rs.getString("device_type"),
                         DateUtil.getFromString(rs.getString("created_at")),
+                        "0",
+                        0L,
+                        "READY",
                         rs.getString("meta")
                 ),
                 deviceTwo.getDeviceId()
@@ -175,6 +186,9 @@ class DeviceCollectorProcessingIT extends BaseIntegrationTest {
                                 rs.getString("device_id"),
                                 rs.getString("device_type"),
                                 DateUtil.getFromString(rs.getString("created_at")),
+                                "0",
+                                0L,
+                                "READY",
                                 rs.getString("meta")
                         ),
                         deviceOne.getDeviceId()

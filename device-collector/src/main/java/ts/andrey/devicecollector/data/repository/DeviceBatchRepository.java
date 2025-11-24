@@ -22,16 +22,22 @@ import java.util.stream.Collectors;
 public class DeviceBatchRepository {
 
     private static final String SQL = """
-                INSERT INTO public.t_device (id, device_id, device_type, created_at, meta)
+                INSERT INTO public.t_device (id, device_id, device_type, created_at, meta, version, etag, application)
             VALUES %s
                 ON CONFLICT (device_id) DO UPDATE SET
                     device_type = EXCLUDED.device_type,
                     created_at  = EXCLUDED.created_at,
-                    meta        = EXCLUDED.meta
+                    meta        = EXCLUDED.meta,
+                    version     = EXCLUDED.version,
+                    etag        = EXCLUDED.etag,
+                    application = EXCLUDED.application
             """;
 
     @Value("${app.shardingSphere.shardCount}")
     private Integer shardCount;
+
+    @Value("${spring.application.name}")
+    private String appName;
 
     private final PostgresMetrics postgresMetrics;
     private final JdbcTemplate jdbcTemplate;
@@ -42,7 +48,7 @@ public class DeviceBatchRepository {
         }
 
         final var placeholders = devices.stream()
-                .map(d -> "(?, ?, ?, ?, ?)")
+                .map(d -> "(?, ?, ?, ?, ?, ?, ?, ?)")
                 .collect(Collectors.joining(", "));
 
         final var sql = SQL.formatted(placeholders);
@@ -54,6 +60,9 @@ public class DeviceBatchRepository {
             params.add(device.getDeviceType());
             params.add(Timestamp.from(device.getCreatedAt()));
             params.add(device.getMeta());
+            params.add(device.getVersion());
+            params.add(device.getEtag());
+            params.add(appName);
         });
         final var updated = jdbcTemplate.update(sql, params.toArray());
 

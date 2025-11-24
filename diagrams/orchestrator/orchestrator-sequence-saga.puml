@@ -1,0 +1,23 @@
+@startuml
+
+actor User
+participant "API Orchestrator" as AO
+participant "device-service" as DS
+participant "router-manager" as RM
+
+User -> AO : POST /api/v1/devices/{id}/version {targetVersion}
+== Шаг A: фиксация версии ==
+AO -> DS : PATCH /devices/{id}/version {targetVersion, status=UPDATING}
+DS --> AO : 200 {prevVersion, etag}
+== Шаг B: отправка команды ==
+AO -> RM : sendUpdateVersion(deviceId, targetVersion)
+alt success
+  RM --> AO : {commandId}
+  AO --> User : 200 {prevVersion, targetVersion, commandId}
+else failure
+  RM --> AO : 5xx / timeout
+  AO -> DS : POST /devices/{id}/version/rollback {rollbackTo=prevVersion, status=READY}
+  DS --> AO : 200
+  AO --> User : 502 {error:"ROUTER_MANAGER_FAILED", compensated:true}
+end
+@enduml

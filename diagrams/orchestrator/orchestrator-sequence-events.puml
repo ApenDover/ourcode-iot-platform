@@ -1,0 +1,15 @@
+@startuml
+
+actor User
+participant "API Orchestrator" as AO
+participant "Event Service" as ES
+database "Cassandra" as CS
+
+User -> AO : GET /api/v1/events (JWT)
+AO -> ES : GET /api/v1/events?device_id=...&from_timestamp=...&page=...
+ES -> CS : SELECT ... WHERE device_id=... AND timestamp BETWEEN ...
+CS --> ES : rows
+ES --> AO : EventPage
+AO --> User : 200 EventPage
+
+@enduml

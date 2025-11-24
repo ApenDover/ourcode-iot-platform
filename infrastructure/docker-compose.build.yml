@@ -29,6 +29,16 @@ services:
       - .env
     networks:
       - infrastructure_iot_network
+  event-api:
+    restart: "no"
+    build:
+      context: ../event-api
+    container_name: event-api
+    entrypoint: [ "./gradlew", "--no-daemon", "clean", "build", "publish" ]
+    env_file:
+      - .env
+    networks:
+      - infrastructure_iot_network
   router-manager-proto-client:
     restart: "no"
     build:

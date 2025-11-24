@@ -25,6 +25,8 @@ class DeviceMapperTest {
         assertEquals("deviceType", deviceEntity.getDeviceType());
         assertEquals(Instant.ofEpochMilli(300L), deviceEntity.getCreatedAt());
         assertEquals("meta", deviceEntity.getMeta());
+        assertEquals("0", deviceEntity.getVersion());
+        assertEquals(0L, deviceEntity.getEtag());
     }
 
     @Test

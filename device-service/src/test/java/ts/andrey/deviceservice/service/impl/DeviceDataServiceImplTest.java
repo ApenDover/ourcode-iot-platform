@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ts.andrey.deviceservice.data.dao.DeviceDbService;
+import ts.andrey.deviceservice.data.dao.DeviceDbDataService;
 import ts.andrey.deviceservice.mapper.DeviceMapper;
 import ts.andrey.deviceservice.metrics.DeviceMetrics;
 import ts.andrey.deviceservice.tdf.DummyTDF;
@@ -24,7 +24,7 @@ class DeviceDataServiceImplTest {
     private DeviceMetrics deviceMetrics;
 
     @Mock
-    private DeviceDbService deviceDbService;
+    private DeviceDbDataService deviceDbService;
 
     @Mock
     private DeviceMapper deviceMapper;
@@ -52,7 +52,7 @@ class DeviceDataServiceImplTest {
     }
 
     @Test
-    void saveDeviceShouldPersistAndReturnMappedDeviceAndRecordMetrics() {
+    void createDeviceShouldPersistAndReturnMappedDeviceAndRecordMetrics() {
         // GIVEN
         var request = DummyTDF.deviceCreateRequest.getDefault();
         var entity = DummyTDF.deviceEntity.getDefault();
@@ -63,7 +63,7 @@ class DeviceDataServiceImplTest {
         when(deviceMapper.toDevice(created)).thenReturn(mapped);
 
         // WHEN
-        Device result = deviceDataServiceImpl.saveDevice(request);
+        Device result = deviceDataServiceImpl.createDevice(request);
 
         // THEN
         assertEquals(mapped, result);

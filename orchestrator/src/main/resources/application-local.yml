@@ -1,0 +1,100 @@
+server:
+  port: 8879
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    tags:
+      application: orchestrator
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    otlp:
+      endpoint: http://localhost:4318
+      protocol: http/protobuf
+
+opentelemetry:
+  instrumentation:
+    logback-mdc:
+      enabled: true
+  service:
+    name: ${spring.application.name}
+  exporter:
+    otlp:
+      endpoint: http://localhost:4318
+      protocol: http/protobuf
+      timeout: 10000
+      compression: gzip
+  traces:
+    exporter: otlp
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+  resource-attributes:
+    service.version: 1.0.0
+    deployment.environment: docker
+    service.name: ${spring.application.name}
+
+spring:
+  application:
+    name: orchestrator
+  data:
+    redis:
+      host: localhost
+      port: 6378
+      password: redis_pass
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: orchestrator
+            client-secret: EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU
+            authorization-grant-type: authorization_code
+            scope: openid,profile,email
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:7878/realms/iot-platform
+            token-uri: http://localhost:7878/realms/iot-platform/protocol/openid-connect/token
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:7878/realms/iot-platform
+          audiences: device-service,orchestrator,account
+
+orchestrator:
+  feign-logger:
+    enabled: true
+  integration:
+    event-service:
+      url: localhost:8881
+    device-service:
+      url: localhost:8886
+    router-manager:
+      host: localhost
+      port: 8890
+  redis:
+    enabled: ${ORCHESTRATOR_REDIS_ENABLED:true}
+    ttl-minutes: 5
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.security.web: DEBUG
+    org.springframework.security.oauth2.server.resource: TRACE
+    org.springframework.security.oauth2.jwt: TRACE
+    org.springframework.web: DEBUG
+    org.springframework.web.filter: DEBUG

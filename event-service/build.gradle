@@ -1,0 +1,164 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version "${springBootVersion}"
+	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+	id 'com.github.spotbugs' version "${spotbugsVersion}"
+	id "org.openapi.generator" version "${openApiGenerator}"
+	id 'jacoco'
+	id 'checkstyle'
+}
+
+group = 'ts.andrey'
+version = "${appVersion}"
+description = 'event-service'
+
+def nexusUrl = System.getenv("NEXUS_URL") ?: project.findProperty("nexusUrl") ?: "http://localhost:7777/repository/maven-releases/"
+def nexusUser = System.getenv("NEXUS_USER") ?: project.findProperty("nexusUser") ?: "admin"
+def nexusPassword = System.getenv("NEXUS_PASSWORD") ?: project.findProperty("nexusPassword") ?: "admin123"
+
+repositories {
+	mavenCentral()
+	maven { url "https://packages.confluent.io/maven/" }
+	maven {
+		url = uri(nexusUrl)
+		allowInsecureProtocol = true
+		credentials {
+			username = nexusUser
+			password = nexusPassword
+		}
+	}
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of("${javaVersion}")
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
+
+	implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
+	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
+	implementation "com.fasterxml.jackson.core:jackson-annotations"
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+
+	implementation "ts.andrey:iot-avro:1.0.0"
+
+	compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
+	compileOnly 'org.projectlombok:lombok'
+
+	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+	implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetrySpringBootVersion}"
+	runtimeOnly 'io.micrometer:micrometer-registry-otlp'
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:cassandra'
+	testImplementation 'org.testcontainers:junit-jupiter'
+
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testCompileOnly "org.projectlombok:lombok"
+	testAnnotationProcessor "org.projectlombok:lombok"
+}
+
+checkstyle {
+	toolVersion = "${checkstyleToolVersion}"
+	configFile = file("$rootDir/config/checkstyle/checkstyle.xml")
+	configProperties = [
+			'checkstyle.suppressions.file': "$rootDir/config/checkstyle/exclude-filter.xml"
+	]
+	showViolations = true
+	ignoreFailures = false
+	maxWarnings = 0
+}
+
+spotbugs {
+	toolVersion = "${spotbugsToolVersion}"
+	ignoreFailures = true
+	showProgress = true
+	effort = 'max'
+	reportLevel = 'low'
+	excludeFilter = file("$rootDir/config/spotbugs/exclude-filter.xml")
+}
+
+
+jacoco {
+	toolVersion = "${jacocoToolVersion}"
+	reportsDirectory = layout.buildDirectory.dir('reports/jacoco')
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = false
+		html.required = true
+		csv.required = false
+	}
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'**/cassandra/**',
+					'**/configuration/**',
+					'**/controller/**',
+					'**/exception/**',
+					'**/*EventCollectorApplication*'
+			])
+		}))
+	}
+}
+
+configurations.configureEach {
+	exclude group: 'org.slf4j', module: 'slf4j-simple'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+bootJar {
+	archiveFileName = "app.jar"
+}
+
+openApiGenerate {
+	generatorName = "spring"
+	inputSpec = "$projectDir/src/main/resources/openapi/event-api.yml"
+	outputDir = "$buildDir/generated"
+	apiPackage = "ts.andrey.api"
+	modelPackage = "ts.andrey.dto"
+	invokerPackage = "ts.andrey.invoker"
+	library = "spring-boot"
+	generateApiTests = false
+	generateModelTests = false
+	additionalProperties = [
+			interfaceOnly: "true",
+			useTags     : "true",
+			java8       : "true",
+			useJakartaEe: "true"
+	]
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "$buildDir/generated/src/main/java"
+		}
+	}
+}
+
+compileJava.dependsOn tasks.openApiGenerate

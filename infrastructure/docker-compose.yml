@@ -65,6 +65,44 @@ services:
       start_period: 10s
     networks:
       - iot_network
+  orchestrator:
+    build:
+      context: ../orchestrator
+      args:
+        NEXUS_URL: ${NEXUS_URL}
+        NEXUS_USER: ${NEXUS_USER}
+        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
+    container_name: orchestrator
+    env_file:
+      - .env
+    ports:
+      - 8879:8879
+    restart: unless-stopped
+    environment:
+      OTEL_SERVICE_NAME: orchestrator
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: none
+      OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
+    depends_on:
+      redis-orchestrator:
+        condition: service_healthy
+      device-collector:
+        condition: service_started
+      device-service:
+        condition: service_started
+      router-manager-service:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q -O - http://localhost:8879/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - iot_network
   device-service:
     build:
       context: ../device-service
@@ -99,6 +137,38 @@ services:
         condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "wget -q -O - http://localhost:8886/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 6s
+    networks:
+      - iot_network
+  event-service:
+    build:
+      context: ../event-service
+      args:
+        NEXUS_URL: ${NEXUS_URL}
+        NEXUS_USER: ${NEXUS_USER}
+        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
+    container_name: event-service
+    env_file:
+      - .env
+    ports:
+      - "8881:8881"
+    restart: unless-stopped
+    environment:
+      OTEL_SERVICE_NAME: event-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: none
+      OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q -O - http://localhost:8881/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
       interval: 3s
       timeout: 5s
       retries: 5
@@ -222,11 +292,13 @@ services:
     container_name: kafka
     restart: unless-stopped
     environment:
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
+    ports:
+      - "9093:9093"
     depends_on:
       - zookeeper
     volumes:
@@ -409,6 +481,22 @@ services:
       retries: 5
     networks:
       - iot_network
+  router:
+    build:
+      context: ../router
+    container_name: router
+    environment:
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      router-manager-service:
+        condition: service_healthy
+      event-collector:
+        condition: service_healthy
+    networks:
+      - iot_network
   router-manager-service:
     build:
       context: ../router-manager-service
@@ -473,7 +561,7 @@ services:
     networks:
       - iot_network
   keycloak:
-    image: quay.io/keycloak/keycloak:26.2
+    image: quay.io/keycloak/keycloak:26.3
     container_name: keycloak
     env_file:
       - .env
@@ -528,6 +616,23 @@ services:
       retries: 5
     volumes:
       - redis_data_rms:/data
+    networks:
+      - iot_network
+  redis-orchestrator:
+    image: redis:7-alpine
+    container_name: redis-orchestrator
+    ports:
+      - "6378:6379"
+    command: redis-server --requirepass ${REDIS_ORCHESTRATOR_PASSWORD}
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_ORCHESTRATOR_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_ORCHESTRATOR_PASSWORD}", "ping" ]
+      interval: 5s
+      retries: 5
+    volumes:
+      - redis_data_orc:/data
     networks:
       - iot_network
   redis-insight:
@@ -715,6 +820,7 @@ volumes:
   postgres_data2r:
   redis_data:
   redis_data_rms:
+  redis_data_orc:
   redis-insight:
   cassandra_data:
   grafana_data:

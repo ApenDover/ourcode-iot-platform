@@ -18,6 +18,7 @@ def nexusPassword = System.getenv("NEXUS_PASSWORD") ?: project.findProperty("nex
 
 repositories {
 	mavenCentral()
+	maven { url "https://packages.confluent.io/maven/" }
 	maven {
 		url = uri(nexusUrl)
 		allowInsecureProtocol = true

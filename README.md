@@ -1,4 +1,4 @@
-# ourcode-iot-platform
+# iot-platform
 
 🛠 **Инфраструктура проекта** на базе Docker Compose.
 
@@ -10,6 +10,16 @@
 - Настраивает роли для keycloak и nexus
 - Публикует API клиент в nexus
 
+
+  сборка локальная:
+```bash
+   cd ./infrastructure
+   cp .env.example .env
+   cd ..
+   make boot && make up-local
+```
+
+сборка в контенерах (дольше, но надежнее):
 ```bash
    cd ./infrastructure
    cp .env.example .env
@@ -25,7 +35,8 @@ postman коллекция тут: [postman](infrastructure/postman)
 
 - puml диаграммы в аннотации C4 можно найти в папке [diagrams](diagrams)
 - инфраструктурные сервисы описаны в `docker-compose.yml`, см. папку [infrastructure](infrastructure)
-- [kafka-producer](kafka-producer) технический сервис для тестирования. Умеет выдавать JWT для device-service, умеет
+- [kafka-producer](kafka-producer) технический сервис для тестирования. Умеет выдавать JWT для device-service и
+  orchestrator, умеет
   генерировать события в топик events
 - [event-collector](event-collector) сервис подписывается на kafka topic events, сохраняет события в cassandra, все
   уникальные deviceId складывает в отдельный топик devices
@@ -33,6 +44,15 @@ postman коллекция тут: [postman](infrastructure/postman)
   шардированную по deviceId
 - [device-service](device-service) сервис для CRUD операций с Device, подключен к в postgres, шардированной по deviceId.
   Защищен через keycloak. Есть redis.
+- [event-service](event-service) сервис для получения собыий из cassndra собранных event-collector
+- [orchestrator](orchestrator) оркестрация для работы бизнес кейсов с системой; Получить список устройств, событий,
+  отправить команды на устройство;
+- [router-manager-service](router-manager-service) сервис для взаимодействия с устройствами. Отправляет команды, хранит
+  статусы команд
+- [router](router) пример логики устройства. С заданным периодом отправляет события в kafka, принимает команды от
+  router-manager-service
+
+Общая схема: ![iot-system.png](diagrams/common/iot-system.png)
 
 ---
 
@@ -53,35 +73,41 @@ postman коллекция тут: [postman](infrastructure/postman)
 
 Будет выполнен запуск следующих сервисов:
 
-| Сервис                    | Описание                                         | Порт(ы) хоста  |
-|---------------------------|--------------------------------------------------|----------------|
-| `kafka-producer`          | SpringBoot service для тестирования              | `8887`         |
-| `router-manager-service`  | GO service для работы с устройствами             | `8890`, `8891` |
-| `failed-events-processor` | SpringBoot service для обработки сообщений в DLT | `8880`         |
-| `event-collector`         | SpringBoot service сбор метрик в cassandra       | `8888`         |
-| `device-collector`        | SpringBoot service сбор device в postgress       | `8889`         |
-| `device-service`          | SpringBoot service CRUD device в postgress       | `8886`         |
-| `zookeeper`               | Координация Kafka                                | `2181`         |
-| `kafka`                   | Брокер Kafka 3.4                                 | `9092`         |
-| `schema-registry`         | Схемы Avro для Kafka                             | `8081`         |
-| `minio`                   | S3-хранилище совместимое с AWS                   | `9000`, `9001` |
-| `camunda`                 | BPM-платформа для бизнес-процессов               | `8088`         |
-| `postgres1`               | База данных PostgreSQL master 1                  | `5431`         |
-| `postgres2`               | База данных PostgreSQL master 2                  | `5432`         |
-| `postgres1r`              | База данных PostgreSQL replica 1                 | `5433`         |
-| `postgres2r`              | База данных PostgreSQL replica 2                 | `5434`         |
-| `postgres_router_manager` | База данных PostgreSQL router-manager-service    | `5439`         |
-| `postgres-keycloak`       | База данных PostgreSQL для keycloak              | `5430`         |
-| `keycloak`                | IAM-платформа, авторизация                       | `8080`         |
-| `redis`                   | In-memory кэш с паролем                          | `6379`         |
-| `redis-insight`           | UI для redis                                     | `6379`         |
-| `cassandra`               | NoSQL база данных                                | `9042`         |
-| `grafana`                 | Визуализация метрик                              | `3000`         |
-| `prometheus`              | Мониторинг и сбор метрик                         | `9090`         |
-| `kafka-exporter`          | Экспорт метрик Kafka для Prometheus              | `9308`         |
-| `cassandra-exporter`      | Экспорт метрик cassandra для Prometheus          | `9500`         |
-| `postgres-exporter`       | Экспорт метрик postgres для Prometheus           | `9187`         |
-| `kafka-ui`                | Kafka-UI для удобства просмотра                  | `8099`         |
+| Сервис                    | Описание                                           | Порт(ы) хоста  |
+|---------------------------|----------------------------------------------------|----------------|
+| `orchestrator`            | SpringBoot service для оркестрации (бизнес логика) | `8879`         |
+| `kafka-producer`          | SpringBoot service для тестирования                | `8887`         |
+| `router`                  | GO service имитация устройства                     | -              |
+| `router-manager-service`  | GO service для работы с устройствами               | `8890`, `8891` |
+| `failed-events-processor` | SpringBoot service для обработки сообщений в DLT   | `8880`         |
+| `event-collector`         | SpringBoot service сбор метрик в cassandra         | `8888`         |
+| `device-collector`        | SpringBoot service сбор device в postgress         | `8889`         |
+| `device-service`          | SpringBoot service CRUD device в postgress         | `8886`         |
+| `zookeeper`               | Координация Kafka                                  | `2181`         |
+| `kafka`                   | Брокер Kafka 3.4                                   | `9092`         |
+| `schema-registry`         | Схемы Avro для Kafka                               | `8081`         |
+| `minio`                   | S3-хранилище совместимое с AWS                     | `9000`, `9001` |
+| `camunda`                 | BPM-платформа для бизнес-процессов                 | `8088`         |
+| `postgres1`               | База данных PostgreSQL master 1                    | `5431`         |
+| `postgres2`               | База данных PostgreSQL master 2                    | `5432`         |
+| `postgres1r`              | База данных PostgreSQL replica 1                   | `5433`         |
+| `postgres2r`              | База данных PostgreSQL replica 2                   | `5434`         |
+| `postgres_router_manager` | База данных PostgreSQL router-manager-service      | `5439`         |
+| `postgres-keycloak`       | База данных PostgreSQL для keycloak                | `5430`         |
+| `keycloak`                | IAM-платформа, авторизация                         | `8080`         |
+| `redis`                   | In-memory кэш с паролем (device-service)           | `6379`         |
+| `redis-rms`               | In-memory кэш с паролем (router-manager-service)   | `6377`         |
+| `redis-orchestrator`      | In-memory кэш с паролем (orchestrator)             | `6378`         |
+| `redis-insight`           | UI для redis (device-service)                      | `5540`         |
+| `cassandra`               | NoSQL база данных                                  | `9042`         |
+| `grafana`                 | Визуализация метрик                                | `3000`         |
+| `prometheus`              | Мониторинг и сбор метрик                           | `9090`         |
+| `kafka-exporter`          | Экспорт метрик Kafka для Prometheus                | `9308`         |
+| `cassandra-exporter`      | Экспорт метрик cassandra для Prometheus            | `9500`         |
+| `postgres-exporter`       | Экспорт метрик postgres для Prometheus             | `9187`         |
+| `kafka-ui`                | Kafka-UI для удобства просмотра                    | `8099`         |
+| `keycloak`                | для orchestrator и device-service                  | `7878`         |
+| `nexus`                   | nexus для выгрузки библиотек                       | `7777`         |
 
 ⚠️ **Важно:**  Убедитесь, что у Docker достаточно памяти и CPU. В Docker Desktop (Windows/Mac) можно выделить, например, 4+ ГБ RAM. Иначе рискуете столкнуться с тормозами или перезапусками контейнеров (особенно Java-сервисы как Keycloak могут потреблять >512МБ).
 
@@ -163,6 +189,41 @@ postman коллекция тут: [postman](infrastructure/postman)
 
 # Описание сервисов
 
+## orchestrator
+
+### Процесс
+
+- взаимодействует с device-service, event-service, router-manager-service
+- реализует логику распределенныз транзакций (SAGA) для обновления версии устройста
+- api закрыт с помощью keycloak
+
+API: [orchestrator-api.yml](orchestrator/src/main/resources/openapi/orchestrator-api.yml)
+
+<details>
+
+<summary>Компоненты сервиса</summary>
+
+![orchestrator-component.png](diagrams/orchestrator/orchestrator-component.png)
+
+</details>
+
+<details>
+
+<summary>Логическая последовательность</summary>
+
+![orchestrator-sequence-saga.png](diagrams/orchestrator/orchestrator-sequence-saga.png)
+
+![orchestrator-sequence-events.png](diagrams/orchestrator/orchestrator-sequence-events.png)
+
+</details>
+
+### Технологии:
+- Язык программирования: Java 24
+- Фреймворк: Spring Boot 3.5
+- Обмен сообщениями: REST
+- keycloak
+- Система сборки: Gradle
+
 ## event-collector
 
 ### Процесс
@@ -193,6 +254,39 @@ postman коллекция тут: [postman](infrastructure/postman)
 - Фреймворк: Spring Boot 3.5
 - Обмен сообщениями: Apache Kafka
 - Сериализация: Avro (Confluent Schema Registry)
+- Хранилище: Apache Cassandra
+- Тестирование и окружение: Testcontainers (Kafka, Cassandra, Schema Registry)
+- Система сборки: Gradle
+
+## event-service
+
+### Процесс
+
+- Подключается к cassandra;
+- Получает события по заданным в запросе критериям
+
+API: [event-api.yml](event-service/src/main/resources/openapi/event-api.yml)
+
+<details>
+
+<summary>Компоненты сервиса</summary>
+
+![event-service-component.png](diagrams/event-service/event-service-component.png)
+
+</details>
+
+<details>
+
+<summary>Логическая последовательность</summary>
+
+![event-service-sequence.png](diagrams/event-service/event-service-sequence.png)
+
+</details>
+
+### Технологии:
+- Язык программирования: Java 24
+- Фреймворк: Spring Boot 3.5
+- Обмен сообщениями: REST
 - Хранилище: Apache Cassandra
 - Тестирование и окружение: Testcontainers (Kafka, Cassandra, Schema Registry)
 - Система сборки: Gradle
@@ -231,10 +325,10 @@ postman коллекция тут: [postman](infrastructure/postman)
 
 ## device-service
 
-- все endpoint защищены keycloak
 - СRUD операции на устройствами в PostgreSQL, используя шардирование через Apache ShardingSphere
 - между приложение и базой есть redis
 - экспортирует метрики
+- api защищен keycloak
 
 <details>
 
@@ -258,6 +352,7 @@ postman коллекция тут: [postman](infrastructure/postman)
 - Обмен сообщениями: REST
 - Шардирование: ShardingSphere
 - Хранилище: Postgres
+- keycloak
 - Тестирование и окружение: Testcontainers (Postgres, Redis, Keycloak)
 - Система сборки: Gradle
 
@@ -346,3 +441,18 @@ gRPC API на Go:
 proto можно найти тут [roma.proto](router-manager-service/protobuf/roma.proto)
 
 jmeter .JMX брать тут: [router-manager-service.jmx](infrastructure/jmeter/router-manager-service.jmx)
+
+## router
+
+Имитация устройства
+
+- С заданным интервалом запрашивает команды у router-manager-service
+- При получении команды отправляет подтверждение выполнения
+- С заданным интервалом публикует события в kafka
+- Роутер имеет хардкод серийный номер
+
+### Технологии:
+
+- Язык программирования: Go 1.25
+- gRPC подключение к router-manager-service
+- kafka producer для публикации событий в топик

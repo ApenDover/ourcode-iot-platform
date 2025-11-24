@@ -13,7 +13,8 @@ ACTUATOR_URL=http://localhost:
 LOGGER_NAME=ts.andrey
 PROJECT_ROOT := $(shell pwd)
 PROTO_DIR := $(PROJECT_ROOT)/router-manager-service/protobuf
-GENPROTO_DIR := $(PROJECT_ROOT)/router-manager-service/internal/ports/genproto
+GENPROTO_DIR_SERVER := $(PROJECT_ROOT)/router-manager-service/internal/ports/genproto
+GENPROTO_DIR_CLIENT := $(PROJECT_ROOT)/router/internal/ports/genproto
 PROTO_FILES := $(wildcard $(PROTO_DIR)/*.proto)
 
 .PHONY: up down downv restart logs help exec logs- proto-gen
@@ -98,10 +99,13 @@ exec-%: ## Зайти в контейнер по имени
 boot: nexus-deploy proto-gen  ## локально пересобрать образы
 	docker image rm infrastructure-device-collector -f
 	docker image rm infrastructure-device-service -f
+	docker image rm infrastructure-event-service -f
+	docker image rm infrastructure-orchestrator -f
 	docker image rm infrastructure-event-collector -f
 	docker image rm infrastructure-kafka-producer -f
 	docker image rm infrastructure-failed-events-processor -f
 	docker image rm infrastructure-router-manager-service -f
+	docker image rm infrastructure-router -f
 	docker image rm infrastructure-device-api -f
 	docker image rm infrastructure-iot-avro -f
 	docker image rm infrastructure-iot-common -f
@@ -109,14 +113,19 @@ boot: nexus-deploy proto-gen  ## локально пересобрать обр�
 	cd event-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-collector && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd device-service && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
+	cd orchestrator && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
+	cd event-service && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd kafka-producer && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd failed-events-processor && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew bootJar
 	cd router-manager-service && go build -o router-manager ./cmd/app
+	cd router && go build -o router ./cmd/app
 
 rebuild: nexus-deploy  ## локально пересобрать образы
 	cd event-collector && ./gradlew clean build
 	cd device-collector && ./gradlew clean build
 	cd device-service && ./gradlew clean build
+	cd event-service && ./gradlew clean build
+	cd orchestrator && ./gradlew clean build
 	cd kafka-producer && ./gradlew clean build
 	cd failed-events-processor && ./gradlew clean build
 
@@ -142,6 +151,12 @@ publish-nexus:
 		echo "device-api не найден, выполняем публикацию Gradle..."; \
 		cd device-api && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
 	fi
+	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/device-api/1.0.0/event-api-1.0.0.pom >/dev/null 2>&1; then \
+		echo "event-api уже опубликован, пропускаем публикацию"; \
+	else \
+		echo "event-api не найден, выполняем публикацию Gradle..."; \
+		cd event-api && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
+	fi
 	@echo "Выгружаю avro"
 	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-avro/1.0.0/iot-avro-1.0.0.pom >/dev/null 2>&1; then \
 		echo "iot-avro уже опубликован, пропускаем публикацию"; \
@@ -166,12 +181,13 @@ publish-nexus:
 	@echo "Выгружаю proto"
 
 keycloak-setup-users: wait-for-keycloak
-	@chmod +x ./infrastructure/keycloak/create-admin.sh
-	@chmod +x ./infrastructure/keycloak/create-user.sh
-	@chmod +x ./infrastructure/keycloak/create-secret.sh
-	@cd ./infrastructure/keycloak && ./create-admin.sh
-	@cd ./infrastructure/keycloak && ./create-user.sh
-	@cd ./infrastructure/keycloak && ./create-secret.sh
+	@chmod +x ./infrastructure/keycloak/create-admin-device.sh
+	@chmod +x ./infrastructure/keycloak/create-admin-orchestrator.sh
+	@chmod +x ./infrastructure/keycloak/create-user-device.sh
+	@cd ./infrastructure/keycloak && ./create-admin-device.sh
+	@cd ./infrastructure/keycloak && ./create-user-device.sh
+	@cd ./infrastructure/keycloak && ./create-secret-device.sh
+	@cd ./infrastructure/keycloak && ./create-secret-orchestrator.sh
 
 nexus-deploy:
 	$(DC) up nexus -d
@@ -179,10 +195,11 @@ nexus-deploy:
 
 proto-gen:
 	@echo "Generating Go code from .proto files..."
-	@mkdir -p $(GENPROTO_DIR)
+	@mkdir -p $(GENPROTO_DIR_SERVER)
+	@mkdir -p $(GENPROTO_DIR_CLIENT)
 	@docker run --rm \
 		-v $(PROTO_DIR):/protos \
-		-v $(GENPROTO_DIR):/gen \
+		-v $(GENPROTO_DIR_SERVER):/gen \
 		rvolosatovs/protoc \
 		--proto_path=/protos \
 		--go_out=/gen \
@@ -190,6 +207,16 @@ proto-gen:
 		--go-grpc_out=/gen \
 		--go-grpc_opt=paths=source_relative \
 		$(notdir $(PROTO_FILES))
+	@docker run --rm \
+    		-v $(PROTO_DIR):/protos \
+    		-v $(GENPROTO_DIR_CLIENT):/gen \
+    		rvolosatovs/protoc \
+    		--proto_path=/protos \
+    		--go_out=/gen \
+    		--go_opt=paths=source_relative \
+    		--go-grpc_out=/gen \
+    		--go-grpc_opt=paths=source_relative \
+    		$(notdir $(PROTO_FILES))
 	@echo "Done!"
 
 clear:

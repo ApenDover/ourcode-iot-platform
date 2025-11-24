@@ -8,9 +8,15 @@ services:
   device-service:
     build:
       dockerfile: ../device-service/Dockerfile.local
+  event-service:
+    build:
+      dockerfile: ../event-service/Dockerfile.local
   event-collector:
     build:
       dockerfile: ../event-collector/Dockerfile.local
   failed-events-processor:
     build:
       dockerfile: ../failed-events-processor/Dockerfile.local
+  orchestrator:
+    build:
+      dockerfile: ../orchestrator/Dockerfile.local
