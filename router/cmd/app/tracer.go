@@ -2,11 +2,12 @@ package app
 
 import (
 	"context"
+	"strings"
+
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"strings"
 )
 
 func InitTracer(ctx context.Context, endpoint string) (*sdktrace.TracerProvider, error) {

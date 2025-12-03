@@ -43,7 +43,7 @@ func LoadConfig() *Config {
 		Profile:                getEnvOrDefault("PROFILE", "local"),
 		TimeExpired:            getTimeOrDefault("APP_ROUTER_MANAGER_SENT_EXPIRED", "1m"),
 		CheckExpiredInterval:   getTimeOrDefault("APP_ROUTER_MANAGER_CHECK_EXPIRED_INTERVAL", "30s"),
-		AlloyUrl:               getEnvOrDefault("FAILED_PROCESSOR_MANAGEMENT_TRACING_OTLP_ENDPOINT_GRPC", "http://localhost:4317"),
+		AlloyUrl:               getEnvOrDefault("APP_ROUTER_MANAGER_SERVICE_TRACING_OTLP_ENDPOINT_GRPC", "http://localhost:4317"),
 		RedisUrl:               getEnvOrDefault("APP_ROUTER_MANAGER_REDIS_HOST", "localhost"),
 		RedisPort:              getEnvOrDefault("APP_ROUTER_MANAGER_REDIS_PORT", "6379"),
 		RedisPassword:          getEnvOrDefault("APP_ROUTER_MANAGER_REDIS_PASSWORD", "redis_pass"),
@@ -72,13 +72,13 @@ func getTimeOrDefault(key, defaultValue string) time.Duration {
 	if value := os.Getenv(key); value != "" {
 		duration, err := time.ParseDuration(os.Getenv(key))
 		if err != nil {
-			log.Error("неверный формат PollInterval в ENV APP_ROUTER_MANAGER_SENT_EXPIRED")
+			log.Error("неверный формат PollInterval в ENV " + key)
 		}
 		return duration
 	}
 	duration, err := time.ParseDuration(defaultValue)
 	if err != nil {
-		log.Error("неверный формат PollInterval в defaultValue, ENV APP_ROUTER_MANAGER_SENT_EXPIRED отсутствует")
+		log.Error("неверный формат PollInterval в defaultValue, ENV " + key)
 	}
 	return duration
 }

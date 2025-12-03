@@ -21,7 +21,7 @@ public class LoggingFeignClient implements Client {
     private final Client delegate;
 
     public LoggingFeignClient() {
-        this.delegate = new ApacheHttpClient(); // Используем OkHttp
+        this.delegate = new ApacheHttpClient();
     }
 
     @Override

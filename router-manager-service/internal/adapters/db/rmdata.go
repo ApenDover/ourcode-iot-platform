@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"router-manager-service/internal/conf/util"
 	"router-manager-service/internal/core/domain"
 	"router-manager-service/internal/ports"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type PostgresDataAdapter struct {
@@ -183,7 +184,7 @@ func (a *PostgresDataAdapter) PollCommands(ctx context.Context, routerSerial str
 		return nil, err
 	}
 
-	util.GetLogger(ctx).Info("Атомарная выборка команд с обновлением статуса",
+	util.GetLogger(ctx).Debug("Сбор команд для роутера (POLL)",
 		"router_serial", routerSerial,
 		"command_count", len(commands),
 		"status", "sent")

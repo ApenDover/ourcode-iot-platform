@@ -95,7 +95,7 @@ public class PerRequestFilter extends OncePerRequestFilter {
 
     private String toSingleLineJson(String body) {
         try {
-            Object json = OBJECT_MAPPER.readValue(body, Object.class);
+            final var json = OBJECT_MAPPER.readValue(body, Object.class);
             return OBJECT_MAPPER.writeValueAsString(json);
         } catch (Exception e) {
             return body.replaceAll("[\\r\\n]+", " ");

@@ -124,7 +124,6 @@ func (a *App) scheduledRequestWorker() {
 		slog.String("poll_interval", a.deps.Config.PollInterval.String()),
 	)
 
-	// Первый запуск
 	a.sendGRPCRequests()
 	a.sendDeviceEvents()
 
@@ -135,7 +134,7 @@ func (a *App) scheduledRequestWorker() {
 			return
 		case <-ticker.C:
 			a.sendGRPCRequests()
-			a.sendDeviceEvents() // Отправляем события в Kafka
+			a.sendDeviceEvents()
 		}
 	}
 }
@@ -209,17 +208,21 @@ func (a *App) sendDeviceEvents() {
 		},
 	}
 
-	if err := a.kafkaProducer.SendDeviceEvent(deviceEvent); err != nil {
+	spanContext, err := a.kafkaProducer.SendDeviceEvent(context.Background(), deviceEvent)
+	if err != nil {
 		log.Error("Failed to send device event to Kafka",
 			slog.String("error", err.Error()),
-			slog.String("event_id", deviceEvent.EventID),
+			slog.String("eventId", deviceEvent.EventID),
+			slog.String("traceId", spanContext.TraceID().String()),
+			slog.String("spanId", spanContext.SpanID().String()),
 		)
 		return
 	}
 
 	log.Info("Device event sent to Kafka",
-		slog.String("event_id", deviceEvent.EventID),
-		slog.String("device_id", deviceEvent.Device.DeviceId),
+		slog.String("eventId", deviceEvent.EventID),
+		slog.String("deviceId", deviceEvent.Device.DeviceId),
+		slog.String("traceId", spanContext.TraceID().String()),
 	)
 }
 
@@ -230,8 +233,7 @@ func (a *App) processCommand(cmd *genproto.Command) error {
 		slog.String("command_type", cmd.CommandType),
 	)
 
-	// Здесь можно добавить логику обработки команды
-	// Например, отправку события в Kafka при выполнении команды
+	// логика обработки команды
 
 	return nil
 }
@@ -244,7 +246,6 @@ func (a *App) gracefulShutdown() {
 	log := util.GetLogger(a.ctx)
 	log.Info("Начинаю graceful shutdown")
 
-	// Закрываем gRPC клиент
 	if a.gClient != nil {
 		if err := a.gClient.Close(); err != nil {
 			log.Error("Failed to close gRPC client", slog.String("error", err.Error()))
@@ -253,7 +254,6 @@ func (a *App) gracefulShutdown() {
 		}
 	}
 
-	// Закрываем Kafka producer
 	if a.kafkaProducer != nil {
 		a.kafkaProducer.Close()
 		log.Info("Kafka producer closed")

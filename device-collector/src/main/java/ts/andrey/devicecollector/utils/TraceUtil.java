@@ -17,8 +17,8 @@ import java.util.function.Supplier;
 public class TraceUtil {
 
     private static final String TRACE = "traceparent";
-    private static final String MDC_TRACE = "trace-id";
-    private static final String MDC_SPAN = "span-id";
+    private static final String MDC_TRACE = "trace_id";
+    private static final String MDC_SPAN = "span_id";
 
     /**
      * Преобразует traceparent в SpanContext

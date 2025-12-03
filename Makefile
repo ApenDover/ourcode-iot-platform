@@ -225,6 +225,9 @@ clear:
 jmeter: j-prepare
 	JVM_ARGS="-Xms512m -Xmx2g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/router-manager-service.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o ./report
 
+j-device-prepare:
+
+
 j-prepare:
 	@docker exec -i -e PGPASSWORD=$(APP_ROUTER_MANAGER_DATASOURCE_PASSWORD) postgres_router_manager \
     		psql -U $(APP_ROUTER_MANAGER_DATASOURCE_USERNAME) -d $(APP_ROUTER_MANAGER_DATASOURCE_DB) \

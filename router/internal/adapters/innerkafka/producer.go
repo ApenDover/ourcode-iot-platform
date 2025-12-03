@@ -2,6 +2,7 @@ package innerkafka
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/binary"
 	"fmt"
 	"io/fs"
@@ -12,10 +13,12 @@ import (
 
 	"embed"
 
-	"github.com/segmentio/kafka-go"
-
 	"github.com/linkedin/goavro/v2"
 	"github.com/riferrei/srclient"
+	"github.com/segmentio/kafka-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 //go:embed avro/*.avsc
@@ -122,10 +125,28 @@ func loadSchemaFromFile() (string, error) {
 	return schemas[0], nil
 }
 
-func (p *Producer) SendDeviceEvent(event *DeviceEvent) error {
+func (p *Producer) SendDeviceEvent(ctx context.Context, event *DeviceEvent) (trace.SpanContext, error) {
+	tracer := otel.Tracer("router")
+
+	traceID, _ := trace.TraceIDFromHex(strings.ReplaceAll(event.EventID, "-", ""))
+	spanID := generateSpanID()
+
+	customSpanContext := trace.NewSpanContext(trace.SpanContextConfig{
+		TraceID:    traceID,
+		SpanID:     spanID,
+		TraceFlags: trace.FlagsSampled,
+		TraceState: trace.TraceState{},
+		Remote:     false,
+	})
+
+	customCtx := trace.ContextWithSpanContext(ctx, customSpanContext)
+	ctx, span := tracer.Start(customCtx, "router.device-event")
+	defer span.End()
+
 	avroData, err := p.serializeToAvro(event)
 	if err != nil {
-		return fmt.Errorf("failed to serialize event: %w", err)
+		span.RecordError(err)
+		return span.SpanContext(), fmt.Errorf("failed to serialize event: %w", err)
 	}
 
 	messageValue := make([]byte, 0, 5+len(avroData))
@@ -136,25 +157,42 @@ func (p *Producer) SendDeviceEvent(event *DeviceEvent) error {
 	messageValue = append(messageValue, avroData...)
 
 	msg := kafka.Message{
-		Key:   []byte(event.Device.DeviceId),
-		Value: messageValue,
+		Key:     []byte(event.Device.DeviceId),
+		Value:   messageValue,
+		Headers: []kafka.Header{},
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	if customSpanContext.IsValid() {
+		traceParent := fmt.Sprintf("00-%s-%s-01", traceID, spanID)
+		msg.Headers = append(msg.Headers, kafka.Header{
+			Key:   "traceparent",
+			Value: []byte(traceParent),
+		})
+	} else {
+		p.logger.Warn("Span context is invalid, sending without trace headers",
+			slog.String("eventId", event.EventID),
+		)
+	}
+
+	span.SetAttributes(
+		attribute.String("device.id", event.Device.DeviceId),
+	)
 
 	if err := p.writer.WriteMessages(ctx, msg); err != nil {
-		return fmt.Errorf("failed to write message: %w", err)
+		span.RecordError(err)
+		return customSpanContext, fmt.Errorf("failed to write message: %w", err)
 	}
 
 	p.logger.Debug("Device event sent to Kafka with Schema Registry",
-		slog.String("event_id", event.EventID),
+		slog.String("eventId", event.EventID),
 		slog.String("device_serial", event.Device.DeviceId),
 		slog.String("event_type", event.Type),
 		slog.Int("schema_id", p.schemaID),
+		slog.String("traceId", customSpanContext.TraceID().String()),
+		slog.Int("kafka_headers_count", len(msg.Headers)),
 	)
 
-	return nil
+	return customSpanContext, nil
 }
 
 func (p *Producer) serializeToAvro(event *DeviceEvent) ([]byte, error) {
@@ -183,4 +221,10 @@ func (p *Producer) Close() error {
 		return p.writer.Close()
 	}
 	return nil
+}
+
+func generateSpanID() trace.SpanID {
+	var id [8]byte
+	_, _ = rand.Read(id[:])
+	return trace.SpanID(id)
 }

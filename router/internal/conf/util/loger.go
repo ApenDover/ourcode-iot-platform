@@ -2,10 +2,11 @@ package util
 
 import (
 	"context"
-	"go.opentelemetry.io/otel/trace"
 	"log/slog"
 	"os"
 	"router-manager-service/internal/conf/logutil"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -19,7 +20,7 @@ func GetLogger(ctx context.Context) *slog.Logger {
 	var logLevel slog.Level
 	switch level {
 	case "INFO":
-		logLevel = slog.LevelDebug
+		logLevel = slog.LevelInfo
 	case "DEBUG":
 		logLevel = slog.LevelDebug
 	case "WARN":
@@ -43,8 +44,8 @@ func GetLogger(ctx context.Context) *slog.Logger {
 
 	if sc.HasTraceID() && sc.HasSpanID() {
 		log = log.With(
-			slog.String("trace_id", sc.TraceID().String()),
-			slog.String("span_id", sc.SpanID().String()),
+			slog.String("traceId", sc.TraceID().String()),
+			slog.String("spanId", sc.SpanID().String()),
 		)
 	}
 
