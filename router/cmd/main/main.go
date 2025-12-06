@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -11,7 +10,6 @@ import (
 	"router-manager-service/internal/conf/logutil"
 	"router-manager-service/internal/conf/util"
 	"syscall"
-	"time"
 )
 
 func main() {
@@ -61,32 +59,11 @@ func initializeDependencies(ctx context.Context, cfg *config.Config, log *slog.L
 		}
 	}
 
-	tracerProvider, err := app.InitTracer(ctx, cfg.AlloyUrl)
-	if err != nil {
-		return nil, cleanup, fmt.Errorf("ошибка создания tracer: %w", err)
-	}
-	cleanupFuncs = append(cleanupFuncs, func() {
-		shutdownTracer(tracerProvider, log)
-	})
-
 	deps := &app.Dependencies{
 		Config: cfg,
 	}
 
 	return deps, cleanup, nil
-}
-
-func shutdownTracer(tp interface{}, log *slog.Logger) {
-	if sh, ok := tp.(interface{ Shutdown(context.Context) error }); ok {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		if err := sh.Shutdown(ctx); err != nil {
-			log.Error("Не смог завершить tracer", slog.String("error", err.Error()))
-		} else {
-			log.Info("Tracer успешно завершен")
-		}
-	}
 }
 
 func waitForShutdownSignal(application *app.App, log *slog.Logger) {

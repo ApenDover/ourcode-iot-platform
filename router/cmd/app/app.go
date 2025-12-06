@@ -208,13 +208,11 @@ func (a *App) sendDeviceEvents() {
 		},
 	}
 
-	spanContext, err := a.kafkaProducer.SendDeviceEvent(context.Background(), deviceEvent)
+	err := a.kafkaProducer.SendDeviceEvent(context.Background(), deviceEvent)
 	if err != nil {
 		log.Error("Failed to send device event to Kafka",
 			slog.String("error", err.Error()),
 			slog.String("eventId", deviceEvent.EventID),
-			slog.String("traceId", spanContext.TraceID().String()),
-			slog.String("spanId", spanContext.SpanID().String()),
 		)
 		return
 	}
@@ -222,7 +220,6 @@ func (a *App) sendDeviceEvents() {
 	log.Info("Device event sent to Kafka",
 		slog.String("eventId", deviceEvent.EventID),
 		slog.String("deviceId", deviceEvent.Device.DeviceId),
-		slog.String("traceId", spanContext.TraceID().String()),
 	)
 }
 
