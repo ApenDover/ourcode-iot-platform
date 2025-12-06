@@ -27,10 +27,10 @@ class EventCollectorProcessingIT extends BaseIntegrationTest {
         final var deviceEvents = DummyTDF.deviceEvent.getList(size);
 
         // WHEN
-        final var metadata = deviceEvents.stream()
-                .map(message -> KafkaProducerUtil.sendMessage(
-                        kafka.getBootstrapServers(), "events", schemaRegistry.getFirstMappedPort(), message))
-                .toList();
+        final var metadata = KafkaProducerUtil.sendMessages(
+                kafka.getBootstrapServers(), "events", schemaRegistry.getFirstMappedPort(), deviceEvents
+        );
+
 
         // THEN CHECK PRODUCE METADATA
         assertFalse(CollectionUtils.isEmpty(metadata));
@@ -58,6 +58,7 @@ class EventCollectorProcessingIT extends BaseIntegrationTest {
 
         //THEN CHECK IT CACHED
         assertEquals(10, simpleCache.size());
+        KafkaProducerUtil.cleanup();
     }
 
 }
