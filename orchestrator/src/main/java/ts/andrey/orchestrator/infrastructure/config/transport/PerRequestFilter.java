@@ -43,34 +43,36 @@ public class PerRequestFilter extends OncePerRequestFilter {
             exception = ex;
             throw ex;
         } finally {
-            final var durationNs = System.nanoTime() - start;
+            if (!request.getRequestURI().contains("actuator")) {
+                final var durationNs = System.nanoTime() - start;
 
-            final var httpStatus = HttpStatus.resolve(wrappedResponse.getStatus());
-            final var isError = httpStatus != null && httpStatus.isError();
+                final var httpStatus = HttpStatus.resolve(wrappedResponse.getStatus());
+                final var isError = httpStatus != null && httpStatus.isError();
 
-            orchestratorMetrics.recordExecutionTime(
-                    wrappedRequest.getMethod(),
-                    wrappedRequest.getRequestURI(),
-                    durationNs
-            );
-
-            if (!isError && exception == null) {
-                orchestratorMetrics.recordSuccess(
+                orchestratorMetrics.recordExecutionTime(
                         wrappedRequest.getMethod(),
                         wrappedRequest.getRequestURI(),
-                        wrappedResponse.getStatus()
+                        durationNs
                 );
-            } else {
-                orchestratorMetrics.recordFailure(
-                        wrappedRequest.getMethod(),
-                        wrappedRequest.getRequestURI(),
-                        wrappedResponse.getStatus(),
-                        exception
-                );
+
+                if (!isError && exception == null) {
+                    orchestratorMetrics.recordSuccess(
+                            wrappedRequest.getMethod(),
+                            wrappedRequest.getRequestURI(),
+                            wrappedResponse.getStatus()
+                    );
+                } else {
+                    orchestratorMetrics.recordFailure(
+                            wrappedRequest.getMethod(),
+                            wrappedRequest.getRequestURI(),
+                            wrappedResponse.getStatus(),
+                            exception
+                    );
+                }
+                logRequest(wrappedRequest);
+                logResponse(wrappedResponse, wrappedRequest);
+                wrappedResponse.copyBodyToResponse();
             }
-            logRequest(wrappedRequest);
-            logResponse(wrappedResponse, wrappedRequest);
-            wrappedResponse.copyBodyToResponse();
         }
     }
 

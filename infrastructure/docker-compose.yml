@@ -704,9 +704,7 @@ services:
       - prometheus_data:/prometheus
     depends_on:
       - kafka-exporter
-      - postgres-exporter1
-      - postgres-exporter2
-      - postgres-exporter-rms
+      - postgres-exporter
     networks:
       - iot_network
   kafka-exporter:
@@ -719,37 +717,26 @@ services:
         condition: service_healthy
     networks:
       - iot_network
-  postgres-exporter1:
+  postgres-exporter:
     image: prometheuscommunity/postgres-exporter:latest
-    container_name: postgres-exporter1
+    container_name: postgres-exporter
     restart: unless-stopped
     environment:
-      DATA_SOURCE_NAME: "postgresql://${APP_DATASOURCE_1_USERNAME}:${APP_DATASOURCE_1_PASSWORD}@postgres1:5432/${POSTGRES_DB}?sslmode=disable"
+      DATA_SOURCE_NAME: |
+        user=${APP_DATASOURCE_1_USERNAME} password=${APP_DATASOURCE_1_PASSWORD} host=postgres1 port=5432 dbname=${POSTGRES_DB} sslmode=disable,
+        user=${APP_DATASOURCE_2_USERNAME} password=${APP_DATASOURCE_2_PASSWORD} host=postgres2 port=5432 dbname=${POSTGRES_DB} sslmode=disable,
+        user=${APP_DATASOURCE_1_USERNAME} password=${APP_DATASOURCE_1_PASSWORD} host=postgres1r port=5432 dbname=${POSTGRES_DB} sslmode=disable,
+        user=${APP_DATASOURCE_2_USERNAME} password=${APP_DATASOURCE_2_PASSWORD} host=postgres2r port=5432 dbname=${POSTGRES_DB} sslmode=disable,
+        user=${APP_ROUTER_MANAGER_DATASOURCE_USERNAME} password=${APP_ROUTER_MANAGER_DATASOURCE_PASSWORD} host=postgres_router_manager port=5432 dbname=${APP_ROUTER_MANAGER_DATASOURCE_DB} sslmode=disable
+      DATA_SOURCE_LABELS: "instance=postgres1,role=primary,service=orchestrator instance=postgres2,role=primary,service=device instance=postgres1r,role=replica,service=orchestrator instance=postgres2r,role=replica,service=device instance=postgres_router_manager,role=primary,service=router_manager"
+    ports:
+      - "9187:9187"
     depends_on:
-      postgres1:
-        condition: service_healthy
-    networks:
-      - iot_network
-  postgres-exporter2:
-    image: prometheuscommunity/postgres-exporter:latest
-    container_name: postgres-exporter2
-    restart: unless-stopped
-    environment:
-      DATA_SOURCE_NAME: "postgresql://${APP_DATASOURCE_2_USERNAME}:${APP_DATASOURCE_2_PASSWORD}@postgres2:5432/${POSTGRES_DB}?sslmode=disable"
-    depends_on:
-      postgres2:
-        condition: service_healthy
-    networks:
-      - iot_network
-  postgres-exporter-rms:
-    image: prometheuscommunity/postgres-exporter:latest
-    container_name: postgres-exporter-rms
-    restart: unless-stopped
-    environment:
-      DATA_SOURCE_NAME: "postgresql://${APP_ROUTER_MANAGER_DATASOURCE_USERNAME}:${APP_ROUTER_MANAGER_DATASOURCE_PASSWORD}@postgres_router_manager:5432/${APP_ROUTER_MANAGER_DATASOURCE_DB}?sslmode=disable"
-    depends_on:
-      postgres_router_manager:
-        condition: service_healthy
+      - postgres1
+      - postgres2
+      - postgres1r
+      - postgres2r
+      - postgres_router_manager
     networks:
       - iot_network
   cassandra-exporter:
