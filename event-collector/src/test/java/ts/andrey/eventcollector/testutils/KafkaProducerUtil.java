@@ -12,14 +12,11 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,10 +49,10 @@ public class KafkaProducerUtil {
         ensureTopicExists(bootstrapServers, schemaRegistryPort, topic);
 
         // Отправляем сообщение
-        ProducerRecord<String, SpecificRecord> record = createProducerRecord(
+        ProducerRecord<String, SpecificRecord> record = new ProducerRecord<>(
                 topic,
-                message
-        );
+                UUID.randomUUID().toString(),
+                message);
 
         return producer.send(record);
     }
@@ -114,34 +111,6 @@ public class KafkaProducerUtil {
         }
     }
 
-    private static ProducerRecord<String, SpecificRecord> createProducerRecord(
-            String topic,
-            SpecificRecord message) {
-
-        ProducerRecord<String, SpecificRecord> record = new ProducerRecord<>(
-                topic,
-                UUID.randomUUID().toString(),
-                message
-        );
-
-        String traceId = generateRandomHex(32);
-        String spanId = generateRandomHex(16);
-
-        log.info("message : {} - traceId : {} - spanId : {}", message, traceId, spanId);
-
-        String traceParent = String.format("00-%s-%s-01", traceId, spanId);
-        record.headers().add("traceparent", traceParent.getBytes(StandardCharsets.UTF_8));
-
-        return record;
-    }
-
-    private static String generateRandomHex(int length) {
-        Random random = new Random();
-        byte[] bytes = new byte[length / 2];
-        random.nextBytes(bytes);
-        return HexFormat.of().formatHex(bytes);
-    }
-
     public static void cleanup() {
         producers.values().forEach(KafkaProducer::close);
         producers.clear();
@@ -164,7 +133,10 @@ public class KafkaProducerUtil {
 
         List<Future<RecordMetadata>> results = new ArrayList<>();
         for (T message : messages) {
-            ProducerRecord<String, SpecificRecord> record = createProducerRecord(topic, message);
+            ProducerRecord<String, SpecificRecord> record = new ProducerRecord<>(
+                    topic,
+                    UUID.randomUUID().toString(),
+                    message);
             results.add(producer.send(record));
         }
 

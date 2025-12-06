@@ -8,23 +8,58 @@
             <providers>
                 <timestamp>
                     <timeZone>UTC</timeZone>
+                    <fieldName>timestamp</fieldName>
                 </timestamp>
-                <logLevel/>
-                <threadName/>
-                <loggerName/>
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+                <threadName>
+                    <fieldName>thread</fieldName>
+                </threadName>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
 
-                <message/>
+                <message>
+                    <fieldName>message</fieldName>
+                </message>
 
+                <!-- OpenTelemetry использует traceId и spanId, а не trace_id и span_id -->
                 <mdc>
+                    <!-- Для Spring Boot 3 + OpenTelemetry -->
+                    <includeMdcKeyName>traceId</includeMdcKeyName>
+                    <includeMdcKeyName>spanId</includeMdcKeyName>
+                    <!-- Можно также включить parentId если нужно -->
+                    <includeMdcKeyName>parentId</includeMdcKeyName>
+
+                    <!-- На всякий случай можно добавить старые ключи -->
                     <includeMdcKeyName>trace_id</includeMdcKeyName>
                     <includeMdcKeyName>span_id</includeMdcKeyName>
-                    <defaultValue>-</defaultValue>
                 </mdc>
 
-                <globalCustomFields>{"app":"${appName}"}</globalCustomFields>
+                <!-- Добавьте context для получения полей OpenTelemetry -->
+                <context>
+                    <include>trace_id</include>
+                    <include>span_id</include>
+                </context>
+
+                <!-- Добавьте structuredArguments если используете -->
+                <structuredArguments>
+                    <keyPattern>traceId</keyPattern>
+                    <keyPattern>spanId</keyPattern>
+                </structuredArguments>
+
+                <globalCustomFields>{"app":"${appName}","service":"${appName}"}</globalCustomFields>
             </providers>
         </encoder>
     </appender>
+
+    <!-- Включаем логирование Spring Kafka для отладки -->
+    <logger name="org.springframework.kafka" level="INFO"/>
+    <logger name="org.apache.kafka" level="WARN"/>
+
+    <!-- Логирование OpenTelemetry для отладки -->
+    <logger name="io.opentelemetry" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

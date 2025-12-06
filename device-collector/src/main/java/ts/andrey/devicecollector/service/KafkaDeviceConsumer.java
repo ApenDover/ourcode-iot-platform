@@ -7,7 +7,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import ts.andrey.devicecollector.service.impl.DeviceServiceImpl;
-import ts.andrey.devicecollector.utils.TraceUtil;
 
 import java.util.ArrayList;
 
@@ -25,14 +24,11 @@ public class KafkaDeviceConsumer {
             containerFactory = "kafkaBatchDeviceListenerContainerFactory"
     )
     public void handleEvents(ConsumerRecords<String, Device> records) {
-        final var trace = TraceUtil.getTraceParentFromIterator(records.iterator().next().headers());
-        TraceUtil.withRootSpan(trace, () -> {
             final var devices = new ArrayList<Device>();
             records.forEach(message -> devices.add(message.value()));
             log.info("Получена пачка из [{}] девайсов", devices.size());
             log.debug("Получены девайсы: [{}]", devices);
             deviceService.createOrUpdateDevice(devices);
-        });
     }
 
 }

@@ -82,6 +82,9 @@ restart-%: ## Перезапустить контейнер по имени
 logs: ## Вывести логи всех контейнеров
 	$(DC) logs -f
 
+logss: ## Вывести логи контейнеров процесса
+	$(DC) logs -f event-collector device-collector
+
 logs-%: ## Вывести логи конкретного контейнера (например: make logs-keycloak)
 	$(DC) logs -f $*
 
