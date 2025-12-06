@@ -18,20 +18,88 @@ public class OrchestratorMetrics {
 
     private final MeterRegistry meterRegistry;
 
-    public void getOrchestratorSuccess() {
-        meterRegistry.counter("orchestrator.database.get").increment();
+    public void routerAckSuccess() {
+        meterRegistry.counter("orchestrator.router.ack.success").increment();
     }
 
-    public void deleteOrchestratorSuccess() {
-        meterRegistry.counter("orchestrator.database.delete").increment();
+    public void routerAckFail() {
+        meterRegistry.counter("orchestrator.router.ack.fail").increment();
     }
 
-    public void updateOrchestratorSuccess() {
-        meterRegistry.counter("orchestrator.database.update").increment();
+    public void routerPollSuccess() {
+        meterRegistry.counter("orchestrator.router.poll.success").increment();
     }
 
-    public void createOrchestratorSuccess() {
-        meterRegistry.counter("orchestrator.database.create").increment();
+    public void routerPollFail() {
+        meterRegistry.counter("orchestrator.router.poll.fail").increment();
+    }
+
+    public void routerCommandSuccess() {
+        meterRegistry.counter("orchestrator.router.command.success").increment();
+    }
+
+    public void routerCommandFail() {
+        meterRegistry.counter("orchestrator.router.command.fail").increment();
+    }
+
+    public void deviceServiceGetSuccess() {
+        meterRegistry.counter("orchestrator.deviceService.get.success").increment();
+    }
+
+    public void deviceServiceGetFail() {
+        meterRegistry.counter("orchestrator.deviceService.get.fail").increment();
+    }
+
+    public void deviceServiceGetListSuccess() {
+        meterRegistry.counter("orchestrator.deviceService.getList.success").increment();
+    }
+
+    public void deviceServiceGetListFail() {
+        meterRegistry.counter("orchestrator.deviceService.getList.fail").increment();
+    }
+
+    public void eventServiceGetSuccess() {
+        meterRegistry.counter("orchestrator.eventService.get.success").increment();
+    }
+
+    public void eventServiceGetFail() {
+        meterRegistry.counter("orchestrator.eventService.get.fail").increment();
+    }
+
+    public void eventServiceGetFilterSuccess() {
+        meterRegistry.counter("orchestrator.eventService.getFilter.success").increment();
+    }
+
+    public void eventServiceGetFilterFail() {
+        meterRegistry.counter("orchestrator.eventService.getFilter.fail").increment();
+    }
+
+    public void deviceServiceDeleteSuccess() {
+        meterRegistry.counter("orchestrator.deviceService.delete.success").increment();
+    }
+
+    public void deviceServiceDeleteFail() {
+        meterRegistry.counter("orchestrator.deviceService.delete.fail").increment();
+    }
+
+    public void deviceUpdateSuccess() {
+        meterRegistry.counter("orchestrator.deviceService.update.success").increment();
+    }
+
+    public void deviceUpdateFail() {
+        meterRegistry.counter("orchestrator.deviceService.update.fail").increment();
+    }
+
+    public void sagaUpdateVersionSuccess() {
+        meterRegistry.counter("orchestrator.saga.success").increment();
+    }
+
+    public void sagaUpdateVersionRollback() {
+        meterRegistry.counter("orchestrator.saga.rollback").increment();
+    }
+
+    public void sagaUpdateVersionFail() {
+        meterRegistry.counter("orchestrator.saga.fail").increment();
     }
 
     public void orchestratorRedisSuccess() {
@@ -70,12 +138,6 @@ public class OrchestratorMetrics {
                 .sla(Duration.ofMillis(SLA_ONE), Duration.ofMillis(SLA_TWO), Duration.ofSeconds(SLA_THREE))
                 .register(meterRegistry)
                 .record(Duration.ofNanos(durationNs));
-    }
-
-    public void recordDatabaseError(String operation) {
-        meterRegistry.counter("orchestrator.database.error",
-                        "operation", operation)
-                .increment();
     }
 
     private String statusGroup(int status) {

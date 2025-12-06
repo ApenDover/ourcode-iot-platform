@@ -5,6 +5,8 @@ import (
 	"os"
 	"router-manager-service/internal/conf/util"
 	"time"
+
+	"github.com/oklog/ulid/v2"
 )
 
 type Config struct {
@@ -29,7 +31,7 @@ func LoadConfig() *Config {
 		MetricsPort:       getEnvOrDefault("APP_ROUTER_MANAGER_METRICS_PORT", "9091"),
 		GRPCPort:          getEnvOrDefault("APP_ROUTER_MANAGER_GRPC_PORT", "9092"),
 		GRPCServerAddress: getEnvOrDefault("APP_ROUTER_MANAGER_HOST", "router-manager-service"),
-		RouterSerial:      "01K6GJ564FPTXDWX8R1F91VZK0",
+		RouterSerial:      getEnvOrDefault("ROUTER_SERIAL", ulid.Make().String()),
 		BootstrapServers:  getEnvOrDefault("SPRING_KAFKA_BOOTSTRAP_SERVERS", "kafka:9092"),
 		Topic:             getEnvOrDefault("SPRING_KAFKA_TEMPLATE_EVENTS_TOPIC", "events"),
 		SchemaRegistryURL: getEnvOrDefault("SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL", "http://schema-registry:8081"),
