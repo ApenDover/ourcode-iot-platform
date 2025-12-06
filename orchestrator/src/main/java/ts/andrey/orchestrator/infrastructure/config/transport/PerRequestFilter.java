@@ -69,10 +69,10 @@ public class PerRequestFilter extends OncePerRequestFilter {
                             exception
                     );
                 }
-                logRequest(wrappedRequest);
-                logResponse(wrappedResponse, wrappedRequest);
-                wrappedResponse.copyBodyToResponse();
             }
+            logRequest(wrappedRequest);
+            logResponse(wrappedResponse, wrappedRequest);
+            wrappedResponse.copyBodyToResponse();
         }
     }
 
