@@ -19,99 +19,99 @@ public class OrchestratorMetrics {
     private final MeterRegistry meterRegistry;
 
     public void routerAckSuccess() {
-        meterRegistry.counter("orchestrator.router.ack.success").increment();
+        meterRegistry.counter("orchestrator_router_ack_success").increment();
     }
 
     public void routerAckFail() {
-        meterRegistry.counter("orchestrator.router.ack.fail").increment();
+        meterRegistry.counter("orchestrator_router_ack_fail").increment();
     }
 
     public void routerPollSuccess() {
-        meterRegistry.counter("orchestrator.router.poll.success").increment();
+        meterRegistry.counter("orchestrator_router_poll_success").increment();
     }
 
     public void routerPollFail() {
-        meterRegistry.counter("orchestrator.router.poll.fail").increment();
+        meterRegistry.counter("orchestrator_router_poll_fail").increment();
     }
 
     public void routerCommandSuccess() {
-        meterRegistry.counter("orchestrator.router.command.success").increment();
+        meterRegistry.counter("orchestrator_router_command_success").increment();
     }
 
     public void routerCommandFail() {
-        meterRegistry.counter("orchestrator.router.command.fail").increment();
+        meterRegistry.counter("orchestrator_router_command_fail").increment();
     }
 
     public void deviceServiceGetSuccess() {
-        meterRegistry.counter("orchestrator.deviceService.get.success").increment();
+        meterRegistry.counter("orchestrator_deviceService_get_success").increment();
     }
 
     public void deviceServiceGetFail() {
-        meterRegistry.counter("orchestrator.deviceService.get.fail").increment();
+        meterRegistry.counter("orchestrator_deviceService_get_fail").increment();
     }
 
     public void deviceServiceGetListSuccess() {
-        meterRegistry.counter("orchestrator.deviceService.getList.success").increment();
+        meterRegistry.counter("orchestrator_deviceService_getList_success").increment();
     }
 
     public void deviceServiceGetListFail() {
-        meterRegistry.counter("orchestrator.deviceService.getList.fail").increment();
+        meterRegistry.counter("orchestrator_deviceService_getList_fail").increment();
     }
 
     public void eventServiceGetSuccess() {
-        meterRegistry.counter("orchestrator.eventService.get.success").increment();
+        meterRegistry.counter("orchestrator_eventService_get_success").increment();
     }
 
     public void eventServiceGetFail() {
-        meterRegistry.counter("orchestrator.eventService.get.fail").increment();
+        meterRegistry.counter("orchestrator_eventService_get_fail").increment();
     }
 
     public void eventServiceGetFilterSuccess() {
-        meterRegistry.counter("orchestrator.eventService.getFilter.success").increment();
+        meterRegistry.counter("orchestrator_eventService_getFilter_success").increment();
     }
 
     public void eventServiceGetFilterFail() {
-        meterRegistry.counter("orchestrator.eventService.getFilter.fail").increment();
+        meterRegistry.counter("orchestrator_eventService_getFilter_fail").increment();
     }
 
     public void deviceServiceDeleteSuccess() {
-        meterRegistry.counter("orchestrator.deviceService.delete.success").increment();
+        meterRegistry.counter("orchestrator_deviceService_delete_success").increment();
     }
 
     public void deviceServiceDeleteFail() {
-        meterRegistry.counter("orchestrator.deviceService.delete.fail").increment();
+        meterRegistry.counter("orchestrator_deviceService_delete_fail").increment();
     }
 
     public void deviceUpdateSuccess() {
-        meterRegistry.counter("orchestrator.deviceService.update.success").increment();
+        meterRegistry.counter("orchestrator_deviceService_update_success").increment();
     }
 
     public void deviceUpdateFail() {
-        meterRegistry.counter("orchestrator.deviceService.update.fail").increment();
+        meterRegistry.counter("orchestrator_deviceService_update_fail").increment();
     }
 
     public void sagaUpdateVersionSuccess() {
-        meterRegistry.counter("orchestrator.saga.success").increment();
+        meterRegistry.counter("orchestrator_saga_success").increment();
     }
 
     public void sagaUpdateVersionRollback() {
-        meterRegistry.counter("orchestrator.saga.rollback").increment();
+        meterRegistry.counter("orchestrator_saga_rollback").increment();
     }
 
     public void sagaUpdateVersionFail() {
-        meterRegistry.counter("orchestrator.saga.fail").increment();
+        meterRegistry.counter("orchestrator_saga_fail").increment();
     }
 
     public void orchestratorRedisSuccess() {
-        meterRegistry.counter("orchestrator.redis.success").increment();
+        meterRegistry.counter("orchestrator_redis_success").increment();
     }
 
     public void orchestratorRedisFailure() {
-        meterRegistry.counter("orchestrator.redis.error").increment();
+        meterRegistry.counter("orchestrator_redis_fail").increment();
     }
 
     public void recordSuccess(String method, String uri, int status) {
-        meterRegistry.counter("orchestrator.requests.success",
+        meterRegistry.counter("orchestrator_success",
                 "method", method,
                 "uri", normalizeUri(uri),
                 "status", String.valueOf(status),
@@ -120,7 +120,7 @@ public class OrchestratorMetrics {
     }
 
     public void recordFailure(String method, String uri, int status, Throwable ex) {
-        meterRegistry.counter("orchestrator.requests.error",
+        meterRegistry.counter("orchestrator_fail",
                 "method", method,
                 "uri", normalizeUri(uri),
                 "status", String.valueOf(status),
@@ -130,7 +130,7 @@ public class OrchestratorMetrics {
     }
 
     public void recordExecutionTime(String method, String uri, long durationNs) {
-        Timer.builder("orchestrator.requests.duration")
+        Timer.builder("orchestrator_requests_duration_seconds")
                 .tag("method", method)
                 .tag("uri", normalizeUri(uri))
                 .description("Время выполнения запроса")

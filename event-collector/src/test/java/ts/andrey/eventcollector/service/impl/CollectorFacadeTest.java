@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ts.andrey.eventcollector.metrics.GlobalMetrics;
+import ts.andrey.eventcollector.metrics.EventCollectorMetrics;
 import ts.andrey.eventcollector.service.component.CollectorFacade;
 import ts.andrey.eventcollector.tdf.DummyTDF;
 
@@ -26,7 +26,7 @@ class CollectorFacadeTest {
     DeviceServiceImpl deviceServiceImpl;
 
     @Mock
-    GlobalMetrics globalMetrics;
+    EventCollectorMetrics eventCollectorMetrics;
 
     @InjectMocks
     CollectorFacade collectorService;

@@ -13,7 +13,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import ts.andrey.devicecollector.data.repository.DeviceBatchRepository;
 import ts.andrey.devicecollector.mapper.DeviceMapper;
-import ts.andrey.devicecollector.metrics.GlobalMetrics;
+import ts.andrey.devicecollector.metrics.DeviceCollectorMetrics;
 import ts.andrey.devicecollector.metrics.PostgresMetrics;
 import ts.andrey.devicecollector.utils.ShardUtil;
 import ts.andrey.iotcommon.service.KafkaProducer;
@@ -35,7 +35,7 @@ public class DeviceDataService {
 
     private final DeviceMapper deviceMapper;
     private final PostgresMetrics postgresMetrics;
-    private final GlobalMetrics globalKafkaMetrics;
+    private final DeviceCollectorMetrics globalKafkaMetrics;
     private final KafkaProducer kafkaDltProducerImpl;
     private final DeviceBatchRepository deviceBatchRepository;
 
@@ -57,6 +57,7 @@ public class DeviceDataService {
                     try {
                         deviceBatchRepository.batchUpsert(part);
                     } catch (Exception e) {
+                        globalKafkaMetrics.incrementError();
                         log.error("Ошибка при обработке батча:", e);
                         throw e;
                     }

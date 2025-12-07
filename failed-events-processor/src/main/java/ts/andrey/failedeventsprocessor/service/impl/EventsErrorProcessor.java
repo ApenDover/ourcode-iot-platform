@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ts.andrey.failedeventsprocessor.metrics.ErrorType;
-import ts.andrey.failedeventsprocessor.metrics.GlobalMetrics;
+import ts.andrey.failedeventsprocessor.metrics.FailEventMetrics;
 import ts.andrey.failedeventsprocessor.service.ErrorProcessor;
 import ts.andrey.failedeventsprocessor.service.MinioUploader;
 import ts.andrey.failedeventsprocessor.utils.JsonAvroConverter;
@@ -19,7 +19,7 @@ public class EventsErrorProcessor implements ErrorProcessor<DeviceEventError> {
 
     private final MinioUploader minioUploader;
 
-    private final GlobalMetrics metrics;
+    private final FailEventMetrics metrics;
 
     @Value("${minio.bucket-name}")
     private String bucketName;

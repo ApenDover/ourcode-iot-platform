@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import ts.andrey.devicecollector.metrics.DeviceCollectorMetrics;
 import ts.andrey.devicecollector.service.impl.DeviceServiceImpl;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 public class KafkaDeviceConsumer {
 
     private final DeviceServiceImpl deviceService;
+    private final DeviceCollectorMetrics deviceCollectorMetrics;
 
     @KafkaListener(
             topics = "${spring.kafka.template.device.topic}",
@@ -24,11 +26,17 @@ public class KafkaDeviceConsumer {
             containerFactory = "kafkaBatchDeviceListenerContainerFactory"
     )
     public void handleEvents(ConsumerRecords<String, Device> records) {
+        final var start = System.nanoTime();
+        try {
             final var devices = new ArrayList<Device>();
             records.forEach(message -> devices.add(message.value()));
             log.info("Получена пачка из [{}] девайсов", devices.size());
             log.debug("Получены девайсы: [{}]", devices);
             deviceService.createOrUpdateDevice(devices);
+        } finally {
+            final var durationNs = System.nanoTime() - start;
+            deviceCollectorMetrics.recordTime(durationNs);
+        }
     }
 
 }

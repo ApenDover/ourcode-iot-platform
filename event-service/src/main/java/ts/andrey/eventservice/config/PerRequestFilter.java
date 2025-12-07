@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
-import ts.andrey.eventservice.metrics.GlobalMetrics;
+import ts.andrey.eventservice.metrics.EventServiceMetrics;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,8 +23,7 @@ import java.nio.charset.StandardCharsets;
 public class PerRequestFilter extends OncePerRequestFilter {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    private final GlobalMetrics globalMetrics;
+    private final EventServiceMetrics eventServiceMetrics;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -32,7 +31,7 @@ public class PerRequestFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         final var start = System.nanoTime();
-        Exception exception = null;
+        Throwable exception = null;
 
         final var wrappedRequest = new ContentCachingRequestWrapper(request);
         final var wrappedResponse = new ContentCachingResponseWrapper(response);
@@ -43,24 +42,23 @@ public class PerRequestFilter extends OncePerRequestFilter {
             exception = ex;
             throw ex;
         } finally {
-            final var durationNs = System.nanoTime() - start;
+            if (!request.getRequestURI().contains("actuator")) {
+                final var durationNs = System.nanoTime() - start;
 
-            final var httpStatus = HttpStatus.resolve(wrappedResponse.getStatus());
-            final var isError = httpStatus != null && httpStatus.isError();
+                final var method = request.getMethod(); // GET, POST и т.д.
+                final var uri = request.getRequestURI();
+                final var status = wrappedResponse.getStatus();
 
-            final var method = wrappedRequest.getMethod().contains("/api/v1/events/")
-                    ? "GetEventById"
-                    : "GetEventByFilter";
+                eventServiceMetrics.recordRequestTime(method, uri, durationNs);
 
-            globalMetrics.recordEndpointTime(
-                    method,
-                    durationNs
-            );
+                final var httpStatus = HttpStatus.resolve(status);
+                final var isError = httpStatus != null && httpStatus.isError();
 
-            if (!isError && exception == null) {
-                globalMetrics.incrementSuccess(method);
-            } else {
-                globalMetrics.incrementError(method);
+                if (!isError && exception == null) {
+                    eventServiceMetrics.incrementSuccess(uri, method, status);
+                } else {
+                    eventServiceMetrics.incrementError(uri, method, status, exception);
+                }
             }
 
             logRequest(wrappedRequest);

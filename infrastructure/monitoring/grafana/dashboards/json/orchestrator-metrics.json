@@ -36,7 +36,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "custom": {
             "axisCenteredZero": false,
@@ -53,7 +53,7 @@
               "viz": false
             },
             "lineInterpolation": "linear",
-            "lineWidth": 1,
+            "lineWidth": 2,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -116,8 +116,8 @@
             "uid": "${datasource}"
           },
           "editorMode": "builder",
-          "expr": "sum(rate(orchestrator_requests_success_total[5m]))",
-          "legendFormat": "Success Requests",
+          "expr": "sum(rate(orchestrator_success_total[5m]))",
+          "legendFormat": "Успешные запросы",
           "range": true,
           "refId": "A"
         },
@@ -127,11 +127,21 @@
             "uid": "${datasource}"
           },
           "editorMode": "builder",
-          "expr": "sum(rate(orchestrator_requests_error_total[5m]))",
-          "hide": false,
-          "legendFormat": "Error Requests",
+          "expr": "sum(rate(orchestrator_fail_total[5m]))",
+          "legendFormat": "Ошибки запросов",
           "range": true,
           "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "builder",
+          "expr": "sum(rate(orchestrator_requests_duration_seconds_count{uri!~\"/actuator.*\"}[5m]))",
+          "legendFormat": "Всего запросов",
+          "range": true,
+          "refId": "C"
         }
       ],
       "title": "Общая нагрузка (RPS)",
@@ -145,7 +155,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "custom": {
             "axisCenteredZero": false,
@@ -183,11 +193,15 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0.95
+              },
+              {
+                "color": "yellow",
+                "value": 0.99
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 0.999
               }
             ]
           },
@@ -205,7 +219,6 @@
       "options": {
         "legend": {
           "calcs": [
-            "sum",
             "mean",
             "last"
           ],
@@ -225,13 +238,13 @@
             "uid": "${datasource}"
           },
           "editorMode": "builder",
-          "expr": "sum(rate(orchestrator_requests_error_total[5m])) / sum(rate(orchestrator_requests_success_total[5m] + orchestrator_requests_error_total[5m]))",
-          "legendFormat": "Error Rate",
+          "expr": "sum(rate(orchestrator_success_total[5m])) / (sum(rate(orchestrator_success_total[5m])) + sum(rate(orchestrator_fail_total[5m])))",
+          "legendFormat": "Success Rate",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Rate ошибок",
+      "title": "Success Rate",
       "type": "timeseries"
     },
     {
@@ -242,12 +255,12 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "custom": {
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "",
+            "axisLabel": "Время (мс)",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
@@ -284,7 +297,7 @@
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 500
               }
             ]
           },
@@ -322,7 +335,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "builder",
-          "expr": "histogram_quantile(0.95, sum(rate(orchestrator_requests_duration_seconds_bucket[5m])) by (le, uri))",
+          "expr": "histogram_quantile(0.95, sum(rate(orchestrator_requests_duration_seconds_bucket{uri!~\"/actuator.*\"}[5m])) by (le, uri)) * 1000",
           "legendFormat": "{{uri}} - p95",
           "range": true,
           "refId": "A"
@@ -333,7 +346,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "builder",
-          "expr": "histogram_quantile(0.50, sum(rate(orchestrator_requests_duration_seconds_bucket[5m])) by (le, uri))",
+          "expr": "histogram_quantile(0.50, sum(rate(orchestrator_requests_duration_seconds_bucket{uri!~\"/actuator.*\"}[5m])) by (le, uri)) * 1000",
           "legendFormat": "{{uri}} - p50",
           "range": true,
           "refId": "B"
@@ -344,13 +357,13 @@
             "uid": "${datasource}"
           },
           "editorMode": "builder",
-          "expr": "histogram_quantile(0.99, sum(rate(orchestrator_requests_duration_seconds_bucket[5m])) by (le, uri))",
+          "expr": "histogram_quantile(0.99, sum(rate(orchestrator_requests_duration_seconds_bucket{uri!~\"/actuator.*\"}[5m])) by (le, uri)) * 1000",
           "legendFormat": "{{uri}} - p99",
           "range": true,
           "refId": "C"
         }
       ],
-      "title": "Время ответа по endpoint (percentiles)",
+      "title": "Время ответа по endpoint",
       "type": "timeseries"
     },
     {
@@ -361,7 +374,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "custom": {
             "axisCenteredZero": false,
@@ -441,7 +454,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "builder",
-          "expr": "sum by (statusGroup) (rate(orchestrator_requests_error_total[5m]))",
+          "expr": "sum by (statusGroup) (rate(orchestrator_fail_total[5m]))",
           "legendFormat": "{{statusGroup}}",
           "range": true,
           "refId": "A"
@@ -458,7 +471,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "custom": {
             "axisCenteredZero": false,
@@ -588,7 +601,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "custom": {
             "axisCenteredZero": false,
@@ -718,7 +731,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "custom": {
             "axisCenteredZero": false,
@@ -848,7 +861,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "custom": {
             "axisCenteredZero": false,
@@ -972,8 +985,8 @@
             "uid": "${datasource}"
           },
           "editorMode": "builder",
-          "expr": "sum(rate(orchestrator_redis_error_total[5m]))",
-          "legendFormat": "Redis - Error",
+          "expr": "sum(rate(orchestrator_redis_fail_total[5m]))",
+          "legendFormat": "Redis - Fail",
           "range": true,
           "refId": "E"
         }
@@ -1018,7 +1031,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 24,
+        "w": 12,
         "x": 0,
         "y": 32
       },
@@ -1045,7 +1058,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "builder",
-          "expr": "topk(5, sum by (exception) (rate(orchestrator_requests_error_total[5m])))",
+          "expr": "topk(5, sum by (exception) (rate(orchestrator_fail_total[5m])))",
           "legendFormat": "{{exception}}",
           "range": true,
           "refId": "A"
@@ -1078,15 +1091,15 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "yellow",
-                "value": 0.5
+                "value": 0.05
               },
               {
                 "color": "red",
-                "value": 1
+                "value": 0.1
               }
             ]
           },
@@ -1096,9 +1109,9 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 40
+        "w": 12,
+        "x": 12,
+        "y": 32
       },
       "id": 10,
       "options": {
@@ -1118,7 +1131,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "builder",
-          "expr": "sum by (uri) (rate(orchestrator_requests_error_total[5m])) / sum by (uri) (rate(orchestrator_requests_success_total[5m] + orchestrator_requests_error_total[5m]))",
+          "expr": "sum by (uri) (rate(orchestrator_fail_total[5m])) / sum by (uri) (rate(orchestrator_success_total[5m] + orchestrator_fail_total[5m]))",
           "format": "table",
           "instant": true,
           "legendFormat": "{{uri}}",
@@ -1127,6 +1140,279 @@
         }
       ],
       "title": "Error Rate по endpoint",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 100
+              },
+              {
+                "color": "red",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 40
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "builder",
+          "expr": "histogram_quantile(0.95, sum(rate(orchestrator_requests_duration_seconds_bucket{uri!~\"/actuator.*\"}[5m])) by (le)) * 1000",
+          "legendFormat": "p95",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "⏱️ p95 Latency (мс)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 500
+              },
+              {
+                "color": "red",
+                "value": 1000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 40
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "builder",
+          "expr": "max_over_time(orchestrator_requests_duration_seconds_max{uri!~\"/actuator.*\"}[$__range]) * 1000",
+          "legendFormat": "Max Latency",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "⏱️ Max Latency (мс)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 100
+              },
+              {
+                "color": "red",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 40
+      },
+      "id": 13,
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Latency"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "builder",
+          "expr": "topk(10, histogram_quantile(0.95, sum(rate(orchestrator_requests_duration_seconds_bucket{uri!~\"/actuator.*\"}[5m])) by (le, uri)) * 1000)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{uri}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Топ-10 по Latency (p95)",
       "type": "table"
     }
   ],
@@ -1171,7 +1457,7 @@
         "multi": true,
         "name": "instance",
         "options": [],
-        "query": "label_values(orchestrator_requests_success_total, instance)",
+        "query": "label_values(orchestrator_success_total, instance)",
         "queryValue": "",
         "refresh": 1,
         "regex": "",
@@ -1248,6 +1534,6 @@
   },
   "timezone": "",
   "title": "Orchestrator API Dashboard",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }

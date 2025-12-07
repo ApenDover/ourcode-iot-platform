@@ -12,7 +12,7 @@ public class GlobalKafkaMetrics {
     private final MeterRegistry meterRegistry;
 
     public void incrementSuccess(String topic) {
-        Counter counter = Counter.builder("iot.kafka.messages.sent")
+        Counter counter = Counter.builder("iot_kafka_messages_sent")
                 .description("Successfully sent Kafka messages")
                 .tag("topic", topic)
                 .register(meterRegistry);
@@ -20,7 +20,7 @@ public class GlobalKafkaMetrics {
     }
 
     public void incrementDlt(String topic) {
-        Counter counter = Counter.builder("iot.kafka.messages.dlt.success")
+        Counter counter = Counter.builder("iot_kafka_messages_dlt_success")
                 .description("Messages sent to Dead Letter Topic")
                 .tag("topic", topic)
                 .register(meterRegistry);
@@ -28,7 +28,7 @@ public class GlobalKafkaMetrics {
     }
 
     public void incrementErrorDlt() {
-        Counter counter = Counter.builder("iot.kafka.messages.dlt.fail")
+        Counter counter = Counter.builder("iot_kafka_messages_dlt_fail")
                 .description("Messages do not sent to Dead Letter Topic")
                 .register(meterRegistry);
         counter.increment();

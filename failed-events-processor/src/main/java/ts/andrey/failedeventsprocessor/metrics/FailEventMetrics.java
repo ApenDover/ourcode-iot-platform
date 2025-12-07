@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class GlobalMetrics {
+public class FailEventMetrics {
 
     private final MeterRegistry meterRegistry;
 

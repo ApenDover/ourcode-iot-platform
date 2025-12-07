@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PostgresMetrics {
 
     private final MeterRegistry registry;
+
     private final Map<String, Counter> successCounters = new ConcurrentHashMap<>();
     private final Map<String, Counter> errorCounters = new ConcurrentHashMap<>();
 
@@ -27,14 +28,14 @@ public class PostgresMetrics {
     }
 
     private Counter createSuccessCounter(String shardId) {
-        return Counter.builder("device.postgres.success")
+        return Counter.builder("device_collector_postgres_success")
                 .description("Число успешных сохранений на шард")
                 .tag("shard", shardId)
                 .register(registry);
     }
 
     private Counter createErrorCounter(String shardId) {
-        return Counter.builder("device.postgres.error")
+        return Counter.builder("device_collector_postgres_fail")
                 .description("Число ошибок при сохранении на шард")
                 .tag("shard", shardId)
                 .register(registry);

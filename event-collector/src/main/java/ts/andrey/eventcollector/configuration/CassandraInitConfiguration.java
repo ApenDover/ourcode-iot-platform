@@ -3,6 +3,7 @@ package ts.andrey.eventcollector.configuration;
 import com.datastax.oss.driver.api.core.CqlSession;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +13,9 @@ import org.springframework.data.cassandra.core.CassandraTemplate;
 
 import java.net.InetSocketAddress;
 import java.util.Collections;
+import java.util.List;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 @Profile("!test")
@@ -28,7 +31,7 @@ public class CassandraInitConfiguration {
     private Integer port;
 
     @Value("${spring.cassandra.contact-points}")
-    private String contactPoints;
+    private List<String> contactPoints;
 
     @Value("${spring.cassandra.local-datacenter}")
     private String localDatacenter;
@@ -39,7 +42,7 @@ public class CassandraInitConfiguration {
     @Bean
     public CqlSessionFactoryBean session() {
         CqlSessionFactoryBean session = new CqlSessionFactoryBean();
-        session.setContactPoints(contactPoints);
+        session.setContactPoints(cassandraPoints());
         session.setPort(port);
         session.setLocalDatacenter(localDatacenter);
         session.setKeyspaceCreations(Collections.emptyList());
@@ -48,7 +51,10 @@ public class CassandraInitConfiguration {
 
     @Bean
     public CassandraTemplate cassandraTemplate(CqlSession session) {
-        session.execute(String.format(CQL_INIT, keyspace, replicationStrategy));
+        final var strategy = replicationStrategy.replaceAll("\"", "");
+        final var connected = String.format(CQL_INIT, keyspace, strategy);
+        log.info("Подключение к : {}", connected);
+        session.execute(connected);
         session.execute("USE " + keyspace);
         return new CassandraTemplate(session);
     }
@@ -56,12 +62,17 @@ public class CassandraInitConfiguration {
     @PostConstruct
     public void init() {
         try (CqlSession session = CqlSession.builder()
-                .addContactPoint(
-                        new InetSocketAddress(contactPoints, port))
+                .addContactPoints(cassandraPoints())
                 .withLocalDatacenter(localDatacenter)
                 .build()) {
             session.execute(String.format(CQL_INIT, keyspace, replicationStrategy));
         }
+    }
+
+    public List<InetSocketAddress> cassandraPoints() {
+        return contactPoints.stream()
+                .map(it -> new InetSocketAddress(it, port))
+                .toList();
     }
 
 }

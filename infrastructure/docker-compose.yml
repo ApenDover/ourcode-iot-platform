@@ -13,6 +13,13 @@ services:
     ports:
       - 8887:8887
     environment:
+      JAVA_OPTS: >-
+        -Xmx512m
+        -Xms256m
+        -XX:MaxRAMPercentage=60.0
+        -XX:+UseZGC
+        -XX:+ZUncommit
+        -XX:ZUncommitDelay=30
       OTEL_SERVICE_NAME: kafka-producer
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
@@ -45,6 +52,13 @@ services:
       - 8889:8889
     restart: unless-stopped
     environment:
+      JAVA_OPTS: >-
+        -Xmx512m
+        -Xms256m
+        -XX:MaxRAMPercentage=60.0
+        -XX:+UseZGC
+        -XX:+ZUncommit
+        -XX:ZUncommitDelay=30
       OTEL_SERVICE_NAME: device-collector
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
@@ -79,6 +93,13 @@ services:
       - 8879:8879
     restart: unless-stopped
     environment:
+      JAVA_OPTS: >-
+        -Xmx512m
+        -Xms256m
+        -XX:MaxRAMPercentage=60.0
+        -XX:+UseZGC
+        -XX:+ZUncommit
+        -XX:ZUncommitDelay=30
       OTEL_SERVICE_NAME: orchestrator
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
@@ -117,6 +138,13 @@ services:
       - 8886:8886
     restart: unless-stopped
     environment:
+      JAVA_OPTS: >-
+        -Xmx512m
+        -Xms256m
+        -XX:MaxRAMPercentage=60.0
+        -XX:+UseZGC
+        -XX:+ZUncommit
+        -XX:ZUncommitDelay=30
       OTEL_SERVICE_NAME: device-service
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
@@ -157,6 +185,13 @@ services:
       - "8881:8881"
     restart: unless-stopped
     environment:
+      JAVA_OPTS: >-
+        -Xmx512m
+        -Xms256m
+        -XX:MaxRAMPercentage=60.0
+        -XX:+UseZGC
+        -XX:+ZUncommit
+        -XX:ZUncommitDelay=30
       OTEL_SERVICE_NAME: event-service
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
@@ -189,6 +224,13 @@ services:
     env_file:
       - .env
     environment:
+      JAVA_OPTS: >-
+        -Xmx512m
+        -Xms256m
+        -XX:MaxRAMPercentage=60.0
+        -XX:+UseZGC
+        -XX:+ZUncommit
+        -XX:ZUncommitDelay=30
       OTEL_SERVICE_NAME: event-collector
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
@@ -540,26 +582,26 @@ services:
       retries: 5
     networks:
       - iot_network
-  postgres_keycloak:
-    container_name: postgres_keycloak
-    image: postgres:15
-    restart: unless-stopped
-    ports:
-      - "5430:5432"
-    volumes:
-      - postgres_keycloak_data:/var/lib/postgresql/data
-    env_file:
-      - .env
-    environment:
-      POSTGRES_USER: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
-      POSTGRES_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_KEYCLOAK_DB}
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${APP_DATASOURCE_KEYCLOAK_USERNAME}", "-d", "${POSTGRES_KEYCLOAK_DB}" ]
-      interval: 10s
-      retries: 5
-    networks:
-      - iot_network
+  #  postgres_keycloak:
+  #    container_name: postgres_keycloak
+  #    image: postgres:15
+  #    restart: unless-stopped
+  #    ports:
+  #      - "5430:5432"
+  #    volumes:
+  #      - postgres_keycloak_data:/var/lib/postgresql/data
+  #    env_file:
+  #      - .env
+  #    environment:
+  #      POSTGRES_USER: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
+  #      POSTGRES_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
+  #      POSTGRES_DB: ${POSTGRES_KEYCLOAK_DB}
+  #    healthcheck:
+  #      test: [ "CMD", "pg_isready", "-U", "${APP_DATASOURCE_KEYCLOAK_USERNAME}", "-d", "${POSTGRES_KEYCLOAK_DB}" ]
+  #      interval: 10s
+  #      retries: 5
+  #    networks:
+  #      - iot_network
   keycloak:
     image: quay.io/keycloak/keycloak:26.3
     container_name: keycloak
@@ -569,19 +611,19 @@ services:
     command:
       - start-dev
       - --import-realm
-    environment:
-      KC_DB: postgres
-      KC_DB_URL_HOST: postgres_keycloak
-      KC_DB_URL_DATABASE: ${POSTGRES_KEYCLOAK_DB}
-      KC_DB_USERNAME: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
-      KC_DB_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
+    #    environment:
+    #      KC_DB: postgres
+    #      KC_DB_URL_HOST: postgres_keycloak
+    #      KC_DB_URL_DATABASE: ${POSTGRES_KEYCLOAK_DB}
+    #      KC_DB_USERNAME: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
+    #      KC_DB_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     ports:
       - "7878:8080"
-    depends_on:
-      postgres_keycloak:
-        condition: service_healthy
+    #    depends_on:
+    #      postgres_keycloak:
+    #        condition: service_healthy
     networks:
       - iot_network
   redis:
@@ -649,11 +691,11 @@ services:
     networks:
       - iot_network
   cassandra:
-    image: cassandra:4.1
-    ports:
-      - "9042:9042"
+    image: cassandra:4.0
     container_name: cassandra
     restart: unless-stopped
+    platform: linux/amd64  # Использовать эмуляцию x86_64
+    cpus: '2.0'
     environment:
       CASSANDRA_CLUSTER_NAME: "TestCluster"
       CASSANDRA_NUM_TOKENS: 256
@@ -666,7 +708,9 @@ services:
         -Dcom.sun.management.jmxremote.ssl=false
         -Dcom.sun.management.jmxremote.authenticate=false
         -Dcom.sun.management.jmxremote.local.only=false
-        -Djava.rmi.server.hostname=cassandra
+        -Djava.rmi.server.hostname=cassandra-seed
+    ports:
+      - "9042:9042"
     healthcheck:
       test: [ "CMD", "cqlsh", "-e", "describe keyspaces" ]
       interval: 10s
@@ -800,7 +844,6 @@ volumes:
   schema-registry-data:
   zookeeper_data:
   postgres_data_router_manager:
-  postgres_keycloak_data:
   postgres_data1:
   postgres_data2:
   postgres_data1r:

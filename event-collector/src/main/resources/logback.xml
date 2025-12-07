@@ -55,6 +55,7 @@
     </appender>
 
     <!-- Включаем логирование Spring Kafka для отладки -->
+    <logger name="org.springframework" level="INFO"/>
     <logger name="org.springframework.kafka" level="INFO"/>
     <logger name="org.apache.kafka" level="WARN"/>
 

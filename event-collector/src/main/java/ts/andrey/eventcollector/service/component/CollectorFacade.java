@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import ts.andrey.eventcollector.metrics.GlobalMetrics;
+import ts.andrey.eventcollector.metrics.EventCollectorMetrics;
 import ts.andrey.eventcollector.service.DeviceEventService;
 import ts.andrey.eventcollector.service.DeviceService;
 
@@ -19,7 +19,7 @@ public class CollectorFacade {
 
     private final DeviceEventService deviceEventService;
     private final DeviceService deviceService;
-    private final GlobalMetrics globalMetrics;
+    private final EventCollectorMetrics eventCollectorMetrics;
 
     @WithSpan("event-collector-processing")
     public void collect(List<DeviceEvent> events) {
@@ -29,9 +29,9 @@ public class CollectorFacade {
             }
             deviceService.sendUniqueDeviceids(events);
             deviceEventService.saveEvents(events);
-            globalMetrics.incrementSuccess();
+            eventCollectorMetrics.incrementSuccess();
         } catch (Exception e) {
-            globalMetrics.incrementError();
+            eventCollectorMetrics.incrementError();
             log.error("Ошибка при обработке событий", e);
             throw e;
         }

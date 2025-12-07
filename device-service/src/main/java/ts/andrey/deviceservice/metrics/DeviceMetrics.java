@@ -19,43 +19,43 @@ public class DeviceMetrics {
     private final MeterRegistry meterRegistry;
 
     public void getDeviceRedisSuccess() {
-        meterRegistry.counter("device.redis.get").increment();
+        meterRegistry.counter("device_service_redis_get").increment();
     }
 
     public void saveDeviceRedisSuccess() {
-        meterRegistry.counter("device.redis.save").increment();
+        meterRegistry.counter("device_service_redis_save").increment();
     }
 
     public void deleteDeviceRedisSuccess() {
-        meterRegistry.counter("device.redis.delete").increment();
+        meterRegistry.counter("device_service_redis_delete").increment();
     }
 
     public void deviceRedisSuccess() {
-        meterRegistry.counter("device.redis.success").increment();
+        meterRegistry.counter("device_service_redis_success").increment();
     }
 
     public void deviceRedisFailure() {
-        meterRegistry.counter("device.redis.error").increment();
+        meterRegistry.counter("device_service_redis_fail").increment();
     }
 
     public void getDeviceSuccess() {
-        meterRegistry.counter("device.database.get").increment();
+        meterRegistry.counter("device_service_database_get").increment();
     }
 
     public void deleteDeviceSuccess() {
-        meterRegistry.counter("device.database.delete").increment();
+        meterRegistry.counter("device_service_database_delete").increment();
     }
 
     public void updateDeviceSuccess() {
-        meterRegistry.counter("device.database.update").increment();
+        meterRegistry.counter("device_service_database_update").increment();
     }
 
     public void createDeviceSuccess() {
-        meterRegistry.counter("device.database.create").increment();
+        meterRegistry.counter("device_service_database_create").increment();
     }
 
     public void recordSuccess(String method, String uri, int status) {
-        meterRegistry.counter("device.requests.success",
+        meterRegistry.counter("device_service_success",
                 "method", method,
                 "uri", normalizeUri(uri),
                 "status", String.valueOf(status),
@@ -64,7 +64,7 @@ public class DeviceMetrics {
     }
 
     public void recordFailure(String method, String uri, int status, Throwable ex) {
-        meterRegistry.counter("device.requests.error",
+        meterRegistry.counter("device_service_fail",
                 "method", method,
                 "uri", normalizeUri(uri),
                 "status", String.valueOf(status),
@@ -74,7 +74,7 @@ public class DeviceMetrics {
     }
 
     public void recordExecutionTime(String method, String uri, long durationNs) {
-        Timer.builder("device.requests.duration")
+        Timer.builder("device_service_requests_duration_seconds")
                 .tag("method", method)
                 .tag("uri", normalizeUri(uri))
                 .description("Время выполнения запроса")
@@ -85,7 +85,7 @@ public class DeviceMetrics {
     }
 
     public void recordDatabaseError(String operation) {
-        meterRegistry.counter("device.database.error",
+        meterRegistry.counter("device_service_database_fail",
                         "operation", operation)
                 .increment();
     }

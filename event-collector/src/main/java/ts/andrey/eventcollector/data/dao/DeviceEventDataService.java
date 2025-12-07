@@ -11,7 +11,7 @@ import reactor.util.retry.Retry;
 import ts.andrey.eventcollector.data.entity.DeviceEventEntity;
 import ts.andrey.eventcollector.data.repository.DeviceEventReactRepository;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
-import ts.andrey.eventcollector.metrics.CassandraMetrics;
+import ts.andrey.eventcollector.metrics.EventCollectorMetrics;
 import ts.andrey.iotcommon.service.KafkaProducer;
 import ts.andrey.iotcommon.utils.MessageDltBuilder;
 
@@ -30,8 +30,8 @@ public class DeviceEventDataService {
 
     private final KafkaProducer kafkaDltProducerImpl;
     private final DeviceEventMapper deviceEventMapper;
-    private final CassandraMetrics cassandraMetrics;
     private final DeviceEventReactRepository deviceEventReactRepository;
+    private final EventCollectorMetrics eventCollectorMetrics;
 
     @Value("${app.cassandra.batch-size}")
     private Integer bufferSize;
@@ -67,7 +67,7 @@ public class DeviceEventDataService {
         log.debug("Processing batch of [{}] events", batch.size());
         return deviceEventReactRepository.saveAll(batch)
                 .doOnNext(e -> {
-                    cassandraMetrics.incrementSuccess();
+                    eventCollectorMetrics.incrementCassandraSuccess();
                     log.debug("Событие [{}] успешно сохранено", e.getKey().getEventId());
                 })
                 .then()
@@ -83,7 +83,7 @@ public class DeviceEventDataService {
         log.info("Обработка ошибки для [{}]", event);
         return deviceEventReactRepository.save(event)
                 .doOnSuccess(e -> {
-                    cassandraMetrics.incrementSuccess();
+                    eventCollectorMetrics.incrementCassandraSuccess();
                     log.debug("Событие [{}] успешно сохранено", e.getKey().getEventId());
                 })
                 .retryWhen(
@@ -97,13 +97,14 @@ public class DeviceEventDataService {
                                                 maxAttempts))
                 )
                 .onErrorResume(inner -> {
-                    cassandraMetrics.incrementError();
+                    eventCollectorMetrics.incrementCassandraError();
                     log.error("Ошибка сохранения события [{}] в Cassandra после всех попыток",
                             event.getKey().getEventId(), inner);
 
                     Optional.ofNullable(eventMap.get(event.getKey().getEventId()))
                             .ifPresent(original -> {
                                 final var errorMessage = MessageDltBuilder.getMessage(original, inner);
+                                eventCollectorMetrics.incrementDltMessage();
                                 kafkaDltProducerImpl.send(List.of(errorMessage));
                             });
 
