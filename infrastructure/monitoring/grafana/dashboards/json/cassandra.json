@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 1,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -55,7 +55,7 @@
         "content": "### Cassandra SLA Dashboard\n#### This dashboard provides the following informations :\n_User metrics_\n* __max latencies by percentile__ : read / write / scan\n* __OPS__ : read / write\n* __Disk usage__ : live space / total space\n* __JAVA heap & non heap usage__ : current memory / max allowed\n\n_Advanced metrics_\n* __Pending operations__ :  compactions / flushes\n* __Streaming & CommitLog__ : OPS / throughput\n* __Repair ratio__ : for every keyspace\n* __Memtable statistics__\n* __Row cache__ : hit rates\n* __Thread pools metrics__ : OPS / blocked / pending",
         "mode": "markdown"
       },
-      "pluginVersion": "11.5.8",
+      "pluginVersion": "12.2.0-16979757807",
       "title": "README",
       "transparent": true,
       "type": "text"
@@ -123,7 +123,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -159,7 +159,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.8",
+      "pluginVersion": "12.2.0-16979757807",
       "targets": [
         {
           "datasource": {
@@ -239,7 +239,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -275,7 +275,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.8",
+      "pluginVersion": "12.2.0-16979757807",
       "targets": [
         {
           "datasource": {
@@ -355,7 +355,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -391,7 +391,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.8",
+      "pluginVersion": "12.2.0-16979757807",
       "targets": [
         {
           "datasource": {
@@ -470,7 +470,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -506,7 +506,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.8",
+      "pluginVersion": "12.2.0-16979757807",
       "targets": [
         {
           "datasource": {
@@ -584,7 +584,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -620,7 +620,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.8",
+      "pluginVersion": "12.2.0-16979757807",
       "targets": [
         {
           "datasource": {
@@ -688,7 +688,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -722,7 +722,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.8",
+      "pluginVersion": "12.2.0-16979757807",
       "targets": [
         {
           "datasource": {
@@ -2367,7 +2367,7 @@
   ],
   "preload": false,
   "refresh": false,
-  "schemaVersion": 40,
+  "schemaVersion": 41,
   "tags": [
     "cassandra"
   ],
@@ -2445,11 +2445,9 @@
       {
         "allValue": ".*",
         "current": {
-          "text": [
-            "device_events"
-          ],
+          "text": "All",
           "value": [
-            "device_events"
+            "$__all"
           ]
         },
         "datasource": {
@@ -2506,13 +2504,12 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Cassandra",
   "uid": "cassandra",
-  "version": 1,
-  "weekStart": ""
+  "version": 1
 }

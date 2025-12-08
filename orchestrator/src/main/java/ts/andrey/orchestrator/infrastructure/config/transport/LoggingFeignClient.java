@@ -5,6 +5,10 @@ import feign.Request;
 import feign.Response;
 import feign.httpclient.ApacheHttpClient;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StreamUtils;
 import ts.andrey.orchestrator.domain.exception.OrchestratorException;
@@ -21,19 +25,36 @@ public class LoggingFeignClient implements Client {
     private final Client delegate;
 
     public LoggingFeignClient() {
-        this.delegate = new ApacheHttpClient();
+        this.delegate = new ApacheHttpClient(createHttpClient());
+    }
+
+    private CloseableHttpClient createHttpClient() {
+        RequestConfig config = RequestConfig.custom()
+                .setConnectTimeout(300)
+                .setConnectionRequestTimeout(300)
+                .setSocketTimeout(800)
+                .build();
+
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        cm.setMaxTotal(200);
+        cm.setDefaultMaxPerRoute(100);
+
+        return HttpClientBuilder.create()
+                .setConnectionManager(cm)
+                .setDefaultRequestConfig(config)
+                .build();
     }
 
     @Override
     public Response execute(Request request, Request.Options options) throws IOException {
         if (request.httpMethod().equals(Request.HttpMethod.POST)) {
-            List<String> heads = new ArrayList<String>();
+            List<String> heads = new ArrayList<>();
             request.headers().forEach((key, values) ->
                     heads.add(key + ": " + String.join(",", values))
             );
             log.info("Request:{}, {}", heads, new String(request.body(), StandardCharsets.UTF_8));
         } else {
-            List<String> heads = new ArrayList<String>();
+            List<String> heads = new ArrayList<>();
             request.headers().forEach((key, values) ->
                     heads.add(key + ": " + String.join(",", values))
             );

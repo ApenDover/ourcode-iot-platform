@@ -605,25 +605,21 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.3
     container_name: keycloak
+    environment:
+      - KC_CACHE=ispn
+      - KC_CACHE_STACK=docker
+      - KC_METRICS_ENABLED=true
+      - KC_HEALTH_ENABLED=true
     env_file:
       - .env
     restart: unless-stopped
     command:
       - start-dev
       - --import-realm
-    #    environment:
-    #      KC_DB: postgres
-    #      KC_DB_URL_HOST: postgres_keycloak
-    #      KC_DB_URL_DATABASE: ${POSTGRES_KEYCLOAK_DB}
-    #      KC_DB_USERNAME: ${APP_DATASOURCE_KEYCLOAK_USERNAME}
-    #      KC_DB_PASSWORD: ${APP_DATASOURCE_KEYCLOAK_PASSWORD}
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     ports:
       - "7878:8080"
-    #    depends_on:
-    #      postgres_keycloak:
-    #        condition: service_healthy
     networks:
       - iot_network
   redis:
@@ -708,7 +704,7 @@ services:
         -Dcom.sun.management.jmxremote.ssl=false
         -Dcom.sun.management.jmxremote.authenticate=false
         -Dcom.sun.management.jmxremote.local.only=false
-        -Djava.rmi.server.hostname=cassandra-seed
+        -Djava.rmi.server.hostname=cassandra
     ports:
       - "9042:9042"
     healthcheck:
