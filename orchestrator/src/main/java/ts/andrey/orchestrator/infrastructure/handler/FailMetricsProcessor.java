@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import ts.andrey.orchestrator.domain.ApiEndpoint;
 import ts.andrey.orchestrator.domain.metrics.OrchestratorMetrics;
 
+import java.net.URI;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -40,6 +42,9 @@ public class FailMetricsProcessor {
     ApiEndpoint resolveEndpoint(String method, String requestUri) {
         String normalizedUri = normalizeUri(requestUri);
         for (ApiEndpoint endpoint : ApiEndpoint.values()) {
+            if (endpoint.equals(ApiEndpoint.GET_DEVICES)) {
+                System.out.println();
+            }
             if (endpoint.getMethod().equalsIgnoreCase(method) &&
                     matchesPath(endpoint.getPath(), normalizedUri)) {
                 return endpoint;
@@ -50,35 +55,41 @@ public class FailMetricsProcessor {
     }
 
     private boolean matchesPath(String endpointPath, String requestUri) {
-        if (endpointPath.equals(requestUri)) {
-            return true;
-        }
-
-        String[] endpointParts = endpointPath.split("/");
-        String[] requestParts = requestUri.split("/");
-
-        if (endpointParts.length != requestParts.length) {
-            return false;
-        }
-
-        for (int i = 0; i < endpointParts.length; i++) {
-            String endpointPart = endpointParts[i];
-            String requestPart = requestParts[i];
-
-            if (endpointPart.startsWith("{") && endpointPart.endsWith("}")) {
-                // Проверяем, что параметр не пустой
-                if (requestPart.isEmpty()) {
-                    return false;
-                }
-                continue;
+        try {
+            final var uri = new URI(requestUri).getPath();
+            if (endpointPath.equals(uri)) {
+                return true;
             }
 
-            if (!endpointPart.equals(requestPart)) {
+            String[] endpointParts = endpointPath.split("/");
+            String[] requestParts = uri.split("/");
+
+            if (endpointParts.length != requestParts.length) {
                 return false;
             }
-        }
 
-        return true;
+            for (int i = 0; i < endpointParts.length; i++) {
+                String endpointPart = endpointParts[i];
+                String requestPart = requestParts[i];
+
+                if (endpointPart.startsWith("{") && endpointPart.endsWith("}")) {
+                    // Проверяем, что параметр не пустой
+                    if (requestPart.isEmpty()) {
+                        return false;
+                    }
+                    continue;
+                }
+
+                if (!endpointPart.equals(requestPart)) {
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return false;
+        }
     }
 
     private void sendFailMetric(ApiEndpoint endpoint) {

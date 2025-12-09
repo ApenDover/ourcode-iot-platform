@@ -51,6 +51,17 @@ opentelemetry:
 spring:
   application:
     name: orchestrator
+  cloud:
+    openfeign:
+      httpclient:
+        enabled: true
+        max-connections: 1000
+        max-connections-per-route: 500
+        connection-timeout: 300
+        time-to-live: 180000
+        follow-redirects: false
+        disable-ssl-validation: false
+
   data:
     redis:
       host: ${REDIS_ORCHESTRATOR_HOST}
@@ -75,8 +86,14 @@ spring:
           audiences: device-service,orchestrator,account
 
 orchestrator:
-  feign-logger:
+  filter:
     enabled: true
+    log-body: true
+    max-body-size: 1024
+    async-metrics: true
+    excluded-paths: /actuator/**,/health,/metrics
+  feign-logger:
+    enabled: false
   integration:
     event-service:
       url: event-service:8881
@@ -89,6 +106,9 @@ orchestrator:
     enabled: ${ORCHESTRATOR_REDIS_ENABLED:true}
     ttl-minutes: 5
 
-feign:
-  httpclient:
-    enabled: true
+logging:
+  level:
+#    FEIGN: INFO
+#    feign.Logger: WARN
+#    ts.andrey.orchestrator.infrastructure.out.port: debug
+    root: info

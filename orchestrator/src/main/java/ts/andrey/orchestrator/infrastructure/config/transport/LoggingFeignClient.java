@@ -17,15 +17,18 @@ import ts.andrey.orchestrator.infrastructure.util.JsonUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
 public class LoggingFeignClient implements Client {
 
     private final Client delegate;
+    private boolean isLoggingEnabled;
 
-    public LoggingFeignClient() {
+    public LoggingFeignClient(boolean loggingEnabled) {
         this.delegate = new ApacheHttpClient(createHttpClient());
+        isLoggingEnabled = loggingEnabled;
     }
 
     private CloseableHttpClient createHttpClient() {
@@ -47,18 +50,30 @@ public class LoggingFeignClient implements Client {
 
     @Override
     public Response execute(Request request, Request.Options options) throws IOException {
+        if (!isLoggingEnabled) {
+            return delegate.execute(request, options);
+        }
         if (request.httpMethod().equals(Request.HttpMethod.POST)) {
             List<String> heads = new ArrayList<>();
-            request.headers().forEach((key, values) ->
-                    heads.add(key + ": " + String.join(",", values))
+            request.headers().forEach((key, values) -> {
+                        if (!key.equalsIgnoreCase("Authorization")) {
+                            heads.add(key + ": " + String.join(",", values));
+                        } else {
+                            heads.add(key + ": " + "Token");
+                        }
+                    }
             );
-            log.info("Request:{}, {}", heads, new String(request.body(), StandardCharsets.UTF_8));
+            log.info("Request:{}, {}", heads, Arrays.toString(request.body()));
         } else {
             List<String> heads = new ArrayList<>();
-            request.headers().forEach((key, values) ->
-                    heads.add(key + ": " + String.join(",", values))
-            );
-            log.info("GET request to {}, headers: {}", request.url(), request.headers());
+            request.headers().forEach((key, values) -> {
+                if (!key.equalsIgnoreCase("Authorization")) {
+                    heads.add(key + ": " + String.join(",", values));
+                } else {
+                    heads.add(key + ": " + "Token");
+                }
+            });
+            log.info("GET request to {}, headers: {}", request.url(), heads);
         }
 
         try (var response = delegate.execute(request, options)) {

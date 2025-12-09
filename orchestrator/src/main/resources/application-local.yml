@@ -75,26 +75,32 @@ spring:
           audiences: device-service,orchestrator,account
 
 orchestrator:
+  filter:
+    enabled: false
+    log-body: true
+    max-body-size: 1024
+    async-metrics: true
+    excluded-paths: /actuator/**,/health,/metrics
   feign-logger:
-    enabled: true
+    enabled: false
   integration:
     event-service:
-      url: localhost:8881
+      url: event-service:8881
     device-service:
-      url: localhost:8886
+      url: device-service:8886
     router-manager:
-      host: localhost
-      port: 8890
+      host: router-manager-service
+      port: 9092
   redis:
-    enabled: ${ORCHESTRATOR_REDIS_ENABLED:true}
+    enabled: true
     ttl-minutes: 5
 
-logging:
-  level:
-    org.springframework.security: DEBUG
-    org.springframework.security.oauth2: DEBUG
-    org.springframework.security.web: DEBUG
-    org.springframework.security.oauth2.server.resource: TRACE
-    org.springframework.security.oauth2.jwt: TRACE
-    org.springframework.web: DEBUG
-    org.springframework.web.filter: DEBUG
+#logging:
+#  level:
+#    org.springframework.security: DEBUG
+#    org.springframework.security.oauth2: DEBUG
+#    org.springframework.security.web: DEBUG
+#    org.springframework.security.oauth2.server.resource: TRACE
+#    org.springframework.security.oauth2.jwt: TRACE
+#    org.springframework.web: DEBUG
+#    org.springframework.web.filter: DEBUG
