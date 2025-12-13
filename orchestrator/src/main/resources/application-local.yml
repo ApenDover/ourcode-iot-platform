@@ -75,12 +75,7 @@ spring:
           audiences: device-service,orchestrator,account
 
 orchestrator:
-  filter:
-    enabled: false
-    log-body: true
-    max-body-size: 1024
-    async-metrics: true
-    excluded-paths: /actuator/**,/health,/metrics
+  print-log: true
   feign-logger:
     enabled: false
   integration:

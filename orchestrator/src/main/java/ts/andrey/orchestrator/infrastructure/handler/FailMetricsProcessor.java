@@ -35,10 +35,6 @@ public class FailMetricsProcessor {
         }
     }
 
-    public void sendFail(String method, String requestUri) {
-        sendFail(method, requestUri, null);
-    }
-
     ApiEndpoint resolveEndpoint(String method, String requestUri) {
         String normalizedUri = normalizeUri(requestUri);
         for (ApiEndpoint endpoint : ApiEndpoint.values()) {

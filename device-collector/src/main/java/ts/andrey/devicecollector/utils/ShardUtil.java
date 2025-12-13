@@ -2,7 +2,7 @@ package ts.andrey.devicecollector.utils;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import ts.andrey.devicecollector.configuration.ShardingSphereConfig;
+import ts.andrey.devicecollector.config.ShardingSphereConfig;
 
 @Slf4j
 @UtilityClass

@@ -4,7 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
-import ts.andrey.deviceservice.configuration.model.DataSourcesConfig;
+import ts.andrey.deviceservice.config.model.DataSourcesConfig;
 import ts.andrey.deviceservice.exception.DeviceServiceException;
 
 @Slf4j

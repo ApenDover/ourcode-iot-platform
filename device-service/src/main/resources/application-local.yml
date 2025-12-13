@@ -93,6 +93,7 @@ spring:
           audiences: device-service,orchestrator,account
 
 app:
+  print-log: true
   redis:
     enabled: true
   shardingSphere:

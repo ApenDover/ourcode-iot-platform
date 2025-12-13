@@ -14,7 +14,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-import ts.andrey.deviceservice.configuration.MdcInterceptor;
+import ts.andrey.deviceservice.config.MdcInterceptor;
 import ts.andrey.dto.DeviceError;
 
 import java.util.Objects;

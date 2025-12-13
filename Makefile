@@ -225,11 +225,14 @@ proto-gen:
 clear:
 	docker rm -f device-api iot-common iot-avro router-manager-proto-client
 
-jmeter: j-prepare
+jmeter-rms: j-prepare
 	JVM_ARGS="-Xms512m -Xmx2g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/router-manager-service.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o ./report
 
-j-device-prepare:
+jmeter:
+	JVM_ARGS="-Xms2g -Xmx12g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/iot.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o $(PROJECT_ROOT)/infrastructure/jmeter/log
 
+j-report:
+	jmeter -g $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -o $(PROJECT_ROOT)/infrastructure/jmeter/report
 
 j-prepare:
 	@docker exec -i -e PGPASSWORD=$(APP_ROUTER_MANAGER_DATASOURCE_PASSWORD) postgres_router_manager \

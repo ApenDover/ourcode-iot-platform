@@ -1,20 +1,13 @@
 package ts.andrey.orchestrator.domain.metrics;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-
 @Service
 @RequiredArgsConstructor
 public class OrchestratorMetrics {
-
-    private static final int SLA_ONE = 100;
-    private static final int SLA_TWO = 500;
-    private static final int SLA_THREE = 1;
 
     private final MeterRegistry meterRegistry;
 
@@ -110,15 +103,6 @@ public class OrchestratorMetrics {
         meterRegistry.counter("orchestrator_redis_fail").increment();
     }
 
-    public void recordSuccess(String method, String uri, int status) {
-        meterRegistry.counter("orchestrator_success",
-                "method", method,
-                "uri", normalizeUri(uri),
-                "status", String.valueOf(status),
-                "statusGroup", statusGroup(status)
-        ).increment();
-    }
-
     public void recordFailure(String method, String uri, int status, Throwable ex) {
         meterRegistry.counter("orchestrator_fail",
                 "method", method,
@@ -127,17 +111,6 @@ public class OrchestratorMetrics {
                 "statusGroup", statusGroup(status),
                 "exception", ex != null ? ex.getClass().getSimpleName() : "unknown"
         ).increment();
-    }
-
-    public void recordExecutionTime(String method, String uri, long durationNs) {
-        Timer.builder("orchestrator_requests_duration_seconds")
-                .tag("method", method)
-                .tag("uri", normalizeUri(uri))
-                .description("Время выполнения запроса")
-                .publishPercentileHistogram(true)
-                .sla(Duration.ofMillis(SLA_ONE), Duration.ofMillis(SLA_TWO), Duration.ofSeconds(SLA_THREE))
-                .register(meterRegistry)
-                .record(Duration.ofNanos(durationNs));
     }
 
     private String statusGroup(int status) {

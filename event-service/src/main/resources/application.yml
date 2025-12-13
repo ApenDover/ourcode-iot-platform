@@ -58,3 +58,6 @@ spring:
     local-datacenter: ${SPRING_CASSANDRA_LOCAL_DATACENTER:datacenter1}
     keyspace-name: ${SPRING_CASSANDRA_KEYSPACE_NAME:iot_service}
     schema-action: NONE
+
+app:
+  print-log: true

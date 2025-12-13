@@ -62,3 +62,6 @@ spring:
     local-datacenter: datacenter1
     keyspace-name: iot_service
     schema-action: NONE
+
+app:
+  print-log: true

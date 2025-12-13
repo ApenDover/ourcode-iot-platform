@@ -86,6 +86,7 @@ spring:
           audiences: device-service,orchestrator,account
 
 app:
+  print-log: true
   redis:
     enabled: ${DEVICE_SERVICE_REDIS_ENABLED:true}
     ttl-minutes: 5
