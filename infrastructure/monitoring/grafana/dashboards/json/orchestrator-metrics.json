@@ -1838,7 +1838,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Orchestrator API Dashboard v3 (Spring Boot Metrics + Histograms)",
+  "title": "Orchestrator Dashboard",
   "uid": "955be242-d062-434a-b063-e3996e6f6c63",
   "version": 3
 }

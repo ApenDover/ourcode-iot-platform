@@ -76,8 +76,6 @@ dependencies {
 	annotationProcessor "org.projectlombok:lombok"
 	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
-    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
-
 	testImplementation "org.flywaydb:flyway-core:${flyWay}"
 	testImplementation "org.flywaydb:flyway-database-postgresql:${flyWay}"
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
