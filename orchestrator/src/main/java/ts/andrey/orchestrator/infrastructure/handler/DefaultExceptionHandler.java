@@ -29,6 +29,7 @@ public class DefaultExceptionHandler {
     public ResponseEntity<ApiV1DevicesDeviceIdVersionPost502Response> handleException(
             RouterManagerRollbackException ex
     ) {
+        log.error("Ошибка RouterManagerRollbackException: {}", ex.getMessage(), ex);
         orchestratorMetrics.sagaUpdateVersionRollback();
         final var errorResult = new ApiV1DevicesDeviceIdVersionPost502Response();
         errorResult.setError(ExceptionMessage.ROUTER_MANAGER_FAILED.name());
@@ -43,6 +44,7 @@ public class DefaultExceptionHandler {
     public ResponseEntity<ApiV1DevicesDeviceIdVersionPost502Response> handleException(
             DeviceServiceRollbackException ex
     ) {
+        log.error("Ошибка DeviceServiceRollbackException: {}", ex.getMessage(), ex);
         orchestratorMetrics.sagaUpdateVersionFail();
         final var errorResult = new ApiV1DevicesDeviceIdVersionPost502Response();
         errorResult.setError(ExceptionMessage.ROUTER_MANAGER_FAILED.name());
@@ -55,7 +57,7 @@ public class DefaultExceptionHandler {
 
     @ExceptionHandler(value = FeignException.class)
     public ResponseEntity<ts.andrey.orchestrator.dto.Error> handleException(FeignException ex, HttpServletRequest request) {
-        log.error(ExceptionMessage.FEIGN_INTEGRATION_FAILED.name(), ex);
+        log.error("Ошибка FeignException, message: {}", ex.getMessage(), ex);
         failMetricsProcessor.sendFail(request.getMethod(), request.getRequestURL().toString(), ex);
         final var trace = String.valueOf(Arrays.stream(ex.getStackTrace())
                 .findFirst()
@@ -73,7 +75,7 @@ public class DefaultExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ts.andrey.orchestrator.dto.Error> handleException(Exception ex, HttpServletRequest request) {
-        log.error(ExceptionMessage.FEIGN_INTEGRATION_FAILED.name(), ex);
+        log.error("Ошибка Exception: {}", ex.getMessage(), ex);
         failMetricsProcessor.sendFail(request.getMethod(), request.getRequestURL().toString(), ex);
         final var trace = String.valueOf(Arrays.stream(ex.getStackTrace())
                 .findFirst()

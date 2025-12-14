@@ -60,7 +60,7 @@ public class UniversalLoggingFeignClient implements Client {
         if (request.httpMethod().equals(Request.HttpMethod.POST) && bodyBytes != null) {
             logBody("Request", request.url(), maskToken(request.headers()), bodyBytes, null);
         } else {
-            log.info("GET request to: {} headers: {}", request.url(), request.headers());
+            log.info("GET request to: {} headers: {}", request.url(), maskToken(request.headers()));
         }
     }
 

@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<DeviceError> handleEntityNotFound(EntityNotFoundException ex, HttpServletRequest request) {
-        log.error(ex.getMessage(), ex);
+        log.error("Ошибка EntityNotFoundException: {}", ex.getMessage(), ex);
         return buildDeviceError(
                 HttpStatus.NOT_FOUND,
                 "Entity not found",
@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<DeviceError> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
-        log.error(ex.getMessage(), ex);
+        log.error("Ошибка IllegalArgumentException: {}", ex.getMessage(), ex);
         return buildDeviceError(
                 HttpStatus.BAD_REQUEST,
                 "Invalid argument",
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<DeviceError> handleException(Exception ex, HttpServletRequest request) {
-        log.error(ex.getMessage(), ex);
+        log.error("Ошибка Exception: {}", ex.getMessage(), ex);
         return buildDeviceError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Unexpected error",
@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DeviceServiceException.class)
     public ResponseEntity<DeviceError> handleException(DeviceServiceException ex, HttpServletRequest request) {
-        log.error(ex.getMessage(), ex);
+        log.error("Ошибка DeviceServiceException: {}", ex.getMessage(), ex);
         return buildDeviceError(
                 ex.getStatus(),
                 "Process exception",
@@ -75,8 +75,7 @@ public class GlobalExceptionHandler {
             TransactionSystemException.class
     })
     public ResponseEntity<DeviceError> handleDatabaseExceptions(Exception ex, WebRequest request) {
-        log.error(ex.getMessage(), ex);
-
+        log.error("Ошибка Базы Данных: {}", ex.getMessage(), ex);
         return buildDeviceError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Database Error",

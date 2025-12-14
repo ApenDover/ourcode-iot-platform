@@ -7,7 +7,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
-import ts.andrey.orchestrator.domain.metrics.OrchestratorMetrics;
 import ts.andrey.orchestrator.infrastructure.util.LogMaskUtil;
 
 import java.io.IOException;
@@ -27,7 +25,6 @@ import java.util.Set;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 @ConditionalOnProperty(value = "orchestrator.print-log", havingValue = "true")
 public class LoggingReqResFilter extends OncePerRequestFilter {
 
@@ -85,7 +82,7 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
     private boolean shouldSkipLogging(HttpServletRequest request) {
         final var requestUri = request.getRequestURI();
         return NOT_LOGGED_ENDPOINTS.stream()
-                .anyMatch(endpoint -> requestUri.startsWith(endpoint));
+                .anyMatch(requestUri::startsWith);
     }
 
     /**
