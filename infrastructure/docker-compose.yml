@@ -679,8 +679,7 @@ services:
     image: cassandra:4.0
     container_name: cassandra
     restart: unless-stopped
-    cpus: '2.0'
-    mem_limit: 5g
+    mem_limit: 7g
     environment:
       CASSANDRA_CLUSTER_NAME: "TestCluster"
       CASSANDRA_NUM_TOKENS: 256
