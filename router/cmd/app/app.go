@@ -143,6 +143,7 @@ func (a *App) sendGRPCRequests() {
 	log := util.GetLogger(a.ctx)
 
 	routerSerial := a.deps.Config.RouterSerial
+	log.Info("Poll process start for", slog.String("router-serial", routerSerial))
 	resp, err := a.gClient.PollCommands(a.ctx, routerSerial)
 	if err != nil {
 		log.Error("Poll commands failed",
@@ -195,13 +196,14 @@ func (a *App) sendDeviceEvents() {
 
 	log := util.GetLogger(a.ctx)
 
+	routerSerial := a.deps.Config.RouterSerial
 	deviceEvent := &innerkafka.DeviceEvent{
 		EventID:   uuid.New().String(),
 		Timestamp: time.Now(),
 		Type:      "STATUS",
 		Payload:   fmt.Sprintf(`{"STATUS": "online"}`),
 		Device: innerkafka.Device{
-			DeviceId:   "01K6GJ564FPTXDWX8R1F91VZK0",
+			DeviceId:   routerSerial,
 			DeviceType: "ROUTER",
 			Meta:       "Office A",
 			CreatedAt:  time.Now(),
