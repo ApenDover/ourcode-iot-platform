@@ -234,6 +234,9 @@ jmeter-devices:
 jmeter-events:
 	JVM_ARGS="-Xms2g -Xmx12g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/iot-events.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o $(PROJECT_ROOT)/infrastructure/jmeter/log
 
+jmeter-commands:
+	JVM_ARGS="-Xms2g -Xmx12g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/iot-commands.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o $(PROJECT_ROOT)/infrastructure/jmeter/log
+
 j-report:
 	jmeter -g $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -o $(PROJECT_ROOT)/infrastructure/jmeter/report
 
