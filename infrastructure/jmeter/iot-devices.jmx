@@ -18,8 +18,8 @@
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="GetDevices">
         <boolProp name="ThreadGroup.delayedStart">true</boolProp>
-        <intProp name="ThreadGroup.num_threads">1200</intProp>
-        <intProp name="ThreadGroup.ramp_time">450</intProp>
+        <intProp name="ThreadGroup.num_threads">600</intProp>
+        <intProp name="ThreadGroup.ramp_time">300</intProp>
         <longProp name="ThreadGroup.duration">900</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
@@ -153,7 +153,7 @@ try {
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Authorization</stringProp>
-              <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJFdW5Eck00bS1wN1FXOW9vSDFseEw3bXpEb1pmODFrUzNQRXJvM0N0RlFrIn0.eyJleHAiOjE3NjU3Mzg3NDAsImlhdCI6MTc2NTczNTE0MCwianRpIjoib25ydHJvOmRkYWI2OTdmLTU1NGMtYTI0Zi05NWJhLTQ0ZjFkOGY2YWZlZSIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9pb3QtcGxhdGZvcm0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMzk3ZmYxNGMtZThkZC00YTMxLWFhNzItNTE4OGY3ZDVmNGU2IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2aWNlLXNlcnZpY2UiLCJzaWQiOiJiZDcyM2EyZC00NjVjLTQ5NTgtYTRmZS0zZjFjN2M4NDg3ZTIiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtaW90LXBsYXRmb3JtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImRldmljZS1zZXJ2aWNlIjp7InJvbGVzIjpbImRldmljZWFwcC5hZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGVzIjpbIlJPTEVfZGV2aWNlYXBwLmFkbWluIiwiUk9MRV9tYW5hZ2UtYWNjb3VudCIsIlJPTEVfdmlldy1wcm9maWxlIiwiUk9MRV9tYW5hZ2UtYWNjb3VudC1saW5rcyJdLCJuYW1lIjoidGVzdCB0ZXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4iLCJnaXZlbl9uYW1lIjoidGVzdCIsImZhbWlseV9uYW1lIjoidGVzdCIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20ifQ.kX3MnCQRZY301t-hG5zzqJ1oT-5x2YBDfeK-c4kZdqfMKkI81F2w4_eM2xTI2nop27rXlRlZRAtAGeWINi8mcm9YkX_oYw0t0lTLCeG2TCBtnq6-lbxEogYAsR2u2e3PbcWOF7EiB9hjZDiH-O6pgkUeenp8YQADizCqqzcEyIeutd3VcimmYDRyRCjBorDEBKrplssI2FAVr56juAnXy_Kq3eDGa52FlVPgztn990H76LFxND6Tw9WsVrBOvd00aLY-5j-i4qKNewrDZkAK76T2tH5m_hRJSh8kAUkSkp5fpL2CcLU1Rzuye2O4YZpa_h593TSAldUEOOFriYtekw</stringProp>
+              <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJFdW5Eck00bS1wN1FXOW9vSDFseEw3bXpEb1pmODFrUzNQRXJvM0N0RlFrIn0.eyJleHAiOjE3NjU3NTAxMjcsImlhdCI6MTc2NTc0NjUyNywianRpIjoib25ydHJvOmUzMDY2MTE5LTFhNzgtZDRkZi01ZWY5LTVkODFkNzA2NjA3NiIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9pb3QtcGxhdGZvcm0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMzk3ZmYxNGMtZThkZC00YTMxLWFhNzItNTE4OGY3ZDVmNGU2IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2aWNlLXNlcnZpY2UiLCJzaWQiOiI5ZTBmNzRiZC0xZDg1LTRiMjctYWYwZC0yNzYwZDNjN2NkYjIiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtaW90LXBsYXRmb3JtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImRldmljZS1zZXJ2aWNlIjp7InJvbGVzIjpbImRldmljZWFwcC5hZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGVzIjpbIlJPTEVfZGV2aWNlYXBwLmFkbWluIiwiUk9MRV9tYW5hZ2UtYWNjb3VudCIsIlJPTEVfdmlldy1wcm9maWxlIiwiUk9MRV9tYW5hZ2UtYWNjb3VudC1saW5rcyJdLCJuYW1lIjoidGVzdCB0ZXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4iLCJnaXZlbl9uYW1lIjoidGVzdCIsImZhbWlseV9uYW1lIjoidGVzdCIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20ifQ.Iqd6AriyBTRtNRx6iVHHJUj3whobZmfiwx1uQy1Bvi4_Y_I9d7Tc7dLuO76qlvanSwcq-Akw7oE3mm5luwoNWCyoLEFGHsDr2wNR1H2n_Te9TtxHCLlpLtCCQrMuDkmTUoDinxAlJSlgthdpMv6rSvj3NRbcVTXOcGc49USIrZ6YaRc9lHQmzRFT_hio8aCkAkFsggNmrnfNxUUaYIyEGSURo9LMj-rRxIUeFBrcDsOer3aEpS32mXn5hBN9GIuG8AmNDzVfzAkISbdf04abojiiwRsKWKl7leHKkM3sV46b-hw3LPaGnAjrR9aLETDzuLCLo0Jvq2pvETLxeft-dg</stringProp>
             </elementProp>
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -166,16 +166,16 @@ try {
           <collectionProp name="load_profile">
             <collectionProp name="-1502215619">
               <stringProp name="48">0</stringProp>
-              <stringProp name="1507423">1000</stringProp>
+              <stringProp name="1507423">550</stringProp>
               <stringProp name="51663">450</stringProp>
             </collectionProp>
             <collectionProp name="-1192673855">
-              <stringProp name="1507423">1000</stringProp>
-              <stringProp name="1507423">1000</stringProp>
+              <stringProp name="1507423">550</stringProp>
+              <stringProp name="1507423">550</stringProp>
               <stringProp name="51508">400</stringProp>
             </collectionProp>
             <collectionProp name="1672394923">
-              <stringProp name="1507423">1000</stringProp>
+              <stringProp name="1507423">550</stringProp>
               <stringProp name="48625">100</stringProp>
               <stringProp name="1691">50</stringProp>
             </collectionProp>

@@ -1,6 +1,7 @@
 package ts.andrey.eventservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ts.andrey.dto.Event;
 import ts.andrey.dto.EventPage;
@@ -10,6 +11,7 @@ import ts.andrey.eventservice.model.EventFilterRequest;
 import ts.andrey.eventservice.service.CassandraService;
 import ts.andrey.eventservice.utils.PageUtil;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CassandraServiceImpl implements CassandraService {

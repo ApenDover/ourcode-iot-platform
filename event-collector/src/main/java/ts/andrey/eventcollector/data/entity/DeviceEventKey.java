@@ -26,7 +26,7 @@ public class DeviceEventKey {
 
     @PrimaryKeyColumn(
             name = "event_id",
-            type = PrimaryKeyType.PARTITIONED,
+            type = PrimaryKeyType.CLUSTERED,
             ordering = Ordering.DESCENDING
     )
     private UUID eventId;

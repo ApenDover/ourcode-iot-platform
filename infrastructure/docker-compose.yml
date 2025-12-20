@@ -679,14 +679,24 @@ services:
     image: cassandra:4.0
     container_name: cassandra
     restart: unless-stopped
-    platform: linux/amd64
     cpus: '2.0'
+    mem_limit: 5g
     environment:
       CASSANDRA_CLUSTER_NAME: "TestCluster"
       CASSANDRA_NUM_TOKENS: 256
       CASSANDRA_DC: "datacenter1"
       CASSANDRA_RACK: "rack1"
+      MAX_HEAP_SIZE: "2G"
+      HEAP_NEWSIZE: "512M"
       JVM_OPTS: >-
+        -XX:MaxGCPauseMillis=500
+        -XX:+UnlockExperimentalVMOptions
+        -XX:+UseContainerSupport
+        -XX:InitialRAMPercentage=70.0
+        -XX:MaxRAMPercentage=80.0
+        -XX:+AlwaysPreTouch
+        -Djava.net.preferIPv4Stack=true
+        -Dcassandra.skip_wait_for_gossip_to_settle=0
         -Dcom.sun.management.jmxremote
         -Dcom.sun.management.jmxremote.port=7199
         -Dcom.sun.management.jmxremote.rmi.port=7199
@@ -783,12 +793,15 @@ services:
       - iot_network
 
   cassandra-exporter:
-    #    image: criteord/cassandra_exporter:v2.5.0  # Конкретная версия
-    image: monitoringdevops/cassandra-exporter:v0.1.1 # Конкретная версия
+    image: bitnamilegacy/cassandra-exporter:2.3.8-debian-12-r51
     container_name: cassandra-exporter
     restart: unless-stopped
     environment:
       CASSANDRA_EXPORTER_CONFIG_host: cassandra:7199
+      CASSANDRA_HOST: cassandra
+      CASSANDRA_JMX_PORT_NUMBER: 7199
+    volumes:
+      - ./cassandra/exporter/config.yml:/opt/bitnami/cassandra-exporter/config.yml:ro
     depends_on:
       cassandra:
         condition: service_healthy

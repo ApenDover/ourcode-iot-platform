@@ -21,7 +21,7 @@ public class DeviceEventDataService {
 
     public DeviceEventEntity getEvent(String deviceId, String eventId) {
         final var eventUuid = UUID.fromString(eventId);
-        final var event = criteriaRepository.getEventById(eventUuid);
+        final var event = criteriaRepository.getEventById(eventUuid, deviceId);
         if (!event.getKey().getDeviceId().equals(deviceId)) {
             throw new EventServiceException(ErrorExceptionMessages.EVENT_DEVICE_NOT_FOUND, deviceId, eventId);
         }

@@ -228,8 +228,11 @@ clear:
 jmeter-rms: j-prepare
 	JVM_ARGS="-Xms512m -Xmx2g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/router-manager-service.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o ./report
 
-jmeter:
-	JVM_ARGS="-Xms2g -Xmx12g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/iot.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o $(PROJECT_ROOT)/infrastructure/jmeter/log
+jmeter-devices:
+	JVM_ARGS="-Xms2g -Xmx12g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/iot-devices.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o $(PROJECT_ROOT)/infrastructure/jmeter/log
+
+jmeter-events:
+	JVM_ARGS="-Xms2g -Xmx12g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/iot-events.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o $(PROJECT_ROOT)/infrastructure/jmeter/log
 
 j-report:
 	jmeter -g $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -o $(PROJECT_ROOT)/infrastructure/jmeter/report

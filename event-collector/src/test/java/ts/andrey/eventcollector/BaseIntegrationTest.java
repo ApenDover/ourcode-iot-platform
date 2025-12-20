@@ -33,15 +33,15 @@ public abstract class BaseIntegrationTest {
     private static final String LOCALHOST = "localhost:";
     private static final String LOCALHOST_HTTP = "http://localhost:";
 
-    @SuppressWarnings("resource")
-    @Container
-    protected static final GenericContainer<?> zookeeper = new GenericContainer<>(
-            DockerImageName.parse("bitnami/zookeeper:latest"))
-            .withCreateContainerCmdModifier(cmd -> cmd.withName("zookeeper"))
-            .withNetwork(Network.SHARED)
-            .withNetworkAliases("int")
-            .withExposedPorts(2181)
-            .withEnv("ALLOW_ANONYMOUS_LOGIN", "yes");
+//    @SuppressWarnings("resource")
+//    @Container
+//    protected static final GenericContainer<?> zookeeper = new GenericContainer<>(
+//            DockerImageName.parse("bitnami/zookeeper:latest"))
+//            .withCreateContainerCmdModifier(cmd -> cmd.withName("zookeeper"))
+//            .withNetwork(Network.SHARED)
+//            .withNetworkAliases("int")
+//            .withExposedPorts(2181)
+//            .withEnv("ALLOW_ANONYMOUS_LOGIN", "yes");
 
 
     @Container
@@ -51,11 +51,9 @@ public abstract class BaseIntegrationTest {
             .withNetwork(Network.SHARED)
             .withNetworkAliases("int")
             .withExposedPorts(9092, 9093)
-            .withEnv("KAFKA_CFG_ZOOKEEPER_CONNECT", "zookeeper:2181")
             .withEnv("ALLOW_PLAINTEXT_LISTENER", "yes")
             .withEnv("KAFKA_CFG_LISTENERS", "PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:9093")
-            .withEnv("KAFKA_CFG_ADVERTISED_LISTENERS", "PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:9093")
-            .dependsOn(zookeeper);
+            .withEnv("KAFKA_CFG_ADVERTISED_LISTENERS", "PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:9093");
 
     @SuppressWarnings("resource")
     @Container

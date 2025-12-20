@@ -11,6 +11,18 @@ management:
       exposure:
         include: ${EVENT_SERVICE_MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE:*}
   metrics:
+    distribution:
+      percentiles-histogram:
+        "http.server.requests": true
+        "http.client.requests": true
+        "orchestrator.requests": true
+      slo:
+        "http.server.requests": 10ms, 50ms, 100ms, 200ms, 500ms, 1s, 2s, 5s
+    enable:
+      http: true
+      jvm: true
+      system: true
+      logback: true
     tags:
       application: event-service
   prometheus:
