@@ -4,7 +4,7 @@ import com.nashkod.avro.DeviceEvent;
 
 import java.util.List;
 
-public interface DeviceEventService {
+public interface EventService {
 
     void saveEvents(List<DeviceEvent> events);
 

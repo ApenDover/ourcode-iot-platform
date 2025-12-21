@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @Data
 @AllArgsConstructor
@@ -29,5 +31,12 @@ public class EventFilterRequest {
     @Min(1)
     @Max(1000)
     private Integer size = 100;
+
+    public Pageable toPageable() {
+        return PageRequest.of(
+                this.page,
+                this.size
+        );
+    }
 
 }

@@ -25,18 +25,18 @@ public class DeviceEventKey {
     private String deviceId;
 
     @PrimaryKeyColumn(
-            name = "event_id",
-            type = PrimaryKeyType.CLUSTERED,
-            ordering = Ordering.DESCENDING
-    )
-    private UUID eventId;
-
-    @PrimaryKeyColumn(
             name = "timestamp",
             type = PrimaryKeyType.CLUSTERED,
             ordering = Ordering.DESCENDING
     )
     private Long timestamp;
+
+    @PrimaryKeyColumn(
+            name = "event_id",
+            type = PrimaryKeyType.CLUSTERED,
+            ordering = Ordering.DESCENDING
+    )
+    private UUID eventId;
 
     @Override
     public boolean equals(Object object) {

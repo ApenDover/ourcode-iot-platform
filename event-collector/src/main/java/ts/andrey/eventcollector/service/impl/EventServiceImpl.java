@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ts.andrey.eventcollector.data.dao.DeviceEventDataService;
-import ts.andrey.eventcollector.service.DeviceEventService;
+import ts.andrey.eventcollector.service.EventService;
 import ts.andrey.eventcollector.service.component.SimpleCache;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DeviceEventServiceImpl implements DeviceEventService {
+public class EventServiceImpl implements EventService {
 
     private final DeviceEventDataService deviceEventDataService;
     private final SimpleCache simpleCache;

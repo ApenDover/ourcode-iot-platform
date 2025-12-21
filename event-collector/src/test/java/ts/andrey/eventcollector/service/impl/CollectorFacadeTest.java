@@ -20,7 +20,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 class CollectorFacadeTest {
 
     @Mock
-    DeviceEventServiceImpl deviceEventServiceImpl;
+    EventServiceImpl deviceEventServiceImpl;
 
     @Mock
     DeviceServiceImpl deviceServiceImpl;
