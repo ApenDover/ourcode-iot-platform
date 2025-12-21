@@ -469,8 +469,8 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "sum by (outcome) (rate(http_server_requests_seconds_count{application=\"orchestrator\", outcome!=\"SUCCESS\",uri!~\"/actuator.*\"}[5m]))",
-          "legendFormat": "{{outcome}}",
+          "expr": "sum by (uri) (rate(http_server_requests_seconds_count{application=\"orchestrator\", outcome!=\"SUCCESS\",uri!~\"/actuator.*\"}[5m]))",
+          "legendFormat": "{{uri}}",
           "range": true,
           "refId": "A"
         }

@@ -12,25 +12,20 @@
           </elementProp>
         </collectionProp>
       </elementProp>
-      <boolProp name="TestPlan.functional_mode">false</boolProp>
-      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="common">
-        <boolProp name="ThreadGroup.delayedStart">true</boolProp>
-        <intProp name="ThreadGroup.num_threads">600</intProp>
-        <intProp name="ThreadGroup.ramp_time">300</intProp>
-        <longProp name="ThreadGroup.duration">900</longProp>
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
-        <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
-          <intProp name="LoopController.loops">-1</intProp>
+          <stringProp name="LoopController.loops">1</stringProp>
           <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
-      </ThreadGroup>
+      </SetupThreadGroup>
       <hashTree>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="GetToken" enabled="false">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -135,9 +130,60 @@ try {
     e.printStackTrace(new java.io.PrintWriter(log.getOutStream()))
 }</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
-        </JSR223PreProcessor>
+        </JSR223Sampler>
         <hashTree/>
-        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config">
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="EVENTS">
+        <intProp name="ThreadGroup.num_threads">310</intProp>
+        <intProp name="ThreadGroup.ramp_time">120</intProp>
+        <longProp name="ThreadGroup.duration">780</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <intProp name="LoopController.loops">-1</intProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
           <stringProp name="delimiter">\n</stringProp>
           <stringProp name="fileEncoding">UTF-8</stringProp>
           <stringProp name="filename">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/loadtest/deviceid.csv</stringProp>
@@ -149,11 +195,11 @@ try {
           <stringProp name="variableNames">deviceIdCsv</stringProp>
         </CSVDataSet>
         <hashTree/>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Authorization</stringProp>
-              <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJfSF9FcFJldHVoaXU2RlQ3RVRIa1JlMUs5V2Zwb1ZTeVJsQmZWV2xGYmxVIn0.eyJleHAiOjE3NjYyNjI5NjcsImlhdCI6MTc2NjI1OTM2NywianRpIjoib25ydHJvOjk0NDU5OWY0LTA1YzEtY2UxNy05ZDRiLTE3MTQ1MWQwOWI2NiIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9pb3QtcGxhdGZvcm0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiZmU4NmVmZDYtOGIyMy00ZDJiLThkY2QtMTQyN2FhNGQzM2QzIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2aWNlLXNlcnZpY2UiLCJzaWQiOiIwMTQ0YjYxNS1iOTdiLTQ3YmMtYjYxZC0zYzZhZGQzMzdjODkiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtaW90LXBsYXRmb3JtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImRldmljZS1zZXJ2aWNlIjp7InJvbGVzIjpbImRldmljZWFwcC5hZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGVzIjpbIlJPTEVfZGV2aWNlYXBwLmFkbWluIiwiUk9MRV9tYW5hZ2UtYWNjb3VudCIsIlJPTEVfdmlldy1wcm9maWxlIiwiUk9MRV9tYW5hZ2UtYWNjb3VudC1saW5rcyJdLCJuYW1lIjoidGVzdCB0ZXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4iLCJnaXZlbl9uYW1lIjoidGVzdCIsImZhbWlseV9uYW1lIjoidGVzdCIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20ifQ.k1543rm292fhrEVg-As_RlxNLytgFLqVEYLCV8HAt7uAqxyqJC6amSDfNRgXSpQI98VN3d5nRGMRWtv3PhqEama-xnyr5ACrWumThGvm8mJQwzgsD-b_mR8MSFcx43PGQqlevSrNeYarRDSDIwQl1j85Cf2fbgMyaufZyz1zPE8dPFzW5sWMhb-NFH013aIRdEO1rMOJNXfus8OF0vr_fsrc1iVxOPmvEGvgFJiSXxgDz7iZrORFazQ1t_KtVKdMXT5rdfjlxb0tRnlFk7QnFEj8oorBAZPuYWJkUAmZK8MA6iJV9zdOO5pAlvnMbTLQ9I1nAiqZFeyjZwYTUGQClg</stringProp>
+              <stringProp name="Header.value">Bearer ${__P(access_token)}</stringProp>
             </elementProp>
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -164,25 +210,45 @@ try {
         <hashTree/>
         <kg.apc.jmeter.timers.VariableThroughputTimer guiclass="kg.apc.jmeter.timers.VariableThroughputTimerGui" testclass="kg.apc.jmeter.timers.VariableThroughputTimer" testname="jp@gc - Throughput Shaping Timer">
           <collectionProp name="load_profile">
-            <collectionProp name="-1547314388">
+            <collectionProp name="-1147540202">
               <stringProp name="48">0</stringProp>
-              <stringProp name="1507423">550</stringProp>
-              <stringProp name="51663">450</stringProp>
-            </collectionProp>
-            <collectionProp name="1659132833">
-              <stringProp name="1507423">550</stringProp>
-              <stringProp name="1507423">550</stringProp>
-              <stringProp name="51508">400</stringProp>
-            </collectionProp>
-            <collectionProp name="274333084">
-              <stringProp name="1507423">550</stringProp>
               <stringProp name="48625">100</stringProp>
-              <stringProp name="1691">50</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-1907816788">
+              <stringProp name="48625">100</stringProp>
+              <stringProp name="48625">100</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-1865747060">
+              <stringProp name="48780">150</stringProp>
+              <stringProp name="48780">150</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-841823508">
+              <stringProp name="49586">200</stringProp>
+              <stringProp name="49586">200</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-775859476">
+              <stringProp name="49741">250</stringProp>
+              <stringProp name="49741">250</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="1735653740">
+              <stringProp name="50547">300</stringProp>
+              <stringProp name="50547">300</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-2056283040">
+              <stringProp name="50547">300</stringProp>
+              <stringProp name="48">0</stringProp>
+              <stringProp name="1722">60</stringProp>
             </collectionProp>
           </collectionProp>
         </kg.apc.jmeter.timers.VariableThroughputTimer>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET EVENTS">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET EVENTS" enabled="true">
           <intProp name="HTTPSampler.connect_timeout">5000</intProp>
           <intProp name="HTTPSampler.response_timeout">10000</intProp>
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
@@ -209,7 +275,86 @@ try {
           </ResponseAssertion>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET DEVICES">
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="DEVICES">
+        <intProp name="ThreadGroup.num_threads">310</intProp>
+        <intProp name="ThreadGroup.ramp_time">120</intProp>
+        <longProp name="ThreadGroup.duration">780</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <intProp name="LoopController.loops">-1</intProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
+          <stringProp name="delimiter">\n</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="filename">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/loadtest/deviceid.csv</stringProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="quotedData">false</boolProp>
+          <boolProp name="recycle">true</boolProp>
+          <stringProp name="shareMode">shareMode.all</stringProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="variableNames">deviceIdCsv</stringProp>
+        </CSVDataSet>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Authorization</stringProp>
+              <stringProp name="Header.value">Bearer ${__P(access_token)}</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-Type</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+        <kg.apc.jmeter.timers.VariableThroughputTimer guiclass="kg.apc.jmeter.timers.VariableThroughputTimerGui" testclass="kg.apc.jmeter.timers.VariableThroughputTimer" testname="jp@gc - Throughput Shaping Timer" enabled="true">
+          <collectionProp name="load_profile">
+            <collectionProp name="-1147540202">
+              <stringProp name="48">0</stringProp>
+              <stringProp name="48625">100</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-1907816788">
+              <stringProp name="48625">100</stringProp>
+              <stringProp name="48625">100</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-1865747060">
+              <stringProp name="48780">150</stringProp>
+              <stringProp name="48780">150</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-841823508">
+              <stringProp name="49586">200</stringProp>
+              <stringProp name="49586">200</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-775859476">
+              <stringProp name="49741">250</stringProp>
+              <stringProp name="49741">250</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="1735653740">
+              <stringProp name="50547">300</stringProp>
+              <stringProp name="50547">300</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-2056283040">
+              <stringProp name="50547">300</stringProp>
+              <stringProp name="48">0</stringProp>
+              <stringProp name="1722">60</stringProp>
+            </collectionProp>
+          </collectionProp>
+        </kg.apc.jmeter.timers.VariableThroughputTimer>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET DEVICES" enabled="true">
           <intProp name="HTTPSampler.connect_timeout">5000</intProp>
           <intProp name="HTTPSampler.response_timeout">10000</intProp>
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
@@ -236,6 +381,85 @@ try {
           </ResponseAssertion>
           <hashTree/>
         </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="COMMANDS">
+        <intProp name="ThreadGroup.num_threads">310</intProp>
+        <intProp name="ThreadGroup.ramp_time">120</intProp>
+        <longProp name="ThreadGroup.duration">780</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <intProp name="LoopController.loops">-1</intProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
+          <stringProp name="delimiter">\n</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="filename">/Users/andrey/DEVELOP/!lesson/ourcode-iot-platform/loadtest/deviceid.csv</stringProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="quotedData">false</boolProp>
+          <boolProp name="recycle">true</boolProp>
+          <stringProp name="shareMode">shareMode.all</stringProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="variableNames">deviceIdCsv</stringProp>
+        </CSVDataSet>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Authorization</stringProp>
+              <stringProp name="Header.value">Bearer ${__P(access_token)}</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-Type</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+        <kg.apc.jmeter.timers.VariableThroughputTimer guiclass="kg.apc.jmeter.timers.VariableThroughputTimerGui" testclass="kg.apc.jmeter.timers.VariableThroughputTimer" testname="jp@gc - Throughput Shaping Timer" enabled="true">
+          <collectionProp name="load_profile">
+            <collectionProp name="-1147540202">
+              <stringProp name="48">0</stringProp>
+              <stringProp name="48625">100</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-1907816788">
+              <stringProp name="48625">100</stringProp>
+              <stringProp name="48625">100</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-1865747060">
+              <stringProp name="48780">150</stringProp>
+              <stringProp name="48780">150</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-841823508">
+              <stringProp name="49586">200</stringProp>
+              <stringProp name="49586">200</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-775859476">
+              <stringProp name="49741">250</stringProp>
+              <stringProp name="49741">250</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="1735653740">
+              <stringProp name="50547">300</stringProp>
+              <stringProp name="50547">300</stringProp>
+              <stringProp name="48687">120</stringProp>
+            </collectionProp>
+            <collectionProp name="-2056283040">
+              <stringProp name="50547">300</stringProp>
+              <stringProp name="48">0</stringProp>
+              <stringProp name="1722">60</stringProp>
+            </collectionProp>
+          </collectionProp>
+        </kg.apc.jmeter.timers.VariableThroughputTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST COMMAND">
           <intProp name="HTTPSampler.connect_timeout">5000</intProp>
           <intProp name="HTTPSampler.response_timeout">10000</intProp>
@@ -274,6 +498,43 @@ try {
           <hashTree/>
         </hashTree>
       </hashTree>
+      <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
     </hashTree>
   </hashTree>
 </jmeterTestPlan>
