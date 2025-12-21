@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 8,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -39,7 +39,6 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -72,7 +71,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": 0
+                "value": null
               },
               {
                 "color": "red",
@@ -104,6 +103,7 @@
         },
         "tooltip": {
           "hideZeros": false,
+          "maxHeight": 600,
           "mode": "multi",
           "sort": "none"
         }
@@ -144,7 +144,6 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -177,7 +176,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": 0
+                "value": null
               },
               {
                 "color": "red",
@@ -209,6 +208,7 @@
         },
         "tooltip": {
           "hideZeros": false,
+          "maxHeight": 600,
           "mode": "multi",
           "sort": "desc"
         }
@@ -250,7 +250,6 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -282,7 +281,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": 0
+                "value": null
               },
               {
                 "color": "red",
@@ -314,6 +313,7 @@
         },
         "tooltip": {
           "hideZeros": false,
+          "maxHeight": 600,
           "mode": "multi",
           "sort": "none"
         }
@@ -352,7 +352,6 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -384,7 +383,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": 0
+                "value": null
               },
               {
                 "color": "red",
@@ -416,6 +415,7 @@
         },
         "tooltip": {
           "hideZeros": false,
+          "maxHeight": 600,
           "mode": "multi",
           "sort": "none"
         }
@@ -453,7 +453,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": 0
+                "value": null
               },
               {
                 "color": "red",
@@ -465,7 +465,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
+        "h": 4,
         "w": 20,
         "x": 0,
         "y": 20
@@ -498,7 +498,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "12.2.0-16979757807",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -516,9 +516,8 @@
       "type": "bargauge"
     }
   ],
-  "preload": false,
   "refresh": "",
-  "schemaVersion": 41,
+  "schemaVersion": 39,
   "tags": [
     "Kafka"
   ],
@@ -526,36 +525,55 @@
     "list": [
       {
         "current": {
+          "selected": false,
           "text": "kafka-exporter",
           "value": "kafka-exporter"
         },
-        "datasource": "PBFE396EC0B189D67",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFE396EC0B189D67"
+        },
+        "definition": "",
+        "hide": 0,
         "includeAll": false,
         "label": "Job",
+        "multi": false,
         "name": "job",
         "options": [],
         "query": "label_values(kafka_topic_partition_current_offset, job)",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
         "type": "query"
       },
       {
         "current": {
+          "selected": false,
           "text": "kafka-exporter:9308",
           "value": "kafka-exporter:9308"
         },
-        "datasource": "PBFE396EC0B189D67",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFE396EC0B189D67"
+        },
+        "definition": "",
+        "hide": 0,
         "includeAll": false,
         "label": "Instance",
+        "multi": false,
         "name": "instance",
         "options": [],
         "query": "label_values(kafka_topic_partition_current_offset{job=~\"$job\"}, instance)",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
         "type": "query"
       },
       {
         "current": {
+          "selected": true,
           "text": [
             "All"
           ],
@@ -563,7 +581,12 @@
             "$__all"
           ]
         },
-        "datasource": "PBFE396EC0B189D67",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFE396EC0B189D67"
+        },
+        "definition": "",
+        "hide": 0,
         "includeAll": true,
         "label": "Topic",
         "multi": true,
@@ -572,6 +595,7 @@
         "query": "label_values(kafka_topic_partition_current_offset{instance='$instance',topic!='__consumer_offsets',topic!='--kafka'}, topic)",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 1,
         "type": "query"
       }
@@ -581,9 +605,11 @@
     "from": "now-5m",
     "to": "now"
   },
+  "timeRangeUpdatedDuringEditOrView": false,
   "timepicker": {},
   "timezone": "browser",
   "title": "Kafka Exporter Overview",
   "uid": "jwPKIsniz",
-  "version": 2
+  "version": 1,
+  "weekStart": ""
 }

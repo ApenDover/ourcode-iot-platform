@@ -1,15 +1,12 @@
 package ts.andrey.orchestrator.infrastructure.config.transport;
 
 import feign.Client;
-import io.micrometer.core.aop.TimedAspect;
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import ts.andrey.orchestrator.infrastructure.config.security.OAuth2RequestInterceptor;

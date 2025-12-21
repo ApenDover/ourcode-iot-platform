@@ -19,12 +19,13 @@ management:
       slo:
         "http.server.requests": 10ms, 50ms, 100ms, 200ms, 500ms, 1s, 2s, 5s
     enable:
+      http.server.requests: true
       http: true
       jvm: true
       system: true
       logback: true
     tags:
-      application: device-service
+      application: ${spring.application.name}
   prometheus:
     metrics:
       export:

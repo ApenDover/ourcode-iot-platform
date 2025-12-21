@@ -19,12 +19,13 @@ management:
       slo:
         "http.server.requests": 10ms, 50ms, 100ms, 200ms, 500ms, 1s, 2s, 5s
     enable:
+      http.server.requests: true
       http: true
       jvm: true
       system: true
       logback: true
     tags:
-      application: event-service
+      application: ${spring.application.name}
   prometheus:
     metrics:
       export:
@@ -70,6 +71,14 @@ spring:
     local-datacenter: ${SPRING_CASSANDRA_LOCAL_DATACENTER:datacenter1}
     keyspace-name: ${SPRING_CASSANDRA_KEYSPACE_NAME:iot_service}
     schema-action: NONE
+    pool:
+      core-connections-per-host: 8
+      max-connections-per-host: 32
+      max-queue-size: 1024
+      idle-timeout: 60s
+    request:
+      timeout: 10000ms
+      consistency: LOCAL_ONE
 
 app:
   print-log: true
