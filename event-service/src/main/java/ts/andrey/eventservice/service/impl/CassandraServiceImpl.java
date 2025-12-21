@@ -28,8 +28,7 @@ public class CassandraServiceImpl implements CassandraService {
     @Override
     public EventPage getEventByFilter(EventFilterRequest eventFilterRequest) {
         final var result = deviceEventDataService.getEventsByFilter(eventFilterRequest);
-        final var list = PageUtil.getPageableList(result, eventFilterRequest);
-        return eventMapper.entityListToEventPage(list, eventFilterRequest, result.size());
+        return eventMapper.entityListToEventPage(result, eventFilterRequest, result.size());
     }
 
 }

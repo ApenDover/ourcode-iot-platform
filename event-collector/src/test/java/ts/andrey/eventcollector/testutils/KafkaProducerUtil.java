@@ -2,6 +2,7 @@ package ts.andrey.eventcollector.testutils;
 
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import lombok.SneakyThrows;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -24,14 +25,16 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@UtilityClass
 public class KafkaProducerUtil {
+
     private static final String BASE_URL = "http://localhost:";
 
     private static final Map<String, KafkaProducer<String, SpecificRecord>> producers = new ConcurrentHashMap<>();
     private static final Map<String, Set<String>> existingTopicsCache = new ConcurrentHashMap<>();
 
     @SneakyThrows
-    public static <T extends SpecificRecord> Future<RecordMetadata> sendMessage(
+    public <T extends SpecificRecord> Future<RecordMetadata> sendMessage(
             String bootstrapServers,
             String topic,
             Integer schemaRegistryPort,
@@ -57,7 +60,7 @@ public class KafkaProducerUtil {
         return producer.send(record);
     }
 
-    private static KafkaProducer<String, SpecificRecord> createProducer(
+    private KafkaProducer<String, SpecificRecord> createProducer(
             String bootstrapServers,
             Integer schemaRegistryPort) {
 
@@ -79,7 +82,7 @@ public class KafkaProducerUtil {
     }
 
     @SneakyThrows
-    private static synchronized void ensureTopicExists(
+    private synchronized void ensureTopicExists(
             String bootstrapServers,
             Integer schemaRegistryPort,
             String topic) {
@@ -111,14 +114,14 @@ public class KafkaProducerUtil {
         }
     }
 
-    public static void cleanup() {
+    public void cleanup() {
         producers.values().forEach(KafkaProducer::close);
         producers.clear();
         existingTopicsCache.clear();
     }
 
     @SneakyThrows
-    public static <T extends SpecificRecord> List<Future<RecordMetadata>> sendMessages(
+    public <T extends SpecificRecord> List<Future<RecordMetadata>> sendMessages(
             String bootstrapServers,
             String topic,
             Integer schemaRegistryPort,

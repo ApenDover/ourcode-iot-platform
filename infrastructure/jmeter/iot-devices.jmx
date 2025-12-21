@@ -12,25 +12,20 @@
           </elementProp>
         </collectionProp>
       </elementProp>
-      <boolProp name="TestPlan.functional_mode">false</boolProp>
-      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="GetDevices">
-        <boolProp name="ThreadGroup.delayedStart">true</boolProp>
-        <intProp name="ThreadGroup.num_threads">600</intProp>
-        <intProp name="ThreadGroup.ramp_time">300</intProp>
-        <longProp name="ThreadGroup.duration">900</longProp>
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
-        <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
-          <intProp name="LoopController.loops">-1</intProp>
+          <stringProp name="LoopController.loops">1</stringProp>
           <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
-      </ThreadGroup>
+      </SetupThreadGroup>
       <hashTree>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="GetToken" enabled="false">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -45,35 +40,35 @@ try {
     String authUrl = &quot;http://localhost:8887/auth/token&quot;
     String login = &quot;admin&quot;
     String password = &quot;admin&quot;
-    
+
     // Логирование начала процесса
     log.info(&quot;Начинаем получение токена авторизации...&quot;)
-    
+
     // Создаем HTTP клиент с таймаутами
     def httpClient = HttpClients.custom()
         .setConnectionTimeToLive(30, java.util.concurrent.TimeUnit.SECONDS)
         .build()
-    
+
     // Формируем URL с параметрами
     def fullUrl = &quot;${authUrl}?login=${URLEncoder.encode(login, &quot;UTF-8&quot;)}&amp;password=${URLEncoder.encode(password, &quot;UTF-8&quot;)}&quot;
     def httpGet = new HttpGet(fullUrl)
-    
+
     // Добавляем заголовки
     httpGet.setHeader(&quot;Accept&quot;, &quot;application/json&quot;)
     httpGet.setHeader(&quot;User-Agent&quot;, &quot;JMeter-Load-Test&quot;)
-    
+
     // Выполняем запрос
     def response = httpClient.execute(httpGet)
     def statusCode = response.getStatusLine().getStatusCode()
     def responseBody = EntityUtils.toString(response.getEntity(), &quot;UTF-8&quot;)
-    
+
     log.info(&quot;Статус ответа авторизации: ${statusCode}&quot;)
-    
+
     if (statusCode == 200) {
         // Парсим JSON ответ
         def jsonSlurper = new JsonSlurper()
         def authResponse
-        
+
         try {
             authResponse = jsonSlurper.parseText(responseBody)
         } catch (Exception e) {
@@ -83,77 +78,80 @@ try {
             SampleResult.setResponseMessage(&quot;Invalid JSON response&quot;)
             return
         }
-        
+
         // Извлекаем токен
         String accessToken = authResponse.access_token
-        
+
         if (accessToken &amp;&amp; !accessToken.isEmpty()) {
             // Сохраняем токен в переменную JMeter
             vars.put(&quot;access_token&quot;, accessToken)
-            
+
             // Также сохраняем в props для использования в других потоках (опционально)
             props.put(&quot;access_token&quot;, accessToken)
-            
+
             // Логируем успех (без полного токена в логах)
             log.info(&quot;✅ Токен успешно получен и сохранен в переменную &apos;access_token&apos;&quot;)
             log.info(&quot;   Длина токена: ${accessToken.length()} символов&quot;)
             log.info(&quot;   Первые 20 символов: ${accessToken.substring(0, Math.min(20, accessToken.length()))}...&quot;)
-            
+
             // Сохраняем время получения токена для возможного кеширования
             vars.put(&quot;token_timestamp&quot;, System.currentTimeMillis().toString())
-            
+
             // Можно также сохранить время истечения токена
             if (authResponse.expires_in) {
                 vars.put(&quot;token_expires_in&quot;, authResponse.expires_in.toString())
                 log.info(&quot;   Срок действия токена: ${authResponse.expires_in} секунд&quot;)
             }
-            
+
         } else {
             log.error(&quot;❌ Токен не найден в ответе сервера&quot;)
             log.error(&quot;Полный ответ: ${responseBody}&quot;)
             SampleResult.setSuccessful(false)
             SampleResult.setResponseMessage(&quot;Token not found in response&quot;)
         }
-        
+
     } else {
         log.error(&quot;❌ Ошибка при получении токена. HTTP статус: ${statusCode}&quot;)
         log.error(&quot;Тело ответа: ${responseBody}&quot;)
         SampleResult.setSuccessful(false)
         SampleResult.setResponseMessage(&quot;Failed to get token, status: ${statusCode}&quot;)
     }
-    
+
     // Закрываем соединение
     EntityUtils.consume(response.getEntity())
     httpClient.close()
-    
+
 } catch (Exception e) {
     log.error(&quot;❌ Неожиданная ошибка при получении токена: &quot;, e)
     SampleResult.setSuccessful(false)
     SampleResult.setResponseMessage(&quot;Exception: &quot; + e.getMessage())
-    
+
     // Выводим stack trace для отладки
     e.printStackTrace(new java.io.PrintWriter(log.getOutStream()))
 }</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
-        </JSR223PreProcessor>
+        </JSR223Sampler>
         <hashTree/>
-        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="false">
-          <stringProp name="delimiter">,</stringProp>
-          <stringProp name="fileEncoding">UTF-8</stringProp>
-          <stringProp name="filename">deviceid.csv</stringProp>
-          <boolProp name="ignoreFirstLine">false</boolProp>
-          <boolProp name="quotedData">false</boolProp>
-          <boolProp name="recycle">true</boolProp>
-          <stringProp name="shareMode">shareMode.all</stringProp>
-          <boolProp name="stopThread">false</boolProp>
-          <stringProp name="variableNames">device_id</stringProp>
-        </CSVDataSet>
-        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="GetDevices">
+        <boolProp name="ThreadGroup.delayedStart">true</boolProp>
+        <intProp name="ThreadGroup.num_threads">600</intProp>
+        <intProp name="ThreadGroup.ramp_time">300</intProp>
+        <longProp name="ThreadGroup.duration">900</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <intProp name="LoopController.loops">-1</intProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Authorization</stringProp>
-              <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJFdW5Eck00bS1wN1FXOW9vSDFseEw3bXpEb1pmODFrUzNQRXJvM0N0RlFrIn0.eyJleHAiOjE3NjU3NTAxMjcsImlhdCI6MTc2NTc0NjUyNywianRpIjoib25ydHJvOmUzMDY2MTE5LTFhNzgtZDRkZi01ZWY5LTVkODFkNzA2NjA3NiIsImlzcyI6Imh0dHA6Ly9rZXljbG9hazo4MDgwL3JlYWxtcy9pb3QtcGxhdGZvcm0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMzk3ZmYxNGMtZThkZC00YTMxLWFhNzItNTE4OGY3ZDVmNGU2IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2aWNlLXNlcnZpY2UiLCJzaWQiOiI5ZTBmNzRiZC0xZDg1LTRiMjctYWYwZC0yNzYwZDNjN2NkYjIiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtaW90LXBsYXRmb3JtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImRldmljZS1zZXJ2aWNlIjp7InJvbGVzIjpbImRldmljZWFwcC5hZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInJvbGVzIjpbIlJPTEVfZGV2aWNlYXBwLmFkbWluIiwiUk9MRV9tYW5hZ2UtYWNjb3VudCIsIlJPTEVfdmlldy1wcm9maWxlIiwiUk9MRV9tYW5hZ2UtYWNjb3VudC1saW5rcyJdLCJuYW1lIjoidGVzdCB0ZXN0IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4iLCJnaXZlbl9uYW1lIjoidGVzdCIsImZhbWlseV9uYW1lIjoidGVzdCIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20ifQ.Iqd6AriyBTRtNRx6iVHHJUj3whobZmfiwx1uQy1Bvi4_Y_I9d7Tc7dLuO76qlvanSwcq-Akw7oE3mm5luwoNWCyoLEFGHsDr2wNR1H2n_Te9TtxHCLlpLtCCQrMuDkmTUoDinxAlJSlgthdpMv6rSvj3NRbcVTXOcGc49USIrZ6YaRc9lHQmzRFT_hio8aCkAkFsggNmrnfNxUUaYIyEGSURo9LMj-rRxIUeFBrcDsOer3aEpS32mXn5hBN9GIuG8AmNDzVfzAkISbdf04abojiiwRsKWKl7leHKkM3sV46b-hw3LPaGnAjrR9aLETDzuLCLo0Jvq2pvETLxeft-dg</stringProp>
+              <stringProp name="Header.value">Bearer ${__P(access_token)}</stringProp>
             </elementProp>
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -164,17 +162,17 @@ try {
         <hashTree/>
         <kg.apc.jmeter.timers.VariableThroughputTimer guiclass="kg.apc.jmeter.timers.VariableThroughputTimerGui" testclass="kg.apc.jmeter.timers.VariableThroughputTimer" testname="jp@gc - Throughput Shaping Timer" enabled="true">
           <collectionProp name="load_profile">
-            <collectionProp name="-1502215619">
+            <collectionProp name="-1547314388">
               <stringProp name="48">0</stringProp>
               <stringProp name="1507423">550</stringProp>
               <stringProp name="51663">450</stringProp>
             </collectionProp>
-            <collectionProp name="-1192673855">
+            <collectionProp name="1659132833">
               <stringProp name="1507423">550</stringProp>
               <stringProp name="1507423">550</stringProp>
               <stringProp name="51508">400</stringProp>
             </collectionProp>
-            <collectionProp name="1672394923">
+            <collectionProp name="274333084">
               <stringProp name="1507423">550</stringProp>
               <stringProp name="48625">100</stringProp>
               <stringProp name="1691">50</stringProp>
@@ -182,7 +180,7 @@ try {
           </collectionProp>
         </kg.apc.jmeter.timers.VariableThroughputTimer>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET Devices" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET Devices">
           <intProp name="HTTPSampler.connect_timeout">5000</intProp>
           <intProp name="HTTPSampler.response_timeout">10000</intProp>
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
