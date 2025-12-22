@@ -3,7 +3,7 @@ server:
 
 logging:
   level:
-    ts.andrey: debug
+    ts.andrey: info
 
 management:
   endpoint:
@@ -56,7 +56,7 @@ spring:
   application:
     name: kafka-producer
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: localhost:9094
     template:
       events:
         topic: events

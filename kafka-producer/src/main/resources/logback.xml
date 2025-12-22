@@ -10,16 +10,15 @@
                     <timeZone>UTC</timeZone>
                 </timestamp>
                 <logLevel/>
+                <mdc>
+                    <includeMdcKeyName>traceId</includeMdcKeyName>
+                    <includeMdcKeyName>spanId</includeMdcKeyName>
+                    <defaultValue>-</defaultValue>
+                </mdc>
                 <threadName/>
                 <loggerName/>
 
                 <message/>
-
-                <mdc>
-                    <includeMdcKeyName>trace_id</includeMdcKeyName>
-                    <includeMdcKeyName>span_id</includeMdcKeyName>
-                    <defaultValue>-</defaultValue>
-                </mdc>
 
                 <globalCustomFields>{"app":"${appName}"}</globalCustomFields>
             </providers>
