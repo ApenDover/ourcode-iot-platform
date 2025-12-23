@@ -1,4 +1,4 @@
-package ts.andrey.kafkaproducer.configuration;
+package ts.andrey.kafkaproducer.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

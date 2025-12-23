@@ -37,6 +37,11 @@ public class FeignClientConfiguration implements ApplicationContextAware {
     }
 
     @Bean
+    public FeignTraceInterceptor feignTraceInterceptor() {
+        return new FeignTraceInterceptor();
+    }
+
+    @Bean
     @Primary
     public Client loggingFeignClient() {
         final var springClient = getSpringCloudClient();

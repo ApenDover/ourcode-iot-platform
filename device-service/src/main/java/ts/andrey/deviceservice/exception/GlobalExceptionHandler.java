@@ -14,7 +14,6 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-import ts.andrey.deviceservice.config.MdcInterceptor;
 import ts.andrey.dto.DeviceError;
 
 import java.util.Objects;
@@ -22,6 +21,8 @@ import java.util.Objects;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final String TRACE = "traceId";
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<DeviceError> handleEntityNotFound(EntityNotFoundException ex, HttpServletRequest request) {
@@ -96,7 +97,7 @@ public class GlobalExceptionHandler {
         error.setTitle(title);
         error.setDetail(detail);
         error.setInstance(instance);
-        error.setTrace(MDC.get(MdcInterceptor.TRACE));
+        error.setTrace(MDC.get(TRACE));
         return ResponseEntity.status(status).body(error);
     }
 

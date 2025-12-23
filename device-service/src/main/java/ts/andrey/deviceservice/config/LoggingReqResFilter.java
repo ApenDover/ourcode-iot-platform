@@ -3,6 +3,7 @@ package ts.andrey.deviceservice.config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.opentelemetry.api.trace.Span;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +33,8 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
             "/actuator"
     );
 
+    private static final String TRACE = "traceId";
+    private static final String SPAN = "spanId";
     private static final int MAX_BODY_SIZE_BYTES = 1024 * 1024;
     private static final int MAX_TEXT_PREVIEW_CHARS = 1000;
     private static final String EMPTY_BODY = "[Empty]";
@@ -52,6 +55,9 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
+        MDC.put(TRACE, Span.current().getSpanContext().getTraceId());
+        MDC.put(SPAN, Span.current().getSpanContext().getSpanId());
 
         if (shouldSkipLogging(request)) {
             filterChain.doFilter(request, response);
@@ -96,11 +102,13 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
         final boolean isRequestBodyTooLarge = isBodyTooLargeByBytes(requestBodyBytes);
         final boolean isResponseBodyTooLarge = isBodyTooLargeByBytes(responseBodyBytes);
 
-        final String requestBody = isRequestBodyTooLarge ?
-                BODY_TOO_LARGE_BYTES : extractBody(requestBodyBytes, request.getCharacterEncoding());
+        final String requestBody = isRequestBodyTooLarge
+                ? BODY_TOO_LARGE_BYTES
+                : extractBody(requestBodyBytes, request.getCharacterEncoding());
 
-        final String responseBody = isResponseBodyTooLarge ?
-                BODY_TOO_LARGE_BYTES : extractBody(responseBodyBytes, response.getCharacterEncoding());
+        final String responseBody = isResponseBodyTooLarge
+                ? BODY_TOO_LARGE_BYTES
+                : extractBody(responseBodyBytes, response.getCharacterEncoding());
 
         final var loggedRequestBody = processBodyForLogging(requestBody, isRequestBodyTooLarge);
         final var loggedResponseBody = processBodyForLogging(responseBody, isResponseBodyTooLarge);
@@ -129,8 +137,9 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
             return "";
         }
         try {
-            Charset charset = (encoding != null && Charset.isSupported(encoding)) ?
-                    Charset.forName(encoding) : StandardCharsets.UTF_8;
+            Charset charset = (encoding != null && Charset.isSupported(encoding))
+                    ? Charset.forName(encoding)
+                    : StandardCharsets.UTF_8;
             return new String(content, charset);
         } catch (Exception e) {
             log.warn("Failed to extract body with encoding: {}", encoding, e);
@@ -184,9 +193,9 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
      * Форматирует JSON для вывода в лог
      */
     private String formatJson(JsonNode node, boolean beautify) throws JsonProcessingException {
-        String jsonString = beautify ?
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(node) :
-                objectMapper.writeValueAsString(node);
+        String jsonString = beautify
+                ? objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(node)
+                : objectMapper.writeValueAsString(node);
 
         if (jsonString.length() > MAX_TEXT_PREVIEW_CHARS) {
             return truncateText(jsonString);

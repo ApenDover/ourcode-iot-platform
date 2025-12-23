@@ -72,6 +72,9 @@ dependencies {
 	testImplementation 'org.testcontainers:cassandra'
 	testImplementation 'org.testcontainers:junit-jupiter'
 
+    implementation 'org.aspectj:aspectjweaver:1.9.22'
+    implementation 'org.aspectj:aspectjrt:1.9.22'
+
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testCompileOnly "org.projectlombok:lombok"
 	testAnnotationProcessor "org.projectlombok:lombok"

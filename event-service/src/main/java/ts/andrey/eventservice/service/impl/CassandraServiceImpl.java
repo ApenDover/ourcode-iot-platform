@@ -1,5 +1,6 @@
 package ts.andrey.eventservice.service.impl;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,12 +21,14 @@ public class CassandraServiceImpl implements CassandraService {
     private final EventMapper eventMapper;
 
     @Override
+    @WithSpan("CassandraGetEvent")
     public Event getEvent(String deviceId, String eventId) {
         final var eventEntity = deviceEventDataService.getEvent(deviceId, eventId);
         return eventMapper.entityToEvent(eventEntity);
     }
 
     @Override
+    @WithSpan("CassandraGetEventByFilter")
     public EventPage getEventByFilter(EventFilterRequest eventFilterRequest) {
         final var result = deviceEventDataService.getEventsByFilter(eventFilterRequest);
         return eventMapper.entityListToEventPage(result, eventFilterRequest, result.size());

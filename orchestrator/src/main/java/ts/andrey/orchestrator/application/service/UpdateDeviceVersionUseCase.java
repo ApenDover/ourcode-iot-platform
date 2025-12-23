@@ -1,5 +1,6 @@
 package ts.andrey.orchestrator.application.service;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ts.andrey.orchestrator.application.port.DeviceServicePort;
@@ -15,6 +16,9 @@ public class UpdateDeviceVersionUseCase {
     private final RouterManagerPort routerManagerPort;
     private final DeviceServicePort deviceServicePort;
 
+    private static final String COMMAND = "UPDATE VERSION";
+
+    @WithSpan("SagaUpdateDeviceVersion")
     public ApiV1DevicesDeviceIdVersionPost200Response updateDeviceVersion(
             String deviceId,
             ApiV1DevicesDeviceIdVersionPostRequest apiV1DevicesDeviceIdVersionPostRequest
@@ -30,7 +34,7 @@ public class UpdateDeviceVersionUseCase {
         try {
             commandId = routerManagerPort.sendCommand(
                     deviceId,
-                    "UPDATE VERSION",
+                    COMMAND,
                     apiV1DevicesDeviceIdVersionPostRequest.getTargetVersion()
             );
         } catch (Exception ex) {

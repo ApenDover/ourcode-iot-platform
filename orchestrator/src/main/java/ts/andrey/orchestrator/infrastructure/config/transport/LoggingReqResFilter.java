@@ -3,6 +3,7 @@ package ts.andrey.orchestrator.infrastructure.config.transport;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.opentelemetry.api.trace.Span;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +33,8 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
             "/actuator"
     );
 
+    private static final String TRACE = "traceId";
+    private static final String SPAN = "spanId";
     private static final int MAX_BODY_SIZE_BYTES = 1024 * 1024;
     private static final int MAX_TEXT_PREVIEW_CHARS = 1000;
     private static final String EMPTY_BODY = "[Empty]";
@@ -52,6 +55,9 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
+        MDC.put(TRACE, Span.current().getSpanContext().getTraceId());
+        MDC.put(SPAN, Span.current().getSpanContext().getSpanId());
 
         if (shouldSkipLogging(request)) {
             filterChain.doFilter(request, response);

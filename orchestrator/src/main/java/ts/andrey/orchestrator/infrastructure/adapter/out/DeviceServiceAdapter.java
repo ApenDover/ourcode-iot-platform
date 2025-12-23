@@ -1,5 +1,6 @@
 package ts.andrey.orchestrator.infrastructure.adapter.out;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ts.andrey.device.model.DeviceStatus;
@@ -24,6 +25,7 @@ public class DeviceServiceAdapter implements DeviceServicePort {
     private final DeviceMapper deviceMapper;
 
     @Override
+    @WithSpan("DeviceTransportCreate")
     public Device createDevice(DeviceCreateRequest deviceCreateRequest) {
         final var request = deviceMapper.toDeviceCreateRequestDto(deviceCreateRequest);
         final var response = deviceServiceClient.createDevice(request);
@@ -31,6 +33,7 @@ public class DeviceServiceAdapter implements DeviceServicePort {
     }
 
     @Override
+    @WithSpan("DeviceTransportUpdate")
     public Device updateDevice(String deviceId, DeviceUpdateRequest deviceUpdateRequest) {
         final var request = deviceMapper.toDeviceUpdateRequestDto(deviceUpdateRequest);
         final var response = deviceServiceClient.updateDevice(deviceId, request);
@@ -38,23 +41,27 @@ public class DeviceServiceAdapter implements DeviceServicePort {
     }
 
     @Override
+    @WithSpan("DeviceTransportDeleteById")
     public void deleteDevice(String deviceId) {
         deviceServiceClient.deleteDevice(deviceId);
     }
 
     @Override
+    @WithSpan("DeviceTransportGetById")
     public Device getDevice(String deviceId) {
         final var response = deviceServiceClient.getDevice(deviceId);
         return deviceMapper.toOrchestratorDeviceDto(response.getBody());
     }
 
     @Override
+    @WithSpan("DeviceTransportGetAll")
     public List<Device> getDevices() {
         final var response = deviceServiceClient.getDevices();
         return deviceMapper.toOrchestratorDeviceDtos(response.getBody());
     }
 
     @Override
+    @WithSpan("DeviceTransportUpdateVersion")
     public DeviceVersionResponse updateDeviceVersion(String deviceId, String deviceVersion, Long etag) {
         final var request = new DeviceVersionUpdateRequest();
         request.setEtag(etag);
@@ -64,6 +71,7 @@ public class DeviceServiceAdapter implements DeviceServicePort {
     }
 
     @Override
+    @WithSpan("DeviceTransportRollbackVersion")
     public DeviceVersionResponse rollbackDeviceVersion(String deviceId, String deviceVersion, Long etag) {
         try {
             final var request = new DeviceVersionRollbackRequest();

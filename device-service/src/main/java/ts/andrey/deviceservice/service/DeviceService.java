@@ -4,8 +4,6 @@ import ts.andrey.dto.Device;
 import ts.andrey.dto.DeviceCreateRequest;
 import ts.andrey.dto.DeviceStatus;
 import ts.andrey.dto.DeviceUpdateRequest;
-import ts.andrey.dto.DeviceVersionResponse;
-import ts.andrey.dto.DeviceVersionUpdateRequest;
 
 import java.util.List;
 

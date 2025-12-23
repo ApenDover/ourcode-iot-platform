@@ -1,5 +1,6 @@
 package ts.andrey.orchestrator.infrastructure.adapter.out;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ts.andrey.orchestrator.dto.AckCommandRequest;
@@ -19,6 +20,7 @@ public class RouterManagerGrpcAdapter implements RouterManagerGrpcPort {
 
     private final RouterManagerGrpcClient routerManagerGrpcClient;
 
+    @WithSpan("RouterManagerTransportCommand")
     public SendCommandResponse sendCommand(SendCommandRequest sendCommandRequest) {
 
         final var payloadStruct = ProtoPayloadMapper.toStruct(sendCommandRequest.getPayload());
@@ -33,6 +35,7 @@ public class RouterManagerGrpcAdapter implements RouterManagerGrpcPort {
         return ProtoMapper.mapToSendCommandResponseDto(sendCommandResponse);
     }
 
+    @WithSpan("RouterManagerTransportAck")
     public AckCommandResponse ackCommand(AckCommandRequest ackCommandRequest) {
 
         final var ackRequest = Roma.AckCommandRequest.newBuilder()
@@ -44,6 +47,7 @@ public class RouterManagerGrpcAdapter implements RouterManagerGrpcPort {
         return ProtoMapper.mapToAckCommandResponseDto(ackResponse);
     }
 
+    @WithSpan("RouterManagerTransportPoll")
     public PollCommandsResponse pollCommands(String routerSerial) {
 
         final var pollRequest = Roma.PollCommandsRequest.newBuilder()

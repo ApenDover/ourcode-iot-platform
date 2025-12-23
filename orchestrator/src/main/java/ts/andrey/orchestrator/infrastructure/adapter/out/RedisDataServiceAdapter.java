@@ -1,13 +1,14 @@
 package ts.andrey.orchestrator.infrastructure.adapter.out;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import ts.andrey.orchestrator.application.port.RedisDataServicePort;
-import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost200Response;
 import ts.andrey.orchestrator.domain.metrics.OrchestratorMetrics;
+import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost200Response;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -25,6 +26,7 @@ public class RedisDataServiceAdapter implements RedisDataServicePort {
     private final OrchestratorMetrics orchestratorMetrics;
 
     @Override
+    @WithSpan("RedisGet")
     public Optional<ApiV1DevicesDeviceIdVersionPost200Response> getResponse(String idempotentKey) {
         try {
             final var response = redisTemplate.opsForValue().get(idempotentKey);
@@ -40,6 +42,7 @@ public class RedisDataServiceAdapter implements RedisDataServicePort {
     }
 
     @Override
+    @WithSpan("RedisSave")
     public void saveResponse(String idempotentKey, ApiV1DevicesDeviceIdVersionPost200Response response) {
         try {
             redisTemplate.opsForValue()

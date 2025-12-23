@@ -49,6 +49,10 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-security"
     implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
 
+    implementation 'org.aspectj:aspectjweaver:1.9.22'
+    implementation 'org.aspectj:aspectjrt:1.9.22'
+    implementation 'io.github.openfeign:feign-httpclient:13.3'
+
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
     implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
 
