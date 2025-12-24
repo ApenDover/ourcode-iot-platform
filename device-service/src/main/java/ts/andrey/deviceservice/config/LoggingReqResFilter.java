@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,7 +20,6 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import ts.andrey.deviceservice.utils.LogMaskUtil;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
@@ -104,11 +104,11 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
 
         final String requestBody = isRequestBodyTooLarge
                 ? BODY_TOO_LARGE_BYTES
-                : extractBody(requestBodyBytes, request.getCharacterEncoding());
+                : extractBody(requestBodyBytes);
 
         final String responseBody = isResponseBodyTooLarge
                 ? BODY_TOO_LARGE_BYTES
-                : extractBody(responseBodyBytes, response.getCharacterEncoding());
+                : extractBody(responseBodyBytes);
 
         final var loggedRequestBody = processBodyForLogging(requestBody, isRequestBodyTooLarge);
         final var loggedResponseBody = processBodyForLogging(responseBody, isResponseBodyTooLarge);
@@ -132,19 +132,11 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
     /**
      * Извлекает тело из массива байт
      */
-    private String extractBody(byte[] content, String encoding) {
+    private String extractBody(byte[] content) {
         if (content == null || content.length == 0) {
-            return "";
+            return StringUtils.EMPTY;
         }
-        try {
-            Charset charset = (encoding != null && Charset.isSupported(encoding))
-                    ? Charset.forName(encoding)
-                    : StandardCharsets.UTF_8;
-            return new String(content, charset);
-        } catch (Exception e) {
-            log.warn("Failed to extract body with encoding: {}", encoding, e);
-            return new String(content, StandardCharsets.UTF_8);
-        }
+        return new String(content, StandardCharsets.UTF_8);
     }
 
     /**

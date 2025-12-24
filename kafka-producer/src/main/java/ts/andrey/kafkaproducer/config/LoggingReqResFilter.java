@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -101,11 +102,12 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
         final boolean isResponseBodyTooLarge = isBodyTooLargeByBytes(responseBodyBytes);
 
         final String requestBody = isRequestBodyTooLarge
-                ? BODY_TOO_LARGE_BYTES : extractBody(requestBodyBytes, request.getCharacterEncoding());
+                ? BODY_TOO_LARGE_BYTES
+                : extractBody(requestBodyBytes);
 
         final String responseBody = isResponseBodyTooLarge
                 ? BODY_TOO_LARGE_BYTES
-                : extractBody(responseBodyBytes, response.getCharacterEncoding());
+                : extractBody(responseBodyBytes);
 
         final var loggedRequestBody = processBodyForLogging(requestBody, isRequestBodyTooLarge);
         final var loggedResponseBody = processBodyForLogging(responseBody, isResponseBodyTooLarge);
@@ -129,19 +131,11 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
     /**
      * Извлекает тело из массива байт
      */
-    private String extractBody(byte[] content, String encoding) {
+    private String extractBody(byte[] content) {
         if (content == null || content.length == 0) {
-            return "";
+            return StringUtils.EMPTY;
         }
-        try {
-            Charset charset = (encoding != null && Charset.isSupported(encoding))
-                    ? Charset.forName(encoding)
-                    : StandardCharsets.UTF_8;
-            return new String(content, charset);
-        } catch (Exception e) {
-            log.warn("Failed to extract body with encoding: {}", encoding, e);
-            return new String(content, StandardCharsets.UTF_8);
-        }
+        return new String(content, StandardCharsets.UTF_8);
     }
 
     /**

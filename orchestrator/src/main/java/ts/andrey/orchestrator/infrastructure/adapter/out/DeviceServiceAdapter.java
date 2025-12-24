@@ -2,6 +2,7 @@ package ts.andrey.orchestrator.infrastructure.adapter.out;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ts.andrey.device.model.DeviceStatus;
 import ts.andrey.device.model.DeviceVersionResponse;
@@ -17,6 +18,7 @@ import ts.andrey.orchestrator.infrastructure.mapper.DeviceMapper;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DeviceServiceAdapter implements DeviceServicePort {
@@ -81,6 +83,7 @@ public class DeviceServiceAdapter implements DeviceServicePort {
             final var deviceVersionResponse = deviceServiceClient.rollbackDeviceVersion(deviceId, request);
             return deviceVersionResponse.getBody();
         } catch (Exception ex) {
+            log.error("RollbackDeviceVersion fail: {}", ex.getMessage(), ex);
             throw new DeviceServiceRollbackException(ex);
         }
     }

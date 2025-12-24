@@ -51,6 +51,15 @@ opentelemetry:
 spring:
   application:
     name: orchestrator
+  cloud:
+    openfeign:
+      httpclient:
+        max-connections: 500
+        max-connections-per-route: 250
+        time-to-live: 180
+        follow-redirects: false
+        disable-ssl-validation: false
+        connection-timeout: 1000
   data:
     redis:
       host: localhost
@@ -80,15 +89,19 @@ orchestrator:
     enabled: false
   integration:
     event-service:
-      url: event-service:8881
+      url: localhost:8881
     device-service:
-      url: device-service:8886
+      url: localhost:8886
     router-manager:
-      host: router-manager-service
+      host: localhost
       port: 9092
   redis:
     enabled: true
     ttl-minutes: 5
+
+logging:
+  level:
+    feign: TRACE
 
 #logging:
 #  level:

@@ -16,6 +16,16 @@
                 <threadName/>
                 <loggerName/>
                 <message/>
+                <stackTrace>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                        <maxLength>2048</maxLength>
+                        <shortenedClassNameLength>20</shortenedClassNameLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                        <exclude>\$\$FastClassByCGLIB\$\$</exclude>
+                        <exclude>\$\$EnhancerBySpringCGLIB\$\$</exclude>
+                    </throwableConverter>
+                </stackTrace>
             </providers>
         </encoder>
     </appender>

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Client;
 import feign.Request;
 import feign.Response;
+import feign.httpclient.ApacheHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import ts.andrey.orchestrator.infrastructure.util.LogMaskUtil;
 

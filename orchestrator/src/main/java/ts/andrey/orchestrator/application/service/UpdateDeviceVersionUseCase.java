@@ -2,6 +2,7 @@ package ts.andrey.orchestrator.application.service;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ts.andrey.orchestrator.application.port.DeviceServicePort;
 import ts.andrey.orchestrator.application.port.RouterManagerPort;
@@ -9,6 +10,7 @@ import ts.andrey.orchestrator.domain.exception.RouterManagerRollbackException;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost200Response;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPostRequest;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UpdateDeviceVersionUseCase {
@@ -39,6 +41,7 @@ public class UpdateDeviceVersionUseCase {
             );
         } catch (Exception ex) {
             deviceServicePort.rollbackDeviceVersion(deviceId, device.getVersion(), device.getEtag() + 1);
+            log.error("UpdateDeviceVersion fail: {}", ex.getMessage(), ex);
             throw new RouterManagerRollbackException();
         }
 

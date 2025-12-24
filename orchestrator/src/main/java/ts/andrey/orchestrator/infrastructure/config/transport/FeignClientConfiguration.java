@@ -1,10 +1,14 @@
 package ts.andrey.orchestrator.infrastructure.config.transport;
 
 import feign.Client;
+import feign.httpclient.ApacheHttpClient;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.cloud.openfeign.support.FeignHttpClientProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -15,10 +19,8 @@ import java.util.Set;
 
 @Slf4j
 @Configuration
-public class FeignClientConfiguration implements ApplicationContextAware {
-
-    public static final String LOAD_BALANCER = "LoadBalancer";
-    public static final String FEIGN = "Feign";
+@RequiredArgsConstructor
+public class FeignClientConfiguration {
 
     @Value("${orchestrator.log.beautify:false}")
     private boolean isBeautify;
@@ -29,12 +31,7 @@ public class FeignClientConfiguration implements ApplicationContextAware {
     @Value("${orchestrator.log.keys:null}")
     private Set<String> keyForMasking;
 
-    private ApplicationContext context;
-
-    @Override
-    public void setApplicationContext(ApplicationContext context) {
-        this.context = context;
-    }
+    private final FeignHttpClientProperties feignHttpClientProperties;
 
     @Bean
     public FeignTraceInterceptor feignTraceInterceptor() {
@@ -44,26 +41,29 @@ public class FeignClientConfiguration implements ApplicationContextAware {
     @Bean
     @Primary
     public Client loggingFeignClient() {
-        final var springClient = getSpringCloudClient();
-        return new UniversalLoggingFeignClient(springClient, isBeautify, isMasking, keyForMasking);
-    }
+        final var connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(
+                feignHttpClientProperties.getMaxConnections()
+        );
+        connectionManager.setDefaultMaxPerRoute(
+                feignHttpClientProperties.getMaxConnectionsPerRoute()
+        );
 
-    private Client getSpringCloudClient() {
-        try {
-            final var beanNames = context.getBeanNamesForType(Client.class);
+        final var requestConfig = RequestConfig.custom()
+                .setConnectTimeout(
+                        feignHttpClientProperties.getConnectionTimeout()
+                )
+                .setSocketTimeout(
+                        (int) feignHttpClientProperties.getTimeToLive()
+                )
+                .build();
 
-            for (String beanName : beanNames) {
-                if (beanName.contains(LOAD_BALANCER) || beanName.contains(FEIGN)) {
-                    Client client = context.getBean(beanName, Client.class);
-                    if (!(client instanceof UniversalLoggingFeignClient)) {
-                        return client;
-                    }
-                }
-            }
-        } catch (Exception ignored) {
-            log.warn("Не удалось получить Client из Spring Cloud контекста");
-        }
-        return new Client.Default(null, null);
+        final var httpClient = HttpClientBuilder.create()
+                .setDefaultRequestConfig(requestConfig)
+                .setConnectionManager(connectionManager)
+                .build();
+        final var client = new ApacheHttpClient(httpClient);
+        return new UniversalLoggingFeignClient(client, isBeautify, isMasking, keyForMasking);
     }
 
     @Bean
