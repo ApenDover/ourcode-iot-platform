@@ -11,18 +11,7 @@ import ts.andrey.orchestrator.application.port.RouterManagerGrpcPort;
 import ts.andrey.orchestrator.application.service.IdempotentProcessor;
 import ts.andrey.orchestrator.application.service.UpdateDeviceVersionUseCase;
 import ts.andrey.orchestrator.domain.metrics.OrchestratorMetrics;
-import ts.andrey.orchestrator.dto.AckCommandRequest;
-import ts.andrey.orchestrator.dto.AckCommandResponse;
-import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost200Response;
-import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPostRequest;
-import ts.andrey.orchestrator.dto.Device;
-import ts.andrey.orchestrator.dto.DeviceCreateRequest;
-import ts.andrey.orchestrator.dto.DeviceUpdateRequest;
-import ts.andrey.orchestrator.dto.Event;
-import ts.andrey.orchestrator.dto.EventPage;
-import ts.andrey.orchestrator.dto.PollCommandsResponse;
-import ts.andrey.orchestrator.dto.SendCommandRequest;
-import ts.andrey.orchestrator.dto.SendCommandResponse;
+import ts.andrey.orchestrator.dto.*;
 
 import java.util.List;
 

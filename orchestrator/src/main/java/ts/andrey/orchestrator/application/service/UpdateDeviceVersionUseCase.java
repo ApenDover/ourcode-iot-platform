@@ -18,7 +18,7 @@ public class UpdateDeviceVersionUseCase {
     private final RouterManagerPort routerManagerPort;
     private final DeviceServicePort deviceServicePort;
 
-    private static final String COMMAND = "UPDATE VERSION";
+    private static final String COMMAND = "UPDATE_VERSION";
 
     @WithSpan("SagaUpdateDeviceVersion")
     public ApiV1DevicesDeviceIdVersionPost200Response updateDeviceVersion(

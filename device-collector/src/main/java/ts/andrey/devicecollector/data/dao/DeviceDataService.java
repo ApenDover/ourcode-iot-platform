@@ -12,6 +12,7 @@ import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import ts.andrey.devicecollector.data.repository.DeviceBatchRepository;
+import ts.andrey.devicecollector.data.repository.DeviceRepository;
 import ts.andrey.devicecollector.mapper.DeviceMapper;
 import ts.andrey.devicecollector.metrics.DeviceCollectorMetrics;
 import ts.andrey.devicecollector.metrics.PostgresMetrics;
@@ -33,11 +34,15 @@ public class DeviceDataService {
     @Value("${app.postgres.batch-size:300}")
     private int batchSize;
 
+    @Value("${spring.application.name}")
+    private String app;
+
     private final DeviceMapper deviceMapper;
     private final PostgresMetrics postgresMetrics;
     private final DeviceCollectorMetrics globalKafkaMetrics;
     private final KafkaProducer kafkaDltProducerImpl;
     private final DeviceBatchRepository deviceBatchRepository;
+    private final DeviceRepository deviceRepository;
 
     @WithSpan
     @Retryable(
@@ -75,6 +80,26 @@ public class DeviceDataService {
                     return MessageDltBuilder.getMessage(device, e);
                 }).toList();
         kafkaDltProducerImpl.send(errorMessages);
+    }
+
+    //TODO если тут сломается, то статус зависнет в UPDATED, надо докатывать до READY
+    public void update(Device device) {
+        try {
+            final var entityOpt = deviceRepository.findDeviceEntitiesByDeviceId(device.getDeviceId());
+            if (entityOpt.isEmpty()) {
+                log.error("Не смог найти device по deviceId {}", device.getDeviceId());
+            }
+            final var entity = entityOpt.get();
+            final var etag = entity.getEtag();
+            entity.setStatus("READY");
+            entity.setEtag(etag + 1);
+            entity.setApplication(app);
+            log.info("Пытаюсь сохранить deviceEntity {}", entity);
+            deviceRepository.save(entity);
+            log.info("Обновление прошивки завершено для {}", device.getDeviceId());
+        } catch (Exception e) {
+            log.error("ошибка: {}", e.getMessage(), e);
+        }
     }
 
 }

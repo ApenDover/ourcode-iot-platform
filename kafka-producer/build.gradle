@@ -49,6 +49,7 @@ configurations {
 dependencies {
 
     implementation "ts.andrey:iot-common:${iotCommon}"
+    implementation "ts.andrey:iot-avro:${iotAvro}"
 
     implementation "org.springframework.boot:spring-boot-starter-web"
 

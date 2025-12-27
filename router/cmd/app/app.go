@@ -125,7 +125,20 @@ func (a *App) scheduledRequestWorker() {
 	)
 
 	a.sendGRPCRequests()
-	a.sendDeviceEvents()
+	routerSerial := a.deps.Config.RouterSerial
+	deviceEvent := innerkafka.DeviceEvent{
+		EventID:   uuid.New().String(),
+		Timestamp: time.Now(),
+		Type:      "STATUS",
+		Payload:   fmt.Sprintf(`{"STATUS": "online"}`),
+		Device: innerkafka.Device{
+			DeviceId:   routerSerial,
+			DeviceType: "ROUTER",
+			Meta:       "Office A",
+			CreatedAt:  time.Now(),
+		},
+	}
+	a.sendDeviceEvents(deviceEvent)
 
 	for {
 		select {
@@ -134,7 +147,20 @@ func (a *App) scheduledRequestWorker() {
 			return
 		case <-ticker.C:
 			a.sendGRPCRequests()
-			a.sendDeviceEvents()
+			routerSerial := a.deps.Config.RouterSerial
+			deviceEvent := innerkafka.DeviceEvent{
+				EventID:   uuid.New().String(),
+				Timestamp: time.Now(),
+				Type:      "STATUS",
+				Payload:   fmt.Sprintf(`{"STATUS": "online"}`),
+				Device: innerkafka.Device{
+					DeviceId:   routerSerial,
+					DeviceType: "ROUTER",
+					Meta:       "Office A",
+					CreatedAt:  time.Now(),
+				},
+			}
+			a.sendDeviceEvents(deviceEvent)
 		}
 	}
 }
@@ -166,7 +192,7 @@ func (a *App) sendGRPCRequests() {
 				slog.String("command_id", cmd.Id),
 				slog.String("error", err.Error()),
 			)
-			continue
+			break
 		}
 
 		_, err = a.gClient.AckCommand(a.ctx, routerSerial, cmd.Id)
@@ -189,28 +215,12 @@ func (a *App) sendGRPCRequests() {
 	}
 }
 
-func (a *App) sendDeviceEvents() {
+func (a *App) sendDeviceEvents(deviceEvent innerkafka.DeviceEvent) {
 	if a.kafkaProducer == nil {
 		return
 	}
-
 	log := util.GetLogger(a.ctx)
-
-	routerSerial := a.deps.Config.RouterSerial
-	deviceEvent := &innerkafka.DeviceEvent{
-		EventID:   uuid.New().String(),
-		Timestamp: time.Now(),
-		Type:      "STATUS",
-		Payload:   fmt.Sprintf(`{"STATUS": "online"}`),
-		Device: innerkafka.Device{
-			DeviceId:   routerSerial,
-			DeviceType: "ROUTER",
-			Meta:       "Office A",
-			CreatedAt:  time.Now(),
-		},
-	}
-
-	err := a.kafkaProducer.SendDeviceEvent(context.Background(), deviceEvent)
+	err := a.kafkaProducer.SendDeviceEvent(context.Background(), &deviceEvent)
 	if err != nil {
 		log.Error("Failed to send device event to Kafka",
 			slog.String("error", err.Error()),
@@ -231,6 +241,25 @@ func (a *App) processCommand(cmd *genproto.Command) error {
 		slog.String("command_id", cmd.Id),
 		slog.String("command_type", cmd.CommandType),
 	)
+
+	cmd.GetPayload()
+
+	if cmd.CommandType == "UPDATE_VERSION" {
+		routerSerial := a.deps.Config.RouterSerial
+		deviceEvent := innerkafka.DeviceEvent{
+			EventID:   uuid.New().String(),
+			Timestamp: time.Now(),
+			Type:      "TECH",
+			Payload:   fmt.Sprintf(`{"success": "true", "process": "version updated"}`),
+			Device: innerkafka.Device{
+				DeviceId:   routerSerial,
+				DeviceType: "ROUTER",
+				Meta:       "SUCCESS_UPDATED",
+				CreatedAt:  time.Now(),
+			},
+		}
+		a.sendDeviceEvents(deviceEvent)
+	}
 
 	// логика обработки команды
 

@@ -18,6 +18,7 @@ Container_Boundary(platform, "IoT Platform") {
 }
 Rel("orchestrator", "devser", "CRUD device")
 Rel("orchestrator", "routermanager", "Создание команд")
+Rel("orchestrator", "keycloak", "JWT")
 
 Rel("kafkaproducer", "kafka", "event")
 Rel("kafkaproducer", "keycloak", "JWT")

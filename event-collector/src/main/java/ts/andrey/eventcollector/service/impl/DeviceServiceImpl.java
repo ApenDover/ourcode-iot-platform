@@ -1,5 +1,6 @@
 package ts.andrey.eventcollector.service.impl;
 
+import com.nashkod.avro.Device;
 import com.nashkod.avro.DeviceEvent;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import ts.andrey.eventcollector.service.DeduplicateService;
 import ts.andrey.eventcollector.service.DeviceService;
 import ts.andrey.iotcommon.service.KafkaProducer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,7 +31,18 @@ public class DeviceServiceImpl implements DeviceService {
                 .toList();
 
         final var uniqueDevices = deduplicateService.getUniqueDevices(devices);
-        kafkaProducerImpl.send(uniqueDevices);
+
+        final var notUniqueTechDevices = deviceEvents.stream()
+                .filter(event -> com.nashkod.avro.EventType.TECH.equals(event.getType()))
+                .map(DeviceEvent::getDevice)
+                .filter(device -> !uniqueDevices.contains(device))
+                .toList();
+
+        final var readyToSendDevices = new ArrayList<Device>();
+        readyToSendDevices.addAll(notUniqueTechDevices);
+        readyToSendDevices.addAll(uniqueDevices);
+
+        kafkaProducerImpl.send(readyToSendDevices);
     }
 
 }
