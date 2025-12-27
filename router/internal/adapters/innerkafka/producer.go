@@ -173,6 +173,7 @@ func (p *Producer) serializeToAvro(event *DeviceEvent) ([]byte, error) {
 			"deviceType": event.Device.DeviceType,
 			"meta":       event.Device.Meta,
 			"createdAt":  event.Device.CreatedAt.UnixMilli(),
+			"update":     event.Device.Update,
 		},
 	}
 

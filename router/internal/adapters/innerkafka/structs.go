@@ -17,4 +17,5 @@ type Device struct {
 	DeviceType string
 	Meta       string
 	CreatedAt  time.Time
+	Update     bool
 }

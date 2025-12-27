@@ -16,6 +16,10 @@
       "type": "string"
     },
     {
+      "name": "update",
+      "type": "boolean"
+    },
+    {
       "name": "createdAt",
       "type": {
         "type": "long",

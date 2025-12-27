@@ -31,6 +31,7 @@ func (s *AvroSerializer) SerializeDeviceEvent(event *DeviceEvent) ([]byte, error
 			"deviceType": event.Device.DeviceType,
 			"meta":       event.Device.Meta,
 			"createdAt":  event.Device.CreatedAt.UnixMilli(),
+			"Update:":    event.Device.Update,
 		},
 	}
 

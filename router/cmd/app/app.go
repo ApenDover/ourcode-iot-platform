@@ -136,6 +136,7 @@ func (a *App) scheduledRequestWorker() {
 			DeviceType: "ROUTER",
 			Meta:       "Office A",
 			CreatedAt:  time.Now(),
+			Update:     false,
 		},
 	}
 	a.sendDeviceEvents(deviceEvent)
@@ -158,6 +159,7 @@ func (a *App) scheduledRequestWorker() {
 					DeviceType: "ROUTER",
 					Meta:       "Office A",
 					CreatedAt:  time.Now(),
+					Update:     false,
 				},
 			}
 			a.sendDeviceEvents(deviceEvent)
@@ -243,9 +245,9 @@ func (a *App) processCommand(cmd *genproto.Command) error {
 	)
 
 	cmd.GetPayload()
+	routerSerial := a.deps.Config.RouterSerial
 
 	if cmd.CommandType == "UPDATE_VERSION" {
-		routerSerial := a.deps.Config.RouterSerial
 		deviceEvent := innerkafka.DeviceEvent{
 			EventID:   uuid.New().String(),
 			Timestamp: time.Now(),
@@ -256,6 +258,22 @@ func (a *App) processCommand(cmd *genproto.Command) error {
 				DeviceType: "ROUTER",
 				Meta:       "SUCCESS_UPDATED",
 				CreatedAt:  time.Now(),
+				Update:     true,
+			},
+		}
+		a.sendDeviceEvents(deviceEvent)
+	} else {
+		deviceEvent := innerkafka.DeviceEvent{
+			EventID:   uuid.New().String(),
+			Timestamp: time.Now(),
+			Type:      "TECH",
+			Payload:   fmt.Sprintf(`{"success": "true"}`),
+			Device: innerkafka.Device{
+				DeviceId:   routerSerial,
+				DeviceType: "ROUTER",
+				Meta:       cmd.GetPayload().String(),
+				CreatedAt:  time.Now(),
+				Update:     true,
 			},
 		}
 		a.sendDeviceEvents(deviceEvent)

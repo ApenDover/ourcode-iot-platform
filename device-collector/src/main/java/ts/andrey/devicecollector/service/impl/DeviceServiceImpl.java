@@ -25,7 +25,7 @@ public class DeviceServiceImpl implements DeviceService {
     public void createOrUpdateDevice(List<Device> devices) {
 
         final var updated = devices.stream()
-                .filter(it -> STATUS_META_NAME.equalsIgnoreCase(it.getMeta()))
+                .filter(it -> STATUS_META_NAME.equalsIgnoreCase(it.getMeta()) || it.getUpdate())
                 .toList();
         if (CollectionUtils.isNotEmpty(updated)) {
             updated.forEach(deviceDataService::update);
