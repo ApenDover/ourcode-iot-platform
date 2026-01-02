@@ -10,6 +10,7 @@ import ts.andrey.eventcollector.data.entity.DeviceEntity;
 import ts.andrey.eventcollector.data.repository.DeviceReactRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -33,6 +34,9 @@ public class DeviceDataService {
 
     @WithSpan("cassandra-searching")
     public List<DeviceEntity> getUnsavedDeviceIds(List<DeviceEntity> devices) {
+        if (CollectionUtils.isEmpty(devices)) {
+            return Collections.emptyList();
+        }
         final var ids = devices.stream()
                 .map(DeviceEntity::getDeviceId)
                 .distinct()

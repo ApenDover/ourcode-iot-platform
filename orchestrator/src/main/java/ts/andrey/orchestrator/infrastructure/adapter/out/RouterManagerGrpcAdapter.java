@@ -22,9 +22,7 @@ public class RouterManagerGrpcAdapter implements RouterManagerGrpcPort {
 
     @WithSpan("RouterManagerTransportCommand")
     public SendCommandResponse sendCommand(SendCommandRequest sendCommandRequest) {
-
         final var payloadStruct = ProtoPayloadMapper.toStruct(sendCommandRequest.getPayload());
-
         final var commandRequest = Roma.SendCommandRequest.newBuilder()
                 .setRouterSerial(sendCommandRequest.getRouterSerial())
                 .setCommandType(sendCommandRequest.getCommandType())
@@ -37,7 +35,6 @@ public class RouterManagerGrpcAdapter implements RouterManagerGrpcPort {
 
     @WithSpan("RouterManagerTransportAck")
     public AckCommandResponse ackCommand(AckCommandRequest ackCommandRequest) {
-
         final var ackRequest = Roma.AckCommandRequest.newBuilder()
                 .setRouterSerial(ackCommandRequest.getRouterSerial())
                 .setCommandId(ackCommandRequest.getCommandId())
@@ -49,7 +46,6 @@ public class RouterManagerGrpcAdapter implements RouterManagerGrpcPort {
 
     @WithSpan("RouterManagerTransportPoll")
     public PollCommandsResponse pollCommands(String routerSerial) {
-
         final var pollRequest = Roma.PollCommandsRequest.newBuilder()
                 .setRouterSerial(routerSerial)
                 .build();

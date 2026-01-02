@@ -82,24 +82,4 @@ public class DeviceDataService {
         kafkaDltProducerImpl.send(errorMessages);
     }
 
-    //TODO если тут сломается, то статус зависнет в UPDATED, надо докатывать до READY
-    public void update(Device device) {
-        try {
-            final var entityOpt = deviceRepository.findDeviceEntitiesByDeviceId(device.getDeviceId());
-            if (entityOpt.isEmpty()) {
-                log.error("Не смог найти device по deviceId {}", device.getDeviceId());
-            }
-            final var entity = entityOpt.get();
-            final var etag = entity.getEtag();
-            entity.setStatus("READY");
-            entity.setEtag(etag + 1);
-            entity.setApplication(app);
-            log.info("Пытаюсь сохранить deviceEntity {}", entity);
-            deviceRepository.save(entity);
-            log.info("Обновление прошивки завершено для {}", device.getDeviceId());
-        } catch (Exception e) {
-            log.error("ошибка: {}", e.getMessage(), e);
-        }
-    }
-
 }

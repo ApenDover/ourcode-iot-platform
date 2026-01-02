@@ -7,10 +7,11 @@ import (
 	"router-manager-service/internal/core/domain"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/prometheus/client_golang/prometheus"
 	"router-manager-service/internal/metrics"
 	"router-manager-service/internal/ports"
+
+	"github.com/google/uuid"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type ManagerService struct {
@@ -32,8 +33,6 @@ func (m *ManagerService) CreateCommand(ctx context.Context, serial string, comma
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("CreateCommand"))
 	defer timer.ObserveDuration()
 
-	log.Debug("создание команд")
-
 	router, errRedis := m.redisRouters.GetRouter(ctx, serial)
 	if router == nil || errRedis != nil {
 		log.Debug("сохранение роутера в БД")
@@ -50,6 +49,8 @@ func (m *ManagerService) CreateCommand(ctx context.Context, serial string, comma
 		Status:      domain.CommandStatusPending,
 	}
 
+	log.Debug("отправка команды")
+
 	if errCreateCommand := m.dataPort.CreateCommands(ctx, []domain.Command{cmd}); errCreateCommand != nil {
 		metrics.CommandErrors.WithLabelValues("CreateCommands").Inc()
 		return domain.CommandOut{}, errCreateCommand
@@ -60,7 +61,7 @@ func (m *ManagerService) CreateCommand(ctx context.Context, serial string, comma
 		ID:           cmd.ID,
 		SerialNumber: serial,
 		CommandType:  cmd.CommandType,
-		Payload:      &cmd.Payload,
+		Payload:      cmd.Payload,
 		Status:       cmd.Status,
 		CreatedAt:    cmd.CreatedAt,
 	}, nil
@@ -93,7 +94,7 @@ func (m *ManagerService) CreateCommandForAll(ctx context.Context, commandType st
 			ID:           cmd.ID,
 			SerialNumber: r.SerialNumber,
 			CommandType:  cmd.CommandType,
-			Payload:      &cmd.Payload,
+			Payload:      cmd.Payload,
 			Status:       cmd.Status,
 			CreatedAt:    cmd.CreatedAt,
 		})
@@ -120,7 +121,7 @@ func (m *ManagerService) GetPendingCommandsAndMarkItSent(ctx context.Context, se
 			ID:           cmd.ID,
 			SerialNumber: serial,
 			CommandType:  cmd.CommandType,
-			Payload:      &cmd.Payload,
+			Payload:      cmd.Payload,
 			Status:       domain.CommandStatusSent,
 			CreatedAt:    cmd.CreatedAt,
 			SentAt:       &now,

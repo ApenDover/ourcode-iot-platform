@@ -109,7 +109,7 @@ func (s *Server) AckCommand(ctx context.Context, req *genproto.AckCommandRequest
 }
 
 func (s *Server) commandToProto(cmd domain.CommandOut) (*genproto.Command, error) {
-	payload, err := structpb.NewStruct(*cmd.Payload)
+	payload, err := structpb.NewStruct(cmd.Payload)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create struct: %w", err)
 	}

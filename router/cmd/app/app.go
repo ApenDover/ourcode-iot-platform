@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -15,6 +16,8 @@ import (
 	"router-manager-service/internal/conf/util"
 
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 type Dependencies struct {
@@ -244,7 +247,6 @@ func (a *App) processCommand(cmd *genproto.Command) error {
 		slog.String("command_type", cmd.CommandType),
 	)
 
-	cmd.GetPayload()
 	routerSerial := a.deps.Config.RouterSerial
 
 	if cmd.CommandType == "UPDATE_VERSION" {
@@ -271,7 +273,7 @@ func (a *App) processCommand(cmd *genproto.Command) error {
 			Device: innerkafka.Device{
 				DeviceId:   routerSerial,
 				DeviceType: "ROUTER",
-				Meta:       cmd.GetPayload().String(),
+				Meta:       structToJSON(cmd.GetPayload()),
 				CreatedAt:  time.Now(),
 				Update:     true,
 			},
@@ -325,4 +327,26 @@ func (a *App) waitForShutdown(log *slog.Logger) {
 	case <-time.After(30 * time.Second):
 		log.Warn("Таймаут graceful shutdown истек")
 	}
+}
+
+func structToJSON(s *structpb.Struct) string {
+	if s == nil {
+		return "{}"
+	}
+
+	marshaler := protojson.MarshalOptions{
+		EmitUnpopulated: false,
+	}
+
+	jsonBytes, err := marshaler.Marshal(s)
+	if err != nil {
+		if m := s.AsMap(); m != nil {
+			if bytes, err := json.Marshal(m); err == nil {
+				return string(bytes)
+			}
+		}
+		return "{}"
+	}
+
+	return string(jsonBytes)
 }
