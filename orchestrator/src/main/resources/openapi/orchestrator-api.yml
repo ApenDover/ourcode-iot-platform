@@ -340,7 +340,7 @@ components:
     # Router Manager schemas
     SendCommandRequest:
       type: object
-      required: [ router_serial, command_type ]
+      required: [ command_type ]
       properties:
         router_serial:
           type: string
