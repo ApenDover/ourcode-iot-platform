@@ -31,6 +31,7 @@ public interface DeviceMapper {
     DeviceEntity toEntity(Device device);
 
     @Mapping(target = "createdAt", expression = "java(deviceEntity.getCreatedAt().toEpochMilli())")
+    @Mapping(target = "etag", expression = "java(deviceEntity.getEtag() == null ? 0L : deviceEntity.getEtag())")
     Device toDevice(DeviceEntity deviceEntity);
 
     List<Device> toDevices(List<DeviceEntity> deviceEntities);

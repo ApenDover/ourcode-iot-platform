@@ -78,6 +78,23 @@ class DeviceMapperTest {
         assertEquals("deviceType", actual.getDeviceType());
         assertEquals(200L, actual.getCreatedAt());
         assertEquals("meta", actual.getMeta());
+        assertEquals(1L, actual.getEtag());
+    }
+
+    @Test
+    void toDeviceWithoutEtag() {
+        // GIVEN
+        final var device = DummyTDF.deviceEntity.getWithoutEtag();
+
+        // WHEN
+        final var actual = deviceMapper.toDevice(device);
+
+        // THEN
+        assertEquals("deviceId", actual.getDeviceId());
+        assertEquals("deviceType", actual.getDeviceType());
+        assertEquals(200L, actual.getCreatedAt());
+        assertEquals("meta", actual.getMeta());
+        assertEquals(0L, actual.getEtag());
     }
 
     @Test

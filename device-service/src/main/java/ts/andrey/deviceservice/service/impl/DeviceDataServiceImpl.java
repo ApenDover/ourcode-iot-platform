@@ -28,8 +28,6 @@ public class DeviceDataServiceImpl implements DeviceService {
     private final DeviceMetrics deviceMetrics;
     private final DeviceDbDataService deviceDbService;
     private final DeviceMapper deviceMapper;
-    private final DeviceRepository deviceRepository;
-    private final EntityManager entityManager;
 
     @Override
     public Device getDevice(String deviceId) {

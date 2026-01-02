@@ -11,8 +11,8 @@ import java.util.List;
 public interface DeviceMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "version", constant = "0")
-    @Mapping(target = "etag", expression = "java(0L)")
+    @Mapping(target = "version", ignore = true)
+    @Mapping(target = "etag", ignore = true)
     DeviceEntity toDeviceEntity(Device device);
 
     Device toDevice(DeviceEntity device);

@@ -29,11 +29,13 @@ public class DeviceCacheServiceImpl implements DeviceService {
 
     public Device getDevice(String deviceId) {
         final var cached = deviceCacheService.getDevice(deviceId);
-        return cached.orElseGet(() -> {
+        if (cached.isEmpty()
+                || DeviceStatus.UPDATING.equals(cached.get().getStatus())) {
             final var device = deviceDataServiceImpl.getDevice(deviceId);
             deviceCacheService.saveDevice(device);
             return device;
-        });
+        }
+        return cached.get();
     }
 
     public List<Device> getDevice() {

@@ -3,13 +3,6 @@ package innergrpc
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/redis/go-redis/v9"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/structpb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"log/slog"
 	"router-manager-service/internal/adapters/cache"
 	"router-manager-service/internal/adapters/db"
@@ -17,6 +10,14 @@ import (
 	"router-manager-service/internal/core/domain"
 	"router-manager-service/internal/core/service"
 	genproto "router-manager-service/internal/ports/genproto"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Server struct {
@@ -57,11 +58,13 @@ func (s *Server) SendCommand(ctx context.Context, req *genproto.SendCommandReque
 		created = len(commands)
 	}
 
-	log.Debug("Commands created successfully", slog.Int("count", created))
+	log.Info("Commands created successfully", slog.Int("count", created))
 	return &genproto.SendCommandResponse{Created: int32(created)}, nil
 }
 
-func (s *Server) PollCommands(ctx context.Context, req *genproto.PollCommandsRequest) (*genproto.PollCommandsResponse, error) {
+func (s *Server) PollCommands(
+	ctx context.Context,
+	req *genproto.PollCommandsRequest) (*genproto.PollCommandsResponse, error) {
 	log := util.GetLogger(ctx)
 
 	commands, err := s.ManagerService.GetPendingCommandsAndMarkItSent(ctx, req.RouterSerial)
@@ -80,7 +83,7 @@ func (s *Server) PollCommands(ctx context.Context, req *genproto.PollCommandsReq
 		pbCommands = append(pbCommands, pbCommand)
 	}
 
-	log.Debug("Polled commands", slog.Int("count", len(pbCommands)))
+	log.Info("Polled commands", slog.Int("count", len(pbCommands)))
 	return &genproto.PollCommandsResponse{Commands: pbCommands}, nil
 }
 
@@ -101,7 +104,7 @@ func (s *Server) AckCommand(ctx context.Context, req *genproto.AckCommandRequest
 		return nil, status.Error(codes.Internal, "failed to acknowledge command")
 	}
 
-	log.Debug("Command acknowledged", slog.String("command_id", req.CommandId))
+	log.Info("Command acknowledged", slog.String("command_id", req.CommandId))
 	return &genproto.AckCommandResponse{Status: "ACKED"}, nil
 }
 

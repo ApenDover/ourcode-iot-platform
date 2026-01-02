@@ -7,6 +7,7 @@ import ts.andrey.devicecollector.tdf.DummyTDF;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class DeviceMapperTest {
 
@@ -25,8 +26,8 @@ class DeviceMapperTest {
         assertEquals("deviceType", deviceEntity.getDeviceType());
         assertEquals(Instant.ofEpochMilli(300L), deviceEntity.getCreatedAt());
         assertEquals("meta", deviceEntity.getMeta());
-        assertEquals("0", deviceEntity.getVersion());
-        assertEquals(0L, deviceEntity.getEtag());
+        assertNull(deviceEntity.getVersion());
+        assertNull(deviceEntity.getEtag());
     }
 
     @Test

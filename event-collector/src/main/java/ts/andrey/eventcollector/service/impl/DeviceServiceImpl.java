@@ -32,14 +32,14 @@ public class DeviceServiceImpl implements DeviceService {
 
         final var uniqueDevices = deduplicateService.getUniqueDevices(devices);
 
-        final var notUniqueTechDevices = deviceEvents.stream()
+        final var techDevices = deviceEvents.stream()
                 .filter(event -> com.nashkod.avro.EventType.TECH.equals(event.getType()))
                 .map(DeviceEvent::getDevice)
                 .filter(device -> !uniqueDevices.contains(device))
                 .toList();
 
         final var readyToSendDevices = new ArrayList<Device>();
-        readyToSendDevices.addAll(notUniqueTechDevices);
+        readyToSendDevices.addAll(techDevices);
         readyToSendDevices.addAll(uniqueDevices);
 
         kafkaProducerImpl.send(readyToSendDevices);
