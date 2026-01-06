@@ -118,15 +118,16 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
         final var requestHeaders = formatHeaders(request);
         final var responseHeaders = formatHeaders(response);
 
-        log.info("Request: {} {} | Headers: {} | Body: {} \nResponse: {} | Status: {} | Headers: {} | Body: {}",
-                request.getMethod(),
-                request.getRequestURI(),
-                requestHeaders,
-                loggedRequestBody,
+        log.info("Response: {} | Status: {} | Headers: {} | Body: {} FOR Request: {} {} | Headers: {} | Body: {}",
                 request.getRequestURI(),
                 response.getStatus(),
                 responseHeaders,
-                loggedResponseBody);
+                loggedResponseBody,
+                request.getMethod(),
+                request.getRequestURI(),
+                requestHeaders,
+                loggedRequestBody
+        );
     }
 
     /**

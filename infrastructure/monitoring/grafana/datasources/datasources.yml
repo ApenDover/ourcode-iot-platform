@@ -6,13 +6,41 @@ datasources:
     access: proxy
     url: http://prometheus:9090
     isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: 15s
+      exemplarTraceIdDestinations:
+        - datasourceUid: DS_TEMPO
+          name: trace_id
+          urlLabel: "Go to trace"
   - name: DS_LOKI
     type: loki
     access: proxy
     url: http://loki:3100
     isDefault: false
+    editable: true
   - name: DS_TEMPO
     type: tempo
     access: proxy
     url: http://tempo:3200
     isDefault: false
+    editable: true
+    jsonData:
+      nodeGraph:
+        enabled: true
+      tracesToLogs:
+        datasourceUid: DS_LOKI
+        tags: [ 'service.name' ]
+        mappedTags:
+          - key: 'service.name'
+            value: 'service'
+        mapTagNamesEnabled: true
+        spanStartTimeShift: '-1h'
+        spanEndTimeShift: '1h'
+        filterByTraceID: true
+        filterBySpanID: false
+        customQuery: false
+      tracesToMetrics:
+        datasourceUid: DS_PROMETHEUS
+      serviceMap:
+        datasourceUid: DS_PROMETHEUS

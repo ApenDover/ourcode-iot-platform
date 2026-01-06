@@ -28,7 +28,7 @@ public class DeviceCacheDataService {
         try {
             final var device = redisTemplate.opsForValue().get(deviceId);
             if (Objects.nonNull(device)) {
-                log.info("Device найден в REDIS: {}", device);
+                log.debug("Device найден в REDIS: {}", device);
                 deviceMetrics.getDeviceRedisSuccess();
                 deviceMetrics.deviceRedisSuccess();
             }
@@ -44,7 +44,7 @@ public class DeviceCacheDataService {
         try {
             redisTemplate.opsForValue()
                     .set(device.getDeviceId(), device, ttl());
-            log.info("Device сохранен в REDIS: {}", device);
+            log.debug("Device сохранен в REDIS: {}", device);
             deviceMetrics.saveDeviceRedisSuccess();
             deviceMetrics.deviceRedisSuccess();
             return device;
@@ -60,7 +60,7 @@ public class DeviceCacheDataService {
             redisTemplate.delete(deviceId);
             deviceMetrics.deleteDeviceRedisSuccess();
             deviceMetrics.deviceRedisSuccess();
-            log.info("Device удален из REDIS: {}", deviceId);
+            log.debug("Device удален из REDIS: {}", deviceId);
         } catch (Exception e) {
             deviceMetrics.deviceRedisFailure();
             log.error(ErrorExceptionMessages.REDIS_NOT_AVAILABLE.format(e.getMessage()), e);

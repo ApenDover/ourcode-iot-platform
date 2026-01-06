@@ -42,42 +42,53 @@ configurations {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+    // ============= SPRING BOOT STARTERS =============
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 
-	implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
+    // ============= OBSERVABILITY (TRACING & METRICS) =============
+    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
+    implementation "io.micrometer:micrometer-tracing-bridge-otel"
+    implementation "io.micrometer:micrometer-observation"
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 
-	implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
-	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
-	implementation "com.fasterxml.jackson.core:jackson-annotations"
-	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    // ============= ASPECTS =============
+    implementation "org.aspectj:aspectjweaver:${aspectj}"
+    implementation "org.aspectj:aspectjrt:${aspectj}"
 
-	implementation "ts.andrey:iot-avro:1.0.0"
-    implementation 'io.projectreactor:reactor-core:3.8.1'
+    // ============= REACTIVE =============
+    implementation "io.projectreactor:reactor-core:${reactorCore}"
 
-	compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
-	compileOnly 'org.projectlombok:lombok'
+    // ============= LOGGING =============
+    implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
 
-	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
-	implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetrySpringBootVersion}"
-	runtimeOnly 'io.micrometer:micrometer-registry-otlp'
-	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    // ============= EXTERNAL APIS =============
+    implementation "ts.andrey:iot-avro:${iotavro}"
 
-	annotationProcessor 'org.projectlombok:lombok'
-	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    // ============= UTILITIES =============
+    implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
+    implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
+    implementation "com.fasterxml.jackson.core:jackson-annotations"
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-	testImplementation 'org.testcontainers:cassandra'
-	testImplementation 'org.testcontainers:junit-jupiter'
+    // ============= COMPILE ONLY =============
+    compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
+    compileOnly 'org.projectlombok:lombok'
 
-    implementation 'org.aspectj:aspectjweaver:1.9.22'
-    implementation 'org.aspectj:aspectjrt:1.9.22'
+    // ============= ANNOTATION PROCESSORS =============
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testCompileOnly "org.projectlombok:lombok"
-	testAnnotationProcessor "org.projectlombok:lombok"
+    // ============= TEST =============
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:cassandra'
+    testImplementation 'org.testcontainers:junit-jupiter'
+
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testCompileOnly "org.projectlombok:lombok"
+    testAnnotationProcessor "org.projectlombok:lombok"
 }
 
 checkstyle {

@@ -36,58 +36,65 @@ java {
 }
 
 dependencies {
+    // ============= SPRING BOOT STARTERS =============
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-
-	implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
-
+    // ============= DATABASE & PERSISTENCE =============
     implementation "org.postgresql:postgresql"
-    implementation "org.springframework.boot:spring-boot-starter-jdbc"
     implementation "org.apache.shardingsphere:shardingsphere-jdbc:${shardingsphere}"
-    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
 
-	implementation "com.github.f4b6a3:ulid-creator:${ulidCreator}"
+    // ============= OBSERVABILITY (TRACING & METRICS) =============
+    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
+    implementation "io.micrometer:micrometer-tracing-bridge-otel"
+    implementation "io.micrometer:micrometer-observation"
+    runtimeOnly "io.micrometer:micrometer-registry-prometheus"
 
-	implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
-	implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
-	implementation "com.fasterxml.jackson.core:jackson-annotations"
+    // ============= ASPECTS =============
+    implementation "org.aspectj:aspectjweaver:${aspectj}"
+    implementation "org.aspectj:aspectjrt:${aspectj}"
 
-	compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
+    // ============= UTILITIES & HELPERS =============
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    implementation "com.github.f4b6a3:ulid-creator:${ulidCreator}"
+    implementation "org.apache.commons:commons-collections4:${commonsCollections}"
+    implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
 
-	implementation "org.apache.commons:commons-collections4:${commonsCollections}"
-	implementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
+    // ============= LOGGING =============
+    implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
 
-    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+    // ============= VALIDATION & SERIALIZATION =============
+    implementation "jakarta.validation:jakarta.validation-api:${jakartaValidation}"
+    implementation "org.openapitools:jackson-databind-nullable:${databindNullable}"
+    implementation "com.fasterxml.jackson.core:jackson-annotations"
 
-	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    // ============= COMPILE ONLY =============
+    compileOnly "io.swagger.core.v3:swagger-annotations:${swagger}"
+    compileOnly "org.projectlombok:lombok"
 
-	implementation "org.springframework.boot:spring-boot-starter-actuator"
-	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
-	implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetrySpringBootVersion}"
+    // ============= ANNOTATION PROCESSORS =============
+    annotationProcessor "org.projectlombok:lombok"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
-	runtimeOnly "io.micrometer:micrometer-registry-prometheus"
-	compileOnly "org.projectlombok:lombok"
-	annotationProcessor "org.projectlombok:lombok"
-	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-
-	testImplementation "org.flywaydb:flyway-core:${flyWay}"
-	testImplementation "org.flywaydb:flyway-database-postgresql:${flyWay}"
+    // ============= TEST =============
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation "org.testcontainers:junit-jupiter"
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation "org.testcontainers:junit-jupiter"
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation "com.github.dasniko:testcontainers-keycloak:${testContainerKeycloak}"
     testImplementation 'io.projectreactor:reactor-test'
-	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-	testImplementation "com.github.dasniko:testcontainers-keycloak:${testContainerKeycloak}"
-	testImplementation 'org.testcontainers:postgresql'
+
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testCompileOnly "org.projectlombok:lombok"
-	testAnnotationProcessor "org.projectlombok:lombok"
-	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    testCompileOnly "org.projectlombok:lombok"
+    testAnnotationProcessor "org.projectlombok:lombok"
+    testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 }
 
 openApiGenerate {
