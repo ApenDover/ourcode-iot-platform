@@ -47,9 +47,10 @@ func (m *ManagerService) CreateCommand(ctx context.Context, serial string, comma
 		CommandType: commandType,
 		Payload:     payload,
 		Status:      domain.CommandStatusPending,
+		CreatedAt:   time.Now(),
 	}
 
-	log.Debug("отправка команды")
+	log.Info("Создание команды: " + cmd.String())
 
 	if errCreateCommand := m.dataPort.CreateCommands(ctx, []domain.Command{cmd}); errCreateCommand != nil {
 		metrics.CommandErrors.WithLabelValues("CreateCommands").Inc()

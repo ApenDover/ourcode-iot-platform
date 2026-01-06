@@ -79,6 +79,7 @@ dependencies {
 	implementation "io.grpc:grpc-stub:${grpcVersion}"
     implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
 	implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
+    implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
 
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 

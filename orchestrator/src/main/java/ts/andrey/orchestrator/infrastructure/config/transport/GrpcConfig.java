@@ -16,11 +16,17 @@ public class GrpcConfig {
     private int routerManagerPort;
 
     @Bean
-    public ManagedChannel routerManagerChannel() {
+    public ManagedChannel routerManagerChannel(GrpcTraceInterceptor grpcTraceInterceptor) {
         return ManagedChannelBuilder
                 .forAddress(routerManagerHost, routerManagerPort)
+                .intercept(grpcTraceInterceptor)
                 .usePlaintext()
                 .build();
+    }
+
+    @Bean
+    public GrpcTraceInterceptor grpcTraceInterceptor() {
+        return new GrpcTraceInterceptor();
     }
 
 }

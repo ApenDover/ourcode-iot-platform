@@ -83,7 +83,12 @@ func (s *Server) PollCommands(
 		pbCommands = append(pbCommands, pbCommand)
 	}
 
-	log.Info("Polled commands", slog.Int("count", len(pbCommands)))
+	if len(pbCommands) > 0 {
+		log.Info("Polled commands", slog.Int("count", len(pbCommands)))
+	} else {
+		log.Debug("Polled commands", slog.Int("count", len(pbCommands)))
+	}
+
 	return &genproto.PollCommandsResponse{Commands: pbCommands}, nil
 }
 

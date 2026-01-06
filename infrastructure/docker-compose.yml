@@ -186,12 +186,15 @@ services:
     restart: unless-stopped
     environment:
       JAVA_OPTS: >-
-        -Xmx512m
-        -Xms256m
-        -XX:MaxRAMPercentage=60.0
-        -XX:+UseZGC
-        -XX:+ZUncommit
-        -XX:ZUncommitDelay=30
+        -Xmx2g
+        -Xms2g
+        -XX:+UseG1GC
+        -XX:MaxGCPauseMillis=200
+        -XX:G1ReservePercent=15
+        -XX:InitiatingHeapOccupancyPercent=35
+        -XX:+ParallelRefProcEnabled
+        -XX:+AlwaysPreTouch
+        -XX:NativeMemoryTracking=summary
       OTEL_SERVICE_NAME: event-service
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf

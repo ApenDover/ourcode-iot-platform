@@ -24,6 +24,7 @@ public class CriteriaRepository {
 
     private static final String TIMESTAMP_FIELD = "timestamp";
     private static final String DEVICE_ID_FIELD = "device_id";
+    private static final String TYPE_FIELD = "type";
 
     private final CassandraTemplate cassandraTemplate;
 
@@ -35,6 +36,9 @@ public class CriteriaRepository {
         }
         if (filter.getToTimestamp() != null) {
             query = query.and(Criteria.where(TIMESTAMP_FIELD).lte(filter.getToTimestamp()));
+        }
+        if (filter.getType() != null) {
+            query = query.and(Criteria.where(TYPE_FIELD).is(filter.getType()));
         }
 
         query = query.pageRequest(pageable);

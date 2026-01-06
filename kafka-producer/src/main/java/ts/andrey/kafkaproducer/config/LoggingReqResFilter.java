@@ -63,6 +63,8 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
             return;
         }
 
+        log.info("Got request {}: {}", request.getMethod(), request.getRequestURI());
+
         final var wrappedRequest = new ContentCachingRequestWrapper(request);
         final var wrappedResponse = new ContentCachingResponseWrapper(response);
 
@@ -115,13 +117,11 @@ public class LoggingReqResFilter extends OncePerRequestFilter {
         final var requestHeaders = formatHeaders(request);
         final var responseHeaders = formatHeaders(response);
 
-        log.info("Request: {} {} | Headers: {} | Body: {}",
+        log.info("Request: {} {} | Headers: {} | Body: {} \nResponse: {} | Status: {} | Headers: {} | Body: {}",
                 request.getMethod(),
                 request.getRequestURI(),
                 requestHeaders,
-                loggedRequestBody);
-
-        log.info("Response: {} | Status: {} | Headers: {} | Body: {}",
+                loggedRequestBody,
                 request.getRequestURI(),
                 response.getStatus(),
                 responseHeaders,
