@@ -9,6 +9,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 import ts.andrey.eventcollector.data.entity.DeviceEventEntity;
+import ts.andrey.eventcollector.data.repository.DeviceEventKeyReactRepository;
 import ts.andrey.eventcollector.data.repository.DeviceEventReactRepository;
 import ts.andrey.eventcollector.mapper.DeviceEventMapper;
 import ts.andrey.eventcollector.metrics.EventCollectorMetrics;
@@ -31,6 +32,7 @@ public class DeviceEventDataService {
     private final KafkaProducer kafkaDltProducerImpl;
     private final DeviceEventMapper deviceEventMapper;
     private final DeviceEventReactRepository deviceEventReactRepository;
+    private final DeviceEventKeyReactRepository deviceEventKeyReactRepository;
     private final EventCollectorMetrics eventCollectorMetrics;
 
     @Value("${app.cassandra.batch-size}")
@@ -65,6 +67,10 @@ public class DeviceEventDataService {
 
     private Mono<Void> saveBatch(List<DeviceEventEntity> batch, Map<UUID, DeviceEvent> eventMap) {
         log.debug("Processing batch of [{}] events", batch.size());
+        final var keys = batch.stream()
+                .map(it -> deviceEventMapper.mapToEntityKey(it.getKey()))
+                .toList();
+        deviceEventKeyReactRepository.saveAll(keys).subscribe();
         return deviceEventReactRepository.saveAll(batch)
                 .doOnNext(e -> {
                     eventCollectorMetrics.incrementCassandraSuccess();

@@ -4,9 +4,7 @@ import com.nashkod.avro.Device;
 import com.nashkod.avro.DeviceEvent;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ts.andrey.eventcollector.data.entity.DeviceEntity;
-import ts.andrey.eventcollector.data.entity.DeviceEventEntity;
-import ts.andrey.eventcollector.data.entity.DeviceEventKey;
+import ts.andrey.eventcollector.data.entity.*;
 
 import java.util.List;
 
@@ -25,5 +23,10 @@ public interface DeviceEventMapper {
     DeviceEntity deviceToEntity(Device device);
 
     List<DeviceEntity> deviceToEntityList(List<Device> device);
+
+    @Mapping(target = "key", expression = "java(toEntityKeyKey(key))")
+    EventKeyEntity mapToEntityKey(DeviceEventKey key);
+
+    EventKeyEntityKey toEntityKeyKey(DeviceEventKey deviceEventKey);
 
 }

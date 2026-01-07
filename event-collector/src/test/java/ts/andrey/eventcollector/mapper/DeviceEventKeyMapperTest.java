@@ -29,4 +29,17 @@ class DeviceEventKeyMapperTest {
         assertEquals("10", actual.getPayload());
     }
 
+    @Test
+    void toKeyEntity() {
+        final var deviceEventEntity = DummyTDF.deviceEventEntity.getDefault();
+
+        //WHEN
+        final var actual = deviceEventMapper.mapToEntityKey(deviceEventEntity.getKey());
+
+        //THEN
+        assertEquals("892dd1da-6f3f-49bc-a60d-a2b282d6efd0", actual.getKey().getEventId().toString());
+        assertEquals(897L, actual.getTimestamp());
+        assertEquals("deviceIdKey", actual.getDeviceId());
+    }
+
 }

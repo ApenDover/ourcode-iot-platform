@@ -9,24 +9,27 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import ts.andrey.eventservice.data.entity.DeviceEventEntity;
 import ts.andrey.eventservice.data.entity.DeviceEventKey;
+import ts.andrey.eventservice.data.entity.EventKeyEntity;
+import ts.andrey.eventservice.data.entity.EventKeyEntityKey;
 import ts.andrey.eventservice.exception.ErrorExceptionMessages;
 import ts.andrey.eventservice.exception.EventServiceException;
+import ts.andrey.eventservice.mapper.EventMapper;
 import ts.andrey.eventservice.model.EventFilterRequest;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Repository
 @RequiredArgsConstructor
 public class CriteriaRepository {
 
+    private final static WeakHashMap<UUID, DeviceEventKey> WEAK_HASH_MAP = new WeakHashMap<>();
     private static final String TIMESTAMP_FIELD = "timestamp";
     private static final String DEVICE_ID_FIELD = "device_id";
     private static final String TYPE_FIELD = "type";
 
     private final CassandraTemplate cassandraTemplate;
+    private final EventMapper eventMapper;
 
     public List<DeviceEventEntity> getEventsByFilter(EventFilterRequest filter, Pageable pageable) {
         Query query = Query.query(Criteria.where(DEVICE_ID_FIELD).is(filter.getDeviceId()));
@@ -43,28 +46,24 @@ public class CriteriaRepository {
 
         query = query.pageRequest(pageable);
 
-        List<DeviceEventEntity> events = cassandraTemplate.select(query, DeviceEventEntity.class);
-
-        if (Objects.nonNull(filter.getType())) {
-            events = events.stream()
-                    .filter(event -> filter.getType().equals(event.getType().toString()))
-                    .toList();
-        }
-
-        return events;
+        return cassandraTemplate.select(query, DeviceEventEntity.class);
     }
 
     public DeviceEventEntity getEventByDeviceIdAndEventId(String deviceId, UUID eventId) {
-        final var key = new DeviceEventKey();
-        key.setDeviceId(deviceId);
-        key.setEventId(eventId);
-
-        final var entity = cassandraTemplate.selectOneById(key, DeviceEventEntity.class);
-
-        if (Objects.isNull(entity)) {
-            throw new EventServiceException(ErrorExceptionMessages.EVENT_NOT_FOUND, eventId);
+        var hashedKey = WEAK_HASH_MAP.get(eventId);
+        if (Objects.isNull(hashedKey)) {
+            final var keyKey = new EventKeyEntityKey();
+            keyKey.setEventId(eventId);
+            final var key = Optional.of(cassandraTemplate.selectOneById(keyKey, EventKeyEntity.class))
+                    .orElseThrow(() -> new EventServiceException(
+                            ErrorExceptionMessages.EVENT_NOT_FOUND, eventId));
+            final var eKey = eventMapper.mapFromEntityKey(key);
+            WEAK_HASH_MAP.put(eventId, eKey);
+            hashedKey = eKey;
         }
-        return entity;
+        return Optional.of(cassandraTemplate.selectOneById(hashedKey, DeviceEventEntity.class))
+                .orElseThrow(() -> new EventServiceException(
+                        ErrorExceptionMessages.EVENT_NOT_FOUND, eventId));
     }
 
 }

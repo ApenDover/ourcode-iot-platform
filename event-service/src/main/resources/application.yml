@@ -73,11 +73,11 @@ spring:
     schema-action: NONE
     pool:
       core-connections-per-host: 8
-      max-connections-per-host: 32
-      max-queue-size: 1024
+      max-connections-per-host: 8
+      max-queue-size: 256
       idle-timeout: 60s
     request:
-      timeout: 10000ms
+      timeout: 3000ms
       consistency: LOCAL_ONE
 
 app:

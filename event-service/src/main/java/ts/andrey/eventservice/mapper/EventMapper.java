@@ -5,6 +5,9 @@ import org.mapstruct.Mapping;
 import ts.andrey.dto.Event;
 import ts.andrey.dto.EventPage;
 import ts.andrey.eventservice.data.entity.DeviceEventEntity;
+import ts.andrey.eventservice.data.entity.DeviceEventKey;
+import ts.andrey.eventservice.data.entity.EventKeyEntity;
+import ts.andrey.eventservice.data.entity.EventKeyEntityKey;
 import ts.andrey.eventservice.model.EventFilterRequest;
 
 import java.util.List;
@@ -28,5 +31,8 @@ public interface EventMapper {
     EventPage entityListToEventPage(List<DeviceEventEntity> deviceEventEntities,
                                     EventFilterRequest eventFilterRequest,
                                     Integer total);
+
+    @Mapping(target = "eventId", source = "eventKeyEntity.key.eventId")
+    DeviceEventKey mapFromEntityKey(EventKeyEntity eventKeyEntity);
 
 }

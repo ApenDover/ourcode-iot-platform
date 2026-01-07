@@ -24,9 +24,109 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 10,
   "links": [],
   "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 17,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFE396EC0B189D67"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "exemplar": true,
+          "expr": "http_server_requests_seconds_count{application=\"orchestrator\", uri!~\"/actuator.*\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Panel Title",
+      "type": "timeseries"
+    },
     {
       "datasource": {
         "type": "prometheus",
@@ -95,7 +195,7 @@
         "h": 27,
         "w": 12,
         "x": 0,
-        "y": 0
+        "y": 8
       },
       "id": 3,
       "options": {
@@ -219,7 +319,7 @@
         "h": 8,
         "w": 3,
         "x": 12,
-        "y": 0
+        "y": 8
       },
       "id": 2,
       "options": {
@@ -316,7 +416,7 @@
         "h": 8,
         "w": 4,
         "x": 15,
-        "y": 0
+        "y": 8
       },
       "id": 4,
       "options": {
@@ -418,7 +518,7 @@
         "h": 8,
         "w": 5,
         "x": 19,
-        "y": 0
+        "y": 8
       },
       "id": 5,
       "options": {
@@ -533,7 +633,7 @@
         "h": 6,
         "w": 7,
         "x": 12,
-        "y": 8
+        "y": 16
       },
       "id": 8,
       "options": {
@@ -617,7 +717,7 @@
         "h": 6,
         "w": 5,
         "x": 19,
-        "y": 8
+        "y": 16
       },
       "id": 11,
       "options": {
@@ -701,7 +801,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 14
+        "y": 22
       },
       "id": 14,
       "options": {
@@ -805,7 +905,7 @@
         "h": 7,
         "w": 4,
         "x": 12,
-        "y": 20
+        "y": 28
       },
       "id": 13,
       "options": {
@@ -874,7 +974,7 @@
         "h": 7,
         "w": 4,
         "x": 16,
-        "y": 20
+        "y": 28
       },
       "id": 7,
       "options": {
@@ -986,7 +1086,7 @@
         "h": 7,
         "w": 4,
         "x": 20,
-        "y": 20
+        "y": 28
       },
       "id": 6,
       "options": {
@@ -1132,7 +1232,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 35
       },
       "id": 1,
       "options": {
@@ -1260,7 +1360,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 36
+        "y": 44
       },
       "id": 15,
       "options": {
@@ -1362,7 +1462,7 @@
         "h": 11,
         "w": 24,
         "x": 0,
-        "y": 44
+        "y": 52
       },
       "id": 16,
       "options": {
@@ -1459,72 +1559,11 @@
         "regex": "",
         "skipUrlSync": false,
         "type": "datasource"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PBFE396EC0B189D67"
-        },
-        "definition": "",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Instance",
-        "multi": true,
-        "name": "instance",
-        "options": [],
-        "query": "label_values(http_server_requests_seconds_count, instance)",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "1h",
-          "value": "1h"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "label": "Time Range",
-        "multi": false,
-        "name": "time_range",
-        "options": [
-          {
-            "selected": true,
-            "text": "1h",
-            "value": "1h"
-          },
-          {
-            "selected": false,
-            "text": "6h",
-            "value": "6h"
-          },
-          {
-            "selected": false,
-            "text": "24h",
-            "value": "24h"
-          },
-          {
-            "selected": false,
-            "text": "7d",
-            "value": "7d"
-          }
-        ],
-        "query": "1h,6h,24h,7d",
-        "skipUrlSync": false,
-        "type": "custom"
       }
     ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-15m",
     "to": "now"
   },
   "timeRangeUpdatedDuringEditOrView": false,
@@ -1532,6 +1571,6 @@
   "timezone": "",
   "title": "Orchestrator Dashboard",
   "uid": "955be242-d062-434a-b063-e3996e6f6c63",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
