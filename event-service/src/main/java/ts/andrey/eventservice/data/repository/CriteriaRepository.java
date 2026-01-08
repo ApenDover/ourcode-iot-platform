@@ -1,5 +1,6 @@
 package ts.andrey.eventservice.data.repository;
 
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.cassandra.core.CassandraTemplate;
@@ -54,14 +55,14 @@ public class CriteriaRepository {
         if (Objects.isNull(hashedKey)) {
             final var keyKey = new EventKeyEntityKey();
             keyKey.setEventId(eventId);
-            final var key = Optional.of(cassandraTemplate.selectOneById(keyKey, EventKeyEntity.class))
+            final var key = Optional.ofNullable(cassandraTemplate.selectOneById(keyKey, EventKeyEntity.class))
                     .orElseThrow(() -> new EventServiceException(
                             ErrorExceptionMessages.EVENT_NOT_FOUND, eventId));
             final var eKey = eventMapper.mapFromEntityKey(key);
             WEAK_HASH_MAP.put(eventId, eKey);
             hashedKey = eKey;
         }
-        return Optional.of(cassandraTemplate.selectOneById(hashedKey, DeviceEventEntity.class))
+        return Optional.ofNullable(cassandraTemplate.selectOneById(hashedKey, DeviceEventEntity.class))
                 .orElseThrow(() -> new EventServiceException(
                         ErrorExceptionMessages.EVENT_NOT_FOUND, eventId));
     }
