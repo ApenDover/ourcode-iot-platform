@@ -53,6 +53,9 @@ func (m *ManagerService) CreateCommand(ctx context.Context, serial string, comma
 	log.Info("Создание команды: " + cmd.String())
 
 	if errCreateCommand := m.dataPort.CreateCommands(ctx, []domain.Command{cmd}); errCreateCommand != nil {
+		log.Error("Не смог создать команду для роутера",
+			slog.String("router-serial", router.SerialNumber),
+			slog.String("router-uuid", router.ID.String()))
 		metrics.CommandErrors.WithLabelValues("CreateCommands").Inc()
 		return domain.CommandOut{}, errCreateCommand
 	}

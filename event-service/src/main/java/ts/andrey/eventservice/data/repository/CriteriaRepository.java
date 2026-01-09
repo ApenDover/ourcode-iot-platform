@@ -44,9 +44,7 @@ public class CriteriaRepository {
         if (filter.getType() != null) {
             query = query.and(Criteria.where(TYPE_FIELD).is(filter.getType()));
         }
-
         query = query.pageRequest(pageable);
-
         return cassandraTemplate.select(query, DeviceEventEntity.class);
     }
 
