@@ -35,10 +35,16 @@ func (m *ManagerService) CreateCommand(ctx context.Context, serial string, comma
 
 	router, errRedis := m.redisRouters.GetRouter(ctx, serial)
 	if router == nil || errRedis != nil {
-		log.Debug("сохранение роутера в БД")
 		router = m.saveRouter(ctx, serial)
+		log.Info("сохранение роутера в БД",
+			slog.String("router-serial", router.SerialNumber),
+			slog.String("router-uuid", router.ID.String()),
+		)
 	} else {
-		log.Debug("нашел роутер в redis")
+		log.Info("нашел роутер в redis",
+			slog.String("router-serial", router.SerialNumber),
+			slog.String("router-uuid", router.ID.String()),
+		)
 	}
 
 	cmd := domain.Command{
