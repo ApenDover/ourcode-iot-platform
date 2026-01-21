@@ -64,6 +64,12 @@ opentelemetry:
 spring:
   application:
     name: event-service
+  task:
+    execution:
+      pool:
+        core-size: 10
+        max-size: 30
+        queue-capacity: 50
 
   cassandra:
     contact-points: ${SPRING_CASSANDRA_CONTACT_POINTS:cassandra}
@@ -77,7 +83,7 @@ spring:
       max-queue-size: 256
       idle-timeout: 60s
     request:
-      timeout: 3000ms
+      timeout: 2000ms
       consistency: LOCAL_ONE
 
 app:

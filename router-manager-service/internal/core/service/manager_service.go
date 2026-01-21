@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"router-manager-service/internal/conf/util"
 	"router-manager-service/internal/core/domain"
+	"sync"
 	"time"
 
 	"router-manager-service/internal/metrics"
@@ -13,6 +14,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus"
 )
+
+var mutexes sync.Map
 
 type ManagerService struct {
 	dataPort         ports.DataPort
@@ -29,6 +32,10 @@ func NewManagerService(dataPort ports.DataPort, routerPort ports.RouterPort, cac
 }
 
 func (m *ManagerService) CreateCommand(ctx context.Context, serial string, commandType string, payload map[string]any) (domain.CommandOut, error) {
+	mu, _ := mutexes.LoadOrStore(serial, &sync.Mutex{})
+	mu.(*sync.Mutex).Lock()
+	defer mu.(*sync.Mutex).Unlock()
+
 	log := util.GetLogger(ctx)
 	timer := prometheus.NewTimer(metrics.MethodDuration.WithLabelValues("CreateCommand"))
 	defer timer.ObserveDuration()

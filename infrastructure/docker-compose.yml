@@ -672,14 +672,14 @@ services:
     image: cassandra:4.0
     container_name: cassandra
     restart: unless-stopped
-    mem_limit: 7g
+    mem_limit: 10g
     environment:
       CASSANDRA_CLUSTER_NAME: "TestCluster"
       CASSANDRA_NUM_TOKENS: 256
       CASSANDRA_DC: "datacenter1"
       CASSANDRA_RACK: "rack1"
-      MAX_HEAP_SIZE: "2G"
-      HEAP_NEWSIZE: "512M"
+      MAX_HEAP_SIZE: "4G"
+      HEAP_NEWSIZE: "1G"
       JVM_OPTS: >-
         -XX:MaxGCPauseMillis=500
         -XX:+UnlockExperimentalVMOptions
@@ -725,6 +725,8 @@ services:
       - loki
       - alloy
       - tempo
+      - cadvisor
+      - node-exporter
     networks:
       - iot_network
 
@@ -849,7 +851,44 @@ services:
     networks:
       - iot_network
 
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: cadvisor
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "8180:8080"
+    networks:
+      - iot_network
+
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: node-exporter
+    restart: unless-stopped
+    command:
+      - '--path.rootfs=/host'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    ports:
+      - "9111:9100"
+    networks:
+      - iot_network
+
 volumes:
+  cadvisor_data:
+  node_exporter_data:
   nexus-data:
   schema-registry-data:
   zookeeper_data:
