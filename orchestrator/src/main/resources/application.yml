@@ -52,6 +52,7 @@ spring:
         follow-redirects: false
         disable-ssl-validation: false
         connection-timeout: 1000
+        read-timeout-ms: 3000
 
   data:
     redis:

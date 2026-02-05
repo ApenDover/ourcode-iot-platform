@@ -104,16 +104,20 @@ public class OrchestratorMetrics {
     }
 
     public void recordFailure(String method, String uri, int status, Throwable ex) {
+        final var statusTag = status > 0 ? String.valueOf(status) : "timeout";
         meterRegistry.counter("orchestrator_fail",
                 "method", method,
                 "uri", normalizeUri(uri),
-                "status", String.valueOf(status),
+                "status", statusTag,
                 "statusGroup", statusGroup(status),
                 "exception", ex != null ? ex.getClass().getSimpleName() : "unknown"
         ).increment();
     }
 
     private String statusGroup(int status) {
+        if (status <= 0) {
+            return "timeout";
+        }
         final var httpStatus = HttpStatusCode.valueOf(status);
         if (httpStatus.is2xxSuccessful()) {
             return "2xx";

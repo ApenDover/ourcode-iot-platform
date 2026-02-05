@@ -1,6 +1,7 @@
 package ts.andrey.orchestrator.infrastructure.config.transport;
 
 import feign.Client;
+import feign.Request;
 import feign.httpclient.ApacheHttpClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import ts.andrey.orchestrator.infrastructure.config.security.OAuth2RequestInterceptor;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Configuration
@@ -30,6 +32,9 @@ public class FeignClientConfiguration {
 
     @Value("${orchestrator.log.keys:null}")
     private Set<String> keyForMasking;
+
+    @Value("${spring.cloud.openfeign.httpclient.read-timeout-ms:3000}")
+    private int readTimeoutMs;
 
     private final FeignHttpClientProperties feignHttpClientProperties;
 
@@ -54,7 +59,7 @@ public class FeignClientConfiguration {
                         feignHttpClientProperties.getConnectionTimeout()
                 )
                 .setSocketTimeout(
-                        (int) feignHttpClientProperties.getTimeToLive()
+                        readTimeoutMs
                 )
                 .build();
 
@@ -67,9 +72,19 @@ public class FeignClientConfiguration {
     }
 
     @Bean
+    public Request.Options feignRequestOptions() {
+        return new Request.Options(
+                feignHttpClientProperties.getConnectionTimeout(),
+                TimeUnit.MILLISECONDS,
+                readTimeoutMs,
+                TimeUnit.MILLISECONDS,
+                true
+        );
+    }
+
+    @Bean
     public OAuth2RequestInterceptor oAuth2RequestInterceptor(OAuth2AuthorizedClientService clientService) {
         return new OAuth2RequestInterceptor(clientService);
     }
 
 }
-

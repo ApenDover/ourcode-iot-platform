@@ -9,16 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -199,7 +194,7 @@ public abstract class BaseIntegrationTest {
         final var entity = new HttpEntity<>(body, headers);
         try {
             return restTemplate.exchange(getUrl(url), method, entity, responseType);
-        } catch (HttpServerErrorException exception) {
+        } catch (HttpStatusCodeException exception) {
             Res errorBody = exception.getResponseBodyAs(responseType);
             return ResponseEntity.status(exception.getStatusCode())
                     .headers(exception.getResponseHeaders())

@@ -2,21 +2,116 @@ services:
   kafka-producer:
     build:
       dockerfile: ../kafka-producer/Dockerfile.local
+    mem_limit: 512m
+    cpus: "0.5"
   device-collector:
     build:
       dockerfile: ../device-collector/Dockerfile.local
+    mem_limit: 768m
+    cpus: "0.75"
   device-service:
     build:
       dockerfile: ../device-service/Dockerfile.local
+    mem_limit: 1g
+    cpus: "1.0"
   event-service:
     build:
       dockerfile: ../event-service/Dockerfile.local
+    mem_limit: 3g
+    cpus: "2.0"
   event-collector:
     build:
       dockerfile: ../event-collector/Dockerfile.local
+    mem_limit: 768m
+    cpus: "0.75"
   failed-events-processor:
     build:
       dockerfile: ../failed-events-processor/Dockerfile.local
+    mem_limit: 768m
+    cpus: "0.75"
   orchestrator:
     build:
       dockerfile: ../orchestrator/Dockerfile.local
+    mem_limit: 1g
+    cpus: "1.0"
+  router-manager-service:
+    mem_limit: 768m
+    cpus: "0.75"
+  router:
+    mem_limit: 256m
+    cpus: "0.25"
+  cassandra:
+    mem_limit: 6g
+    cpus: "2.0"
+    environment:
+      MAX_HEAP_SIZE: "2G"
+      HEAP_NEWSIZE: "512M"
+  kafka:
+    mem_limit: 1536m
+    cpus: "1.5"
+  schema-registry:
+    mem_limit: 512m
+    cpus: "0.5"
+  keycloak:
+    mem_limit: 1g
+    cpus: "1.0"
+  postgres1:
+    mem_limit: 1g
+    cpus: "1.0"
+  postgres2:
+    mem_limit: 1g
+    cpus: "1.0"
+  postgres1r:
+    mem_limit: 512m
+    cpus: "0.5"
+  postgres2r:
+    mem_limit: 512m
+    cpus: "0.5"
+  postgres_router_manager:
+    mem_limit: 512m
+    cpus: "0.5"
+  redis:
+    mem_limit: 256m
+    cpus: "0.25"
+  redis-rms:
+    mem_limit: 256m
+    cpus: "0.25"
+  redis-orchestrator:
+    mem_limit: 256m
+    cpus: "0.25"
+  prometheus:
+    mem_limit: 1g
+    cpus: "1.0"
+  grafana:
+    mem_limit: 512m
+    cpus: "0.5"
+  minio:
+    mem_limit: 512m
+    cpus: "0.5"
+  kafka-ui:
+    mem_limit: 256m
+    cpus: "0.25"
+  kafka-exporter:
+    mem_limit: 256m
+    cpus: "0.25"
+  postgres-exporter:
+    mem_limit: 256m
+    cpus: "0.25"
+  cassandra-exporter:
+    mem_limit: 256m
+    cpus: "0.25"
+  alloy:
+    mem_limit: 512m
+    cpus: "0.5"
+  loki:
+    mem_limit: 512m
+    cpus: "0.5"
+  tempo:
+    mem_limit: 512m
+    cpus: "0.5"
+  cadvisor:
+    mem_limit: 256m
+    cpus: "0.25"
+  node-exporter:
+    mem_limit: 128m
+    cpus: "0.2"

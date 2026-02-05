@@ -171,7 +171,7 @@ try {
         <hashTree/>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="EVENTS">
-        <intProp name="ThreadGroup.num_threads">120</intProp>
+        <intProp name="ThreadGroup.num_threads">80</intProp>
         <intProp name="ThreadGroup.ramp_time">60</intProp>
         <longProp name="ThreadGroup.duration">600</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -212,31 +212,26 @@ try {
           <collectionProp name="load_profile">
             <collectionProp name="-1147540202">
               <stringProp name="48">0</stringProp>
-              <stringProp name="48625">30</stringProp>
+              <stringProp name="48625">20</stringProp>
               <stringProp name="48687">60</stringProp>
             </collectionProp>
             <collectionProp name="-1907816788">
-              <stringProp name="48625">30</stringProp>
-              <stringProp name="48625">30</stringProp>
+              <stringProp name="48625">20</stringProp>
+              <stringProp name="48625">20</stringProp>
               <stringProp name="48687">120</stringProp>
             </collectionProp>
             <collectionProp name="-1865747060">
-              <stringProp name="48780">50</stringProp>
-              <stringProp name="48780">50</stringProp>
+              <stringProp name="48780">30</stringProp>
+              <stringProp name="48780">30</stringProp>
               <stringProp name="48687">120</stringProp>
             </collectionProp>
             <collectionProp name="-841823508">
-              <stringProp name="49586">70</stringProp>
-              <stringProp name="49586">70</stringProp>
-              <stringProp name="48687">120</stringProp>
-            </collectionProp>
-            <collectionProp name="-775859476">
-              <stringProp name="49741">80</stringProp>
-              <stringProp name="49741">80</stringProp>
+              <stringProp name="49586">40</stringProp>
+              <stringProp name="49586">40</stringProp>
               <stringProp name="48687">120</stringProp>
             </collectionProp>
             <collectionProp name="-2056283040">
-              <stringProp name="49741">80</stringProp>
+              <stringProp name="49586">40</stringProp>
               <stringProp name="48">0</stringProp>
               <stringProp name="1722">60</stringProp>
             </collectionProp>
@@ -272,7 +267,7 @@ try {
         </hashTree>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="DEVICES">
-        <intProp name="ThreadGroup.num_threads">120</intProp>
+        <intProp name="ThreadGroup.num_threads">80</intProp>
         <intProp name="ThreadGroup.ramp_time">60</intProp>
         <longProp name="ThreadGroup.duration">600</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -313,31 +308,26 @@ try {
           <collectionProp name="load_profile">
             <collectionProp name="-1147540202">
               <stringProp name="48">0</stringProp>
-              <stringProp name="48625">30</stringProp>
+              <stringProp name="48625">20</stringProp>
               <stringProp name="48687">60</stringProp>
             </collectionProp>
             <collectionProp name="-1907816788">
-              <stringProp name="48625">30</stringProp>
-              <stringProp name="48625">30</stringProp>
+              <stringProp name="48625">20</stringProp>
+              <stringProp name="48625">20</stringProp>
               <stringProp name="48687">120</stringProp>
             </collectionProp>
             <collectionProp name="-1865747060">
-              <stringProp name="48780">50</stringProp>
-              <stringProp name="48780">50</stringProp>
+              <stringProp name="48780">30</stringProp>
+              <stringProp name="48780">30</stringProp>
               <stringProp name="48687">120</stringProp>
             </collectionProp>
             <collectionProp name="-841823508">
-              <stringProp name="49586">70</stringProp>
-              <stringProp name="49586">70</stringProp>
-              <stringProp name="48687">120</stringProp>
-            </collectionProp>
-            <collectionProp name="-775859476">
-              <stringProp name="49741">80</stringProp>
-              <stringProp name="49741">80</stringProp>
+              <stringProp name="49586">40</stringProp>
+              <stringProp name="49586">40</stringProp>
               <stringProp name="48687">120</stringProp>
             </collectionProp>
             <collectionProp name="-2056283040">
-              <stringProp name="49741">80</stringProp>
+              <stringProp name="49586">40</stringProp>
               <stringProp name="48">0</stringProp>
               <stringProp name="1722">60</stringProp>
             </collectionProp>
@@ -373,7 +363,7 @@ try {
         </hashTree>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="COMMANDS">
-        <intProp name="ThreadGroup.num_threads">120</intProp>
+        <intProp name="ThreadGroup.num_threads">80</intProp>
         <intProp name="ThreadGroup.ramp_time">60</intProp>
         <longProp name="ThreadGroup.duration">600</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -414,31 +404,26 @@ try {
           <collectionProp name="load_profile">
             <collectionProp name="-1147540202">
               <stringProp name="48">0</stringProp>
-              <stringProp name="48625">30</stringProp>
+              <stringProp name="48625">20</stringProp>
               <stringProp name="48687">60</stringProp>
             </collectionProp>
             <collectionProp name="-1907816788">
-              <stringProp name="48625">30</stringProp>
-              <stringProp name="48625">30</stringProp>
+              <stringProp name="48625">20</stringProp>
+              <stringProp name="48625">20</stringProp>
               <stringProp name="48687">120</stringProp>
             </collectionProp>
             <collectionProp name="-1865747060">
-              <stringProp name="48780">50</stringProp>
-              <stringProp name="48780">50</stringProp>
+              <stringProp name="48780">30</stringProp>
+              <stringProp name="48780">30</stringProp>
               <stringProp name="48687">120</stringProp>
             </collectionProp>
             <collectionProp name="-841823508">
-              <stringProp name="49586">70</stringProp>
-              <stringProp name="49586">70</stringProp>
-              <stringProp name="48687">120</stringProp>
-            </collectionProp>
-            <collectionProp name="-775859476">
-              <stringProp name="49741">80</stringProp>
-              <stringProp name="49741">80</stringProp>
+              <stringProp name="49586">40</stringProp>
+              <stringProp name="49586">40</stringProp>
               <stringProp name="48687">120</stringProp>
             </collectionProp>
             <collectionProp name="-2056283040">
-              <stringProp name="49741">80</stringProp>
+              <stringProp name="49586">40</stringProp>
               <stringProp name="48">0</stringProp>
               <stringProp name="1722">60</stringProp>
             </collectionProp>

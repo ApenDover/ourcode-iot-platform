@@ -17,14 +17,19 @@ import ts.andrey.eventservice.exception.EventServiceException;
 import ts.andrey.eventservice.mapper.EventMapper;
 import ts.andrey.eventservice.model.EventFilterRequest;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
 @Repository
 @RequiredArgsConstructor
 public class CriteriaRepository {
 
-    private final static WeakHashMap<UUID, DeviceEventKey> WEAK_HASH_MAP = new WeakHashMap<>();
+    private static final ConcurrentMap<UUID, DeviceEventKey> EVENT_KEY_CACHE = new ConcurrentHashMap<>();
     private static final String TIMESTAMP_FIELD = "timestamp";
     private static final String DEVICE_ID_FIELD = "device_id";
     private static final String TYPE_FIELD = "type";
@@ -49,7 +54,7 @@ public class CriteriaRepository {
     }
 
     public DeviceEventEntity getEventByDeviceIdAndEventId(String deviceId, UUID eventId) {
-        var hashedKey = WEAK_HASH_MAP.get(eventId);
+        var hashedKey = EVENT_KEY_CACHE.get(eventId);
         if (Objects.isNull(hashedKey)) {
             final var keyKey = new EventKeyEntityKey();
             keyKey.setEventId(eventId);
@@ -57,7 +62,7 @@ public class CriteriaRepository {
                     .orElseThrow(() -> new EventServiceException(
                             ErrorExceptionMessages.EVENT_NOT_FOUND, eventId));
             final var eKey = eventMapper.mapFromEntityKey(key);
-            WEAK_HASH_MAP.put(eventId, eKey);
+            EVENT_KEY_CACHE.put(eventId, eKey);
             hashedKey = eKey;
         }
         return Optional.ofNullable(cassandraTemplate.selectOneById(hashedKey, DeviceEventEntity.class))

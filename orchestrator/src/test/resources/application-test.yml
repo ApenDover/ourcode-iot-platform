@@ -5,7 +5,7 @@ management:
   endpoint:
     health:
       probes:
-        enabled: true
+        enabled: false
   endpoints:
     web:
       exposure:
@@ -18,35 +18,17 @@ management:
       export:
         enabled: true
   tracing:
-    enabled: true
-    sampling:
-      probability: 1.0
-    otlp:
-      endpoint: http://localhost:4318
-      protocol: http/protobuf
+    enabled: false
 
-opentelemetry:
-  instrumentation:
-    logback-mdc:
-      enabled: true
-  service:
-    name: ${spring.application.name}
-  exporter:
-    otlp:
-      endpoint: http://localhost:4318
-      protocol: http/protobuf
-      timeout: 10000
-      compression: gzip
+otel:
+  sdk:
+    disabled: true
   traces:
-    exporter: otlp
+    exporter: none
   metrics:
     exporter: none
   logs:
     exporter: none
-  resource-attributes:
-    service.version: 1.0.0
-    deployment.environment: docker
-    service.name: ${spring.application.name}
 
 spring:
   application:
@@ -71,6 +53,8 @@ feign:
     config:
       default:
         loggerLevel: full
+        readTimeout: 500
+        connectTimeout: 1000
 
 logging:
   level:
@@ -85,3 +69,5 @@ logging:
 orchestrator:
   feign-logger:
     enabled: true
+  feign:
+    read-timeout-ms: 500

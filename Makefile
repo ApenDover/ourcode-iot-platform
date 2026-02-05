@@ -240,8 +240,20 @@ jmeter-commands:
 jmeter-all:
 	JVM_ARGS="-Xms2g -Xmx12g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/iot-all.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o $(PROJECT_ROOT)/infrastructure/jmeter/log
 
+jmeter-all-baseline:
+	JVM_ARGS="-Xms2g -Xmx12g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/iot-all-baseline.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results-baseline.jtl -e -o $(PROJECT_ROOT)/infrastructure/jmeter/report-baseline
+
+jmeter-all-ramp:
+	JVM_ARGS="-Xms2g -Xmx12g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/iot-all-ramp.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results-ramp.jtl -e -o $(PROJECT_ROOT)/infrastructure/jmeter/report-ramp
+
 j-report:
 	jmeter -g $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -o $(PROJECT_ROOT)/infrastructure/jmeter/report
+
+j-report-baseline:
+	jmeter -g $(PROJECT_ROOT)/infrastructure/jmeter/results-baseline.jtl -o $(PROJECT_ROOT)/infrastructure/jmeter/report-baseline
+
+j-report-ramp:
+	jmeter -g $(PROJECT_ROOT)/infrastructure/jmeter/results-ramp.jtl -o $(PROJECT_ROOT)/infrastructure/jmeter/report-ramp
 
 j-prepare:
 	@docker exec -i -e PGPASSWORD=$(APP_ROUTER_MANAGER_DATASOURCE_PASSWORD) postgres_router_manager \
