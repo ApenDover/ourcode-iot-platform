@@ -7,10 +7,14 @@ import org.springframework.stereotype.Service;
 import ts.andrey.dto.Event;
 import ts.andrey.dto.EventPage;
 import ts.andrey.eventservice.data.dao.DeviceEventDataService;
+import ts.andrey.eventservice.data.entity.DeviceEventEntity;
 import ts.andrey.eventservice.mapper.EventMapper;
 import ts.andrey.eventservice.model.EventFilterRequest;
 import ts.andrey.eventservice.service.CassandraService;
-import ts.andrey.eventservice.utils.PageUtil;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -31,7 +35,22 @@ public class CassandraServiceImpl implements CassandraService {
     @WithSpan("CassandraGetEventByFilter")
     public EventPage getEventByFilter(EventFilterRequest eventFilterRequest) {
         final var result = deviceEventDataService.getEventsByFilter(eventFilterRequest);
-        return eventMapper.entityListToEventPage(result, eventFilterRequest, result.size());
+        final var filtered = filterByType(result, eventFilterRequest.getType());
+        return eventMapper.entityListToEventPage(filtered, eventFilterRequest, filtered.size());
+    }
+
+    private List<DeviceEventEntity> filterByType(
+            List<DeviceEventEntity> events,
+            String type
+    ) {
+        if (type == null || type.isBlank()) {
+            return events;
+        }
+        return events.stream()
+                .filter(event ->
+                        Objects.nonNull(event.getType())
+                                && type.toUpperCase().equals(event.getType().name()))
+                .collect(Collectors.toList());
     }
 
 }
