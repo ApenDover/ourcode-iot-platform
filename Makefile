@@ -4,9 +4,11 @@ ifneq (,$(wildcard infrastructure/.env))
 endif
 
 COMPOSE_FILE=./infrastructure/docker-compose.yml
+COMPOSE_WIRE_FILE=./infrastructure/docker-compose-wiremock.yml
 COMPOSE_FILE_BUILD=./infrastructure/docker-compose.build.yml
 COMPOSE_FILE_LOCAL=./infrastructure/docker-compose.override.yml
 DC=docker compose -f $(COMPOSE_FILE)
+DC_WIRE=docker compose -f $(COMPOSE_WIRE_FILE)
 DCB=docker compose -f $(COMPOSE_FILE_BUILD)
 DCL=docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_FILE_LOCAL)
 ACTUATOR_URL=http://localhost:
@@ -49,6 +51,26 @@ up: proto-gen clear  ## Запустить контейнеры в фоне
 	$(DC) up -d
 	@make keycloak-setup-users
 
+up-wire: proto-gen clear  ## Запустить контейнеры в фоне
+	$(DC) up nexus -d
+	@echo "⏳ Жду пока контейнер nexus станет healthy..."
+	@until [ $$(docker inspect --format='{{.State.Health.Status}}' nexus) = "healthy" ]; do \
+		echo "жду.." & sleep 10; \
+	done
+	@sleep 5;
+	$(DCB) up -d iot-avro
+	@until curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-avro/1.0.0/iot-avro-1.0.0.pom >/dev/null 2>&1; do \
+		echo "жду публикацию iot-avro.." & sleep 5; \
+	done
+	$(DCB) up -d iot-common
+	$(DCB) up -d device-api
+	$(DCB) up -d router-manager-proto-client
+	@until curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-common/1.0.0/iot-common-1.0.0.pom >/dev/null 2>&1; do \
+    	echo "жду публикацию iot-common.." & sleep 10; \
+    done
+	$(DC_WIRE) up -d
+	@make keycloak-setup-users
+
 up-local: clear ## Запустить все контейнеры в фоне
 	$(DCL) up -d
 	@make keycloak-setup-users
@@ -75,6 +97,9 @@ down: ## Остановить и удалить контейнеры
 
 downv: ## Остановить контейнеры и удалить тома
 	$(DC) down -v
+
+downv-wire: ## Остановить контейнеры и удалить тома
+	$(DC_WIRE) down -v
 
 restart-%: ## Перезапустить контейнер по имени
 	$(DC) restart $*
@@ -240,20 +265,11 @@ jmeter-commands:
 jmeter-all:
 	JVM_ARGS="-Xms2g -Xmx12g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/iot-all.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -e -o $(PROJECT_ROOT)/infrastructure/jmeter/log
 
-jmeter-all-baseline:
-	JVM_ARGS="-Xms2g -Xmx12g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/iot-all-baseline.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results-baseline.jtl -e -o $(PROJECT_ROOT)/infrastructure/jmeter/report-baseline
-
-jmeter-all-ramp:
-	JVM_ARGS="-Xms2g -Xmx12g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/iot-all-ramp.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results-ramp.jtl -e -o $(PROJECT_ROOT)/infrastructure/jmeter/report-ramp
+jmeter-all-steps:
+	JVM_ARGS="-Xms2g -Xmx12g" jmeter -n -t $(PROJECT_ROOT)/infrastructure/jmeter/iot-all-steps.jmx -l $(PROJECT_ROOT)/infrastructure/jmeter/results-steps.jtl -e -o $(PROJECT_ROOT)/infrastructure/jmeter/report-steps
 
 j-report:
 	jmeter -g $(PROJECT_ROOT)/infrastructure/jmeter/results.jtl -o $(PROJECT_ROOT)/infrastructure/jmeter/report
-
-j-report-baseline:
-	jmeter -g $(PROJECT_ROOT)/infrastructure/jmeter/results-baseline.jtl -o $(PROJECT_ROOT)/infrastructure/jmeter/report-baseline
-
-j-report-ramp:
-	jmeter -g $(PROJECT_ROOT)/infrastructure/jmeter/results-ramp.jtl -o $(PROJECT_ROOT)/infrastructure/jmeter/report-ramp
 
 j-prepare:
 	@docker exec -i -e PGPASSWORD=$(APP_ROUTER_MANAGER_DATASOURCE_PASSWORD) postgres_router_manager \

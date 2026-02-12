@@ -1,0 +1,454 @@
+{
+  "mappings": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "Get all devices",
+      "priority": 5,
+      "request": {
+        "method": "GET",
+        "urlPath": "/api/v1/devices"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": [
+          {
+            "deviceId": "abc-123",
+            "deviceType": "SENSOR_TEMPERATURE",
+            "createdAt": 1718920034567,
+            "meta": "{\"location\":\"room-1\",\"manufacturer\":\"acme\"}",
+            "version": "1.2.3",
+            "status": "READY",
+            "etag": 5
+          },
+          {
+            "deviceId": "xyz-789",
+            "deviceType": "SENSOR_HUMIDITY",
+            "createdAt": 1718921034567,
+            "meta": "{\"location\":\"room-2\",\"manufacturer\":\"beta\"}",
+            "version": "2.0.1",
+            "status": "UPDATING",
+            "etag": 8
+          }
+        ]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "name": "Get device by ID - success",
+      "priority": 5,
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/api/v1/devices/([a-zA-Z0-9_-]+)"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "deviceId": "{{request.pathSegments.[3]}}",
+          "deviceType": "SENSOR_TEMPERATURE",
+          "createdAt": 1718920034567,
+          "meta": "{\"location\":\"room-1\",\"manufacturer\":\"acme\"}",
+          "version": "1.2.3",
+          "status": "READY",
+          "etag": 5
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440002",
+      "name": "Get device by ID - not found",
+      "priority": 1,
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/api/v1/devices/(invalid|not-found|nonexistent|missing-.*)"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/problem+json"
+        },
+        "jsonBody": {
+          "title": "Device not found",
+          "status": 404,
+          "detail": "Device with id {{request.pathSegments.[3]}} does not exist",
+          "instance": "{{request.path}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440003",
+      "name": "Create device",
+      "priority": 5,
+      "request": {
+        "method": "POST",
+        "urlPath": "/api/v1/devices",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.deviceType"
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "deviceId": "dev-{{randomValue length=8 type='ALPHANUMERIC'}}",
+          "deviceType": "{{jsonPath request.body '$.deviceType'}}",
+          "createdAt": "{{now}}",
+          "meta": "{{jsonPath request.body '$.meta'}}",
+          "version": "{{jsonPath request.body '$.version'}}",
+          "status": "READY",
+          "etag": 1
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440004",
+      "name": "Update device",
+      "priority": 5,
+      "request": {
+        "method": "PUT",
+        "urlPathPattern": "/api/v1/devices/([a-zA-Z0-9_-]+)"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "deviceId": "{{request.pathSegments.[3]}}",
+          "deviceType": "{{jsonPath request.body '$.deviceType'}}",
+          "createdAt": 1718920034567,
+          "meta": "{{jsonPath request.body '$.meta'}}",
+          "version": "{{jsonPath request.body '$.version'}}",
+          "status": "{{jsonPath request.body '$.status'}}",
+          "etag": "{{randomValue type='NUMERIC' length=2}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440005",
+      "name": "Delete device",
+      "priority": 5,
+      "request": {
+        "method": "DELETE",
+        "urlPathPattern": "/api/v1/devices/([a-zA-Z0-9_-]+)"
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440006",
+      "name": "Update device version - success",
+      "priority": 5,
+      "request": {
+        "method": "PATCH",
+        "urlPathPattern": "/api/v1/devices/([a-zA-Z0-9_-]+)/version"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "deviceId": "{{request.pathSegments.[3]}}",
+          "prevVersion": "1.2.3",
+          "targetVersion": "{{jsonPath request.body '$.targetVersion'}}",
+          "status": "UPDATING",
+          "etag": "{{randomValue type='NUMERIC' length=1}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440007",
+      "name": "Update device version - conflict",
+      "priority": 1,
+      "request": {
+        "method": "PATCH",
+        "urlPathPattern": "/api/v1/devices/([a-zA-Z0-9_-]+)/version",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.etag == 999)]"
+          }
+        ]
+      },
+      "response": {
+        "status": 409,
+        "headers": {
+          "Content-Type": "application/problem+json"
+        },
+        "jsonBody": {
+          "title": "Optimistic locking conflict",
+          "status": 409,
+          "detail": "Device was modified by another transaction. Expected etag: 999, actual etag: 5",
+          "instance": "{{request.path}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440008",
+      "name": "Update device version - not found",
+      "priority": 1,
+      "request": {
+        "method": "PATCH",
+        "urlPathPattern": "/api/v1/devices/(invalid|not-found|nonexistent)/version"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/problem+json"
+        },
+        "jsonBody": {
+          "title": "Device not found",
+          "status": 404,
+          "detail": "Device with id {{request.pathSegments.[3]}} does not exist",
+          "instance": "{{request.path}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440009",
+      "name": "Rollback device version - success",
+      "priority": 5,
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/api/v1/devices/([a-zA-Z0-9_-]+)/version/rollback"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "deviceId": "{{request.pathSegments.[3]}}",
+          "prevVersion": "2.3.5",
+          "targetVersion": "{{jsonPath request.body '$.rollbackVersion'}}",
+          "status": "{{jsonPath request.body '$.status'}}",
+          "etag": "{{randomValue type='NUMERIC' length=1}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440010",
+      "name": "Rollback device version - not found",
+      "priority": 1,
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/api/v1/devices/(invalid|not-found|nonexistent)/version/rollback"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/problem+json"
+        },
+        "jsonBody": {
+          "title": "Device not found",
+          "status": 404,
+          "detail": "Device with id {{request.pathSegments.[3]}} does not exist",
+          "instance": "{{request.path}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440011",
+      "name": "Device service - bad request",
+      "priority": 1,
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/api/v1/devices.*",
+        "bodyPatterns": [
+          {
+            "contains": "invalid"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/problem+json"
+        },
+        "jsonBody": {
+          "title": "Invalid request",
+          "status": 400,
+          "detail": "Request validation failed",
+          "instance": "{{request.path}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440012",
+      "name": "Get events - success",
+      "priority": 5,
+      "request": {
+        "method": "GET",
+        "urlPath": "/api/v1/events",
+        "queryParameters": {
+          "device_id": {
+            "matches": "[a-zA-Z0-9_-]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "events": [
+            {
+              "event_id": "evt-001",
+              "device_id": "{{request.query.device_id}}",
+              "timestamp": 1718920034567,
+              "type": "temperature",
+              "payload": "{\"value\":26.5,\"unit\":\"celsius\"}"
+            },
+            {
+              "event_id": "evt-002",
+              "device_id": "{{request.query.device_id}}",
+              "timestamp": 1718920035567,
+              "type": "temperature",
+              "payload": "{\"value\":26.7,\"unit\":\"celsius\"}"
+            },
+            {
+              "event_id": "evt-003",
+              "device_id": "{{request.query.device_id}}",
+              "timestamp": 1718920036567,
+              "type": "battery",
+              "payload": "{\"level\":87,\"status\":\"normal\"}"
+            }
+          ],
+          "page": "{{request.query.page}}",
+          "size": "{{request.query.size}}",
+          "total": 3
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440013",
+      "name": "Get events - empty result",
+      "priority": 5,
+      "request": {
+        "method": "GET",
+        "urlPath": "/api/v1/events",
+        "queryParameters": {
+          "device_id": {
+            "equalTo": "empty-device"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "events": [],
+          "page": 0,
+          "size": 100,
+          "total": 0
+        }
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440014",
+      "name": "Get events - bad request",
+      "priority": 1,
+      "request": {
+        "method": "GET",
+        "urlPath": "/api/v1/events",
+        "queryParameters": {
+          "device_id": {
+            "absent": true
+          }
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "title": "Invalid parameters",
+          "status": 400,
+          "detail": "device_id is required",
+          "instance": "/api/v1/events"
+        }
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440015",
+      "name": "Get event by ID - success",
+      "priority": 5,
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/api/v1/events/([a-zA-Z0-9_-]+)",
+        "queryParameters": {
+          "device_id": {
+            "matches": "[a-zA-Z0-9_-]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "event_id": "{{request.pathSegments.[3]}}",
+          "device_id": "{{request.query.device_id}}",
+          "timestamp": 1718920034567,
+          "type": "temperature",
+          "payload": "{\"value\":26.5,\"unit\":\"celsius\"}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440016",
+      "name": "Get event by ID - not found",
+      "priority": 1,
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/api/v1/events/(invalid|not-found|nonexistent)",
+        "queryParameters": {
+          "device_id": {
+            "matches": "[a-zA-Z0-9_-]+"
+          }
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "title": "Event not found",
+          "status": 404,
+          "detail": "Event with id {{request.pathSegments.[3]}} does not exist",
+          "instance": "{{request.path}}"
+        },
+        "transformers": ["response-template"]
+      }
+    }
+  ]
+}

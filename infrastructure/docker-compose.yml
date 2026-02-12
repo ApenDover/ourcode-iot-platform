@@ -1,4 +1,21 @@
 services:
+  wiremock:
+    image: wiremock/wiremock:latest
+    ports:
+      - "8881:8080"
+      - "8886:8080"
+    container_name: wiremock
+    volumes:
+      - ./wiremock/mappings.json:/home/wiremock/mappings/mappings.json
+    command:
+      - "--verbose"
+      - "--global-response-templating"
+    networks:
+      iot_network:
+        aliases:
+          - wiremock
+          - device-service
+          - event-service
   kafka-producer:
     build:
       context: ../kafka-producer
@@ -112,8 +129,8 @@ services:
         condition: service_healthy
       device-collector:
         condition: service_started
-      device-service:
-        condition: service_started
+#      device-service:
+#        condition: service_started
       router-manager-service:
         condition: service_started
     healthcheck:
@@ -124,95 +141,95 @@ services:
       start_period: 10s
     networks:
       - iot_network
-  device-service:
-    build:
-      context: ../device-service
-      args:
-        NEXUS_URL: ${NEXUS_URL}
-        NEXUS_USER: ${NEXUS_USER}
-        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
-    container_name: device-service
-    env_file:
-      - .env
-    ports:
-      - 8886:8886
-    restart: unless-stopped
-    environment:
-      JAVA_OPTS: >-
-        -Xmx512m
-        -Xms256m
-        -XX:MaxRAMPercentage=60.0
-        -XX:+UseZGC
-        -XX:+ZUncommit
-        -XX:ZUncommitDelay=30
-      OTEL_SERVICE_NAME: device-service
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
-      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-      OTEL_METRICS_EXPORTER: none
-      OTEL_TRACES_EXPORTER: otlp
-      OTEL_LOGS_EXPORTER: none
-      OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
-    depends_on:
-      device-collector:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      postgres1r:
-        condition: service_healthy
-      postgres2r:
-        condition: service_healthy
-      event-collector:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD-SHELL", "wget -q -O - http://localhost:8886/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
-      interval: 3s
-      timeout: 5s
-      retries: 5
-      start_period: 6s
-    networks:
-      - iot_network
-  event-service:
-    build:
-      context: ../event-service
-      args:
-        NEXUS_URL: ${NEXUS_URL}
-        NEXUS_USER: ${NEXUS_USER}
-        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
-    container_name: event-service
-    env_file:
-      - .env
-    ports:
-      - "8881:8881"
-    restart: unless-stopped
-    environment:
-      JAVA_OPTS: >-
-        -Xmx2g
-        -Xms2g
-        -XX:+UseG1GC
-        -XX:MaxGCPauseMillis=200
-        -XX:G1ReservePercent=15
-        -XX:InitiatingHeapOccupancyPercent=35
-        -XX:+ParallelRefProcEnabled
-        -XX:+AlwaysPreTouch
-        -XX:NativeMemoryTracking=summary
-      OTEL_SERVICE_NAME: event-service
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
-      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-      OTEL_METRICS_EXPORTER: none
-      OTEL_TRACES_EXPORTER: otlp
-      OTEL_LOGS_EXPORTER: none
-      OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
-    depends_on:
-      cassandra:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD-SHELL", "wget -q -O - http://localhost:8881/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
-      interval: 3s
-      timeout: 5s
-      retries: 5
-      start_period: 6s
-    networks:
-      - iot_network
+#  device-service:
+#    build:
+#      context: ../device-service
+#      args:
+#        NEXUS_URL: ${NEXUS_URL}
+#        NEXUS_USER: ${NEXUS_USER}
+#        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
+#    container_name: device-service
+#    env_file:
+#      - .env
+#    ports:
+#      - 8886:8886
+#    restart: unless-stopped
+#    environment:
+#      JAVA_OPTS: >-
+#        -Xmx512m
+#        -Xms256m
+#        -XX:MaxRAMPercentage=60.0
+#        -XX:+UseZGC
+#        -XX:+ZUncommit
+#        -XX:ZUncommitDelay=30
+#      OTEL_SERVICE_NAME: device-service
+#      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+#      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+#      OTEL_METRICS_EXPORTER: none
+#      OTEL_TRACES_EXPORTER: otlp
+#      OTEL_LOGS_EXPORTER: none
+#      OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
+#    depends_on:
+#      device-collector:
+#        condition: service_healthy
+#      redis:
+#        condition: service_healthy
+#      postgres1r:
+#        condition: service_healthy
+#      postgres2r:
+#        condition: service_healthy
+#      event-collector:
+#        condition: service_healthy
+#    healthcheck:
+#      test: [ "CMD-SHELL", "wget -q -O - http://localhost:8886/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
+#      interval: 3s
+#      timeout: 5s
+#      retries: 5
+#      start_period: 6s
+#    networks:
+#      - iot_network
+#  event-service:
+#    build:
+#      context: ../event-service
+#      args:
+#        NEXUS_URL: ${NEXUS_URL}
+#        NEXUS_USER: ${NEXUS_USER}
+#        NEXUS_USER_PASSWORD: ${NEXUS_USER_PASSWORD}
+#    container_name: event-service
+#    env_file:
+#      - .env
+#    ports:
+#      - "8881:8881"
+#    restart: unless-stopped
+#    environment:
+#      JAVA_OPTS: >-
+#        -Xmx2g
+#        -Xms2g
+#        -XX:+UseG1GC
+#        -XX:MaxGCPauseMillis=200
+#        -XX:G1ReservePercent=15
+#        -XX:InitiatingHeapOccupancyPercent=35
+#        -XX:+ParallelRefProcEnabled
+#        -XX:+AlwaysPreTouch
+#        -XX:NativeMemoryTracking=summary
+#      OTEL_SERVICE_NAME: event-service
+#      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+#      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+#      OTEL_METRICS_EXPORTER: none
+#      OTEL_TRACES_EXPORTER: otlp
+#      OTEL_LOGS_EXPORTER: none
+#      OTEL_RESOURCE_ATTRIBUTES: service.version=1.0.0,deployment.environment=docker
+#    depends_on:
+#      cassandra:
+#        condition: service_healthy
+#    healthcheck:
+#      test: [ "CMD-SHELL", "wget -q -O - http://localhost:8881/actuator/health | grep -q '\"status\":\"UP\"' || exit 1" ]
+#      interval: 3s
+#      timeout: 5s
+#      retries: 5
+#      start_period: 6s
+#    networks:
+#      - iot_network
   event-collector:
     build:
       context: ../event-collector

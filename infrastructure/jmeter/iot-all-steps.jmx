@@ -171,9 +171,9 @@ try {
         <hashTree/>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="EVENTS">
-        <intProp name="ThreadGroup.num_threads">310</intProp>
+        <intProp name="ThreadGroup.num_threads">200</intProp>
         <intProp name="ThreadGroup.ramp_time">120</intProp>
-        <longProp name="ThreadGroup.duration">780</longProp>
+        <longProp name="ThreadGroup.duration">2520</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
@@ -212,38 +212,33 @@ try {
           <collectionProp name="load_profile">
             <collectionProp name="-1147540202">
               <stringProp name="48">0</stringProp>
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48687">120</stringProp>
+              <stringProp name="48625">60</stringProp>
+              <stringProp name="48687">180</stringProp>
             </collectionProp>
             <collectionProp name="-1907816788">
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48687">120</stringProp>
+              <stringProp name="48625">60</stringProp>
+              <stringProp name="48625">60</stringProp>
+              <stringProp name="48687">600</stringProp>
             </collectionProp>
             <collectionProp name="-1865747060">
-              <stringProp name="48780">150</stringProp>
-              <stringProp name="48780">150</stringProp>
-              <stringProp name="48687">120</stringProp>
+              <stringProp name="48780">120</stringProp>
+              <stringProp name="48780">120</stringProp>
+              <stringProp name="48687">180</stringProp>
             </collectionProp>
             <collectionProp name="-841823508">
-              <stringProp name="49586">200</stringProp>
-              <stringProp name="49586">200</stringProp>
-              <stringProp name="48687">120</stringProp>
-            </collectionProp>
-            <collectionProp name="-775859476">
-              <stringProp name="49741">250</stringProp>
-              <stringProp name="49741">250</stringProp>
-              <stringProp name="48687">120</stringProp>
-            </collectionProp>
-            <collectionProp name="1735653740">
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="48687">120</stringProp>
+              <stringProp name="49586">120</stringProp>
+              <stringProp name="49586">120</stringProp>
+              <stringProp name="48687">600</stringProp>
             </collectionProp>
             <collectionProp name="-2056283040">
-              <stringProp name="50547">300</stringProp>
+              <stringProp name="49741">200</stringProp>
+              <stringProp name="49741">200</stringProp>
+              <stringProp name="48687">600</stringProp>
+            </collectionProp>
+            <collectionProp name="-1978435123">
+              <stringProp name="49741">200</stringProp>
               <stringProp name="48">0</stringProp>
-              <stringProp name="1722">60</stringProp>
+              <stringProp name="1722">180</stringProp>
             </collectionProp>
           </collectionProp>
         </kg.apc.jmeter.timers.VariableThroughputTimer>
@@ -277,9 +272,9 @@ try {
         </hashTree>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="DEVICES">
-        <intProp name="ThreadGroup.num_threads">310</intProp>
+        <intProp name="ThreadGroup.num_threads">200</intProp>
         <intProp name="ThreadGroup.ramp_time">120</intProp>
-        <longProp name="ThreadGroup.duration">780</longProp>
+        <longProp name="ThreadGroup.duration">2520</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
@@ -318,38 +313,33 @@ try {
           <collectionProp name="load_profile">
             <collectionProp name="-1147540202">
               <stringProp name="48">0</stringProp>
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48687">120</stringProp>
+              <stringProp name="48625">60</stringProp>
+              <stringProp name="48687">180</stringProp>
             </collectionProp>
             <collectionProp name="-1907816788">
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48687">120</stringProp>
+              <stringProp name="48625">60</stringProp>
+              <stringProp name="48625">60</stringProp>
+              <stringProp name="48687">600</stringProp>
             </collectionProp>
             <collectionProp name="-1865747060">
-              <stringProp name="48780">150</stringProp>
-              <stringProp name="48780">150</stringProp>
-              <stringProp name="48687">120</stringProp>
+              <stringProp name="48780">120</stringProp>
+              <stringProp name="48780">120</stringProp>
+              <stringProp name="48687">180</stringProp>
             </collectionProp>
             <collectionProp name="-841823508">
-              <stringProp name="49586">200</stringProp>
-              <stringProp name="49586">200</stringProp>
-              <stringProp name="48687">120</stringProp>
-            </collectionProp>
-            <collectionProp name="-775859476">
-              <stringProp name="49741">250</stringProp>
-              <stringProp name="49741">250</stringProp>
-              <stringProp name="48687">120</stringProp>
-            </collectionProp>
-            <collectionProp name="1735653740">
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="48687">120</stringProp>
+              <stringProp name="49586">120</stringProp>
+              <stringProp name="49586">120</stringProp>
+              <stringProp name="48687">600</stringProp>
             </collectionProp>
             <collectionProp name="-2056283040">
-              <stringProp name="50547">300</stringProp>
+              <stringProp name="49741">200</stringProp>
+              <stringProp name="49741">200</stringProp>
+              <stringProp name="48687">600</stringProp>
+            </collectionProp>
+            <collectionProp name="-1978435123">
+              <stringProp name="49741">200</stringProp>
               <stringProp name="48">0</stringProp>
-              <stringProp name="1722">60</stringProp>
+              <stringProp name="1722">180</stringProp>
             </collectionProp>
           </collectionProp>
         </kg.apc.jmeter.timers.VariableThroughputTimer>
@@ -383,9 +373,9 @@ try {
         </hashTree>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="COMMANDS">
-        <intProp name="ThreadGroup.num_threads">310</intProp>
+        <intProp name="ThreadGroup.num_threads">200</intProp>
         <intProp name="ThreadGroup.ramp_time">120</intProp>
-        <longProp name="ThreadGroup.duration">780</longProp>
+        <longProp name="ThreadGroup.duration">2520</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
@@ -424,38 +414,33 @@ try {
           <collectionProp name="load_profile">
             <collectionProp name="-1147540202">
               <stringProp name="48">0</stringProp>
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48687">120</stringProp>
+              <stringProp name="48625">60</stringProp>
+              <stringProp name="48687">180</stringProp>
             </collectionProp>
             <collectionProp name="-1907816788">
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48687">120</stringProp>
+              <stringProp name="48625">60</stringProp>
+              <stringProp name="48625">60</stringProp>
+              <stringProp name="48687">600</stringProp>
             </collectionProp>
             <collectionProp name="-1865747060">
-              <stringProp name="48780">150</stringProp>
-              <stringProp name="48780">150</stringProp>
-              <stringProp name="48687">120</stringProp>
+              <stringProp name="48780">120</stringProp>
+              <stringProp name="48780">120</stringProp>
+              <stringProp name="48687">180</stringProp>
             </collectionProp>
             <collectionProp name="-841823508">
-              <stringProp name="49586">200</stringProp>
-              <stringProp name="49586">200</stringProp>
-              <stringProp name="48687">120</stringProp>
-            </collectionProp>
-            <collectionProp name="-775859476">
-              <stringProp name="49741">250</stringProp>
-              <stringProp name="49741">250</stringProp>
-              <stringProp name="48687">120</stringProp>
-            </collectionProp>
-            <collectionProp name="1735653740">
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="48687">120</stringProp>
+              <stringProp name="49586">120</stringProp>
+              <stringProp name="49586">120</stringProp>
+              <stringProp name="48687">600</stringProp>
             </collectionProp>
             <collectionProp name="-2056283040">
-              <stringProp name="50547">300</stringProp>
+              <stringProp name="49741">200</stringProp>
+              <stringProp name="49741">200</stringProp>
+              <stringProp name="48687">600</stringProp>
+            </collectionProp>
+            <collectionProp name="-1978435123">
+              <stringProp name="49741">200</stringProp>
               <stringProp name="48">0</stringProp>
-              <stringProp name="1722">60</stringProp>
+              <stringProp name="1722">180</stringProp>
             </collectionProp>
           </collectionProp>
         </kg.apc.jmeter.timers.VariableThroughputTimer>
