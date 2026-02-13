@@ -1,36 +1,43 @@
 services:
   kafka-producer:
     build:
+      context: ../kafka-producer
       dockerfile: ../kafka-producer/Dockerfile.local
     mem_limit: 512m
     cpus: "0.5"
   device-collector:
     build:
+      context: ../device-collector
       dockerfile: ../device-collector/Dockerfile.local
     mem_limit: 768m
     cpus: "0.75"
   device-service:
     build:
+      context: ../device-service
       dockerfile: ../device-service/Dockerfile.local
     mem_limit: 1g
     cpus: "1.0"
   event-service:
     build:
+      context: ../event-service
       dockerfile: ../event-service/Dockerfile.local
     mem_limit: 3g
     cpus: "2.0"
   event-collector:
     build:
+      context: ../event-collector
       dockerfile: ../event-collector/Dockerfile.local
     mem_limit: 768m
     cpus: "0.75"
   failed-events-processor:
     build:
+      context: ../failed-events-processor
       dockerfile: ../failed-events-processor/Dockerfile.local
     mem_limit: 768m
     cpus: "0.75"
   orchestrator:
     build:
+      context: ../orchestrator
       dockerfile: ../orchestrator/Dockerfile.local
     mem_limit: 1g
     cpus: "1.0"

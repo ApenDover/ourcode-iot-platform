@@ -84,9 +84,9 @@ orchestrator:
     enabled: false
   integration:
     event-service:
-      url: event-service:8881
+      url: ${EVENT_SERVICE_SERVER_PORT_URL}
     device-service:
-      url: device-service:8886
+      url: ${DEVICE_SERVICE_SERVER_PORT_URL}
     router-manager:
       host: router-manager-service
       port: 9092
