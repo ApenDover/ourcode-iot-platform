@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Orchestrator Load Test">
@@ -12,6 +12,8 @@
           </elementProp>
         </collectionProp>
       </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group">
@@ -27,8 +29,8 @@
       <hashTree>
         <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
           <stringProp name="cacheKey">true</stringProp>
-          <stringProp name="filename"></stringProp>
-          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename" />
+          <stringProp name="parameters" />
           <stringProp name="script">import groovy.json.JsonSlurper
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClients
@@ -37,12 +39,12 @@ import org.apache.http.entity.ContentType
 
 try {
     // Конфигурация
-    String authUrl = &quot;http://localhost:8887/auth/token&quot;
-    String login = &quot;admin&quot;
-    String password = &quot;admin&quot;
+    String authUrl = "http://localhost:8887/auth/token"
+    String login = "admin"
+    String password = "admin"
 
     // Логирование начала процесса
-    log.info(&quot;Начинаем получение токена авторизации...&quot;)
+    log.info("Начинаем получение токена авторизации...")
 
     // Создаем HTTP клиент с таймаутами
     def httpClient = HttpClients.custom()
@@ -50,19 +52,19 @@ try {
         .build()
 
     // Формируем URL с параметрами
-    def fullUrl = &quot;${authUrl}?login=${URLEncoder.encode(login, &quot;UTF-8&quot;)}&amp;password=${URLEncoder.encode(password, &quot;UTF-8&quot;)}&quot;
+    def fullUrl = "${authUrl}?login=${URLEncoder.encode(login, "UTF-8")}&amp;password=${URLEncoder.encode(password, "UTF-8")}"
     def httpGet = new HttpGet(fullUrl)
 
     // Добавляем заголовки
-    httpGet.setHeader(&quot;Accept&quot;, &quot;application/json&quot;)
-    httpGet.setHeader(&quot;User-Agent&quot;, &quot;JMeter-Load-Test&quot;)
+    httpGet.setHeader("Accept", "application/json")
+    httpGet.setHeader("User-Agent", "JMeter-Load-Test")
 
     // Выполняем запрос
     def response = httpClient.execute(httpGet)
     def statusCode = response.getStatusLine().getStatusCode()
-    def responseBody = EntityUtils.toString(response.getEntity(), &quot;UTF-8&quot;)
+    def responseBody = EntityUtils.toString(response.getEntity(), "UTF-8")
 
-    log.info(&quot;Статус ответа авторизации: ${statusCode}&quot;)
+    log.info("Статус ответа авторизации: ${statusCode}")
 
     if (statusCode == 200) {
         // Парсим JSON ответ
@@ -72,10 +74,10 @@ try {
         try {
             authResponse = jsonSlurper.parseText(responseBody)
         } catch (Exception e) {
-            log.error(&quot;Ошибка парсинга JSON: ${e.getMessage()}&quot;)
-            log.error(&quot;Ответ сервера: ${responseBody}&quot;)
+            log.error("Ошибка парсинга JSON: ${e.getMessage()}")
+            log.error("Ответ сервера: ${responseBody}")
             SampleResult.setSuccessful(false)
-            SampleResult.setResponseMessage(&quot;Invalid JSON response&quot;)
+            SampleResult.setResponseMessage("Invalid JSON response")
             return
         }
 
@@ -84,37 +86,37 @@ try {
 
         if (accessToken &amp;&amp; !accessToken.isEmpty()) {
             // Сохраняем токен в переменную JMeter
-            vars.put(&quot;access_token&quot;, accessToken)
+            vars.put("access_token", accessToken)
 
             // Также сохраняем в props для использования в других потоках (опционально)
-            props.put(&quot;access_token&quot;, accessToken)
+            props.put("access_token", accessToken)
 
             // Логируем успех (без полного токена в логах)
-            log.info(&quot;✅ Токен успешно получен и сохранен в переменную &apos;access_token&apos;&quot;)
-            log.info(&quot;   Длина токена: ${accessToken.length()} символов&quot;)
-            log.info(&quot;   Первые 20 символов: ${accessToken.substring(0, Math.min(20, accessToken.length()))}...&quot;)
+            log.info("✅ Токен успешно получен и сохранен в переменную 'access_token'")
+            log.info("   Длина токена: ${accessToken.length()} символов")
+            log.info("   Первые 20 символов: ${accessToken.substring(0, Math.min(20, accessToken.length()))}...")
 
             // Сохраняем время получения токена для возможного кеширования
-            vars.put(&quot;token_timestamp&quot;, System.currentTimeMillis().toString())
+            vars.put("token_timestamp", System.currentTimeMillis().toString())
 
             // Можно также сохранить время истечения токена
             if (authResponse.expires_in) {
-                vars.put(&quot;token_expires_in&quot;, authResponse.expires_in.toString())
-                log.info(&quot;   Срок действия токена: ${authResponse.expires_in} секунд&quot;)
+                vars.put("token_expires_in", authResponse.expires_in.toString())
+                log.info("   Срок действия токена: ${authResponse.expires_in} секунд")
             }
 
         } else {
-            log.error(&quot;❌ Токен не найден в ответе сервера&quot;)
-            log.error(&quot;Полный ответ: ${responseBody}&quot;)
+            log.error("❌ Токен не найден в ответе сервера")
+            log.error("Полный ответ: ${responseBody}")
             SampleResult.setSuccessful(false)
-            SampleResult.setResponseMessage(&quot;Token not found in response&quot;)
+            SampleResult.setResponseMessage("Token not found in response")
         }
 
     } else {
-        log.error(&quot;❌ Ошибка при получении токена. HTTP статус: ${statusCode}&quot;)
-        log.error(&quot;Тело ответа: ${responseBody}&quot;)
+        log.error("❌ Ошибка при получении токена. HTTP статус: ${statusCode}")
+        log.error("Тело ответа: ${responseBody}")
         SampleResult.setSuccessful(false)
-        SampleResult.setResponseMessage(&quot;Failed to get token, status: ${statusCode}&quot;)
+        SampleResult.setResponseMessage("Failed to get token, status: ${statusCode}")
     }
 
     // Закрываем соединение
@@ -122,22 +124,22 @@ try {
     httpClient.close()
 
 } catch (Exception e) {
-    log.error(&quot;❌ Неожиданная ошибка при получении токена: &quot;, e)
+    log.error("❌ Неожиданная ошибка при получении токена: ", e)
     SampleResult.setSuccessful(false)
-    SampleResult.setResponseMessage(&quot;Exception: &quot; + e.getMessage())
+    SampleResult.setResponseMessage("Exception: " + e.getMessage())
 
     // Выводим stack trace для отладки
     e.printStackTrace(new java.io.PrintWriter(log.getOutStream()))
 }</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223Sampler>
-        <hashTree/>
+        <hashTree />
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="GetEvents">
         <boolProp name="ThreadGroup.delayedStart">true</boolProp>
-        <intProp name="ThreadGroup.num_threads">600</intProp>
-        <intProp name="ThreadGroup.ramp_time">300</intProp>
-        <longProp name="ThreadGroup.duration">900</longProp>
+        <intProp name="ThreadGroup.num_threads">200</intProp>
+        <intProp name="ThreadGroup.ramp_time">10</intProp>
+        <longProp name="ThreadGroup.duration">320</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
@@ -159,27 +161,10 @@ try {
             </elementProp>
           </collectionProp>
         </HeaderManager>
-        <hashTree/>
+        <hashTree />
         <kg.apc.jmeter.timers.VariableThroughputTimer guiclass="kg.apc.jmeter.timers.VariableThroughputTimerGui" testclass="kg.apc.jmeter.timers.VariableThroughputTimer" testname="jp@gc - Throughput Shaping Timer">
-          <collectionProp name="load_profile">
-            <collectionProp name="-1547314388">
-              <stringProp name="48">0</stringProp>
-              <stringProp name="1507423">550</stringProp>
-              <stringProp name="51663">450</stringProp>
-            </collectionProp>
-            <collectionProp name="1659132833">
-              <stringProp name="1507423">550</stringProp>
-              <stringProp name="1507423">550</stringProp>
-              <stringProp name="51508">400</stringProp>
-            </collectionProp>
-            <collectionProp name="274333084">
-              <stringProp name="1507423">550</stringProp>
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="1691">50</stringProp>
-            </collectionProp>
-          </collectionProp>
-        </kg.apc.jmeter.timers.VariableThroughputTimer>
-        <hashTree/>
+          <collectionProp name="load_profile"><collectionProp name="7094498075293123290"><stringProp name="48">0</stringProp><stringProp name="1507423">200</stringProp><stringProp name="51663">10</stringProp></collectionProp><collectionProp name="6282102568463573252"><stringProp name="48">200</stringProp><stringProp name="1507423">200</stringProp><stringProp name="51663">300</stringProp></collectionProp><collectionProp name="6125151346069166338"><stringProp name="48">200</stringProp><stringProp name="1507423">0</stringProp><stringProp name="51663">10</stringProp></collectionProp></collectionProp></kg.apc.jmeter.timers.VariableThroughputTimer>
+        <hashTree />
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET EVENTS">
           <intProp name="HTTPSampler.connect_timeout">5000</intProp>
           <intProp name="HTTPSampler.response_timeout">10000</intProp>
@@ -192,7 +177,7 @@ try {
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-            <collectionProp name="Arguments.arguments"/>
+            <collectionProp name="Arguments.arguments" />
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
@@ -203,9 +188,9 @@ try {
             <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             <boolProp name="Assertion.assume_success">false</boolProp>
             <intProp name="Assertion.test_type">16</intProp>
-            <stringProp name="Assertion.custom_message"></stringProp>
+            <stringProp name="Assertion.custom_message" />
           </ResponseAssertion>
-          <hashTree/>
+          <hashTree />
         </hashTree>
       </hashTree>
     </hashTree>

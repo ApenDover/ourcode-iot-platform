@@ -1,8 +1,15 @@
 server:
   port: ${ORCHESTRATOR_SERVER_PORT:8879}
+  tomcat:
+    threads:
+      max: 48
+      min-spare: 5
+    accept-count: 100
 
 management:
   endpoint:
+    heapdump:
+      access: unrestricted
     health:
       probes:
         enabled: ${ORCHESTRATOR_MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED:true}
@@ -13,6 +20,7 @@ management:
   metrics:
     distribution:
       percentiles-histogram:
+        "jvm.gc.pause": true
         "http.server.requests": true
         "http.client.requests": true
         "orchestrator.requests": true
@@ -46,14 +54,14 @@ spring:
   cloud:
     openfeign:
       httpclient:
-        max-connections: 500
-        max-connections-per-route: 250
+        max-connections: 60
+        max-connections-per-route: 30
         time-to-live: 180
         follow-redirects: false
         disable-ssl-validation: false
         connection-timeout: 1000
-        connection-request-timeout: 1000
-        read-timeout-ms: 3000
+        connection-request-timeout: 160
+        read-timeout-ms: 400
 
   data:
     redis:

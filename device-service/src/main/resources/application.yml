@@ -13,6 +13,7 @@ management:
   metrics:
     distribution:
       percentiles-histogram:
+        jvm.gc.pause: true
         "http.server.requests": true
         "http.client.requests": true
         "orchestrator.requests": true

@@ -11,6 +11,9 @@ management:
       exposure:
         include: ${KAFKA_PRODUCER_MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE:*}
   metrics:
+    distribution:
+      percentiles-histogram:
+        jvm.gc.pause: true
     tags:
       application: ${KAFKA_PRODUCER_MANAGEMENT_METRICS_TAGS_APPLICATION:kafka-producer}
   prometheus:

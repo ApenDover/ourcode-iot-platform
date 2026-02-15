@@ -25,7 +25,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 4,
   "links": [],
   "panels": [
     {
@@ -105,7 +104,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.8",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -194,7 +193,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "11.5.8",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -292,7 +291,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "11.5.8",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -329,7 +328,6 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -390,6 +388,7 @@
         },
         "tooltip": {
           "hideZeros": false,
+          "maxHeight": 600,
           "mode": "multi",
           "sort": "none"
         }
@@ -476,7 +475,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.8",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -514,7 +513,6 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -579,6 +577,7 @@
         },
         "tooltip": {
           "hideZeros": false,
+          "maxHeight": 600,
           "mode": "multi",
           "sort": "none"
         }
@@ -632,7 +631,6 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
@@ -697,6 +695,7 @@
         },
         "tooltip": {
           "hideZeros": false,
+          "maxHeight": 600,
           "mode": "multi",
           "sort": "none"
         }
@@ -2822,11 +2821,233 @@
       ],
       "title": "Logback Statistics",
       "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFE396EC0B189D67"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "ms",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "id": 97,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "maxHeight": 600,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.0-16979757807",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum(rate(jvm_gc_pause_seconds_bucket{application=\"$application\"}[5m])) by (le)) * 1000",
+          "legendFormat": "GC pause p95",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.99, sum(rate(jvm_gc_pause_seconds_bucket{application=\"$application\"}[5m])) by (le)) * 1000",
+          "hide": false,
+          "legendFormat": "GC pause p99",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "GC Pause p95 (ms)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFE396EC0B189D67"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "B/s",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1000000
+              },
+              {
+                "color": "red",
+                "value": 5000000
+              }
+            ]
+          },
+          "unit": "Bps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "id": 98,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "maxHeight": 600,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.0-16979757807",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "rate(jvm_gc_memory_promoted_bytes_total{application=\"$application\"}[5m])",
+          "legendFormat": "Promoted bytes/s",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "GC Promoted Bytes (rate)",
+      "type": "timeseries"
     }
   ],
-  "preload": false,
-  "refresh": "",
-  "schemaVersion": 40,
+  "schemaVersion": 39,
   "tags": [
     "app"
   ],
@@ -2834,16 +3055,19 @@
     "list": [
       {
         "current": {
-          "text": "",
-          "value": ""
+          "selected": false,
+          "text": "orchestrator",
+          "value": "orchestrator"
         },
         "datasource": {
           "type": "prometheus",
           "uid": "PBFE396EC0B189D67"
         },
         "definition": "label_values(jvm_info,application)",
+        "hide": 0,
         "includeAll": false,
         "label": "Application",
+        "multi": false,
         "name": "application",
         "options": [],
         "query": {
@@ -2852,12 +3076,15 @@
         },
         "refresh": 2,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 1,
         "type": "query"
       },
       {
         "current": {
-          "text": "",
+          "isNone": true,
+          "selected": false,
+          "text": "None",
           "value": ""
         },
         "datasource": {
@@ -2865,7 +3092,9 @@
           "uid": "PBFE396EC0B189D67"
         },
         "definition": "label_values(jvm_info,namespace)",
+        "hide": 0,
         "includeAll": false,
+        "multi": false,
         "name": "Namespace",
         "options": [],
         "query": {
@@ -2874,20 +3103,25 @@
         },
         "refresh": 2,
         "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
         "type": "query"
       },
       {
         "current": {
-          "text": "event-collector:8888",
-          "value": "event-collector:8888"
+          "selected": false,
+          "text": "orchestrator:8879",
+          "value": "orchestrator:8879"
         },
         "datasource": {
           "type": "prometheus",
           "uid": "PBFE396EC0B189D67"
         },
         "definition": "label_values(jvm_info{application=\"$application\", namespace=\"$Namespace\"},instance)",
+        "hide": 0,
         "includeAll": false,
         "label": "Instance",
+        "multi": false,
         "name": "instance",
         "options": [],
         "query": {
@@ -2896,12 +3130,15 @@
         },
         "refresh": 2,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 1,
         "type": "query"
       },
       {
         "current": {
-          "text": "",
+          "isNone": true,
+          "selected": false,
+          "text": "None",
           "value": ""
         },
         "datasource": {
@@ -2909,8 +3146,10 @@
           "uid": "PBFE396EC0B189D67"
         },
         "definition": "",
+        "hide": 0,
         "includeAll": false,
         "label": "HikariCP-Pool",
+        "multi": false,
         "name": "hikaricp",
         "options": [],
         "query": {
@@ -2919,11 +3158,13 @@
         },
         "refresh": 2,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 1,
         "type": "query"
       },
       {
         "current": {
+          "selected": false,
           "text": "All",
           "value": "$__all"
         },
@@ -2932,8 +3173,10 @@
           "uid": "PBFE396EC0B189D67"
         },
         "definition": "label_values(jvm_memory_used_bytes{application=\"$application\", instance=\"$instance\", area=\"heap\"},id)",
+        "hide": 0,
         "includeAll": true,
         "label": "Memory Pool (heap)",
+        "multi": false,
         "name": "memory_pool_heap",
         "options": [],
         "query": {
@@ -2942,11 +3185,13 @@
         },
         "refresh": 2,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 1,
         "type": "query"
       },
       {
         "current": {
+          "selected": false,
           "text": "All",
           "value": "$__all"
         },
@@ -2955,8 +3200,10 @@
           "uid": "PBFE396EC0B189D67"
         },
         "definition": "label_values(jvm_memory_used_bytes{application=\"$application\", instance=\"$instance\", area=\"nonheap\"},id)",
+        "hide": 0,
         "includeAll": true,
         "label": "Memory Pool (nonheap)",
+        "multi": false,
         "name": "memory_pool_nonheap",
         "options": [],
         "query": {
@@ -2965,15 +3212,17 @@
         },
         "refresh": 2,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 1,
         "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-5m",
     "to": "now"
   },
+  "timeRangeUpdatedDuringEditOrView": false,
   "timepicker": {},
   "timezone": "",
   "title": "Spring Boot 3.x Statistics",
