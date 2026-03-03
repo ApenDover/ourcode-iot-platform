@@ -23,15 +23,14 @@ public class EventController implements EventsV1Api {
     @Override
     public ResponseEntity<EventPage> apiV1EventsGet(
             String deviceId, Long fromTimestamp, Long toTimestamp,
-            String type, Integer page, Integer size
+            String type, String pageToken
     ) {
         final var filter = EventFilterRequest.builder()
                 .deviceId(deviceId)
                 .fromTimestamp(fromTimestamp)
                 .toTimestamp(toTimestamp)
                 .type(type)
-                .page(page)
-                .size(size)
+                .pageToken(pageToken)
                 .build();
         return ResponseEntity.ok(cassandraService.getEventByFilter(filter));
     }

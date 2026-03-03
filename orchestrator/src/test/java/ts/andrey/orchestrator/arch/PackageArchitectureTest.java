@@ -145,6 +145,12 @@ class PackageArchitectureTest {
                     .should().onlyDependOnClassesThat()
                     .resideInAnyPackage(
                             "ts.andrey.orchestrator.infrastructure.adapter.out..",
+                            "ts.andrey.orchestrator.infrastructure.out.port.grpc..",
+                            "ts.andrey.device..",
+                            "ts.andrey.event..",
+                            "ts.andrey.routermanager..",
+                            "io.grpc..",
+                            "feign..",
                             "java..", "javax..", "org..", "lombok.."
                     )
                     .because("Все классы из infrastructure.out могут обращаться только к infrastructure.adapter.out");

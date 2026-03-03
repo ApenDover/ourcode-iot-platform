@@ -7,6 +7,6 @@ public interface EventServicePort {
 
     Event getEvent(String eventId, String deviceId);
 
-    EventPage getEventByFilter(String deviceId, Long fromMs, Long toMs, String eventType, Integer page, Integer size);
+    EventPage getEventByFilter(String deviceId, Long fromMs, Long toMs, String eventType, String pageToken);
 
 }

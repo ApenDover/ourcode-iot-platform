@@ -1,12 +1,13 @@
 package ts.andrey.eventservice.data.repository;
 
-import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.core.query.Criteria;
 import org.springframework.data.cassandra.core.query.Query;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import ts.andrey.eventservice.data.entity.DeviceEventEntity;
 import ts.andrey.eventservice.data.entity.DeviceEventKey;
@@ -37,16 +38,27 @@ public class CriteriaRepository {
     private final EventMapper eventMapper;
 
     public List<DeviceEventEntity> getEventsByFilter(EventFilterRequest filter, Pageable pageable) {
-        Query query = Query.query(Criteria.where(DEVICE_ID_FIELD).is(filter.getDeviceId()));
+        var query = buildBaseQuery(filter);
+        query = query.pageRequest(pageable);
+        return cassandraTemplate.select(query, DeviceEventEntity.class);
+    }
 
+    public Slice<DeviceEventEntity> getEventsSlice(EventFilterRequest filter, Pageable pageable) {
+        var query = buildBaseQuery(filter);
+        query = query.pageRequest(pageable);
+        return cassandraTemplate.slice(query, DeviceEventEntity.class);
+    }
+
+    private Query buildBaseQuery(EventFilterRequest filter) {
+        var query = Query.query(Criteria.where(DEVICE_ID_FIELD).is(filter.getDeviceId()));
         if (filter.getFromTimestamp() != null) {
             query = query.and(Criteria.where(TIMESTAMP_FIELD).gte(filter.getFromTimestamp()));
         }
         if (filter.getToTimestamp() != null) {
             query = query.and(Criteria.where(TIMESTAMP_FIELD).lte(filter.getToTimestamp()));
         }
-        query = query.pageRequest(pageable);
-        return cassandraTemplate.select(query, DeviceEventEntity.class);
+        query = query.sort(Sort.by(Sort.Order.desc(TIMESTAMP_FIELD)));
+        return query;
     }
 
     public DeviceEventEntity getEventByDeviceIdAndEventId(String deviceId, UUID eventId) {

@@ -36,17 +36,14 @@ class EventMapperTest {
     void entityToPage() {
         //GIVEN
         final var entities = DummyTDF.deviceEventEntity.getList(10);
-        final var filter = DummyTDF.eventFilterRequest.getDefault(10, 1);
 
         //WHEN
-        final var actual = eventMapper.entityListToEventPage(entities, filter, entities.size());
+        final var actual = eventMapper.entityListToEventPage(entities, "token-123");
 
         //THEN
         assertNotNull(actual);
         assertEquals(10, actual.getEvents().size());
-        assertEquals(1, actual.getPage());
-        assertEquals(10, actual.getSize());
-        assertEquals(10, actual.getTotal());
+        assertEquals("token-123", actual.getNextPageToken().get());
     }
 
     @Test

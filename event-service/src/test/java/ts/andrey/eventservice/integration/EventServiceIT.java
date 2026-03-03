@@ -79,21 +79,19 @@ class EventServiceIT extends BaseIntegrationTest {
                 + "device_id=device-2&"
                 + "from_timestamp=1759425954136&"
                 + "to_timestamp=1759425954836&"
-                + "type=TEMPERATURE&"
-                + "page=0&"
-                + "size=2", EventPage.class);
+                + "type=TEMPERATURE", EventPage.class);
         final var body = result.getBody();
         final var event = body.getEvents().get(0);
 
         //THEN
         assertNotNull(result);
         assertNotNull(body);
-        assertEquals(1, body.getTotal());
         assertEquals(1, body.getEvents().size());
         assertEquals("550e8400-e29b-41d4-a716-446655440003", event.getEventId());
         assertEquals("device-2", event.getDeviceId());
         assertEquals("TEMPERATURE", event.getType());
         assertEquals("{\"temp\":18.7,\"unit\":\"C\"}", event.getPayload());
+        assertEquals(true, body.getNextPageToken() == null || !body.getNextPageToken().isPresent());
     }
 
 }

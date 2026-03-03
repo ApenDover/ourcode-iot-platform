@@ -2,13 +2,12 @@ package ts.andrey.eventservice.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.openapitools.jackson.nullable.JsonNullable;
 import ts.andrey.dto.Event;
 import ts.andrey.dto.EventPage;
 import ts.andrey.eventservice.data.entity.DeviceEventEntity;
 import ts.andrey.eventservice.data.entity.DeviceEventKey;
 import ts.andrey.eventservice.data.entity.EventKeyEntity;
-import ts.andrey.eventservice.data.entity.EventKeyEntityKey;
-import ts.andrey.eventservice.model.EventFilterRequest;
 
 import java.util.List;
 
@@ -25,14 +24,15 @@ public interface EventMapper {
     List<Event> entityListToEventList(List<DeviceEventEntity> deviceEventEntity);
 
     @Mapping(target = "events", expression = "java(entityListToEventList(deviceEventEntities))")
-    @Mapping(target = "page", source = "eventFilterRequest.page")
-    @Mapping(target = "size", source = "eventFilterRequest.size")
-    @Mapping(target = "total", source = "total")
+    @Mapping(target = "nextPageToken", source = "nextPageToken")
     EventPage entityListToEventPage(List<DeviceEventEntity> deviceEventEntities,
-                                    EventFilterRequest eventFilterRequest,
-                                    Integer total);
+                                    String nextPageToken);
 
     @Mapping(target = "eventId", source = "eventKeyEntity.key.eventId")
     DeviceEventKey mapFromEntityKey(EventKeyEntity eventKeyEntity);
+
+    default JsonNullable<String> map(String value) {
+        return JsonNullable.of(value);
+    }
 
 }

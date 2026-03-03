@@ -1,14 +1,13 @@
 package ts.andrey.eventservice.model;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+
+import java.nio.ByteBuffer;
 
 @Data
 @AllArgsConstructor
@@ -25,18 +24,6 @@ public class EventFilterRequest {
 
     private String type;
 
-    @Min(0)
-    private Integer page = 0;
-
-    @Min(1)
-    @Max(1000)
-    private Integer size = 100;
-
-    public Pageable toPageable() {
-        return PageRequest.of(
-                this.page,
-                this.size
-        );
-    }
+    private String pageToken;
 
 }

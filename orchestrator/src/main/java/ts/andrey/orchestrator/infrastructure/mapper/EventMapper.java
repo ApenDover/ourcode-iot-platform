@@ -1,6 +1,7 @@
 package ts.andrey.orchestrator.infrastructure.mapper;
 
 import org.mapstruct.Mapper;
+import org.openapitools.jackson.nullable.JsonNullable;
 import ts.andrey.orchestrator.dto.Event;
 import ts.andrey.orchestrator.dto.EventPage;
 
@@ -14,5 +15,9 @@ public interface EventMapper {
     EventPage toOrchestratorEventPageDto(ts.andrey.event.model.EventPage eventPage);
 
     ts.andrey.event.model.EventPage toEventPageDto(EventPage eventPage);
+
+    default JsonNullable<String> map(String value) {
+        return JsonNullable.of(value);
+    }
 
 }

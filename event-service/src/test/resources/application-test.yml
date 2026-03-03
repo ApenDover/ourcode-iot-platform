@@ -59,3 +59,7 @@ spring:
   cassandra:
     keyspace-name: iot_service
     schema-action: CREATE_IF_NOT_EXISTS
+
+app:
+  events:
+    page-size: 100

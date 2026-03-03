@@ -31,10 +31,10 @@ public class EventServiceAdapter implements EventServicePort {
     @WithSpan("EventTransportGetByFilter")
     public EventPage getEventByFilter(
             String deviceId, Long fromMs, Long toMs,
-            String eventType, Integer page, Integer size
+            String eventType, String pageToken
     ) {
         return requestTimerUtil.recordExternal("event-service", "getEvents", "http", () -> {
-            final var response = eventServiceClient.apiV1EventsGet(deviceId, fromMs, toMs, eventType, page, size);
+            final var response = eventServiceClient.apiV1EventsGet(deviceId, fromMs, toMs, eventType, pageToken);
             return eventMapper.toOrchestratorEventPageDto(response.getBody());
         });
     }

@@ -89,3 +89,5 @@ spring:
 
 app:
   print-log: true
+  events:
+    page-size: 100

@@ -121,9 +121,9 @@ public class OrchestratorController implements DefaultApi {
     @WithSpan("ControllerGetEventsByFilter")
     public ResponseEntity<EventPage> apiV1EventsGet(
             String deviceId, Long fromTimestamp, Long toTimestamp,
-            String type, Integer page, Integer size
+            String type, String pageToken
     ) {
-        final var response = eventServicePort.getEventByFilter(deviceId, fromTimestamp, toTimestamp, type, page, size);
+        final var response = eventServicePort.getEventByFilter(deviceId, fromTimestamp, toTimestamp, type, pageToken);
         orchestratorMetrics.eventServiceGetFilterSuccess();
         return ResponseEntity.ok(response);
     }

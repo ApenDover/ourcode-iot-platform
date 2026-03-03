@@ -25,12 +25,10 @@ public class MessageGenerator {
 
     public List<DeviceEvent> generate(long messageCount, long deviceCount, boolean persist) {
         List<String> ulidPool = persist ? syncDevicePool(deviceCount) : generateUlidPool(deviceCount);
-
         List<DeviceEvent> events = new ArrayList<>();
         for (long i = 0; i < messageCount; i++) {
             events.add(generateRandomMessage(ulidPool));
         }
-
         if (!persist) {
             devicePool.clear();
         }
@@ -65,6 +63,7 @@ public class MessageGenerator {
                         getRandomElement(ulidPool),
                         getRandomElement(DEVICE_TYPES),
                         "information",
+                        false,
                         generateRandomTimestamp()
                 )
         );

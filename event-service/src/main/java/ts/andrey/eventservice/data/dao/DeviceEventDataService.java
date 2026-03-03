@@ -9,8 +9,9 @@ import ts.andrey.eventservice.exception.ErrorExceptionMessages;
 import ts.andrey.eventservice.exception.EventServiceException;
 import ts.andrey.eventservice.model.EventFilterRequest;
 
-import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
 @Slf4j
 @Service
@@ -28,8 +29,8 @@ public class DeviceEventDataService {
         return event;
     }
 
-    public List<DeviceEventEntity> getEventsByFilter(EventFilterRequest filter) {
-        return criteriaRepository.getEventsByFilter(filter, filter.toPageable());
+    public Slice<DeviceEventEntity> getEventsSlice(EventFilterRequest filter, Pageable pageable) {
+        return criteriaRepository.getEventsSlice(filter, pageable);
     }
 
 }

@@ -43,7 +43,6 @@ public abstract class BaseIntegrationTest {
     protected static final GenericContainer<?> cassandra = new GenericContainer<>(
             DockerImageName.parse("cassandra:5.0"))
             .withStartupTimeout(Duration.ofMinutes(2))
-            .withCreateContainerCmdModifier(cmd -> cmd.withName("cassandra"))
             .withNetwork(Network.SHARED)
             .withNetworkAliases("cassandra")
             .withExposedPorts(9042);

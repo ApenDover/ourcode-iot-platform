@@ -30,11 +30,9 @@ paths:
           schema: { type: string }
           description: Фильтр по типу события
         - in: query
-          name: page
-          schema: { type: integer, minimum: 0, default: 0 }
-        - in: query
-          name: size
-          schema: { type: integer, minimum: 1, maximum: 1000, default: 100 }
+          name: page_token
+          schema: { type: string }
+          description: Пейджинг-токен для следующей страницы (cursor pagination)
       responses:
         '200':
           description: Список событий
@@ -85,6 +83,7 @@ components:
         events:
           type: array
           items: { $ref: '#/components/schemas/Event' }
-        page: { type: integer, example: 0 }
-        size: { type: integer, example: 100 }
-        total: { type: integer, example: 233 }
+        next_page_token:
+          type: string
+          nullable: true
+          description: Токен для запроса следующей страницы

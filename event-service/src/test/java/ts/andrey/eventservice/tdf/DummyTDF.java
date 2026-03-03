@@ -6,6 +6,5 @@ import lombok.experimental.UtilityClass;
 public class DummyTDF {
 
     public static final DummyDeviceEventEntity deviceEventEntity = new DummyDeviceEventEntity();
-    public static final DummyEventFilterRequest eventFilterRequest = new DummyEventFilterRequest();
 
 }

@@ -13,6 +13,7 @@ import ts.andrey.orchestrator.domain.exception.ExceptionMessage;
 import ts.andrey.orchestrator.domain.exception.RouterManagerRollbackException;
 import ts.andrey.orchestrator.domain.metrics.OrchestratorMetrics;
 import ts.andrey.orchestrator.dto.ApiV1DevicesDeviceIdVersionPost502Response;
+import ts.andrey.orchestrator.infrastructure.metrics.FailMetricsProcessor;
 
 import java.util.Arrays;
 
