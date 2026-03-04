@@ -8,6 +8,7 @@ import org.springframework.data.cassandra.core.query.CassandraPageRequest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.openapitools.jackson.nullable.JsonNullable;
 import ts.andrey.dto.Event;
 import ts.andrey.dto.EventPage;
 import ts.andrey.eventservice.data.dao.DeviceEventDataService;
@@ -48,8 +49,16 @@ public class CassandraServiceImpl implements CassandraService {
         final var pageRequest = buildPageRequest(pageSize, pagingState);
         final var slice = deviceEventDataService.getEventsSlice(eventFilterRequest, pageRequest);
         final var filtered = filterByType(slice.getContent(), eventFilterRequest.getType());
-        final var nextToken = encodeToken(extractPagingState(slice));
-        return eventMapper.entityListToEventPage(filtered, nextToken);
+        final var nextToken = slice.hasNext() ? encodeToken(extractPagingState(slice)) : null;
+        final var total = deviceEventDataService.countEventsByFilter(eventFilterRequest);
+        final var totalPages = total == 0 ? 0 : (int) Math.ceil((double) total / pageSize);
+        final Integer pageNumber = (pagingState == null && total > 0) ? 1 : null;
+
+        final var page = eventMapper.entityListToEventPage(filtered, nextToken);
+        page.setTotal((int) Math.min(total, Integer.MAX_VALUE));
+        page.setTotalPages(totalPages);
+        page.setPageNumber(pageNumber == null ? JsonNullable.undefined() : JsonNullable.of(pageNumber));
+        return page;
     }
 
     private List<DeviceEventEntity> filterByType(

@@ -91,6 +91,11 @@ class EventServiceIT extends BaseIntegrationTest {
         assertEquals("device-2", event.getDeviceId());
         assertEquals("TEMPERATURE", event.getType());
         assertEquals("{\"temp\":18.7,\"unit\":\"C\"}", event.getPayload());
+        assertEquals(1, body.getTotal());
+        assertEquals(1, body.getTotalPages());
+        assertNotNull(body.getPageNumber());
+        assertEquals(true, body.getPageNumber().isPresent());
+        assertEquals(1, body.getPageNumber().get());
         assertEquals(true, body.getNextPageToken() == null || !body.getNextPageToken().isPresent());
     }
 

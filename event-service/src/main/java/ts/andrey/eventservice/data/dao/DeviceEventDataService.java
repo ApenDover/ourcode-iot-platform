@@ -33,4 +33,8 @@ public class DeviceEventDataService {
         return criteriaRepository.getEventsSlice(filter, pageable);
     }
 
+    public long countEventsByFilter(EventFilterRequest filter) {
+        return criteriaRepository.countEventsByFilter(filter);
+    }
+
 }

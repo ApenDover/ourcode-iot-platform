@@ -25,6 +25,9 @@ public interface EventMapper {
 
     @Mapping(target = "events", expression = "java(entityListToEventList(deviceEventEntities))")
     @Mapping(target = "nextPageToken", source = "nextPageToken")
+    @Mapping(target = "total", ignore = true)
+    @Mapping(target = "pageNumber", ignore = true)
+    @Mapping(target = "totalPages", ignore = true)
     EventPage entityListToEventPage(List<DeviceEventEntity> deviceEventEntities,
                                     String nextPageToken);
 
@@ -32,6 +35,9 @@ public interface EventMapper {
     DeviceEventKey mapFromEntityKey(EventKeyEntity eventKeyEntity);
 
     default JsonNullable<String> map(String value) {
+        if (value == null) {
+            return JsonNullable.undefined();
+        }
         return JsonNullable.of(value);
     }
 

@@ -83,6 +83,19 @@ components:
         events:
           type: array
           items: { $ref: '#/components/schemas/Event' }
+        total:
+          type: integer
+          example: 233
+          description: Общее количество событий в запросе (по фильтрам)
+        page_number:
+          type: integer
+          nullable: true
+          example: 1
+          description: Номер текущей страницы (1-based). Null для запросов с page_token.
+        total_pages:
+          type: integer
+          example: 3
+          description: Общее число страниц при фиксированном размере страницы.
         next_page_token:
           type: string
           nullable: true

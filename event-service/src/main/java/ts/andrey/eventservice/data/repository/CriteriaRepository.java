@@ -49,6 +49,11 @@ public class CriteriaRepository {
         return cassandraTemplate.slice(query, DeviceEventEntity.class);
     }
 
+    public long countEventsByFilter(EventFilterRequest filter) {
+        var query = buildBaseQuery(filter);
+        return cassandraTemplate.count(query, DeviceEventEntity.class);
+    }
+
     private Query buildBaseQuery(EventFilterRequest filter) {
         var query = Query.query(Criteria.where(DEVICE_ID_FIELD).is(filter.getDeviceId()));
         if (filter.getFromTimestamp() != null) {
