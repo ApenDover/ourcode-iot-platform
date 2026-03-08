@@ -89,6 +89,10 @@ try {
             // Также сохраняем в props для использования в других потоках (опционально)
             props.put(&quot;access_token&quot;, accessToken)
 
+            // Сохраняем время для фильтра событий (общие props для всех ThreadGroup)
+            props.put("from_ts", String.valueOf(System.currentTimeMillis() - 3600000))
+            props.put("to_ts", String.valueOf(System.currentTimeMillis()))
+
             // Логируем успех (без полного токена в логах)
             log.info(&quot;✅ Токен успешно получен и сохранен в переменную &apos;access_token&apos;&quot;)
             log.info(&quot;   Длина токена: ${accessToken.length()} символов&quot;)
@@ -209,41 +213,41 @@ try {
         </HeaderManager>
         <hashTree/>
         <kg.apc.jmeter.timers.VariableThroughputTimer guiclass="kg.apc.jmeter.timers.VariableThroughputTimerGui" testclass="kg.apc.jmeter.timers.VariableThroughputTimer" testname="jp@gc - Throughput Shaping Timer">
-          <collectionProp name="load_profile">
-            <collectionProp name="-1147540202">
-              <stringProp name="48">0</stringProp>
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48687">120</stringProp>
+                    <collectionProp name="load_profile">
+            <collectionProp name="step-0">
+              <stringProp name="start">0</stringProp>
+              <stringProp name="end">100</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-1907816788">
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-1">
+              <stringProp name="start">100</stringProp>
+              <stringProp name="end">100</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-1865747060">
-              <stringProp name="48780">150</stringProp>
-              <stringProp name="48780">150</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-2">
+              <stringProp name="start">150</stringProp>
+              <stringProp name="end">150</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-841823508">
-              <stringProp name="49586">200</stringProp>
-              <stringProp name="49586">200</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-3">
+              <stringProp name="start">200</stringProp>
+              <stringProp name="end">200</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-775859476">
-              <stringProp name="49741">250</stringProp>
-              <stringProp name="49741">250</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-4">
+              <stringProp name="start">250</stringProp>
+              <stringProp name="end">250</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="1735653740">
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-5">
+              <stringProp name="start">300</stringProp>
+              <stringProp name="end">300</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-2056283040">
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="48">0</stringProp>
-              <stringProp name="1722">60</stringProp>
+            <collectionProp name="step-6">
+              <stringProp name="start">300</stringProp>
+              <stringProp name="end">0</stringProp>
+              <stringProp name="duration">60</stringProp>
             </collectionProp>
           </collectionProp>
         </kg.apc.jmeter.timers.VariableThroughputTimer>
@@ -254,7 +258,7 @@ try {
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">8879</stringProp>
           <stringProp name="HTTPSampler.protocol">http</stringProp>
-          <stringProp name="HTTPSampler.path">/api/v1/events?device_id=01K6GJ564FPTXDWX8R1F91VZK0&amp;from_timestamp=1765301942117&amp;page=0&amp;size=50</stringProp>
+          <stringProp name="HTTPSampler.path">/api/v1/events?device_id=${deviceIdCsv}&amp;from_timestamp=${__P(from_ts)}&amp;to_timestamp=${__P(to_ts)}&amp;type=${event_type}&amp;page_token=${page_token}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
@@ -315,41 +319,41 @@ try {
         </HeaderManager>
         <hashTree/>
         <kg.apc.jmeter.timers.VariableThroughputTimer guiclass="kg.apc.jmeter.timers.VariableThroughputTimerGui" testclass="kg.apc.jmeter.timers.VariableThroughputTimer" testname="jp@gc - Throughput Shaping Timer" enabled="true">
-          <collectionProp name="load_profile">
-            <collectionProp name="-1147540202">
-              <stringProp name="48">0</stringProp>
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48687">120</stringProp>
+                    <collectionProp name="load_profile">
+            <collectionProp name="step-0">
+              <stringProp name="start">0</stringProp>
+              <stringProp name="end">100</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-1907816788">
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-1">
+              <stringProp name="start">100</stringProp>
+              <stringProp name="end">100</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-1865747060">
-              <stringProp name="48780">150</stringProp>
-              <stringProp name="48780">150</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-2">
+              <stringProp name="start">150</stringProp>
+              <stringProp name="end">150</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-841823508">
-              <stringProp name="49586">200</stringProp>
-              <stringProp name="49586">200</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-3">
+              <stringProp name="start">200</stringProp>
+              <stringProp name="end">200</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-775859476">
-              <stringProp name="49741">250</stringProp>
-              <stringProp name="49741">250</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-4">
+              <stringProp name="start">250</stringProp>
+              <stringProp name="end">250</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="1735653740">
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-5">
+              <stringProp name="start">300</stringProp>
+              <stringProp name="end">300</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-2056283040">
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="48">0</stringProp>
-              <stringProp name="1722">60</stringProp>
+            <collectionProp name="step-6">
+              <stringProp name="start">300</stringProp>
+              <stringProp name="end">0</stringProp>
+              <stringProp name="duration">60</stringProp>
             </collectionProp>
           </collectionProp>
         </kg.apc.jmeter.timers.VariableThroughputTimer>
@@ -421,41 +425,41 @@ try {
         </HeaderManager>
         <hashTree/>
         <kg.apc.jmeter.timers.VariableThroughputTimer guiclass="kg.apc.jmeter.timers.VariableThroughputTimerGui" testclass="kg.apc.jmeter.timers.VariableThroughputTimer" testname="jp@gc - Throughput Shaping Timer" enabled="true">
-          <collectionProp name="load_profile">
-            <collectionProp name="-1147540202">
-              <stringProp name="48">0</stringProp>
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48687">120</stringProp>
+                    <collectionProp name="load_profile">
+            <collectionProp name="step-0">
+              <stringProp name="start">0</stringProp>
+              <stringProp name="end">100</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-1907816788">
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48625">100</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-1">
+              <stringProp name="start">100</stringProp>
+              <stringProp name="end">100</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-1865747060">
-              <stringProp name="48780">150</stringProp>
-              <stringProp name="48780">150</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-2">
+              <stringProp name="start">150</stringProp>
+              <stringProp name="end">150</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-841823508">
-              <stringProp name="49586">200</stringProp>
-              <stringProp name="49586">200</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-3">
+              <stringProp name="start">200</stringProp>
+              <stringProp name="end">200</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-775859476">
-              <stringProp name="49741">250</stringProp>
-              <stringProp name="49741">250</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-4">
+              <stringProp name="start">250</stringProp>
+              <stringProp name="end">250</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="1735653740">
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="48687">120</stringProp>
+            <collectionProp name="step-5">
+              <stringProp name="start">300</stringProp>
+              <stringProp name="end">300</stringProp>
+              <stringProp name="duration">120</stringProp>
             </collectionProp>
-            <collectionProp name="-2056283040">
-              <stringProp name="50547">300</stringProp>
-              <stringProp name="48">0</stringProp>
-              <stringProp name="1722">60</stringProp>
+            <collectionProp name="step-6">
+              <stringProp name="start">300</stringProp>
+              <stringProp name="end">0</stringProp>
+              <stringProp name="duration">60</stringProp>
             </collectionProp>
           </collectionProp>
         </kg.apc.jmeter.timers.VariableThroughputTimer>

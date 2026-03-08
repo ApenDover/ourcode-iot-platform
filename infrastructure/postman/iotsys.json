@@ -1,0 +1,1791 @@
+{
+  "info": {
+    "_postman_id": "875422f8-f1b7-40b5-9a91-a86b6afd38b3",
+    "name": "EvgLessons",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "21548763"
+  },
+  "item": [
+    {
+      "name": "TECH",
+      "item": [
+        {
+          "name": "actuator",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8888/actuator/metrics/events.cassandra.error",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8888",
+              "path": [
+                "actuator",
+                "metrics",
+                "events.cassandra.error"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "avro",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/subjects/events-value/versions/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "subjects",
+                "events-value",
+                "versions",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "nexus-script",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "admin123",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:7777/service/rest/v1/script",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "7777",
+              "path": [
+                "service",
+                "rest",
+                "v1",
+                "script"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "nexus-script-run",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "admin123",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/plain",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:7777/service/rest/v1/script/create-user/run",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "7777",
+              "path": [
+                "service",
+                "rest",
+                "v1",
+                "script",
+                "create-user",
+                "run"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "nexus-create-user",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "admin123",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"create-user\",\n    \"type\": \"groovy\",\n    \"content\": \"security.addUser('user', 'user', 'user', 'user@mail', true, 'strongpassword', ['nx-admin-role']);\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:7777/service/rest/v1/script",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "7777",
+              "path": [
+                "service",
+                "rest",
+                "v1",
+                "script"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "keycloak-auth",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "type": "text",
+                  "key": "username",
+                  "value": "admin"
+                },
+                {
+                  "type": "text",
+                  "key": "password",
+                  "value": "admin"
+                },
+                {
+                  "type": "text",
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "type": "text",
+                  "key": "client_id",
+                  "value": "admin-cli"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:7878/realms/master/protocol/openid-connect/token",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "7878",
+              "path": [
+                "realms",
+                "master",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getTokenDeviceService",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "type": "text",
+                  "key": "client_id",
+                  "value": "device-service"
+                },
+                {
+                  "type": "text",
+                  "key": "client_secret",
+                  "value": "EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU"
+                },
+                {
+                  "type": "text",
+                  "key": "grant_type",
+                  "value": "client_credentials"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:7878/realms/iot-platform/protocol/openid-connect/token",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "7878",
+              "path": [
+                "realms",
+                "iot-platform",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json && json.access_token) pm.environment.set(\"device_service_token\", json.access_token);"
+                ],
+                "packages": {}
+              }
+            }
+          ]
+        },
+        {
+          "name": "getTokenOrchestrator",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "type": "text",
+                  "key": "client_id",
+                  "value": "orchestrator"
+                },
+                {
+                  "type": "text",
+                  "key": "client_secret",
+                  "value": "EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU"
+                },
+                {
+                  "type": "text",
+                  "key": "grant_type",
+                  "value": "client_credentials"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:7878/realms/iot-platform/protocol/openid-connect/token",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "7878",
+              "path": [
+                "realms",
+                "iot-platform",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json && json.access_token) pm.environment.set(\"access_token\", json.access_token);"
+                ],
+                "packages": {}
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Kafka-producer",
+      "item": [
+        {
+          "name": "addDeviceEvent",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "function generateUlid() {",
+                  "    const ENCODING = \"0123456789ABCDEFGHJKMNPQRSTVWXYZ\"; // Crockford Base32",
+                  "    const time = Date.now();",
+                  "    let ulid = \"\";",
+                  "",
+                  "    // Первые 10 символов = время",
+                  "    let modTime = time;",
+                  "    let timeChars = [];",
+                  "    for (let i = 0; i < 10; i++) {",
+                  "        timeChars.push(ENCODING[modTime % 32]);",
+                  "        modTime = Math.floor(modTime / 32);",
+                  "    }",
+                  "    ulid += timeChars.reverse().join(\"\");",
+                  "",
+                  "    // Остальные 16 символов = случайные",
+                  "    for (let i = 0; i < 16; i++) {",
+                  "        ulid += ENCODING[Math.floor(Math.random() * 32)];",
+                  "    }",
+                  "",
+                  "    return ulid;",
+                  "}",
+                  "",
+                  "pm.environment.set(\"ulid\", generateUlid());",
+                  "pm.environment.set(\"random\", _.random(1, 20))",
+                  "pm.environment.set(\"temp\", _.random(-30, 35))"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[{\n  \"eventId\": \"{{$guid}}\",\n  \"timestamp\": {{$timestamp}},\n  \"type\": \"TEMPERATURE\",\n  \"payload\": \"{{temp}}\",\n  \"device\": {\n    \"deviceId\": \"{{ulid}}\",\n    \"deviceType\": \"SENSOR\",\n    \"meta\": \"тут текст или json тогда и поле jsonb\",\n    \"createdAt\": 1692700000000\n  }\n}]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8887/api/kafka/send",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8887",
+              "path": [
+                "api",
+                "kafka",
+                "send"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "sendGeneratedEvents",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "traceId",
+                "value": "AndreyTest",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8887/api/kafka/send/generate?messageCount=1&deviceCount=1&saveDevice=false",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8887",
+              "path": [
+                "api",
+                "kafka",
+                "send",
+                "generate"
+              ],
+              "query": [
+                {
+                  "key": "messageCount",
+                  "value": "1"
+                },
+                {
+                  "key": "deviceCount",
+                  "value": "1"
+                },
+                {
+                  "key": "saveDevice",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "health",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "traceId",
+                "value": "AndreyTest",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8887/actuator/beans",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8887",
+              "path": [
+                "actuator",
+                "beans"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getDirectToken",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8887/auth/token?login=admin&password=admin",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8887",
+              "path": [
+                "auth",
+                "token"
+              ],
+              "query": [
+                {
+                  "key": "login",
+                  "value": "admin"
+                },
+                {
+                  "key": "password",
+                  "value": "admin"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Failed-events-service",
+      "item": [
+        {
+          "name": "addDeviceDltMessage",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "function generateUlid() {",
+                  "    const ENCODING = \"0123456789ABCDEFGHJKMNPQRSTVWXYZ\"; // Crockford Base32",
+                  "    const time = Date.now();",
+                  "    let ulid = \"\";",
+                  "",
+                  "    // Первые 10 символов = время",
+                  "    let modTime = time;",
+                  "    let timeChars = [];",
+                  "    for (let i = 0; i < 10; i++) {",
+                  "        timeChars.push(ENCODING[modTime % 32]);",
+                  "        modTime = Math.floor(modTime / 32);",
+                  "    }",
+                  "    ulid += timeChars.reverse().join(\"\");",
+                  "",
+                  "    // Остальные 16 символов = случайные",
+                  "    for (let i = 0; i < 16; i++) {",
+                  "        ulid += ENCODING[Math.floor(Math.random() * 32)];",
+                  "    }",
+                  "",
+                  "    return ulid;",
+                  "}",
+                  "",
+                  "pm.environment.set(\"ulid\", generateUlid());",
+                  "pm.environment.set(\"random\", _.random(1, 20))",
+                  "pm.environment.set(\"temp\", _.random(-30, 35))",
+                  "pm.environment.set(\"currentTimestamp\", Date.now());"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[{\n    \"failedEvent\": {\n        \"deviceId\": \"{{ulid}}\",\n        \"deviceType\": \"SENSOR\",\n        \"meta\": \"тут текст или json тогда и поле jsonb\",\n        \"createdAt\": 1692700000000\n    },\n    \"errorMeta\": {\n        \"errorSource\": \"DEVICE_COLLECTOR\",\n        \"reason\": \"Connection timeout\",\n        \"stackTrace\": \"java.net.SocketTimeoutException: Read timed out\\n\\tat com.example.DeviceClient.send(DeviceClient.java:42)\"\n    },\n    \"receivedAt\": \"{{currentTimestamp}}\"\n}]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8887/api/kafka/dlt/device/send",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8887",
+              "path": [
+                "api",
+                "kafka",
+                "dlt",
+                "device",
+                "send"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "addEventsDltMessage",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "function generateUlid() {",
+                  "    const ENCODING = \"0123456789ABCDEFGHJKMNPQRSTVWXYZ\"; // Crockford Base32",
+                  "    const time = Date.now();",
+                  "    let ulid = \"\";",
+                  "",
+                  "    // Первые 10 символов = время",
+                  "    let modTime = time;",
+                  "    let timeChars = [];",
+                  "    for (let i = 0; i < 10; i++) {",
+                  "        timeChars.push(ENCODING[modTime % 32]);",
+                  "        modTime = Math.floor(modTime / 32);",
+                  "    }",
+                  "    ulid += timeChars.reverse().join(\"\");",
+                  "",
+                  "    // Остальные 16 символов = случайные",
+                  "    for (let i = 0; i < 16; i++) {",
+                  "        ulid += ENCODING[Math.floor(Math.random() * 32)];",
+                  "    }",
+                  "",
+                  "    return ulid;",
+                  "}",
+                  "",
+                  "pm.environment.set(\"ulid\", generateUlid());",
+                  "pm.environment.set(\"random\", _.random(1, 20))",
+                  "pm.environment.set(\"temp\", _.random(-30, 35))",
+                  "pm.environment.set(\"currentTimestamp\", Date.now());"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n    {\n        \"failedEvent\": {\n            \"eventId\": \"{{$guid}}\",\n            \"timestamp\": {{$timestamp}},\n            \"type\": \"TEMPERATURE\",\n            \"payload\": \"{{temp}}\",\n            \"device\": {\n                \"deviceId\": \"{{ulid}}\",\n                \"deviceType\": \"SENSOR\",\n                \"meta\": \"тут текст или json тогда и поле jsonb\",\n                \"createdAt\": 1692700000000\n            }\n        },\n        \"errorMeta\": {\n            \"errorSource\": \"EVENT_COLLECTOR\",\n            \"reason\": \"Connection timeout\",\n            \"stackTrace\": \"java.net.SocketTimeoutException: Read timed out\\n\\tat com.example.DeviceClient.send(DeviceClient.java:42)\"\n        },\n        \"receivedAt\": \"{{currentTimestamp}}\"\n    }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8887/api/kafka/dlt/events/send",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8887",
+              "path": [
+                "api",
+                "kafka",
+                "dlt",
+                "events",
+                "send"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Device-service",
+      "item": [
+        {
+          "name": "CreateDeviceService",
+          "request": {
+            "auth": {
+              "type": "oauth2",
+              "oauth2": [
+                {
+                  "key": "clientSecret",
+                  "value": "EKzEMfMvm7m0P4hcjDfb9ZMstLpVbSAU",
+                  "type": "string"
+                },
+                {
+                  "key": "clientId",
+                  "value": "device-service",
+                  "type": "string"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "authorization_code_with_pkce",
+                  "type": "string"
+                },
+                {
+                  "key": "scope",
+                  "value": "",
+                  "type": "string"
+                },
+                {
+                  "key": "client_authentication",
+                  "value": "header",
+                  "type": "string"
+                },
+                {
+                  "key": "useBrowser",
+                  "value": true,
+                  "type": "boolean"
+                },
+                {
+                  "key": "authUrl",
+                  "value": "http://localhost:7878/realms/iot-platform/protocol/openid-connect/auth",
+                  "type": "string"
+                },
+                {
+                  "key": "accessTokenUrl",
+                  "value": "http://localhost:7878/realms/iot-platform/protocol/openid-connect/token",
+                  "type": "string"
+                },
+                {
+                  "key": "tokenName",
+                  "value": "andrew-token",
+                  "type": "string"
+                },
+                {
+                  "key": "addTokenTo",
+                  "value": "header",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"deviceType\": \"postmanA\",\n    \"meta\": \"postmanA\",\n    \"version\": \"0\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8886/api/v1/devices",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8886",
+              "path": [
+                "api",
+                "v1",
+                "devices"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetDevice",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{device_service_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8886/api/v1/devices/01K6GJ564FPTXDWX8R1F91VZK0",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8886",
+              "path": [
+                "api",
+                "v1",
+                "devices",
+                "01K6GJ564FPTXDWX8R1F91VZK0"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "rollback",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{device_service_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetVersion\": \"1.0.1\",\n  \"idempotencyKey\": \"f4f6b4a2\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8886/api/v1/devices/01K6GJ564FPTXDWX8R1F91VZK0/rollback",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8886",
+              "path": [
+                "api",
+                "v1",
+                "devices",
+                "01K6GJ564FPTXDWX8R1F91VZK0",
+                "rollback"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8886/actuator/prometheus",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8886",
+              "path": [
+                "actuator",
+                "prometheus"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Event-service",
+      "item": [
+        {
+          "name": "getEventsByDevice",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8881/api/v1/events?device_id={{device_id}}&from_timestamp={{from_timestamp}}&to_timestamp={{to_timestamp}}&type={{event_type}}&page_token={{page_token}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8881",
+              "path": [
+                "api",
+                "v1",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "device_id",
+                  "value": "{{device_id}}"
+                },
+                {
+                  "key": "from_timestamp",
+                  "value": "{{from_timestamp}}"
+                },
+                {
+                  "key": "to_timestamp",
+                  "value": "{{to_timestamp}}"
+                },
+                {
+                  "key": "type",
+                  "value": "{{event_type}}"
+                },
+                {
+                  "key": "page_token",
+                  "value": "{{page_token}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "getEventByDevice",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8881/api/v1/events?device_id=01K6GJ564FPTXDWX8R1F91VZK0",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8881",
+                  "path": [
+                    "api",
+                    "v1",
+                    "events"
+                  ],
+                  "query": [
+                    {
+                      "key": "device_id",
+                      "value": "01K6GJ564FPTXDWX8R1F91VZK0"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "4687"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sat, 06 Dec 2025 21:35:35 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"events\": [\n        {\n            \"event_id\": \"18820848-aeb2-4e87-aedd-988c450a71ea\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056672914,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"fb29b86b-2924-437b-b20f-1ee06c544e11\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056682736,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"de217fd8-8df0-4c93-ba36-65fd289803ab\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056692728,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"dd39fc75-0f1a-49be-82da-2ef6ac91d322\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056702751,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"011aca0d-37a4-4e58-8c20-a2a62d84fe91\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056712728,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"80384f5b-d44d-42c9-8546-fbd2dbe3f9e7\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056722783,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"c9a016e4-d07e-44b7-a8d7-e97e4523c078\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056732734,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"ef129430-6643-4406-9eca-5a16cbb96186\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056742732,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"d5bfb390-63ec-4682-981c-0de3bc5e4791\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056752732,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"3c4ec108-4e41-4c7f-80c1-a67bd82764bd\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056762748,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"9fb5211f-d25d-4e88-a08a-6c5d6778a57f\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056772732,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"3f271518-bf99-44b9-b2a5-2d8bed2c1ef0\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056782729,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"7cb7cbfa-861a-49d3-b645-420ba144ca58\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056792726,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"8e186409-d960-4832-ba1e-3b29abcd0297\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056802733,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"1849683c-7d1d-4d7e-887b-c4031c80617a\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056812740,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"428a5a77-dcab-4b08-a52f-df194c6aef5a\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056822738,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"4147df55-a733-4905-92c8-59465b564c5e\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056832737,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"0898f29b-f682-491c-8741-cf6dfa50d4b3\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056842726,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"c474df0c-884e-41fc-901c-712f1f50eb5b\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056852732,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"a6f6cc4e-ae66-4665-8a5d-6bbc29536d69\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056862724,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"c7f3491c-4edb-450b-bdd5-436ed47302d2\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056872733,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"e31fdf6a-69a3-4ad6-b5e7-ea7a675cf394\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056882727,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"4c5e8f28-bd41-4972-91a9-25cfad28c0a5\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056892726,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"d84dc802-9d2a-48cc-b2a5-0bed176e14c6\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056902729,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"a1cf7866-1593-465c-a412-85f498b7c29f\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056912740,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"46959cee-1235-47b3-91fb-88e4caf586ae\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056922743,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"14c99200-9a6f-4324-8b3e-2b0db42c880b\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1765056932744,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        }\n    ],\n    \"page\": 0,\n    \"size\": 100,\n    \"total\": 27\n}"
+            }
+          ]
+        },
+        {
+          "name": "getEvent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8881/api/v1/events/0d94040f-879a-4ba5-b19c-857f3596500b?device_id=01K6GJ564FPTXDWX8R1F91VZK0",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8881",
+              "path": [
+                "api",
+                "v1",
+                "events",
+                "0d94040f-879a-4ba5-b19c-857f3596500b"
+              ],
+              "query": [
+                {
+                  "key": "device_id",
+                  "value": "01K6GJ564FPTXDWX8R1F91VZK0"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "getEventRequest",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8881/api/v1/events/0d94040f-879a-4ba5-b19c-857f3596500b?device_id=01K6GJ564FPTXDWX8R1F91VZK0",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8881",
+                  "path": [
+                    "api",
+                    "v1",
+                    "events",
+                    "0d94040f-879a-4ba5-b19c-857f3596500b"
+                  ],
+                  "query": [
+                    {
+                      "key": "device_id",
+                      "value": "01K6GJ564FPTXDWX8R1F91VZK0"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 01 Oct 2025 18:57:50 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"event_id\": \"0d94040f-879a-4ba5-b19c-857f3596500b\",\n    \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n    \"timestamp\": 1759345023000,\n    \"type\": \"TEMPERATURE\",\n    \"payload\": \"-24\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8881/actuator/prometheus",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8881",
+              "path": [
+                "actuator",
+                "prometheus"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ORCHESTRATOR",
+      "item": [
+        {
+          "name": "getEventByFilter",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8879/api/v1/events?device_id={{device_id}}&from_timestamp={{from_timestamp}}&to_timestamp={{to_timestamp}}&type={{event_type}}&page_token={{page_token}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8879",
+              "path": [
+                "api",
+                "v1",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "device_id",
+                  "value": "{{device_id}}"
+                },
+                {
+                  "key": "from_timestamp",
+                  "value": "{{from_timestamp}}"
+                },
+                {
+                  "key": "to_timestamp",
+                  "value": "{{to_timestamp}}"
+                },
+                {
+                  "key": "type",
+                  "value": "{{event_type}}"
+                },
+                {
+                  "key": "page_token",
+                  "value": "{{page_token}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "getEventByFilter",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8879/api/v1/events?device_id=01K6GJ564FPTXDWX8R1F91VZK0&page=3&size=2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8879",
+                  "path": [
+                    "api",
+                    "v1",
+                    "events"
+                  ],
+                  "query": [
+                    {
+                      "key": "device_id",
+                      "value": "01K6GJ564FPTXDWX8R1F91VZK0"
+                    },
+                    {
+                      "key": "page",
+                      "value": "3"
+                    },
+                    {
+                      "key": "size",
+                      "value": "2"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 16 Nov 2025 18:11:27 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"events\": [\n        {\n            \"event_id\": \"d90ddc8f-42d9-40b8-b8af-3026a8a23e8b\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1763312213993,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        },\n        {\n            \"event_id\": \"a6507405-7d70-49a9-9342-5e702f43d447\",\n            \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n            \"timestamp\": 1763312223994,\n            \"type\": \"STATUS\",\n            \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n        }\n    ],\n    \"page\": 3,\n    \"size\": 2,\n    \"total\": 452\n}"
+            }
+          ]
+        },
+        {
+          "name": "getDevices",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8879/api/v1/devices",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8879",
+              "path": [
+                "api",
+                "v1",
+                "devices"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "getDevices",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8879/api/v1/devices",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8879",
+                  "path": [
+                    "api",
+                    "v1",
+                    "devices"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 16 Nov 2025 17:11:39 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n    {\n        \"deviceId\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n        \"deviceType\": \"ROUTER\",\n        \"createdAt\": 1763312173986,\n        \"meta\": \"Office A\",\n        \"version\": \"0\",\n        \"status\": \"READY\",\n        \"etag\": null\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "getEvent",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8879/api/v1/events/9814a2c6-4641-4bdc-b4b7-e724969b2f17?device_id=01K6GJ564FPTXDWX8R1F91VZK0",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8879",
+              "path": [
+                "api",
+                "v1",
+                "events",
+                "9814a2c6-4641-4bdc-b4b7-e724969b2f17"
+              ],
+              "query": [
+                {
+                  "key": "device_id",
+                  "value": "01K6GJ564FPTXDWX8R1F91VZK0"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "getEvent",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8879/api/v1/events/d90ddc8f-42d9-40b8-b8af-3026a8a23e8b?device_id=01K6GJ564FPTXDWX8R1F91VZK0",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8879",
+                  "path": [
+                    "api",
+                    "v1",
+                    "events",
+                    "d90ddc8f-42d9-40b8-b8af-3026a8a23e8b"
+                  ],
+                  "query": [
+                    {
+                      "key": "device_id",
+                      "value": "01K6GJ564FPTXDWX8R1F91VZK0"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 16 Nov 2025 18:12:42 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"event_id\": \"d90ddc8f-42d9-40b8-b8af-3026a8a23e8b\",\n    \"device_id\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n    \"timestamp\": 1763312213993,\n    \"type\": \"STATUS\",\n    \"payload\": \"{\\\"STATUS\\\": \\\"online\\\"}\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "sendCommandToDevice",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"router_serial\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n  \"command_type\": \"SYSTEM\",\n  \"payload\": {\"RELOAD\": \"NOW\"}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8879/api/v1/commands",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8879",
+              "path": [
+                "api",
+                "v1",
+                "commands"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "sendCommandToDevice",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"router_serial\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n  \"command_type\": \"SYSTEM\",\n  \"payload\": {\"RELOAD\": \"NOW\"}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8879/api/v1/commands",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8879",
+                  "path": [
+                    "api",
+                    "v1",
+                    "commands"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "13"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 16 Nov 2025 18:31:51 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"created\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "SAGA-update-frameware-version",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetVersion\": \"2.0.1\",\n  \"idempotencyKey\": \"f4f6b4a2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8879/api/v1/devices/01K6GJ564FPTXDWX8R1F91VZK0/version",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8879",
+              "path": [
+                "api",
+                "v1",
+                "devices",
+                "01K6GJ564FPTXDWX8R1F91VZK0",
+                "version"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "SAGA-update-frameware-version",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"targetVersion\": \"2.0.1\",\n  \"idempotencyKey\": \"f4f6b4a2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8879/api/v1/devices/01K6GJ564FPTXDWX8R1F91VZK0/version",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8879",
+                  "path": [
+                    "api",
+                    "v1",
+                    "devices",
+                    "01K6GJ564FPTXDWX8R1F91VZK0",
+                    "version"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "103"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 17 Nov 2025 15:55:44 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"deviceId\": \"01K6GJ564FPTXDWX8R1F91VZK0\",\n    \"prevVersion\": \"2.0.0\",\n    \"targetVersion\": \"2.0.1\",\n    \"commandId\": \"1\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "metrics",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8879/actuator/prometheus",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8879",
+              "path": [
+                "actuator",
+                "prometheus"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "wiremock",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    }
+  ]
+}

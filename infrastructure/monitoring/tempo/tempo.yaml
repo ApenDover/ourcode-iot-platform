@@ -11,15 +11,15 @@ distributor:
           endpoint: 0.0.0.0:4318
 
 ingester:
-  trace_idle_period: 10s
+  trace_idle_period: 30s
 
 usage_report:
   reporting_enabled: false
 
 compactor:
   compaction:
-    block_retention: 48h
-    compacted_block_retention: 1h
+    block_retention: 12h
+    compacted_block_retention: 30m
 
 storage:
   trace:
