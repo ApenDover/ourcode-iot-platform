@@ -59,10 +59,9 @@ spring:
         time-to-live: 180
         follow-redirects: false
         disable-ssl-validation: false
-        connection-timeout: 1000
+        connection-timeout: 100
         connection-request-timeout: 160
-        read-timeout-ms: 400
-
+        read-timeout-ms: 1000
   data:
     redis:
       host: ${REDIS_ORCHESTRATOR_HOST}
