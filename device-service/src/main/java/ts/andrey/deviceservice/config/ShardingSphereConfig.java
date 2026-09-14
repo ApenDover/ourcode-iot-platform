@@ -1,6 +1,8 @@
 package ts.andrey.deviceservice.config;
 
 import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.metrics.micrometer.MicrometerMetricsTrackerFactory;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import org.apache.shardingsphere.driver.api.ShardingSphereDataSourceFactory;
 import org.apache.shardingsphere.infra.algorithm.core.config.AlgorithmConfiguration;
@@ -54,6 +56,8 @@ public class ShardingSphereConfig {
     private Integer shardCount;
 
     private final DataSourcesConfig dataSourcesConfig;
+
+    private final MeterRegistry meterRegistry;
 
     @Bean
     public DataSource createShardingDataSource() {
@@ -120,6 +124,8 @@ public class ShardingSphereConfig {
             ds.setUsername(source.getUsername());
             ds.setPassword(source.getPassword());
             ds.setDriverClassName(POSTGRES_DRIVER);
+            ds.setPoolName(name);
+            ds.setMetricsTrackerFactory(new MicrometerMetricsTrackerFactory(meterRegistry));
             dataSourceMap.put(name, ds);
         }
     }

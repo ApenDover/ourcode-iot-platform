@@ -55,6 +55,8 @@ public class ShardingSphereConfig {
     private Integer shardCount;
 
     private final DataSourcesConfig dataSourcesConfig;
+    private final MeterRegistry meterRegistry;
+
 
     @Bean
     public DataSource createShardingDataSource() {
@@ -124,6 +126,8 @@ public class ShardingSphereConfig {
             ds.setUsername(source.getUsername());
             ds.setPassword(source.getPassword());
             ds.setDriverClassName(POSTGRES_DRIVER);
+            ds.setPoolName(name);
+            ds.setMetricsTrackerFactory(new MicrometerMetricsTrackerFactory(meterRegistry));
             dataSourceMap.put(name, ds);
         }
     }
