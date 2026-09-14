@@ -12,12 +12,16 @@ import ts.andrey.devicecollector.exception.DeviceCollectorException;
 public class MigrationProcessor {
 
     public void runFlyway(DataSourcesConfig.DataSourceInfo migrationSource) {
-        final var ds = new HikariDataSource();
-        ds.setJdbcUrl(migrationSource.getUrl());
-        ds.setUsername(migrationSource.getUsername());
-        ds.setPassword(migrationSource.getPassword());
-        ds.setDriverClassName("org.postgresql.Driver");
-        runFlyway(ds);
+        try (var ds = new HikariDataSource()) {
+            ds.setJdbcUrl(migrationSource.getUrl());
+            ds.setUsername(migrationSource.getUsername());
+            ds.setPassword(migrationSource.getPassword());
+            ds.setDriverClassName("org.postgresql.Driver");
+            ds.setMaximumPoolSize(1);
+            runFlyway(ds);
+        } finally {
+            log.info("Flyway done");
+        }
     }
 
     public void runFlyway(HikariDataSource ds) {

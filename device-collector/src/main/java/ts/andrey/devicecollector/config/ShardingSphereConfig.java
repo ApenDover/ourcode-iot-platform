@@ -56,6 +56,9 @@ public class ShardingSphereConfig {
     @Value("${app.shardingSphere.shardCount}")
     private Integer shardCount;
 
+    @Value("${spring.datasource.hikari.maximum-pool-size}")
+    private Integer poolSize;
+
     private final DataSourcesConfig dataSourcesConfig;
     private final MeterRegistry meterRegistry;
 
@@ -128,6 +131,7 @@ public class ShardingSphereConfig {
             ds.setUsername(source.getUsername());
             ds.setPassword(source.getPassword());
             ds.setDriverClassName(POSTGRES_DRIVER);
+            ds.setMaximumPoolSize(poolSize);
             ds.setPoolName(name);
             ds.setMetricsTrackerFactory(new MicrometerMetricsTrackerFactory(meterRegistry));
             dataSourceMap.put(name, ds);
