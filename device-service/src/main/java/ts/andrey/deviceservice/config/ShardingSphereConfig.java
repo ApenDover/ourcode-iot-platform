@@ -75,7 +75,7 @@ public class ShardingSphereConfig {
         props.put("algorithm-expression", String.format(algorithmExpression, shardCount));
         shardingRule.getShardingAlgorithms().put(ALGORITHM_NAME, new AlgorithmConfiguration("INLINE", props));
 
-        final var dataSourceGroups = IntStream.range(0, chardMax)
+        final var dataSourceGroups = IntStream.range(0, shardCount)
                 .mapToObj(i -> {
                     final var name = SHARD_NAME + i;
                     final var replicaName = name + REPLICA_POSTFIX;

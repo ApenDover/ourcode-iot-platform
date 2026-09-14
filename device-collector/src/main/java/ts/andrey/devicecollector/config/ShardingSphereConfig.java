@@ -1,6 +1,8 @@
 package ts.andrey.devicecollector.config;
 
 import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.metrics.micrometer.MicrometerMetricsTrackerFactory;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import org.apache.shardingsphere.driver.api.ShardingSphereDataSourceFactory;
 import org.apache.shardingsphere.infra.algorithm.core.config.AlgorithmConfiguration;
@@ -77,7 +79,7 @@ public class ShardingSphereConfig {
         final var masterSource = dataSourcesConfig.getDataSources();
         masterSource.forEach(MigrationProcessor::runFlyway);
 
-        final var dataSourceGroups = IntStream.range(0, chardMax)
+        final var dataSourceGroups = IntStream.range(0, shardCount)
                 .mapToObj(i -> {
                     final var name = SHARD_NAME + i;
                     final var replicaName = name + REPLICA_POSTFIX;

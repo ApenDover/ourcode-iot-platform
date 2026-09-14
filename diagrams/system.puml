@@ -24,6 +24,7 @@ Rel(iotDevices, commandService, "gRPC", "Получение команд")
 Rel(orchestrator, commandService, "gRPC", "Отправка команд")
 Rel(orchestrator, deviceService, "REST")
 Rel(orchestrator, eventService, "REST")
+Rel(orchestrator, keycloak, "REST")
 
 Rel(commandService, postgresCmd, "JDBC (write/read)")
 Rel(deviceService, postgresDev, "Shared JDBC(write/read)")
