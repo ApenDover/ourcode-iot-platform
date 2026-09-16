@@ -15,13 +15,9 @@ spring:
   jpa:
     show-sql: true
 
-otel:
-  traces:
-    exporter: none
-  metrics:
-    exporter: none
-  logs:
-    exporter: none
+management:
+  tracing:
+    enabled: false
 
 app:
   shardingSphere:

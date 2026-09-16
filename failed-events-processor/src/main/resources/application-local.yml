@@ -22,32 +22,15 @@ management:
     enabled: true
     sampling:
       probability: 1.0
-    otlp:
+  otlp:
+    tracing:
       endpoint: http://localhost:4318
-      protocol: http/protobuf
-
-opentelemetry:
-  instrumentation:
-    logback-mdc:
-      enabled: true
-  service:
-    name: ${spring.application.name}
-  exporter:
-    otlp:
-      endpoint: http://localhost:4318
-      protocol: http/protobuf
-      timeout: 10000
-      compression: gzip
-  traces:
-    exporter: otlp
-  metrics:
-    exporter: none
-  logs:
-    exporter: none
-  resource-attributes:
-    service.version: 1.0.0
-    deployment.environment: docker
-    service.name: ${spring.application.name}
+      transport: HTTP
+  opentelemetry:
+    resource-attributes:
+      service.name: ${spring.application.name}
+      service.version: 1.0.0
+      deployment.environment: docker
 
 minio:
   url: http://localhost:9000
@@ -58,10 +41,6 @@ minio:
     max-attempts: 2
     initial-delay: 1000
     multiplier: 5
-
-otel:
-  sdk:
-    disabled: true
 
 spring:
   kafka:

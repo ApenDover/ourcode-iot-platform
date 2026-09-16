@@ -52,9 +52,10 @@ dependencies {
     implementation "org.apache.shardingsphere:shardingsphere-jdbc:${shardingsphere}"
 
     // ============= OBSERVABILITY (TRACING & METRICS) =============
-    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp"
     implementation "io.micrometer:micrometer-tracing-bridge-otel"
     implementation "io.micrometer:micrometer-observation"
+    implementation "net.ttddyy.observation:datasource-micrometer-spring-boot:2.2.1"
     runtimeOnly "io.micrometer:micrometer-registry-prometheus"
 
     // ============= ASPECTS =============

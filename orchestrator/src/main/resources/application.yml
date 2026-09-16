@@ -44,9 +44,14 @@ management:
   otlp:
     tracing:
       endpoint: ${ORCHESTRATOR_MANAGEMENT_TRACING_OTLP_ENDPOINT:http://alloy:4318}
-      transport: GRPC
+      transport: ${ORCHESTRATOR_MANAGEMENT_TRACING_OTLP_TRANSPORT:HTTP}
       export:
         enabled: true
+  opentelemetry:
+    resource-attributes:
+      service.name: orchestrator
+      service.namespace: iot
+      deployment.environment: prod
 
 spring:
   application:
@@ -107,10 +112,3 @@ logging:
     org.springframework.boot.actuate.autoconfigure.tracing: TRACE
     org.springframework.boot.actuate.autoconfigure.logging: TRACE
 
-otel:
-  resource:
-    attributes:
-      deployment.environment: prod
-      service:
-        name: orchestrator
-        namespace: iot

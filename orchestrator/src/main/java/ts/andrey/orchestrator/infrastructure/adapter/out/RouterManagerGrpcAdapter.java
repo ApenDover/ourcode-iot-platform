@@ -1,6 +1,6 @@
 package ts.andrey.orchestrator.infrastructure.adapter.out;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ts.andrey.orchestrator.application.port.RouterManagerGrpcPort;
@@ -18,7 +18,7 @@ public class RouterManagerGrpcAdapter implements RouterManagerGrpcPort {
     private final RouterManagerGrpcClient routerManagerGrpcClient;
     private final RequestTimerUtil requestTimerUtil;
 
-    @WithSpan("RouterManagerTransportCommand")
+    @Observed(name = "RouterManagerTransportCommand")
     public SendCommandResponse sendCommand(SendCommandRequest sendCommandRequest) {
         return requestTimerUtil.recordExternal("router-manager-service", "sendCommand", "grpc", () -> {
             final var payloadStruct = ProtoPayloadMapper.toStruct(sendCommandRequest.getPayload());
@@ -33,7 +33,7 @@ public class RouterManagerGrpcAdapter implements RouterManagerGrpcPort {
         });
     }
 
-    @WithSpan("RouterManagerTransportAck")
+    @Observed(name = "RouterManagerTransportAck")
     public AckCommandResponse ackCommand(AckCommandRequest ackCommandRequest) {
         return requestTimerUtil.recordExternal("router-manager-service", "ackCommand", "grpc", () -> {
             final var ackRequest = Roma.AckCommandRequest.newBuilder()
@@ -46,7 +46,7 @@ public class RouterManagerGrpcAdapter implements RouterManagerGrpcPort {
         });
     }
 
-    @WithSpan("RouterManagerTransportPoll")
+    @Observed(name = "RouterManagerTransportPoll")
     public PollCommandsResponse pollCommands(String routerSerial) {
         return requestTimerUtil.recordExternal("router-manager-service", "pollCommands", "grpc", () -> {
             final var pollRequest = Roma.PollCommandsRequest.newBuilder()

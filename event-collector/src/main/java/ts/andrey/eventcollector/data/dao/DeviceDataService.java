@@ -1,6 +1,6 @@
 package ts.andrey.eventcollector.data.dao;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -20,7 +20,7 @@ public class DeviceDataService {
 
     private final DeviceReactRepository deviceReactRepository;
 
-    @WithSpan("cassandra-save-batch-devices")
+    @Observed(name = "cassandra-save-batch-devices")
     public void saveDeviceIds(List<DeviceEntity> devices) {
         if (CollectionUtils.isEmpty(devices)) {
             return;
@@ -32,7 +32,7 @@ public class DeviceDataService {
                 .subscribe();
     }
 
-    @WithSpan("cassandra-searching")
+    @Observed(name = "cassandra-searching")
     public List<DeviceEntity> getUnsavedDeviceIds(List<DeviceEntity> devices) {
         if (CollectionUtils.isEmpty(devices)) {
             return Collections.emptyList();

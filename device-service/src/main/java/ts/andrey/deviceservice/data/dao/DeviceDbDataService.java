@@ -1,6 +1,6 @@
 package ts.andrey.deviceservice.data.dao;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class DeviceDbDataService {
     @Value("${spring.application.name}")
     private String appName;
 
-    @WithSpan
+    @Observed(name = "DeviceDbSave")
     public DeviceEntity save(DeviceEntity device) {
         device.setApplication(appName);
         final var saved = deviceRepository.save(device);
@@ -32,12 +32,12 @@ public class DeviceDbDataService {
         return saved;
     }
 
-    @WithSpan
+    @Observed(name = "DeviceDbDeleteByDeviceId")
     public int deleteByDeviceId(String deviceId) {
         return deviceRepository.deleteByDeviceId(deviceId);
     }
 
-    @WithSpan
+    @Observed(name = "DeviceDbGetByDeviceId")
     public DeviceEntity getDeviceByDeviceId(String deviceId) {
         return deviceRepository.findByDeviceId(deviceId)
                 .orElseThrow(() -> new DeviceServiceException(ErrorExceptionMessages.DEVICE_NOT_FOUND, deviceId));

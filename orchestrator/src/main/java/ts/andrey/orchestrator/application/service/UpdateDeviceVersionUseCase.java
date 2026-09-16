@@ -1,6 +1,6 @@
 package ts.andrey.orchestrator.application.service;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class UpdateDeviceVersionUseCase {
 
     private static final String COMMAND = "UPDATE_VERSION";
 
-    @WithSpan("SagaUpdateDeviceVersion")
+    @Observed(name = "SagaUpdateDeviceVersion")
     public ApiV1DevicesDeviceIdVersionPost200Response updateDeviceVersion(
             String deviceId,
             ApiV1DevicesDeviceIdVersionPostRequest apiV1DevicesDeviceIdVersionPostRequest

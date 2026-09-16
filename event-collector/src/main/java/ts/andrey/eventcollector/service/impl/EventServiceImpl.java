@@ -2,7 +2,7 @@ package ts.andrey.eventcollector.service.impl;
 
 import com.nashkod.avro.Device;
 import com.nashkod.avro.DeviceEvent;
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class EventServiceImpl implements EventService {
     private final DeviceEventDataService deviceEventDataService;
     private final SimpleCache simpleCache;
 
-    @WithSpan("cassandra-save-events-and-cache")
+    @Observed(name = "cassandra-save-events-and-cache")
     public void saveEvents(List<DeviceEvent> events) {
         final var mono = deviceEventDataService.saveAll(events);
         final var deviceIds = events.stream()

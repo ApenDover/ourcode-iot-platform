@@ -21,35 +21,15 @@ management:
     enabled: true
     sampling:
       probability: 1.0
-    otlp:
+  otlp:
+    tracing:
       endpoint: http://localhost:4318
-      protocol: http/protobuf
-
-otel.traces.exporter: none
-otel.logs.exporter: none
-
-opentelemetry:
-  instrumentation:
-    logback-mdc:
-      enabled: true
-  service:
-    name: ${spring.application.name}
-  exporter:
-    otlp:
-      endpoint: http://localhost:4318
-      protocol: http/protobuf
-      timeout: 10000
-      compression: gzip
-  traces:
-    exporter: otlp
-  metrics:
-    exporter: none
-  logs:
-    exporter: none
-  resource-attributes:
-    service.version: 1.0.0
-    deployment.environment: docker
-    service.name: ${spring.application.name}
+      transport: HTTP
+  opentelemetry:
+    resource-attributes:
+      service.name: ${spring.application.name}
+      service.version: 1.0.0
+      deployment.environment: docker
 
 spring:
   application:

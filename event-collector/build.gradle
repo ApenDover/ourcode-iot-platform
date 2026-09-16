@@ -47,7 +47,10 @@ dependencies {
     implementation "io.micrometer:micrometer-registry-prometheus"
 
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
-    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
+    implementation "io.micrometer:micrometer-tracing-bridge-otel"
+    implementation "io.micrometer:micrometer-observation"
+    implementation "org.aspectj:aspectjweaver:${aspectj}"
+    implementation "org.aspectj:aspectjrt:${aspectj}"
 
     implementation 'org.springframework.boot:spring-boot-starter-data-cassandra-reactive'
     implementation 'io.projectreactor:reactor-core'

@@ -20,16 +20,6 @@ management:
   tracing:
     enabled: false
 
-otel:
-  sdk:
-    disabled: true
-  traces:
-    exporter: none
-  metrics:
-    exporter: none
-  logs:
-    exporter: none
-
 spring:
   application:
     name: orchestrator

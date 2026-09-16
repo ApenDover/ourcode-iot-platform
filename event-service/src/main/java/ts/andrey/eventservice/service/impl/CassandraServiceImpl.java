@@ -1,6 +1,6 @@
 package ts.andrey.eventservice.service.impl;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,14 +36,14 @@ public class CassandraServiceImpl implements CassandraService {
     private int pageSize;
 
     @Override
-    @WithSpan("CassandraGetEvent")
+    @Observed(name = "CassandraGetEvent")
     public Event getEvent(String deviceId, String eventId) {
         final var eventEntity = deviceEventDataService.getEvent(deviceId, eventId);
         return eventMapper.entityToEvent(eventEntity);
     }
 
     @Override
-    @WithSpan("CassandraGetEventByFilter")
+    @Observed(name = "CassandraGetEventByFilter")
     public EventPage getEventByFilter(EventFilterRequest eventFilterRequest) {
         final var pagingState = decodeToken(eventFilterRequest.getPageToken());
         final var pageRequest = buildPageRequest(pageSize, pagingState);

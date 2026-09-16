@@ -2,7 +2,7 @@ package ts.andrey.eventcollector.service.impl;
 
 import com.nashkod.avro.Device;
 import com.nashkod.avro.DeviceEvent;
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ts.andrey.eventcollector.service.DeduplicateService;
@@ -24,7 +24,7 @@ public class DeviceServiceImpl implements DeviceService {
      *
      * @param deviceEvents список событий
      */
-    @WithSpan("deduplicate-save-send-process")
+    @Observed(name = "deduplicate-save-send-process")
     public void sendUniqueDeviceids(List<DeviceEvent> deviceEvents) {
         final var devices = deviceEvents.stream()
                 .map(DeviceEvent::getDevice)

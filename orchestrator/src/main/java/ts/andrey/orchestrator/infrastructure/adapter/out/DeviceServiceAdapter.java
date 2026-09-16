@@ -1,6 +1,6 @@
 package ts.andrey.orchestrator.infrastructure.adapter.out;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -29,7 +29,7 @@ public class DeviceServiceAdapter implements DeviceServicePort {
     private final RequestTimerUtil requestTimerUtil;
 
     @Override
-    @WithSpan("DeviceTransportCreate")
+    @Observed(name = "DeviceTransportCreate")
     public Device createDevice(DeviceCreateRequest deviceCreateRequest) {
         return requestTimerUtil.recordExternal("device-service", "createDevice", "http", () -> {
             final var request = deviceMapper.toDeviceCreateRequestDto(deviceCreateRequest);
@@ -39,7 +39,7 @@ public class DeviceServiceAdapter implements DeviceServicePort {
     }
 
     @Override
-    @WithSpan("DeviceTransportUpdate")
+    @Observed(name = "DeviceTransportUpdate")
     public Device updateDevice(String deviceId, DeviceUpdateRequest deviceUpdateRequest) {
         return requestTimerUtil.recordExternal("device-service", "updateDevice", "http", () -> {
             final var request = deviceMapper.toDeviceUpdateRequestDto(deviceUpdateRequest);
@@ -49,13 +49,13 @@ public class DeviceServiceAdapter implements DeviceServicePort {
     }
 
     @Override
-    @WithSpan("DeviceTransportDeleteById")
+    @Observed(name = "DeviceTransportDeleteById")
     public void deleteDevice(String deviceId) {
         requestTimerUtil.recordExternal("device-service", "deleteDevice", "http", () -> deviceServiceClient.deleteDevice(deviceId));
     }
 
     @Override
-    @WithSpan("DeviceTransportGetById")
+    @Observed(name = "DeviceTransportGetById")
     public Device getDevice(String deviceId) {
         return requestTimerUtil.recordExternal("device-service", "getDevice", "http", () -> {
             final var response = deviceServiceClient.getDevice(deviceId);
@@ -64,7 +64,7 @@ public class DeviceServiceAdapter implements DeviceServicePort {
     }
 
     @Override
-    @WithSpan("DeviceTransportGetAll")
+    @Observed(name = "DeviceTransportGetAll")
     public List<Device> getDevices() {
         return requestTimerUtil.recordExternal("device-service", "getDevices", "http", () -> {
             final var response = deviceServiceClient.getDevices();
@@ -73,7 +73,7 @@ public class DeviceServiceAdapter implements DeviceServicePort {
     }
 
     @Override
-    @WithSpan("DeviceTransportUpdateVersion")
+    @Observed(name = "DeviceTransportUpdateVersion")
     public DeviceVersionResponse updateDeviceVersion(String deviceId, String deviceVersion, Long etag) {
         return requestTimerUtil.recordExternal("device-service", "updateDeviceVersion", "http", () -> {
             final var request = new DeviceVersionUpdateRequest();
@@ -85,7 +85,7 @@ public class DeviceServiceAdapter implements DeviceServicePort {
     }
 
     @Override
-    @WithSpan("DeviceTransportRollbackVersion")
+    @Observed(name = "DeviceTransportRollbackVersion")
     public DeviceVersionResponse rollbackDeviceVersion(String deviceId, String deviceVersion, Long etag) {
         try {
             return requestTimerUtil.recordExternal("device-service", "rollbackDeviceVersion", "http", () -> {

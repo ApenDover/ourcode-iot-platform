@@ -1,6 +1,6 @@
 package ts.andrey.orchestrator.infrastructure.adapter.in;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +27,7 @@ public class OrchestratorController implements DefaultApi {
     private final OrchestratorMetrics orchestratorMetrics;
 
     @Override
-    @WithSpan("ControllerRouterManagerAck")
+    @Observed(name = "ControllerRouterManagerAck")
     public ResponseEntity<AckCommandResponse> apiV1CommandsAckPost(AckCommandRequest ackCommandRequest) {
         final var response = routerManagerGrpcPort.ackCommand(ackCommandRequest);
         orchestratorMetrics.routerAckSuccess();
@@ -35,7 +35,7 @@ public class OrchestratorController implements DefaultApi {
     }
 
     @Override
-    @WithSpan("ControllerRouterManagerPoll")
+    @Observed(name = "ControllerRouterManagerPoll")
     public ResponseEntity<PollCommandsResponse> apiV1CommandsPollGet(String routerSerial) {
         final var response = routerManagerGrpcPort.pollCommands(routerSerial);
         orchestratorMetrics.routerPollSuccess();
@@ -43,7 +43,7 @@ public class OrchestratorController implements DefaultApi {
     }
 
     @Override
-    @WithSpan("ControllerRouterManagerCommand")
+    @Observed(name = "ControllerRouterManagerCommand")
     public ResponseEntity<SendCommandResponse> apiV1CommandsPost(SendCommandRequest sendCommandRequest) {
         final var response = routerManagerGrpcPort.sendCommand(sendCommandRequest);
         orchestratorMetrics.routerCommandSuccess();
@@ -51,7 +51,7 @@ public class OrchestratorController implements DefaultApi {
     }
 
     @Override
-    @WithSpan("ControllerDeleteDevice")
+    @Observed(name = "ControllerDeleteDevice")
     public ResponseEntity<Void> apiV1DevicesDeviceIdDelete(String deviceId) {
         deviceServicePort.deleteDevice(deviceId);
         orchestratorMetrics.deviceServiceDeleteSuccess();
@@ -59,7 +59,7 @@ public class OrchestratorController implements DefaultApi {
     }
 
     @Override
-    @WithSpan("ControllerGetDevice")
+    @Observed(name = "ControllerGetDevice")
     public ResponseEntity<Device> apiV1DevicesDeviceIdGet(String deviceId) {
         final var response = deviceServicePort.getDevice(deviceId);
         orchestratorMetrics.deviceServiceGetSuccess();
@@ -67,7 +67,7 @@ public class OrchestratorController implements DefaultApi {
     }
 
     @Override
-    @WithSpan("ControllerUpdateDevice")
+    @Observed(name = "ControllerUpdateDevice")
     public ResponseEntity<Device> apiV1DevicesDeviceIdPut(String deviceId, DeviceUpdateRequest deviceUpdateRequest) {
         final var response = deviceServicePort.updateDevice(deviceId, deviceUpdateRequest);
         orchestratorMetrics.deviceUpdateSuccess();
@@ -75,7 +75,7 @@ public class OrchestratorController implements DefaultApi {
     }
 
     @Override
-    @WithSpan("ControllerUpdateVersionSaga")
+    @Observed(name = "ControllerUpdateVersionSaga")
     public ResponseEntity<ApiV1DevicesDeviceIdVersionPost200Response> apiV1DevicesDeviceIdVersionPost(
             String deviceId, ApiV1DevicesDeviceIdVersionPostRequest apiV1DevicesDeviceIdVersionPostRequest
     ) {
@@ -94,7 +94,7 @@ public class OrchestratorController implements DefaultApi {
     }
 
     @Override
-    @WithSpan("ControllerGetAllDevices")
+    @Observed(name = "ControllerGetAllDevices")
     public ResponseEntity<List<Device>> apiV1DevicesGet() {
         final var device = deviceServicePort.getDevices();
         orchestratorMetrics.deviceServiceGetListSuccess();
@@ -102,7 +102,7 @@ public class OrchestratorController implements DefaultApi {
     }
 
     @Override
-    @WithSpan("ControllerCreateDevice")
+    @Observed(name = "ControllerCreateDevice")
     public ResponseEntity<Device> apiV1DevicesPost(DeviceCreateRequest deviceCreateRequest) {
         final var device = deviceServicePort.createDevice(deviceCreateRequest);
         orchestratorMetrics.deviceUpdateSuccess();
@@ -110,7 +110,7 @@ public class OrchestratorController implements DefaultApi {
     }
 
     @Override
-    @WithSpan("ControllerGetEvent")
+    @Observed(name = "ControllerGetEvent")
     public ResponseEntity<Event> apiV1EventsEventIdGet(String eventId, String deviceId) {
         final var event = eventServicePort.getEvent(eventId, deviceId);
         orchestratorMetrics.eventServiceGetSuccess();
@@ -118,7 +118,7 @@ public class OrchestratorController implements DefaultApi {
     }
 
     @Override
-    @WithSpan("ControllerGetEventsByFilter")
+    @Observed(name = "ControllerGetEventsByFilter")
     public ResponseEntity<EventPage> apiV1EventsGet(
             String deviceId, Long fromTimestamp, Long toTimestamp,
             String type, String pageToken

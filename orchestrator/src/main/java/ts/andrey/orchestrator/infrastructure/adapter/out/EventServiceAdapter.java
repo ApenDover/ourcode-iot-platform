@@ -1,6 +1,6 @@
 package ts.andrey.orchestrator.infrastructure.adapter.out;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ts.andrey.orchestrator.application.port.EventServicePort;
@@ -19,7 +19,7 @@ public class EventServiceAdapter implements EventServicePort {
     private final RequestTimerUtil requestTimerUtil;
 
     @Override
-    @WithSpan("EventTransportGet")
+    @Observed(name = "EventTransportGet")
     public Event getEvent(String eventId, String deviceId) {
         return requestTimerUtil.recordExternal("event-service", "getEvent", "http", () -> {
             final var response = eventServiceClient.apiV1EventsEventIdGet(eventId, deviceId);
@@ -28,7 +28,7 @@ public class EventServiceAdapter implements EventServicePort {
     }
 
     @Override
-    @WithSpan("EventTransportGetByFilter")
+    @Observed(name = "EventTransportGetByFilter")
     public EventPage getEventByFilter(
             String deviceId, Long fromMs, Long toMs,
             String eventType, String pageToken

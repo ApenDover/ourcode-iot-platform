@@ -1,7 +1,7 @@
 package ts.andrey.eventcollector.service.impl;
 
 import com.nashkod.avro.Device;
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +32,7 @@ public class DeduplicateServiceImpl implements DeduplicateService {
     /**
      * @return список device которых нет ни в simpleCache ни в cassandra
      */
-    @WithSpan("deduplicateService")
+    @Observed(name = "deduplicateService")
     public List<Device> getUniqueDevices(List<Device> devices) {
 
         final var uncachedDeviceId = devices.stream()

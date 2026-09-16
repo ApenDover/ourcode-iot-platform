@@ -26,13 +26,9 @@ spring:
       properties:
         schema.registry.url: ${schema.registry.url}
 
-otel:
-  traces:
-    exporter: none
-  metrics:
-    exporter: none
-  logs:
-    exporter: none
+management:
+  tracing:
+    enabled: false
 
 app:
   shardingSphere:

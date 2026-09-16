@@ -56,7 +56,8 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-actuator"
     implementation "io.micrometer:micrometer-registry-prometheus"
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
-    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
+    implementation "io.micrometer:micrometer-tracing-bridge-otel"
+    implementation "io.micrometer:micrometer-observation"
 
     implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
 

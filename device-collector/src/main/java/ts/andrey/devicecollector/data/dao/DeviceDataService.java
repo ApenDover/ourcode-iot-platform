@@ -2,7 +2,7 @@ package ts.andrey.devicecollector.data.dao;
 
 import com.google.common.collect.Lists;
 import com.nashkod.avro.Device;
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,8 +20,6 @@ import ts.andrey.devicecollector.utils.ShardUtil;
 import ts.andrey.iotcommon.service.KafkaProducer;
 import ts.andrey.iotcommon.utils.MessageDltBuilder;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,7 +44,7 @@ public class DeviceDataService {
     private final DeviceBatchRepository deviceBatchRepository;
     private final DeviceRepository deviceRepository;
 
-    @WithSpan
+    @Observed(name = "DeviceDbBatchUpsert")
     @Retryable(
             retryFor = DataAccessException.class,
             maxAttemptsExpression = "${app.postgres.retry.max-attempts:2}",
@@ -57,18 +55,8 @@ public class DeviceDataService {
             )
     )
     public void batchUpsert(List<Device> devices) {
-        final var uniqueByDeviceId = new LinkedHashMap<String, Device>();
-        devices.forEach(d -> uniqueByDeviceId.merge(
-                d.getDeviceId(),
-                d, (oldD, newD) -> newD.getCreatedAt().isAfter(oldD.getCreatedAt()) ? newD : oldD
-        ));
-
-        final var deviceEntities = deviceMapper.toDeviceEntityList(
-                new ArrayList<>(uniqueByDeviceId.values())
-        );
-
+        final var deviceEntities = deviceMapper.toDeviceEntityList(devices);
         deviceEntities.forEach(e -> e.setId(UUID.randomUUID()));
-
         Lists.partition(deviceEntities, batchSize)
                 .forEach(part -> {
                     try {

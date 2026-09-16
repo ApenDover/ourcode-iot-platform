@@ -1,6 +1,6 @@
 package ts.andrey.orchestrator.infrastructure.adapter.out;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +26,7 @@ public class RedisDataServiceAdapter implements RedisDataServicePort {
     private final OrchestratorMetrics orchestratorMetrics;
 
     @Override
-    @WithSpan("RedisGet")
+    @Observed(name = "RedisGet")
     public Optional<ApiV1DevicesDeviceIdVersionPost200Response> getResponse(String idempotentKey) {
         try {
             final var response = redisTemplate.opsForValue().get(idempotentKey);
@@ -42,7 +42,7 @@ public class RedisDataServiceAdapter implements RedisDataServicePort {
     }
 
     @Override
-    @WithSpan("RedisSave")
+    @Observed(name = "RedisSave")
     public void saveResponse(String idempotentKey, ApiV1DevicesDeviceIdVersionPost200Response response) {
         try {
             redisTemplate.opsForValue()

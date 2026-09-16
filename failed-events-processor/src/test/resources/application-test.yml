@@ -12,10 +12,6 @@ minio:
     initial-delay: 1000
     multiplier: 5
 
-otel:
-  sdk:
-    disabled: true
-
 spring:
   kafka:
     bootstrap-servers: localhost:9092

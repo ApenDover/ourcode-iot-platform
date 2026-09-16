@@ -61,7 +61,7 @@ dependencies {
     implementation "io.github.openfeign:feign-httpclient:${feignClient}"
 
     // ============= OBSERVABILITY (TRACING & METRICS) =============
-    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp"
     implementation "io.micrometer:micrometer-tracing-bridge-otel"
     implementation "io.micrometer:micrometer-observation"
     implementation 'io.micrometer:micrometer-registry-prometheus'

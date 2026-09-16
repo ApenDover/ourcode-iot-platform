@@ -45,7 +45,11 @@ dependencies {
 
     implementation "org.springframework.boot:spring-boot-starter-actuator"
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
-    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetrySpringBootVersion}"
+    implementation "io.micrometer:micrometer-tracing-bridge-otel"
+    implementation "io.micrometer:micrometer-observation"
+    implementation "net.ttddyy.observation:datasource-micrometer-spring-boot:2.2.1"
+    implementation "org.aspectj:aspectjweaver:${aspectj}"
+    implementation "org.aspectj:aspectjrt:${aspectj}"
 
     implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoder}"
 

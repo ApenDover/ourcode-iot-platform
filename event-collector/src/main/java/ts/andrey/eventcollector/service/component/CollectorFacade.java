@@ -1,7 +1,7 @@
 package ts.andrey.eventcollector.service.component;
 
 import com.nashkod.avro.DeviceEvent;
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ public class CollectorFacade {
     private final DeviceService deviceService;
     private final EventCollectorMetrics eventCollectorMetrics;
 
-    @WithSpan("event-collector-processing")
+    @Observed(name = "event-collector-processing")
     public void collect(List<DeviceEvent> events) {
         try {
             if (CollectionUtils.isEmpty(events)) {

@@ -1,6 +1,6 @@
 package ts.andrey.orchestrator.application.service;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +19,7 @@ public class IdempotentProcessor {
 
     private final RedisDataServicePort redisDataServicePort;
 
-    @WithSpan("RedisCheckIdempotentKey")
+    @Observed(name = "RedisCheckIdempotentKey")
     public Optional<ApiV1DevicesDeviceIdVersionPost200Response> checkIdempotentKey(String idempotentKey) {
         if (!BooleanUtils.toBoolean(enabled)) {
             return Optional.empty();
@@ -27,7 +27,7 @@ public class IdempotentProcessor {
         return redisDataServicePort.getResponse(idempotentKey);
     }
 
-    @WithSpan("RedisSaveResponse")
+    @Observed(name = "RedisSaveResponse")
     public void saveResponse(String idempotencyKey, ApiV1DevicesDeviceIdVersionPost200Response response) {
         if (!BooleanUtils.toBoolean(enabled)) {
             return;
