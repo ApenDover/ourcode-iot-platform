@@ -17,7 +17,7 @@ public class MigrationProcessor {
             ds.setUsername(migrationSource.getUsername());
             ds.setPassword(migrationSource.getPassword());
             ds.setDriverClassName("org.postgresql.Driver");
-            ds.setMaximumPoolSize(1);
+            ds.setMaximumPoolSize(2);
             runFlyway(ds);
         } finally {
             log.info("Flyway done");

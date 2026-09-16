@@ -20,6 +20,8 @@ import ts.andrey.devicecollector.utils.ShardUtil;
 import ts.andrey.iotcommon.service.KafkaProducer;
 import ts.andrey.iotcommon.utils.MessageDltBuilder;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,8 +57,18 @@ public class DeviceDataService {
             )
     )
     public void batchUpsert(List<Device> devices) {
-        final var deviceEntities = deviceMapper.toDeviceEntityList(devices);
+        final var uniqueByDeviceId = new LinkedHashMap<String, Device>();
+        devices.forEach(d -> uniqueByDeviceId.merge(
+                d.getDeviceId(),
+                d, (oldD, newD) -> newD.getCreatedAt().isAfter(oldD.getCreatedAt()) ? newD : oldD
+        ));
+
+        final var deviceEntities = deviceMapper.toDeviceEntityList(
+                new ArrayList<>(uniqueByDeviceId.values())
+        );
+
         deviceEntities.forEach(e -> e.setId(UUID.randomUUID()));
+
         Lists.partition(deviceEntities, batchSize)
                 .forEach(part -> {
                     try {
