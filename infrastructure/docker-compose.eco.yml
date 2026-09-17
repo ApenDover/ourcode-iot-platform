@@ -1,0 +1,180 @@
+services:
+  cassandra:
+    mem_limit: 3g
+    cpus: "2"
+    environment:
+      MAX_HEAP_SIZE: "2G"
+      HEAP_NEWSIZE: "400M"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  kafka:
+    mem_limit: 2g
+    cpus: "1"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  prometheus:
+    mem_limit: 1g
+    cpus: "0.5"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=6h'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  loki:
+    mem_limit: 1g
+    cpus: "0.5"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  tempo:
+    mem_limit: 1g
+    cpus: "0.5"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  alloy:
+    mem_limit: 512m
+    cpus: "0.5"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  grafana:
+    mem_limit: 512m
+    cpus: "0.5"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  cadvisor:
+    mem_limit: 256m
+    cpus: "0.5"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  node-exporter:
+    mem_limit: 128m
+    cpus: "0.2"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  keycloak:
+    mem_limit: 1g
+    cpus: "1"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  orchestrator:
+    mem_limit: 1g
+    cpus: "1"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  event-service:
+    mem_limit: 1g
+    cpus: "1"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  device-service:
+    mem_limit: 1g
+    cpus: "1"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  router-manager-service:
+    mem_limit: 512m
+    cpus: "0.5"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  router:
+    mem_limit: 256m
+    cpus: "0.5"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  kafka-producer:
+    mem_limit: 512m
+    cpus: "0.5"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  device-collector:
+    mem_limit: 512m
+    cpus: "0.5"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  event-collector:
+    mem_limit: 512m
+    cpus: "0.5"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  failed-events-processor:
+    mem_limit: 512m
+    cpus: "0.5"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"

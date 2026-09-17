@@ -792,7 +792,6 @@ services:
         user=${APP_DATASOURCE_1_USERNAME} password=${APP_DATASOURCE_1_PASSWORD} host=postgres1r port=5432 dbname=${POSTGRES_DB} sslmode=disable,
         user=${APP_DATASOURCE_2_USERNAME} password=${APP_DATASOURCE_2_PASSWORD} host=postgres2r port=5432 dbname=${POSTGRES_DB} sslmode=disable,
         user=${APP_ROUTER_MANAGER_DATASOURCE_USERNAME} password=${APP_ROUTER_MANAGER_DATASOURCE_PASSWORD} host=postgres_router_manager port=5432 dbname=${APP_ROUTER_MANAGER_DATASOURCE_DB} sslmode=disable
-      DATA_SOURCE_LABELS: "instance=postgres1,role=primary,service=orchestrator instance=postgres2,role=primary,service=device instance=postgres1r,role=replica,service=orchestrator instance=postgres2r,role=replica,service=device instance=postgres_router_manager,role=primary,service=router_manager"
     ports:
       - "9187:9187"
     depends_on:

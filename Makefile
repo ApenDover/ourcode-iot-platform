@@ -7,10 +7,12 @@ COMPOSE_FILE=./infrastructure/docker-compose.yml
 COMPOSE_WIRE_FILE=./infrastructure/docker-compose-wiremock.yml
 COMPOSE_FILE_BUILD=./infrastructure/docker-compose.build.yml
 COMPOSE_FILE_LOCAL=./infrastructure/docker-compose.override.yml
+COMPOSE_FILE_ECO=./infrastructure/docker-compose.eco.yml
 DC=docker compose -f $(COMPOSE_FILE)
 DC_WIRE=docker compose -f $(COMPOSE_WIRE_FILE)
 DCB=docker compose -f $(COMPOSE_FILE_BUILD)
 DCL=docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_FILE_LOCAL)
+DCE=docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_FILE_ECO)
 ACTUATOR_URL=http://localhost:
 LOGGER_NAME=ts.andrey
 PROJECT_ROOT := $(shell pwd)
@@ -19,7 +21,7 @@ GENPROTO_DIR_SERVER := $(PROJECT_ROOT)/router-manager-service/internal/ports/gen
 GENPROTO_DIR_CLIENT := $(PROJECT_ROOT)/router/internal/ports/genproto
 PROTO_FILES := $(wildcard $(PROTO_DIR)/*.proto)
 
-.PHONY: up down downv restart logs help exec logs- proto-gen
+.PHONY: up up-eco up-eco-local down downv downv-wire restart logs logss help exec logs- proto-gen jmeter-all-quick
 
 help: ## Показать список доступных команд
 	@echo "Usage: make <command>\n"
@@ -51,6 +53,26 @@ up: proto-gen clear  ## Запустить контейнеры в фоне
 	$(DC) up -d
 	@make keycloak-setup-users
 
+up-eco: proto-gen clear  ## Запустить контейнеры в фоне (eco-режим)
+	$(DC) up nexus -d
+	@echo "⏳ Жду пока контейнер nexus станет healthy..."
+	@until [ $$(docker inspect --format='{{.State.Health.Status}}' nexus) = "healthy" ]; do \
+		echo "жду.." & sleep 10; \
+	done
+	@sleep 5;
+	$(DCB) up -d iot-avro
+	@until curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-avro/1.0.0/iot-avro-1.0.0.pom >/dev/null 2>&1; do \
+		echo "жду публикацию iot-avro.." & sleep 5; \
+	done
+	$(DCB) up -d iot-common
+	$(DCB) up -d device-api
+	$(DCB) up -d router-manager-proto-client
+	@until curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/iot-common/1.0.0/iot-common-1.0.0.pom >/dev/null 2>&1; do \
+    	echo "жду публикацию iot-common.." & sleep 10; \
+    done
+	$(DCE) up -d
+	@make keycloak-setup-users
+
 up-wire: proto-gen clear  ## Запустить контейнеры в фоне
 	$(DC) up nexus -d
 	@echo "⏳ Жду пока контейнер nexus станет healthy..."
@@ -69,6 +91,10 @@ up-wire: proto-gen clear  ## Запустить контейнеры в фоне
     	echo "жду публикацию iot-common.." & sleep 10; \
     done
 	$(DC_WIRE) up -d
+	@make keycloak-setup-users
+
+up-eco-local: clear ## Запустить все контейнеры в фоне
+	$(DCE) up -d
 	@make keycloak-setup-users
 
 up-local: clear ## Запустить все контейнеры в фоне
@@ -179,7 +205,7 @@ publish-nexus:
 		echo "device-api не найден, выполняем публикацию Gradle..."; \
 		cd device-api && env -u NEXUS_URL -u NEXUS_USER -u NEXUS_PASSWORD ./gradlew clean build publish; \
 	fi
-	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/device-api/1.0.0/event-api-1.0.0.pom >/dev/null 2>&1; then \
+	@if curl -s -f http://localhost:7777/repository/maven-releases/ts/andrey/event-api/1.0.0/event-api-1.0.0.pom >/dev/null 2>&1; then \
 		echo "event-api уже опубликован, пропускаем публикацию"; \
 	else \
 		echo "event-api не найден, выполняем публикацию Gradle..."; \

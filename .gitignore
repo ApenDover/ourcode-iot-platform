@@ -37,3 +37,11 @@ build/
 # Системные файлы
 .DS_Store
 Thumbs.db
+
+# Скомпилированные Go-бинарники, случайно попадающие в корень при go build без -o
+/router/router
+/router-manager-service/router-manager
+/router-manager-service/router-manager-service
+
+# Резервные копии дашбордов перед правкой
+*.json.bak
