@@ -37,7 +37,7 @@ management:
       probability: ${DEVICE_SERVICE_MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
   otlp:
     tracing:
-      endpoint: ${DEVICE_SERVICE_MANAGEMENT_TRACING_OTLP_ENDPOINT:http://alloy:4318}
+      endpoint: ${DEVICE_SERVICE_MANAGEMENT_TRACING_OTLP_ENDPOINT:http://alloy:4318/v1/traces}
       transport: ${DEVICE_SERVICE_MANAGEMENT_TRACING_OTLP_TRANSPORT:HTTP}
   opentelemetry:
     resource-attributes:

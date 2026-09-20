@@ -13,7 +13,7 @@ management:
         include: "*"
   metrics:
     tags:
-      application: event-collector
+      application: failed-events-processor
   prometheus:
     metrics:
       export:
@@ -24,7 +24,7 @@ management:
       probability: 1.0
   otlp:
     tracing:
-      endpoint: http://localhost:4318
+      endpoint: http://localhost:4318/v1/traces
       transport: HTTP
   opentelemetry:
     resource-attributes:

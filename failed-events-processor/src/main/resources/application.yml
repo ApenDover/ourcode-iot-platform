@@ -26,7 +26,7 @@ management:
       probability: ${FAILED_PROCESSOR_MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
   otlp:
     tracing:
-      endpoint: ${FAILED_PROCESSOR_MANAGEMENT_TRACING_OTLP_ENDPOINT:http://alloy:4318}
+      endpoint: ${FAILED_PROCESSOR_MANAGEMENT_TRACING_OTLP_ENDPOINT:http://alloy:4318/v1/traces}
       transport: ${FAILED_PROCESSOR_MANAGEMENT_TRACING_OTLP_TRANSPORT:HTTP}
   opentelemetry:
     resource-attributes:

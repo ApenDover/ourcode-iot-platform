@@ -47,7 +47,7 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
     implementation "io.micrometer:micrometer-tracing-bridge-otel"
     implementation "io.micrometer:micrometer-observation"
-    implementation "net.ttddyy.observation:datasource-micrometer-spring-boot:2.2.1"
+    implementation "net.ttddyy.observation:datasource-micrometer-spring-boot:1.5.0"
     implementation "org.aspectj:aspectjweaver:${aspectj}"
     implementation "org.aspectj:aspectjrt:${aspectj}"
 
