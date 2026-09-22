@@ -31,11 +31,14 @@ public class DeviceServiceImpl implements DeviceService {
                 .toList();
 
         final var uniqueDevices = deduplicateService.getUniqueDevices(devices);
+        final var uniqueDeviceIds = uniqueDevices.stream()
+                .map(Device::getDeviceId)
+                .toList();
 
         final var techDevices = deviceEvents.stream()
                 .filter(event -> com.nashkod.avro.EventType.TECH.equals(event.getType()))
                 .map(DeviceEvent::getDevice)
-                .filter(device -> !uniqueDevices.contains(device))
+                .filter(device -> !uniqueDeviceIds.contains(device.getDeviceId()))
                 .toList();
 
         final var readyToSendDevices = new ArrayList<Device>();
