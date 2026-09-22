@@ -17,6 +17,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @UtilityClass
 public class MessageGenerator {
 
+    private static final List<EventType> EVENT_TYPES = List.of(EventType.HUMIDITY, EventType.STATUS, EventType.TEMPERATURE);
     private static final List<String> DEVICE_TYPES = List.of("sensor", "actuator", "controller", "gateway");
     private static final long RANGE_START = -50;
     private static final long RANGE_END = 50;
@@ -57,7 +58,7 @@ public class MessageGenerator {
         return new DeviceEvent(
                 UUID.randomUUID().toString(),
                 generateRandomTimestamp(),
-                getRandomElement(List.of(EventType.values())),
+                getRandomElement(EVENT_TYPES),
                 String.format("%.2f", random.nextDouble(RANGE_START, RANGE_END)),
                 new Device(
                         getRandomElement(ulidPool),
